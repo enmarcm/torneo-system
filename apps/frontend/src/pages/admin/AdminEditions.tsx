@@ -1,4 +1,5 @@
 import { Box, Grid2 as Grid, Card, Stack, Typography, Switch, IconButton, Menu, MenuItem, Chip, Button, TextField, Tooltip } from '@mui/material';
+import { getStatusLabel, getStatusColor } from '@/utils/statusLabels';
 import { AddRounded, MoreVertRounded, EmojiEventsRounded } from '@mui/icons-material';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -110,7 +111,7 @@ const AdminEditions: React.FC = () => {
               setAnchor(null);
             }}
           >
-            Cambiar a {s}
+            Cambiar a {getStatusLabel(s)}
           </MenuItem>
         ))}
       </Menu>

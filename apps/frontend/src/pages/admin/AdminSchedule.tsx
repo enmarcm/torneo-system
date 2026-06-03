@@ -1,4 +1,5 @@
 import { Box, Grid2 as Grid, Card, Stack, Typography, Button, FormControl, InputLabel, Select, MenuItem, IconButton, TextField, Chip } from '@mui/material';
+import { StatusBadge } from '@/components/ui/StatusBadge';
 import { AddRounded, PlayArrowRounded, StopRounded, FiberManualRecordRounded } from '@mui/icons-material';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
@@ -106,7 +107,7 @@ const AdminSchedule: React.FC = () => {
                 <Card component={motion.div} whileHover={{ y: -2 }} sx={{ p: 2.5 }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
                     <Typography variant="caption" color="text.secondary">Jornada {m.matchday} · {formatDateTime(m.scheduledAt)}</Typography>
-                    <Chip size="small" label={m.status} color={m.status === 'LIVE' ? 'error' : m.status === 'FINISHED' ? 'info' : 'default'} variant="outlined" />
+                    <StatusBadge status={m.status} />
                   </Stack>
                   <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ my: 2 }}>
                     <Typography sx={{ fontWeight: 600, flex: 1, textAlign: 'center' }}>{m.homeRegistration.team.name}</Typography>

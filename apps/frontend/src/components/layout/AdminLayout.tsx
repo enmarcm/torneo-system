@@ -14,21 +14,13 @@ export const AdminLayout: React.FC = () => {
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
       {!isMobile && <Sidebar />}
       {isMobile && (
-        <Drawer
-          open={mobileOpen}
-          onClose={() => setMobileOpen(false)}
-          PaperProps={{ sx: { bgcolor: 'var(--sidebar)' } }}
-        >
-          <Box sx={{ width: 264 }}>
-            <Sidebar />
-          </Box>
+        <Drawer open={mobileOpen} onClose={() => setMobileOpen(false)} PaperProps={{ sx: { bgcolor: 'var(--sidebar)', borderRadius: 0 } }}>
+          <Box sx={{ width: 264 }}><Sidebar /></Box>
         </Drawer>
       )}
       <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
         <Topbar onOpenSidebar={() => setMobileOpen(true)} />
-        <Box sx={{ p: { xs: 2, md: 4 }, flex: 1 }}>
-          <Outlet />
-        </Box>
+        <Box sx={{ p: { xs: 2, md: 4 }, flex: 1 }}><Outlet /></Box>
       </Box>
     </Box>
   );
