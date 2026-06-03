@@ -1,8 +1,9 @@
 import { Box, AppBar, Toolbar, Typography, Stack, Button, IconButton, Tooltip, Container, Drawer, List, ListItemButton, ListItemText, Divider, ListItemIcon } from '@mui/material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { LightModeRounded, DarkModeRounded, MenuRounded, CloseRounded, HomeRounded, EmojiEventsRounded, CalendarMonthRounded, LiveTvRounded, BarChartRounded, GroupsRounded, LoginRounded } from '@mui/icons-material';
-import logoSrc from '@/assets/logo_azul.PNG';
-import { useState, Suspense } from 'react';
+import logoAzul from '@/assets/logo_azul.PNG';
+import logoBlanco from '@/assets/logo.PNG';
+import { useState, Suspense, useMemo } from 'react';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { ROUTES } from '@/routes/routes';
@@ -11,6 +12,7 @@ export const PublicLayout: React.FC = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { mode, toggleMode } = useGlobalStore();
+  const logoSrc = useMemo(() => mode === 'dark' ? logoBlanco : logoAzul, [mode]);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const NAV = [
