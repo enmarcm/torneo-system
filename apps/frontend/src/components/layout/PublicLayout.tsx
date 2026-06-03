@@ -1,8 +1,9 @@
 import { Box, AppBar, Toolbar, Typography, Stack, Button, IconButton, Tooltip, Container, Drawer, List, ListItemButton, ListItemText, Divider } from '@mui/material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { LightModeRounded, DarkModeRounded, MenuRounded, CloseRounded } from '@mui/icons-material';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useGlobalStore } from '@/store/useGlobalStore';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { ROUTES } from '@/routes/routes';
 
 export const PublicLayout: React.FC = () => {
@@ -107,7 +108,9 @@ export const PublicLayout: React.FC = () => {
       </Drawer>
 
       <Box component="main" sx={{ flex: 1 }}>
-        <Outlet />
+        <Suspense fallback={<LoadingState rows={4} />}>
+          <Outlet />
+        </Suspense>
       </Box>
 
       <Box component="footer" sx={{ borderTop: '1px solid', borderColor: 'divider', py: 3, mt: 4 }}>
