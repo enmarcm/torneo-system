@@ -1,4 +1,5 @@
 import { Box, List, ListItemButton, ListItemIcon, ListItemText, Avatar, Typography, Tooltip, IconButton, Divider, useMediaQuery, useTheme } from '@mui/material';
+import logoSrc from '@/assets/logo.PNG';
 import { useLocation, useNavigate, matchPath } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -74,22 +75,15 @@ export const Sidebar: React.FC = () => {
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: expanded ? 2 : 1, py: 2, minHeight: 64, justifyContent: expanded ? 'flex-start' : 'center' }}>
           <Box
+            component="img"
+            src={logoSrc}
             sx={{
               width: 32,
               height: 32,
-              borderRadius: 1.5,
-              background: 'var(--brandGradient)',
+              borderRadius: 1,
               flexShrink: 0,
-              display: 'grid',
-              placeItems: 'center',
-              color: '#fff',
-              fontWeight: 800,
-              fontFamily: '"Inter", system-ui, sans-serif',
-              fontSize: 16,
             }}
-          >
-            L
-          </Box>
+          />
           {expanded && (
             <Typography sx={{ color: 'var(--logo)', fontWeight: 700, fontFamily: '"Inter", system-ui, sans-serif', fontSize: 16 }} noWrap>
               Liga Lago Futsal

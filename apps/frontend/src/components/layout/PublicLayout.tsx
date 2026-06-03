@@ -1,6 +1,7 @@
-import { Box, AppBar, Toolbar, Typography, Stack, Button, IconButton, Tooltip, Container, Drawer, List, ListItemButton, ListItemText, Divider } from '@mui/material';
+import { Box, AppBar, Toolbar, Typography, Stack, Button, IconButton, Tooltip, Container, Drawer, List, ListItemButton, ListItemText, Divider, ListItemIcon } from '@mui/material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { LightModeRounded, DarkModeRounded, MenuRounded, CloseRounded } from '@mui/icons-material';
+import { LightModeRounded, DarkModeRounded, MenuRounded, CloseRounded, HomeRounded, EmojiEventsRounded, CalendarMonthRounded, LiveTvRounded, BarChartRounded, GroupsRounded, LoginRounded } from '@mui/icons-material';
+import logoSrc from '@/assets/logo.PNG';
 import { useState, Suspense } from 'react';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import { LoadingState } from '@/components/ui/LoadingState';
@@ -13,12 +14,12 @@ export const PublicLayout: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const NAV = [
-    { label: 'Inicio', to: ROUTES.public.home },
-    { label: 'Competiciones', to: ROUTES.public.competitions },
-    { label: 'Calendario', to: ROUTES.public.schedule },
-    { label: 'En vivo', to: ROUTES.public.live },
-    { label: 'Estadísticas', to: ROUTES.public.stats },
-    { label: 'Equipos', to: ROUTES.public.teams },
+    { label: 'Inicio', to: ROUTES.public.home, icon: <HomeRounded /> },
+    { label: 'Competiciones', to: ROUTES.public.competitions, icon: <EmojiEventsRounded /> },
+    { label: 'Calendario', to: ROUTES.public.schedule, icon: <CalendarMonthRounded /> },
+    { label: 'En vivo', to: ROUTES.public.live, icon: <LiveTvRounded /> },
+    { label: 'Estadísticas', to: ROUTES.public.stats, icon: <BarChartRounded /> },
+    { label: 'Equipos', to: ROUTES.public.teams, icon: <GroupsRounded /> },
   ];
 
   const handleNav = (to: string) => {
@@ -36,7 +37,7 @@ export const PublicLayout: React.FC = () => {
         <Container maxWidth="xl">
           <Toolbar disableGutters sx={{ gap: 2, minHeight: 72 }}>
             <Stack direction="row" alignItems="center" spacing={1.5} sx={{ cursor: 'pointer' }} onClick={() => navigate(ROUTES.public.home)}>
-              <Box sx={{ width: 36, height: 36, borderRadius: 2, background: 'var(--brandGradient)', display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 800, fontFamily: '"Plus Jakarta Sans"' }}>L</Box>
+              <Box component="img" src={logoSrc} sx={{ width: 36, height: 36, borderRadius: 1.5 }} />
               <Typography variant="h4" sx={{ fontFamily: '"Plus Jakarta Sans"', fontWeight: 800, display: { xs: 'none', sm: 'block' } }}>Liga Lago Futsal</Typography>
             </Stack>
 
@@ -47,6 +48,7 @@ export const PublicLayout: React.FC = () => {
                   key={n.to}
                   onClick={() => navigate(n.to)}
                   color={pathname === n.to ? 'primary' : 'inherit'}
+                  startIcon={n.icon}
                   sx={{ fontWeight: 600 }}
                 >
                   {n.label}
@@ -66,7 +68,7 @@ export const PublicLayout: React.FC = () => {
                 {mode === 'dark' ? <LightModeRounded /> : <DarkModeRounded />}
               </IconButton>
             </Tooltip>
-            <Button variant="contained" onClick={() => navigate(ROUTES.login)}>
+            <Button variant="contained" startIcon={<LoginRounded />} onClick={() => navigate(ROUTES.login)}>
               Iniciar sesión
             </Button>
           </Toolbar>
@@ -82,7 +84,7 @@ export const PublicLayout: React.FC = () => {
       >
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 2, minHeight: 72 }}>
           <Stack direction="row" alignItems="center" spacing={1.5}>
-            <Box sx={{ width: 32, height: 32, borderRadius: 1.5, background: 'var(--brandGradient)', display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 800, fontSize: 14 }}>L</Box>
+            <Box component="img" src={logoSrc} sx={{ width: 32, height: 32, borderRadius: 1 }} />
             <Typography sx={{ fontWeight: 800 }}>Liga Lago Futsal</Typography>
           </Stack>
           <IconButton onClick={() => setDrawerOpen(false)} aria-label="Cerrar menú">
@@ -98,6 +100,9 @@ export const PublicLayout: React.FC = () => {
               selected={pathname === n.to}
               sx={{ borderRadius: 1.5, mb: 0.25, '&.Mui-selected': { bgcolor: 'primary.soft', color: 'primary.main' } }}
             >
+              <ListItemIcon sx={{ minWidth: 36, color: pathname === n.to ? 'primary.main' : 'inherit' }}>
+                {n.icon}
+              </ListItemIcon>
               <ListItemText
                 primary={n.label}
                 primaryTypographyProps={{ fontWeight: pathname === n.to ? 700 : 500, fontSize: 15 }}

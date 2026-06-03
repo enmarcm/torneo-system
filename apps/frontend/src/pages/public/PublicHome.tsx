@@ -1,15 +1,19 @@
-import { Box, Container, Grid2 as Grid, Card, Stack, Typography, Button, Chip } from '@mui/material';
-import { SportsSoccerRounded, LoginRounded } from '@mui/icons-material';
+import { Box, Container, Grid2 as Grid, Card, Stack, Typography, Button } from '@mui/material';
+import { SportsSoccerRounded } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { usePublicEditionsQuery, usePublicCompetitionsQuery, usePublicMatchesQuery } from '@/hooks/queries';
 import { MatchCard } from '@/components/sport/MatchCard';
+import { LiveScoreboard } from '@/components/sport/LiveScoreboard';
 import { EntityHeroCard } from '@/components/sport/EntityHeroCard';
+import { AppModal } from '@/components/ui/AppModal';
 import { ROUTES } from '@/routes/routes';
 import { motion } from 'framer-motion';
 import type { Edition, Competition, Match } from '@/api/public.api';
 
 const PublicHome: React.FC = () => {
   const navigate = useNavigate();
+  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const { data: editions = [] } = usePublicEditionsQuery();
   const active: Edition | undefined = editions.find((e: Edition) => e.status === 'ACTIVE') ?? editions[0];
   const { data: comps = [] } = usePublicCompetitionsQuery(active?.id);
@@ -33,11 +37,6 @@ const PublicHome: React.FC = () => {
                 </Box>
               </Stack>
             }
-            right={
-              <Button variant="contained" size="large" startIcon={<LoginRounded />} onClick={() => navigate(ROUTES.login)} sx={{ display: { xs: 'none', sm: 'inline-flex' } }}>
-                Iniciar sesión
-              </Button>
-            }
           />
         ) : null}
 
@@ -50,7 +49,7 @@ const PublicHome: React.FC = () => {
             <Grid container spacing={2}>
               {liveMatches.map((m: Match) => (
                 <Grid size={{ xs: 12, md: 6 }} key={m.id}>
-                  <MatchCard match={m} />
+                  <MatchCard match={m} onClick={() => setSelectedMatch(m)} />
                 </Grid>
               ))}
             </Grid>
@@ -67,7 +66,7 @@ const PublicHome: React.FC = () => {
             <Grid container spacing={2}>
               {upcoming.slice(0, 6).map((m: Match) => (
                 <Grid size={{ xs: 12, md: 6, lg: 4 }} key={m.id}>
-                  <MatchCard match={m} />
+                  <MatchCard match={m} onClick={() => setSelectedMatch(m)} />
                 </Grid>
               ))}
             </Grid>
@@ -95,6 +94,16 @@ const PublicHome: React.FC = () => {
           </Grid>
         </Box>
       </Container>
+
+      <AppModal
+        open={!!selectedMatch}
+        onClose={() => setSelectedMatch(null)}
+        title={selectedMatch ? `${selectedMatch.homeRegistration.team.name} vs ${selectedMatch.awayRegistration.team.name}` : ''}
+        subtitle={selectedMatch ? selectedMatch.venue ?? 'Estadio por confirmar' : undefined}
+        maxWidth={640}
+      >
+        {selectedMatch && <LiveScoreboard match={selectedMatch} size="lg" />}
+      </AppModal>
     </Box>
   );
 };

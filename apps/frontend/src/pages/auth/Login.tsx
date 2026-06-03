@@ -1,5 +1,6 @@
 import { Box, Card, Typography, TextField, Button, Alert, Stack, InputAdornment, IconButton } from '@mui/material';
-import { VisibilityRounded, VisibilityOffRounded, EmojiEventsRounded } from '@mui/icons-material';
+import { VisibilityRounded, VisibilityOffRounded, ArrowBackRounded } from '@mui/icons-material';
+import logoSrc from '@/assets/logo.PNG';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -58,7 +59,7 @@ const Login: React.FC = () => {
         }}
       >
         <Stack direction="row" alignItems="center" spacing={1.5}>
-          <EmojiEventsRounded sx={{ fontSize: 32 }} />
+          <Box component="img" src={logoSrc} sx={{ width: 40, height: 40, borderRadius: 1 }} />
           <Typography variant="h3" sx={{ fontWeight: 800 }}>Liga Lago Futsal</Typography>
         </Stack>
         <Box component={motion.div} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
@@ -79,7 +80,7 @@ const Login: React.FC = () => {
         <Card sx={{ width: '100%', maxWidth: 420, p: { xs: 3, md: 4 } }} component={motion.div}
           initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
           <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3, display: { md: 'none' } }}>
-            <EmojiEventsRounded color="primary" />
+            <Box component="img" src={logoSrc} sx={{ width: 32, height: 32, borderRadius: 1 }} />
             <Typography variant="h4" sx={{ fontWeight: 800 }}>Liga Lago Futsal</Typography>
           </Stack>
           <Typography variant="h2" sx={{ mb: 0.5 }}>Bienvenido</Typography>
@@ -129,9 +130,14 @@ const Login: React.FC = () => {
               >
                 {login.isPending ? 'Ingresando…' : 'Iniciar sesión'}
               </Button>
-              <Typography variant="caption" color="text.secondary" align="center">
-                Demo: admin@torneo.com / Admin1234
-              </Typography>
+              <Button
+                startIcon={<ArrowBackRounded />}
+                onClick={() => navigate('/')}
+                fullWidth
+                sx={{ color: 'text.secondary' }}
+              >
+                Volver al inicio
+              </Button>
             </Stack>
           </form>
         </Card>
