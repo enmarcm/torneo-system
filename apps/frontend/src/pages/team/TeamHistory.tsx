@@ -1,16 +1,19 @@
 import { Box, Grid2 as Grid, Card, Stack, Typography, Chip } from '@mui/material';
-import { EmojiEventsRounded } from '@mui/icons-material';
+import { EmojiEventsRounded, ChevronRightRounded } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import { useEditionsQuery } from '@/hooks/queries';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { formatDate } from '@/utils/formatDate';
+import { ROUTES } from '@/routes/routes';
 
 const TeamHistory: React.FC = () => {
+  const navigate = useNavigate();
   const { data: editions = [] } = useEditionsQuery();
 
   return (
     <Box>
-      <PageHeader title="Historial" subtitle="Ediciones del torneo" />
+      <PageHeader title="Historial" subtitle="Todas las ediciones del torneo. Haz clic para ver detalles." />
       {editions.length === 0 ? (
         <Card sx={{ p: 4, textAlign: 'center' }}>
           <Typography variant="h4" sx={{ mb: 1 }}>Sin ediciones</Typography>
@@ -20,15 +23,19 @@ const TeamHistory: React.FC = () => {
         <Grid container spacing={2}>
           {editions.map((ed) => (
             <Grid size={{ xs: 12, md: 6, lg: 4 }} key={ed.id}>
-              <Card sx={{ p: 3 }}>
+              <Card
+                sx={{ p: 3, cursor: 'pointer', transition: '0.15s', '&:hover': { boxShadow: 6, transform: 'translateY(-2px)' } }}
+                onClick={() => navigate(ROUTES.team.historyDetail.replace(':id', ed.id))}
+              >
                 <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
                   <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: 'primary.soft', color: 'primary.main', display: 'grid', placeItems: 'center' }}>
                     <EmojiEventsRounded />
                   </Box>
-                  <Box>
+                  <Box sx={{ flex: 1 }}>
                     <Typography variant="h4">{ed.name}</Typography>
                     <Typography variant="caption" color="text.secondary">Temporada {ed.seasonNumber} · {ed.year}</Typography>
                   </Box>
+                  <ChevronRightRounded sx={{ color: 'text.secondary', fontSize: 20 }} />
                 </Stack>
                 <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
                   <StatusBadge status={ed.status} />

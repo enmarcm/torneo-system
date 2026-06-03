@@ -43,9 +43,12 @@ const AdminAudit = lazy(() => import('@/pages/admin/AdminAudit'));
 
 // Team
 const TeamHome = lazy(() => import('@/pages/team/TeamHome'));
+const TeamPlayers = lazy(() => import('@/pages/team/TeamPlayers'));
 const TeamSquads = lazy(() => import('@/pages/team/TeamSquads'));
+const TeamMatches = lazy(() => import('@/pages/team/TeamMatches'));
 const TeamStats = lazy(() => import('@/pages/team/TeamStats'));
 const TeamHistory = lazy(() => import('@/pages/team/TeamHistory'));
+const TeamHistoryDetail = lazy(() => import('@/pages/team/TeamHistoryDetail'));
 const TeamTransfers = lazy(() => import('@/pages/team/TeamTransfers'));
 
 export const AppRouter: React.FC = () => (
@@ -81,9 +84,12 @@ export const AppRouter: React.FC = () => (
       <Route element={<RoleGuard allow={['TEAM_LEADER']} />}>
         <Route element={<TeamLayout />}>
           <Route path={ROUTES.team.home} element={<TeamHome />} />
+          <Route path={ROUTES.team.players} element={<TeamPlayers />} />
           <Route path={ROUTES.team.squads} element={<TeamSquads />} />
+          <Route path={ROUTES.team.matches} element={<TeamMatches />} />
           <Route path={ROUTES.team.stats} element={<TeamStats />} />
           <Route path={ROUTES.team.history} element={<TeamHistory />} />
+          <Route path={ROUTES.team.historyDetail} element={<TeamHistoryDetail />} />
           <Route path={ROUTES.team.transfers} element={<TeamTransfers />} />
         </Route>
       </Route>
