@@ -27,12 +27,17 @@ const AdminTeamDetail: React.FC = () => {
       <Button startIcon={<ArrowBackRounded />} onClick={() => navigate(ROUTES.admin.teams)} sx={{ mb: 2 }}>
         Volver a equipos
       </Button>
-      <PageHeader
-        title={team.name}
-        subtitle={team.leader?.email ? `Líder: ${team.leader.email}` : 'Sin líder asignado'}
-      />
-      <Stack direction="row" spacing={1} sx={{ mb: 3 }}>
-        <StatusBadge status={team.status} />
+      <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3 }}>
+        {team.logoUrl && <Avatar src={team.logoUrl} sx={{ width: 56, height: 56 }} />}
+        <Box>
+          <PageHeader
+            title={team.name}
+            subtitle={team.leader?.email ? `Líder: ${team.leader.email}` : 'Sin líder asignado'}
+          />
+          <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+            <StatusBadge status={team.status} />
+          </Stack>
+        </Box>
       </Stack>
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid size={{ xs: 6, md: 3 }}>

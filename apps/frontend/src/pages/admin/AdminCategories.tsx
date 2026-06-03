@@ -1,5 +1,6 @@
-import { Box, Stack, Typography, Button, Chip, Switch, TextField, FormControlLabel, MenuItem as MuiMenuItem } from '@mui/material';
+import { Box, Stack, Typography, Button, Chip, Switch, TextField, FormControlLabel, MenuItem as MuiMenuItem, Avatar } from '@mui/material';
 import { AddRounded } from '@mui/icons-material';
+import { ImageUpload } from '@/components/ui/ImageUpload';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -39,6 +40,8 @@ const AdminCategories: React.FC = () => {
   const [deleting, setDeleting] = useState<Category | null>(null);
   const [detailCat, setDetailCat] = useState<Category | null>(null);
 
+  const [imageUrl, setImageUrl] = useState('');
+
   const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { defaultFormat: 'LEAGUE', defaultRequiresAdminEligibility: false, defaultMinPlayers: 11, defaultMaxPlayers: 25 },
@@ -46,7 +49,7 @@ const AdminCategories: React.FC = () => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      const payload = { ...data, defaultAgeMin: data.defaultAgeMin || null, defaultAgeMax: data.defaultAgeMax || null } as Partial<Category>;
+      const payload = { ...data, imageUrl: imageUrl || null, defaultAgeMin: data.defaultAgeMin || null, defaultAgeMax: data.defaultAgeMax || null } as Partial<Category>;
       if (editing) await update.mutateAsync({ id: editing.id, data: payload });
       else await create.mutateAsync(payload);
       setOpen(false);
@@ -58,11 +61,16 @@ const AdminCategories: React.FC = () => {
     }
   };
 
-  const onOpenNew = () => { setEditing(null); reset({ defaultFormat: 'LEAGUE', defaultRequiresAdminEligibility: false, defaultMinPlayers: 11, defaultMaxPlayers: 25 }); setOpen(true); };
-  const onOpenEdit = (c: Category) => { setEditing(c); reset({ ...c, defaultAgeMin: c.defaultAgeMin ?? '', defaultAgeMax: c.defaultAgeMax ?? '' } as FormData); setOpen(true); };
+  const onOpenNew = () => { setEditing(null); setImageUrl(''); reset({ defaultFormat: 'LEAGUE', defaultRequiresAdminEligibility: false, defaultMinPlayers: 11, defaultMaxPlayers: 25 }); setOpen(true); };
+  const onOpenEdit = (c: Category) => { setEditing(c); setImageUrl(c.imageUrl ?? ''); reset({ ...c, defaultAgeMin: c.defaultAgeMin ?? '', defaultAgeMax: c.defaultAgeMax ?? '' } as FormData); setOpen(true); };
 
   const columns: DataTableColumn<Category>[] = [
-    { key: 'name', label: 'Nombre', render: (r) => <Typography sx={{ fontWeight: 600 }}>{r.name}</Typography> },
+    { key: 'name', label: 'Nombre', render: (r) => (
+      <Stack direction="row" spacing={1.5} alignItems="center">
+        {r.imageUrl ? <Avatar src={r.imageUrl} sx={{ width: 28, height: 28 }} /> : null}
+        <Typography sx={{ fontWeight: 600 }}>{r.name}</Typography>
+      </Stack>
+    ) },
     { key: 'format', label: 'Formato', render: (r) => <Chip size="small" label={r.defaultFormat === 'LEAGUE' ? 'Liga' : 'Copa'} variant="outlined" /> },
     { key: 'age', label: 'Rango de edad', render: (r) => `${r.defaultAgeMin ?? '—'} – ${r.defaultAgeMax ?? '∞'}`, hideInMobile: true },
     { key: 'elig', label: 'Habilitación', render: (r) => r.defaultRequiresAdminEligibility ? <Chip size="small" color="warning" label="Sí" variant="outlined" /> : <Chip size="small" label="No" variant="outlined" />, hideInMobile: true },
@@ -99,6 +107,7 @@ const AdminCategories: React.FC = () => {
       <DetailDrawer open={!!detailCat} onClose={() => setDetailCat(null)} title={detailCat?.name ?? 'Categoría'} subtitle="Detalle de la categoría">
         {detailCat && (
           <>
+            {detailCat.imageUrl && <Box component="img" src={detailCat.imageUrl} alt="" sx={{ width: '100%', maxHeight: 160, objectFit: 'contain', borderRadius: 2, mb: 2, bgcolor: 'action.hover', p: 1 }} />}
             <DetailField label="Formato" value={detailCat.defaultFormat === 'LEAGUE' ? 'Liga' : 'Copa'} />
             <DetailField label="Rango de edad" value={`${detailCat.defaultAgeMin ?? '—'} – ${detailCat.defaultAgeMax ?? '∞'}`} />
             <DetailField label="Requiere habilitación" value={detailCat.defaultRequiresAdminEligibility ? 'Sí' : 'No'} />
@@ -114,6 +123,7 @@ const AdminCategories: React.FC = () => {
           <Stack spacing={2}>
             <TextField label="Nombre" fullWidth {...register('name')} error={!!errors.name} helperText={errors.name?.message} />
             <TextField label="Descripción" fullWidth multiline rows={2} {...register('description')} />
+            <ImageUpload value={imageUrl} onChange={setImageUrl} label="Subir imagen de categoría" />
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
               <TextField select label="Formato" fullWidth defaultValue={watch('defaultFormat')} {...register('defaultFormat')}>
                 <MuiMenuItem value="LEAGUE">Liga</MuiMenuItem>

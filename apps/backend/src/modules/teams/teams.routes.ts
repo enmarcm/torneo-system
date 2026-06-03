@@ -30,7 +30,7 @@ teamsRouter.post(
 teamsRouter.patch(
   '/:id',
   authMiddleware,
-  requireRole('ADMIN'),
+  requireRole('ADMIN', 'TEAM_LEADER'),
   validate(updateTeamSchema),
   audit('UPDATE', 'Team'),
   teamsController.update,

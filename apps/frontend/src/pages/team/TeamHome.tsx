@@ -1,17 +1,25 @@
-import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Divider } from '@mui/material';
-import { GroupsRounded, SportsSoccerRounded, BarChartRounded } from '@mui/icons-material';
+import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Divider, Button, Avatar, Dialog, DialogTitle, DialogContent } from '@mui/material';
+import { GroupsRounded, SportsSoccerRounded, BarChartRounded, EditRounded } from '@mui/icons-material';
+import { useState } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useTeamsQuery, useTeamHistoryQuery, useTeamStatsQuery } from '@/hooks/queries';
+import { useUpdateTeam } from '@/hooks/mutations';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatCard } from '@/components/ui/StatCard';
 import { EntityHeroCard } from '@/components/sport/EntityHeroCard';
 import { MatchCard } from '@/components/sport/MatchCard';
+import { ImageUpload } from '@/components/ui/ImageUpload';
+import { extractErrorMessage } from '@/api/axios';
+import { useToast } from '@/hooks/common/useToast';
 
 const TeamHome: React.FC = () => {
   const user = useAuthStore((s) => s.user);
   const teamId = user?.teamId;
   const { data: teams = [] } = useTeamsQuery();
   const team = teams.find((t) => t.id === teamId);
+  const updateTeam = useUpdateTeam();
+  const toast = useToast();
+  const [logoOpen, setLogoOpen] = useState(false);
   const { data: history = [] } = useTeamHistoryQuery(teamId ?? undefined);
   const { data: stats } = useTeamStatsQuery(teamId ?? undefined);
 
@@ -29,10 +37,44 @@ const TeamHome: React.FC = () => {
           <EntityHeroCard
             title={team.name}
             subtitle="Tu equipo"
-            chips={<Chip size="small" label={team.status} variant="outlined" sx={{ color: '#fff', borderColor: 'rgba(255,255,255,0.4)' }} />}
+            chips={
+              <Stack direction="row" spacing={1} alignItems="center">
+                {team.logoUrl && <Avatar src={team.logoUrl} sx={{ width: 32, height: 32, border: '2px solid rgba(255,255,255,0.5)' }} />}
+                <Chip size="small" label={team.status} variant="outlined" sx={{ color: '#fff', borderColor: 'rgba(255,255,255,0.4)' }} />
+              </Stack>
+            }
+            right={
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<EditRounded />}
+                onClick={() => setLogoOpen(true)}
+                sx={{ color: '#fff', borderColor: 'rgba(255,255,255,0.4)', '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.1)' } }}
+              >
+                Cambiar logo
+              </Button>
+            }
           />
         </Box>
       )}
+      <Dialog open={logoOpen} onClose={() => setLogoOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Cambiar logo del equipo</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ pt: 1 }}>
+            <ImageUpload value={team?.logoUrl ?? ''} onChange={async (url) => {
+              if (!team) return;
+              try {
+                await updateTeam.mutateAsync({ id: team.id, data: { logoUrl: url || null } as any });
+                toast.success('Logo actualizado');
+                setLogoOpen(false);
+              } catch (e) {
+                toast.error(extractErrorMessage(e));
+              }
+            }} label="Seleccionar imagen" />
+            <Button onClick={() => setLogoOpen(false)} fullWidth>Cancelar</Button>
+          </Stack>
+        </DialogContent>
+      </Dialog>
       <Grid container spacing={2} sx={{ mt: 1 }}>
         <Grid size={{ xs: 6, md: 4 }}>
           <StatCard label="Inscripciones" value={team?._count?.registrations ?? 0} icon={<GroupsRounded />} tint="primary" />

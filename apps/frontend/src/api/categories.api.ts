@@ -4,6 +4,7 @@ export interface Category {
   id: string;
   name: string;
   description: string | null;
+  imageUrl: string | null;
   defaultFormat: 'LEAGUE' | 'GROUPS_KNOCKOUT';
   defaultAgeMin: number | null;
   defaultAgeMax: number | null;
