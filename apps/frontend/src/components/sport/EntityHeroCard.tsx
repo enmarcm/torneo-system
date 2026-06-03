@@ -11,8 +11,8 @@ interface Props {
 export const EntityHeroCard: React.FC<Props> = ({ title, subtitle, chips, right }) => (
   <Box
     sx={{
-      borderRadius: 6,
-      p: { xs: 3, md: 5 },
+      borderRadius: 2,
+      p: { xs: 2.5, md: 3.5 },
       color: '#fff',
       background: 'var(--heroGradient)',
       display: 'flex',
