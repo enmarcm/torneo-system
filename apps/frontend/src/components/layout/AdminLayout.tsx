@@ -1,8 +1,9 @@
 import { Box, Drawer, useMediaQuery, useTheme } from '@mui/material';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { useGlobalStore } from '@/store/useGlobalStore';
 
 export const AdminLayout: React.FC = () => {
@@ -36,7 +37,9 @@ export const AdminLayout: React.FC = () => {
       >
         <Topbar onOpenSidebar={() => setMobileOpen(true)} />
         <Box sx={{ p: { xs: 2, md: 4 }, flex: 1 }}>
-          <Outlet />
+          <Suspense fallback={<LoadingState rows={4} />}>
+            <Outlet />
+          </Suspense>
         </Box>
       </Box>
     </Box>
