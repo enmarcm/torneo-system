@@ -1,7 +1,7 @@
 import { Box, AppBar, Toolbar, Typography, Stack, Button, IconButton, Tooltip, Container, Drawer, List, ListItemButton, ListItemText, Divider, ListItemIcon } from '@mui/material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { LightModeRounded, DarkModeRounded, MenuRounded, CloseRounded, HomeRounded, EmojiEventsRounded, CalendarMonthRounded, LiveTvRounded, BarChartRounded, GroupsRounded, LoginRounded } from '@mui/icons-material';
-import logoSrc from '@/assets/logo.PNG';
+import logoSrc from '@/assets/logo_azul.PNG';
 import { useState, Suspense } from 'react';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import { LoadingState } from '@/components/ui/LoadingState';
@@ -37,7 +37,7 @@ export const PublicLayout: React.FC = () => {
         <Container maxWidth="xl">
           <Toolbar disableGutters sx={{ gap: 2, minHeight: 72 }}>
             <Stack direction="row" alignItems="center" spacing={1.5} sx={{ cursor: 'pointer' }} onClick={() => navigate(ROUTES.public.home)}>
-              <Box component="img" src={logoSrc} sx={{ width: 36, height: 36, borderRadius: 1.5 }} />
+              <Box component="img" src={logoSrc} sx={{ width: 36, height: 36, borderRadius: '50%' }} />
               <Typography variant="h4" sx={{ fontFamily: '"Plus Jakarta Sans"', fontWeight: 800, display: { xs: 'none', sm: 'block' } }}>Liga Lago Futsal</Typography>
             </Stack>
 
@@ -84,7 +84,7 @@ export const PublicLayout: React.FC = () => {
       >
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 2, minHeight: 72 }}>
           <Stack direction="row" alignItems="center" spacing={1.5}>
-            <Box component="img" src={logoSrc} sx={{ width: 32, height: 32, borderRadius: 1 }} />
+            <Box component="img" src={logoSrc} sx={{ width: 32, height: 32, borderRadius: '50%' }} />
             <Typography sx={{ fontWeight: 800 }}>Liga Lago Futsal</Typography>
           </Stack>
           <IconButton onClick={() => setDrawerOpen(false)} aria-label="Cerrar menú">
