@@ -3,13 +3,14 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
-
-const SIDEBAR_WIDTH = 264;
+import { useGlobalStore } from '@/store/useGlobalStore';
 
 export const AdminLayout: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { sidebarCollapsed } = useGlobalStore();
+  const sidebarWidth = sidebarCollapsed ? 64 : 264;
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
@@ -29,7 +30,8 @@ export const AdminLayout: React.FC = () => {
           minWidth: 0,
           display: 'flex',
           flexDirection: 'column',
-          ml: { xs: 0, md: `${SIDEBAR_WIDTH}px` },
+          ml: { xs: 0, md: `${sidebarWidth}px` },
+          transition: 'margin-left 0.2s ease-in-out',
         }}
       >
         <Topbar onOpenSidebar={() => setMobileOpen(true)} />
