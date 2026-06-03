@@ -64,7 +64,7 @@ export function DataTable<T>({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.18, delay: i * 0.03 }}
           >
-            <Card sx={{ p: 2, position: 'relative' }}>
+            <Card sx={{ p: 2, pt: 3, position: 'relative' }}>
               {actions && actions.length > 0 && (
                 <Box sx={{ position: 'absolute', top: 4, right: 4 }}>
                   <RowActions actions={actions} row={row} />
@@ -73,7 +73,7 @@ export function DataTable<T>({
               {columns
                 .filter((c) => !c.hideInMobile)
                 .map((c) => (
-                  <Box key={c.key} sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, py: 0.5, '&:first-of-type': { mt: 2.5 } }}>
+                  <Box key={c.key} sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, py: 0.75 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
                       {c.label}
                     </Typography>

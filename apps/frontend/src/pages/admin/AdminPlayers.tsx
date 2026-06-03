@@ -1,4 +1,5 @@
 import { Box, Stack, Typography, Button, Avatar, Chip, TextField, MenuItem, IconButton } from '@mui/material';
+import { StatusBadge } from '@/components/ui/StatusBadge';
 import { AddRounded, VerifiedRounded } from '@mui/icons-material';
 import { useState, useMemo, useEffect } from 'react';
 import { PageHeader } from '@/components/ui/PageHeader';
@@ -54,7 +55,7 @@ const AdminPlayers: React.FC = () => {
     { key: 'doc', label: 'Documento', render: (r) => `${r.documentType === 'CEDULA' ? 'C.I.' : 'P.N.'} ${r.documentNumber}`, hideInMobile: true },
     { key: 'age', label: 'Edad', render: (r) => calcAge(r.birthDate) },
     { key: 'degree', label: 'Título', render: (r) => r.universityDegreeVerified ? <Chip size="small" color="success" label="Verificado" variant="outlined" icon={<VerifiedRounded sx={{ fontSize: 14 }} />} /> : <Chip size="small" label="Sin verificar" variant="outlined" /> },
-    { key: 'status', label: 'Estado', render: (r) => <Chip size="small" label={r.status === 'ACTIVE' ? 'Activo' : 'Inactivo'} color={r.status === 'ACTIVE' ? 'success' : 'default'} variant="outlined" /> },
+    { key: 'status', label: 'Estado', render: (r) => <StatusBadge status={r.status} /> },
   ];
   const actions: DataTableAction<Player>[] = [
     { label: (r) => r.universityDegreeVerified ? 'Quitar verificación' : 'Verificar título', onClick: (r) => setDegree.mutate({ id: r.id, data: { universityDegreeVerified: !r.universityDegreeVerified } }) },

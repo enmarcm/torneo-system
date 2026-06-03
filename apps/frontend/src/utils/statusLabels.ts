@@ -1,0 +1,58 @@
+export const STATUS_LABELS: Record<string, string> = {
+  ACTIVE: 'Activo',
+  INACTIVE: 'Inactivo',
+  DRAFT: 'Borrador',
+  FINISHED: 'Finalizado',
+  PENDING: 'Pendiente',
+  APPROVED: 'Aprobado',
+  REJECTED: 'Rechazado',
+  SCHEDULED: 'Programado',
+  LIVE: 'En vivo',
+  POSTPONED: 'Pospuesto',
+  LEAGUE: 'Liga',
+  GROUPS_KNOCKOUT: 'Copa',
+  GROUP: 'Grupos',
+  R16: 'Octavos',
+  QUARTER: 'Cuartos',
+  SEMI: 'Semifinal',
+  THIRD: 'Tercer puesto',
+  FINAL: 'Final',
+  GOAL: 'Gol',
+  YELLOW: 'Amarilla',
+  RED: 'Roja',
+  SUB: 'Sustitución',
+  OTHER: 'Otro',
+  CEDULA: 'Cédula',
+  PARTIDA: 'Partida de nacimiento',
+  ADMIN: 'Administrador',
+  TEAM_LEADER: 'Líder de equipo',
+  HOME_BANNER: 'Banner principal',
+  SIDEBAR: 'Sidebar',
+  FOOTER: 'Footer',
+};
+
+export const STATUS_COLORS: Record<string, 'success' | 'warning' | 'error' | 'info' | 'default' | 'secondary'> = {
+  ACTIVE: 'success',
+  INACTIVE: 'default',
+  DRAFT: 'warning',
+  FINISHED: 'info',
+  PENDING: 'warning',
+  APPROVED: 'success',
+  REJECTED: 'error',
+  SCHEDULED: 'info',
+  LIVE: 'error',
+  POSTPONED: 'warning',
+  LEAGUE: 'info',
+  GROUPS_KNOCKOUT: 'secondary',
+  GROUP: 'info',
+  R16: 'info',
+  QUARTER: 'info',
+  SEMI: 'info',
+  THIRD: 'info',
+  FINAL: 'warning',
+};
+
+export const getStatusLabel = (status: string): string => STATUS_LABELS[status] ?? status;
+
+export const getStatusColor = (status: string): 'success' | 'warning' | 'error' | 'info' | 'default' | 'secondary' =>
+  STATUS_COLORS[status] ?? 'default';

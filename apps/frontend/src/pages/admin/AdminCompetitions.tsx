@@ -1,4 +1,5 @@
 import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Button, IconButton, Menu, MenuItem, FormControl, Select, InputLabel, Tooltip } from '@mui/material';
+import { getStatusLabel } from '@/utils/statusLabels';
 import { AddRounded, MoreVertRounded, EmojiEventsRounded } from '@mui/icons-material';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
@@ -135,7 +136,7 @@ const AdminCompetitions: React.FC = () => {
       <Menu anchorEl={anchor?.el ?? null} open={!!anchor} onClose={() => setAnchor(null)}>
         {(['DRAFT', 'ACTIVE', 'FINISHED'] as const).map((s) => (
           <MenuItem key={s} onClick={() => { if (anchor) setStatus.mutate({ id: anchor.c.id, status: s }); setAnchor(null); }}>
-            Cambiar a {s}
+            Cambiar a {getStatusLabel(s)}
           </MenuItem>
         ))}
       </Menu>

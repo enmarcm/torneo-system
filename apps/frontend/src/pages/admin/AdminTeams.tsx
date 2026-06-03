@@ -1,4 +1,5 @@
 import { Box, Card, Stack, Typography, Button, Avatar, IconButton, Menu, MenuItem, TextField, FormControl, InputLabel, Select, Chip } from '@mui/material';
+import { StatusBadge } from '@/components/ui/StatusBadge';
 import { AddRounded, MoreVertRounded, GroupsRounded, EmailRounded } from '@mui/icons-material';
 import { useState } from 'react';
 import { PageHeader } from '@/components/ui/PageHeader';
@@ -44,7 +45,7 @@ const AdminTeams: React.FC = () => {
     },
     { key: 'leader', label: 'Líder', render: (r) => r.leader?.email ?? '—', hideInMobile: true },
     { key: 'regs', label: 'Inscripciones', render: (r) => r._count?.registrations ?? 0 },
-    { key: 'active', label: 'Estado', render: (r) => <Chip size="small" label={r.status === 'ACTIVE' ? 'Activo' : 'Inactivo'} color={r.status === 'ACTIVE' ? 'success' : 'default'} variant="outlined" /> },
+    { key: 'active', label: 'Estado', render: (r) => <StatusBadge status={r.status} /> },
   ];
   const actions: DataTableAction<Team>[] = [
     { label: 'Inscribir en competición', onClick: (t) => setRegOpen({ team: t, competitionId: competitions[0]?.id ?? '' }) },
