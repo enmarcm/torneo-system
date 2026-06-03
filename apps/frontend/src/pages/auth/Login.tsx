@@ -1,7 +1,9 @@
 import { Box, Card, Typography, TextField, Button, Alert, Stack, InputAdornment, IconButton } from '@mui/material';
 import { VisibilityRounded, VisibilityOffRounded, ArrowBackRounded } from '@mui/icons-material';
-import logoSrc from '@/assets/logo_azul.PNG';
+import logoAzul from '@/assets/logo_azul.PNG';
+import logoBlanco from '@/assets/logo.PNG';
 import { useState } from 'react';
+import { useGlobalStore } from '@/store/useGlobalStore';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -19,6 +21,8 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 const Login: React.FC = () => {
+  const { mode } = useGlobalStore();
+  const logoSrc = mode === 'dark' ? logoBlanco : logoAzul;
   const [showPwd, setShowPwd] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();

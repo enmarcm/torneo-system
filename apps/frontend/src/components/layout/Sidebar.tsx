@@ -1,5 +1,5 @@
 import { Box, List, ListItemButton, ListItemIcon, ListItemText, Avatar, Typography, Tooltip, IconButton, Divider, useMediaQuery, useTheme } from '@mui/material';
-import logoSrc from '@/assets/logo_azul.PNG';
+import logoSrc from '@/assets/escudo.PNG';
 import { useLocation, useNavigate, matchPath } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -78,8 +78,8 @@ export const Sidebar: React.FC = () => {
             component="img"
             src={logoSrc}
             sx={{
-              width: 32,
-              height: 32,
+              width: 36,
+              height: 36,
               borderRadius: '50%',
               flexShrink: 0,
             }}
