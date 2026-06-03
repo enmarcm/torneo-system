@@ -1,0 +1,326 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  TEAM_LEADER
+}
+
+enum EntityStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum EditionStatus {
+  DRAFT
+  ACTIVE
+  FINISHED
+}
+
+enum CompetitionFormat {
+  LEAGUE
+  GROUPS_KNOCKOUT
+}
+
+enum CompetitionStatus {
+  DRAFT
+  ACTIVE
+  FINISHED
+}
+
+enum MatchStage {
+  LEAGUE
+  GROUP
+  R16
+  QUARTER
+  SEMI
+  THIRD
+  FINAL
+}
+
+enum MatchStatus {
+  SCHEDULED
+  LIVE
+  FINISHED
+  POSTPONED
+}
+
+enum MatchEventType {
+  GOAL
+  YELLOW
+  RED
+  SUB
+  OTHER
+}
+
+enum DocumentType {
+  CEDULA
+  PARTIDA
+}
+
+enum TransferStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AdPlacement {
+  HOME_BANNER
+  SIDEBAR
+  FOOTER
+}
+
+model User {
+  id           String       @id @default(uuid())
+  email        String       @unique
+  passwordHash String
+  role         UserRole     @default(TEAM_LEADER)
+  status       EntityStatus @default(ACTIVE)
+  team         Team?        @relation("TeamLeader", fields: [teamId], references: [id])
+  teamId       String?      @unique
+  auditLogs    AuditLog[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model Edition {
+  id                  String        @id @default(uuid())
+  name                String
+  year                Int
+  seasonNumber        Int
+  status              EditionStatus @default(DRAFT)
+  startDate           DateTime
+  endDate             DateTime
+  transfersOpen       Boolean       @default(false)
+  transferWindowStart DateTime?
+  transferWindowEnd   DateTime?
+  competitions        Competition[]
+  transfers           Transfer[]
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+}
+
+model Category {
+  id                              String            @id @default(uuid())
+  name                            String            @unique
+  description                     String?
+  defaultFormat                   CompetitionFormat @default(LEAGUE)
+  defaultAgeMin                   Int?
+  defaultAgeMax                   Int?
+  defaultRequiresAdminEligibility Boolean           @default(false)
+  defaultMinPlayers               Int               @default(11)
+  defaultMaxPlayers               Int               @default(25)
+  active                          Boolean           @default(true)
+  competitions                    Competition[]
+  createdAt                       DateTime          @default(now())
+  updatedAt                       DateTime          @updatedAt
+}
+
+model Competition {
+  id                       String             @id @default(uuid())
+  edition                  Edition            @relation(fields: [editionId], references: [id])
+  editionId                String
+  category                 Category           @relation(fields: [categoryId], references: [id])
+  categoryId               String
+  name                     String
+  format                   CompetitionFormat
+  division                 String?
+  ageMin                   Int?
+  ageMax                   Int?
+  requiresAdminEligibility Boolean            @default(false)
+  minPlayers               Int                @default(11)
+  maxPlayers               Int                @default(25)
+  manualTeamSelection      Boolean            @default(false)
+  knockoutQualifiers       Int?
+  numGroups                Int?
+  groupSize                Int?
+  qualifiersPerGroup       Int?
+  status                   CompetitionStatus  @default(DRAFT)
+  groups                   CompetitionGroup[]
+  registrations            TeamRegistration[]
+  matches                  Match[]
+  createdAt                DateTime           @default(now())
+  updatedAt                DateTime           @updatedAt
+  @@index([editionId])
+  @@index([categoryId])
+}
+
+model CompetitionGroup {
+  id            String             @id @default(uuid())
+  competition   Competition        @relation(fields: [competitionId], references: [id])
+  competitionId String
+  name          String
+  registrations TeamRegistration[]
+  matches       Match[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  @@index([competitionId])
+}
+
+model Team {
+  id            String             @id @default(uuid())
+  name          String
+  logoUrl       String?
+  status        EntityStatus       @default(ACTIVE)
+  leader        User?              @relation("TeamLeader")
+  registrations TeamRegistration[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+}
+
+model TeamRegistration {
+  id            String            @id @default(uuid())
+  team          Team              @relation(fields: [teamId], references: [id])
+  teamId        String
+  competition   Competition       @relation(fields: [competitionId], references: [id])
+  competitionId String
+  group         CompetitionGroup? @relation(fields: [groupId], references: [id])
+  groupId       String?
+  status        EntityStatus      @default(ACTIVE)
+  roster        RosterEntry[]
+  homeMatches   Match[]           @relation("HomeRegistration")
+  awayMatches   Match[]           @relation("AwayRegistration")
+  matchEvents   MatchEvent[]
+  transfersFrom Transfer[]        @relation("TransferFrom")
+  transfersTo   Transfer[]        @relation("TransferTo")
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  @@unique([teamId, competitionId])
+  @@index([competitionId])
+}
+
+model Player {
+  id                       String        @id @default(uuid())
+  documentType             DocumentType
+  documentNumber           String
+  firstName                String
+  lastName                 String
+  birthDate                DateTime
+  position                 String?
+  photoUrl                 String?
+  universityDegreeVerified Boolean       @default(false)
+  degreeDocUrl             String?
+  status                   EntityStatus  @default(ACTIVE)
+  rosterEntries            RosterEntry[]
+  matchEvents              MatchEvent[]
+  transfers                Transfer[]
+  createdAt                DateTime      @default(now())
+  updatedAt                DateTime      @updatedAt
+  @@unique([documentType, documentNumber])
+}
+
+model RosterEntry {
+  id                  String             @id @default(uuid())
+  player              Player             @relation(fields: [playerId], references: [id])
+  playerId            String
+  teamRegistration    TeamRegistration   @relation(fields: [teamRegistrationId], references: [id])
+  teamRegistrationId  String
+  jerseyNumber        Int?
+  eligibilityApproved Boolean            @default(false)
+  status              EntityStatus       @default(ACTIVE)
+  stats               PlayerSeasonStats?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  @@unique([playerId, teamRegistrationId])
+  @@index([teamRegistrationId])
+}
+
+model PlayerSeasonStats {
+  id            String      @id @default(uuid())
+  rosterEntry   RosterEntry @relation(fields: [rosterEntryId], references: [id])
+  rosterEntryId String      @unique
+  matchesPlayed Int         @default(0)
+  goals         Int         @default(0)
+  assists       Int         @default(0)
+  yellowCards   Int         @default(0)
+  redCards      Int         @default(0)
+  minutesPlayed Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Match {
+  id                 String            @id @default(uuid())
+  competition        Competition       @relation(fields: [competitionId], references: [id])
+  competitionId      String
+  group              CompetitionGroup? @relation(fields: [groupId], references: [id])
+  groupId            String?
+  stage              MatchStage        @default(LEAGUE)
+  matchday           Int               @default(1)
+  homeRegistration   TeamRegistration  @relation("HomeRegistration", fields: [homeRegistrationId], references: [id])
+  homeRegistrationId String
+  awayRegistration   TeamRegistration  @relation("AwayRegistration", fields: [awayRegistrationId], references: [id])
+  awayRegistrationId String
+  scheduledAt        DateTime
+  status             MatchStatus       @default(SCHEDULED)
+  homeScore          Int               @default(0)
+  awayScore          Int               @default(0)
+  venue              String?
+  events             MatchEvent[]
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  @@index([competitionId])
+  @@index([status])
+}
+
+model MatchEvent {
+  id                 String           @id @default(uuid())
+  match              Match            @relation(fields: [matchId], references: [id])
+  matchId            String
+  player             Player?          @relation(fields: [playerId], references: [id])
+  playerId           String?
+  teamRegistration   TeamRegistration @relation(fields: [teamRegistrationId], references: [id])
+  teamRegistrationId String
+  type               MatchEventType
+  minute             Int
+  createdAt          DateTime         @default(now())
+  @@index([matchId])
+}
+
+model Transfer {
+  id                 String            @id @default(uuid())
+  player             Player            @relation(fields: [playerId], references: [id])
+  playerId           String
+  edition            Edition           @relation(fields: [editionId], references: [id])
+  editionId          String
+  fromRegistration   TeamRegistration? @relation("TransferFrom", fields: [fromRegistrationId], references: [id])
+  fromRegistrationId String?
+  toRegistration     TeamRegistration  @relation("TransferTo", fields: [toRegistrationId], references: [id])
+  toRegistrationId   String
+  status             TransferStatus    @default(PENDING)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  @@index([editionId])
+}
+
+model Advertisement {
+  id        String      @id @default(uuid())
+  imageUrl  String
+  linkUrl   String?
+  placement AdPlacement
+  sortOrder Int         @default(0)
+  active    Boolean     @default(true)
+  startDate DateTime?
+  endDate   DateTime?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+  action    String
+  entity    String
+  entityId  String?
+  metadata  Json?
+  ip        String?
+  createdAt DateTime @default(now())
+  @@index([entity])
+}

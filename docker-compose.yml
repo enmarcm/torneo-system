@@ -1,0 +1,67 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports: ["8217:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports: ["6773:9000", "6774:9001"]
+    volumes: ["miniodata:/data"]
+
+  createbuckets:
+    image: minio/mc
+    depends_on: [minio]
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      mc alias set local http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
+      mc mb -p local/${MINIO_PUBLIC_BUCKET} || true;
+      mc anonymous set download local/${MINIO_PUBLIC_BUCKET} || true;
+      mc mb -p local/${MINIO_PRIVATE_BUCKET} || true;
+      exit 0;"
+
+  backend:
+    build: ./apps/backend
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      postgres: { condition: service_healthy }
+      minio: { condition: service_started }
+    ports: ["7391:4000"]
+    command: sh -c "npx prisma migrate deploy && npm run prisma:seed && npm run start"
+
+  frontend:
+    build:
+      context: ./apps/frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+        VITE_SOCKET_URL: ${VITE_SOCKET_URL}
+        VITE_PUBLIC_ASSETS_URL: ${VITE_PUBLIC_ASSETS_URL}
+    restart: unless-stopped
+    ports: ["5842:80"]
+    depends_on: [backend]
+
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    ports: ["8123:8080"]
+
+volumes:
+  pgdata:
+  miniodata:

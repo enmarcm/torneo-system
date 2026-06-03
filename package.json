@@ -1,0 +1,19 @@
+{
+  "name": "torneo-system",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Sistema de torneos de fútbol: backend Express+Prisma+PostgreSQL, frontend Vite+React+MUI, dockerizado.",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:back": "npm --workspace apps/backend run dev",
+    "dev:front": "npm --workspace apps/frontend run dev",
+    "build:back": "npm --workspace apps/backend run build",
+    "build:front": "npm --workspace apps/frontend run build",
+    "typecheck:back": "npm --workspace apps/backend run typecheck",
+    "typecheck:front": "npm --workspace apps/frontend run typecheck",
+    "typecheck": "npm run typecheck:back && npm run typecheck:front"
+  }
+}
