@@ -18,4 +18,13 @@ export const teamsController = {
   registrations: asyncHandler(async (req, res) =>
     ok(res, await teamsService.registrations(req.params.id)),
   ),
+  history: asyncHandler(async (req, res) =>
+    ok(res, await teamsService.history(req.params.id)),
+  ),
+  stats: asyncHandler(async (req, res) =>
+    ok(res, await teamsService.stats(req.params.id)),
+  ),
+  players: asyncHandler(async (req, res) =>
+    ok(res, await teamsService.players(req.params.id)),
+  ),
 };

@@ -15,6 +15,7 @@ import { useCreateEdition, useSetEditionStatus, useSetTransfers } from '@/hooks/
 import { formatDate } from '@/utils/formatDate';
 import type { Edition } from '@/api/editions.api';
 import { extractErrorMessage } from '@/api/axios';
+import { useToast } from '@/hooks/common/useToast';
 
 const schema = z.object({
   name: z.string().min(2, 'Mínimo 2 caracteres'),
@@ -27,6 +28,7 @@ type FormData = z.infer<typeof schema>;
 
 const AdminEditions: React.FC = () => {
   const { data: editions = [], isLoading } = useEditionsQuery();
+  const toast = useToast();
   const create = useCreateEdition();
   const setStatus = useSetEditionStatus();
   const setTransfers = useSetTransfers();
@@ -45,8 +47,9 @@ const AdminEditions: React.FC = () => {
       } as Partial<Edition>);
       setOpen(false);
       reset();
+      toast.success('Edición creada');
     } catch (e) {
-      alert(extractErrorMessage(e));
+      toast.error(extractErrorMessage(e));
     }
   };
 

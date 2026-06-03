@@ -22,6 +22,7 @@ import { useCreatePlayer, useUpdatePlayer, useSetPlayerStatus } from '@/hooks/mu
 import { playersApi } from '@/api/players.api';
 import type { Player } from '@/api/players.api';
 import { extractErrorMessage } from '@/api/axios';
+import { useToast } from '@/hooks/common/useToast';
 
 interface PlayerRow {
   id: string;
@@ -76,6 +77,7 @@ const TeamPlayers: React.FC = () => {
   const user = useAuthStore((s) => s.user);
   const teamId = user?.teamId;
   const { data: registrations = [], isLoading, error, refetch } = useTeamRegistrationsQuery(teamId ?? undefined);
+  const toast = useToast();
   const createPlayer = useCreatePlayer();
   const updatePlayer = useUpdatePlayer();
   const setStatus = useSetPlayerStatus();
@@ -167,8 +169,9 @@ const TeamPlayers: React.FC = () => {
       } as Partial<Player>);
       setCreateOpen(false);
       setCreateForm(INITIAL_FORM);
+      toast.success('Jugador creado');
     } catch (e) {
-      alert(extractErrorMessage(e));
+      toast.error(extractErrorMessage(e));
     }
   };
 
@@ -184,8 +187,9 @@ const TeamPlayers: React.FC = () => {
       });
       setEditOpen(false);
       setEditId(null);
+      toast.success('Jugador actualizado');
     } catch (e) {
-      alert(extractErrorMessage(e));
+      toast.error(extractErrorMessage(e));
     }
   };
 

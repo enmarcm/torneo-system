@@ -15,7 +15,7 @@ export const MatchCard: React.FC<Props> = ({ match, onClick }) => (
     component={motion.div}
     whileHover={{ y: -2 }}
     onClick={onClick}
-    sx={{ p: 2.5, cursor: onClick ? 'pointer' : 'default' }}
+    sx={{ p: { xs: 2, md: 2.5 }, cursor: onClick ? 'pointer' : 'default' }}
   >
     <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
       <Stack direction="row" alignItems="center" spacing={0.75} sx={{ color: 'text.secondary' }}>
@@ -34,7 +34,7 @@ export const MatchCard: React.FC<Props> = ({ match, onClick }) => (
         </Typography>
       </Stack>
 
-      <Box sx={{ textAlign: 'center', minWidth: 80 }}>
+      <Box sx={{ textAlign: 'center', minWidth: { xs: 56, md: 80 } }}>
         {match.status === 'SCHEDULED' ? (
           <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>vs</Typography>
         ) : (

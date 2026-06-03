@@ -9,7 +9,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useEditionQuery, useCompetitionsQuery, useMatchesQuery, useStandingsQuery, useTeamRegistrationsQuery } from '@/hooks/queries';
+import { useEditionQuery, useCompetitionsQuery, useTeamHistoryQuery, useTeamStatsQuery } from '@/hooks/queries';
 import { formatDate } from '@/utils/formatDate';
 import { EmojiEventsRounded, GroupsRounded, SportsSoccerRounded, BarChartRounded } from '@mui/icons-material';
 
@@ -20,48 +20,22 @@ const TeamHistoryDetail: React.FC = () => {
 
   const { data: edition, isLoading: loadingEdition, error: editionError, refetch: refetchEdition } = useEditionQuery(id ?? '');
   const { data: comps = [], isLoading: loadingComps } = useCompetitionsQuery(id);
-  const { data: matches = [], isLoading: loadingMatches } = useMatchesQuery(undefined, undefined);
-  const { data: registrations = [] } = useTeamRegistrationsQuery(teamId ?? undefined);
-
-  const myRegistrationIds = useMemo(() =>
-    new Set(registrations.map((r) => r.id)), [registrations]);
+  const { data: history = [], isLoading: loadingHistory } = useTeamHistoryQuery(teamId ?? undefined);
+  const { data: stats, isLoading: loadingStats } = useTeamStatsQuery(teamId ?? undefined);
 
   const editionComps = useMemo(() =>
     comps.filter((c: any) => c.editionId === id), [comps, id]);
 
-  const myMatches = useMemo(() =>
-    matches.filter((m) =>
-      myRegistrationIds.has(m.homeRegistrationId) || myRegistrationIds.has(m.awayRegistrationId),
-    ), [matches, myRegistrationIds]);
-
   const compMatches = useMemo(() => {
-    const compMap: Record<string, typeof matches> = {};
-    for (const m of myMatches) {
+    const compMap: Record<string, typeof history> = {};
+    for (const m of history) {
       if (!compMap[m.competitionId]) compMap[m.competitionId] = [];
       compMap[m.competitionId].push(m);
     }
     return compMap;
-  }, [myMatches]);
+  }, [history]);
 
-  const summary = useMemo(() => ({
-    competitions: editionComps.length,
-    totalMatches: myMatches.length,
-    wins: myMatches.filter((m) => {
-      const isHome = m.homeRegistration.team.id === teamId;
-      return isHome ? m.homeScore > m.awayScore : m.awayScore > m.homeScore;
-    }).length,
-    finished: myMatches.filter((m) => m.status === 'FINISHED').length,
-    goalsFor: myMatches.reduce((sum, m) => {
-      const isHome = m.homeRegistration.team.id === teamId;
-      return sum + (isHome ? m.homeScore : m.awayScore);
-    }, 0),
-    goalsAgainst: myMatches.reduce((sum, m) => {
-      const isHome = m.homeRegistration.team.id === teamId;
-      return sum + (isHome ? m.awayScore : m.homeScore);
-    }, 0),
-  }), [myMatches, editionComps, teamId]);
-
-  if (loadingEdition || loadingComps || loadingMatches) return <LoadingState rows={6} />;
+  if (loadingEdition || loadingComps || loadingHistory || loadingStats) return <LoadingState rows={6} />;
   if (editionError) return <ErrorState onRetry={refetchEdition} />;
   if (!edition) return <ErrorState onRetry={refetchEdition} />;
 
@@ -89,19 +63,19 @@ const TeamHistoryDetail: React.FC = () => {
 
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid size={{ xs: 6, md: 2.4 }}>
-          <StatCard label="Competiciones" value={summary.competitions} icon={<BarChartRounded />} tint="primary" />
+          <StatCard label="Competiciones" value={editionComps.length} icon={<BarChartRounded />} tint="primary" />
         </Grid>
         <Grid size={{ xs: 6, md: 2.4 }}>
-          <StatCard label="Partidos" value={summary.totalMatches} icon={<SportsSoccerRounded />} tint="info" />
+          <StatCard label="Partidos" value={stats?.totalPlayed ?? 0} icon={<SportsSoccerRounded />} tint="info" />
         </Grid>
         <Grid size={{ xs: 6, md: 2.4 }}>
-          <StatCard label="Victorias" value={summary.wins} icon={<EmojiEventsRounded />} tint="success" />
+          <StatCard label="Victorias" value={stats?.wins ?? 0} icon={<EmojiEventsRounded />} tint="success" />
         </Grid>
         <Grid size={{ xs: 6, md: 2.4 }}>
-          <StatCard label="Goles a favor" value={summary.goalsFor} icon={<SportsSoccerRounded />} tint="accent" />
+          <StatCard label="Goles a favor" value={stats?.goalsFor ?? 0} icon={<SportsSoccerRounded />} tint="accent" />
         </Grid>
         <Grid size={{ xs: 6, md: 2.4 }}>
-          <StatCard label="Goles en contra" value={summary.goalsAgainst} icon={<SportsSoccerRounded />} tint="danger" />
+          <StatCard label="Goles en contra" value={stats?.goalsAgainst ?? 0} icon={<SportsSoccerRounded />} tint="danger" />
         </Grid>
       </Grid>
 
@@ -113,7 +87,6 @@ const TeamHistoryDetail: React.FC = () => {
         <Stack spacing={2}>
           {editionComps.map((comp: any) => {
             const cm = compMatches[comp.id] ?? [];
-            const finishedCm = cm.filter((m) => m.status === 'FINISHED');
             const wins = cm.filter((m) => {
               const isHome = m.homeRegistration.team.id === teamId;
               return m.status === 'FINISHED' && (isHome ? m.homeScore > m.awayScore : m.awayScore > m.homeScore);
@@ -153,7 +126,7 @@ const TeamHistoryDetail: React.FC = () => {
                 ) : (
                   <Grid container spacing={1.5}>
                     {cm.slice(0, 4).map((m) => (
-                      <Grid key={m.id} size={{ xs: 12, sm: 6 }}>
+                      <Grid key={m.id} size={{ xs: 12, md: 6 }}>
                         <MatchCard match={m} />
                       </Grid>
                     ))}

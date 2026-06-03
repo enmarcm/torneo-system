@@ -1,7 +1,7 @@
 import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Divider } from '@mui/material';
 import { GroupsRounded, SportsSoccerRounded, BarChartRounded } from '@mui/icons-material';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useTeamsQuery, useMatchesQuery } from '@/hooks/queries';
+import { useTeamsQuery, useTeamHistoryQuery, useTeamStatsQuery } from '@/hooks/queries';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatCard } from '@/components/ui/StatCard';
 import { EntityHeroCard } from '@/components/sport/EntityHeroCard';
@@ -9,17 +9,17 @@ import { MatchCard } from '@/components/sport/MatchCard';
 
 const TeamHome: React.FC = () => {
   const user = useAuthStore((s) => s.user);
-  const { data: teams = [] } = useTeamsQuery();
-  const team = teams.find((t) => t.id === user?.teamId);
-  const { data: matches = [] } = useMatchesQuery();
-
-  const myMatches = matches.filter((m) => m.homeRegistration.team.id === user?.teamId || m.awayRegistration.team.id === user?.teamId);
-
   const teamId = user?.teamId;
-  const wins = myMatches.filter((m) => m.status === 'FINISHED' && ((m.homeRegistration.team.id === teamId && m.homeScore > m.awayScore) || (m.awayRegistration.team.id === teamId && m.awayScore > m.homeScore))).length;
-  const draws = myMatches.filter((m) => m.status === 'FINISHED' && m.homeScore === m.awayScore).length;
-  const losses = myMatches.filter((m) => m.status === 'FINISHED' && ((m.homeRegistration.team.id === teamId && m.homeScore < m.awayScore) || (m.awayRegistration.team.id === teamId && m.awayScore < m.homeScore))).length;
-  const pending = myMatches.filter((m) => m.status === 'SCHEDULED' || m.status === 'POSTPONED').length;
+  const { data: teams = [] } = useTeamsQuery();
+  const team = teams.find((t) => t.id === teamId);
+  const { data: history = [] } = useTeamHistoryQuery(teamId ?? undefined);
+  const { data: stats } = useTeamStatsQuery(teamId ?? undefined);
+
+  const upcoming = history.filter((m) => m.status === 'SCHEDULED' || m.status === 'POSTPONED').slice(0, 4);
+  const wins = stats?.wins ?? 0;
+  const draws = stats?.draws ?? 0;
+  const losses = stats?.losses ?? 0;
+  const pending = upcoming.length;
 
   return (
     <Box>
@@ -38,7 +38,7 @@ const TeamHome: React.FC = () => {
           <StatCard label="Inscripciones" value={team?._count?.registrations ?? 0} icon={<GroupsRounded />} tint="primary" />
         </Grid>
         <Grid size={{ xs: 6, md: 4 }}>
-          <StatCard label="Partidos" value={myMatches.length} icon={<SportsSoccerRounded />} tint="info" />
+          <StatCard label="Partidos" value={stats?.totalPlayed ?? 0} icon={<SportsSoccerRounded />} tint="info" />
         </Grid>
         <Grid size={{ xs: 6, md: 4 }}>
           <Card sx={{ p: { xs: 2, md: 3 }, height: '100%', borderRadius: 3 }}>
@@ -92,13 +92,13 @@ const TeamHome: React.FC = () => {
       </Grid>
       <Box sx={{ mt: 3 }}>
         <Typography variant="h4" sx={{ mb: 2 }}>Tus próximos partidos</Typography>
-        {myMatches.length === 0 ? (
+        {upcoming.length === 0 ? (
           <Card sx={{ p: 4, textAlign: 'center' }}>
             <Typography color="text.secondary">Aún no tienes partidos asignados.</Typography>
           </Card>
         ) : (
           <Grid container spacing={2}>
-            {myMatches.slice(0, 4).map((m) => (
+            {upcoming.map((m) => (
               <Grid size={{ xs: 12, md: 6 }} key={m.id}>
                 <MatchCard match={m} />
               </Grid>

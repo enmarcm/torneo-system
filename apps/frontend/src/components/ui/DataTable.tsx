@@ -33,6 +33,7 @@ interface Props<T> {
   emptyDescription?: string;
   actions?: DataTableAction<T>[];
   getRowKey: (row: T) => string;
+  onRowClick?: (row: T) => void;
 }
 
 export function DataTable<T>({
@@ -45,6 +46,7 @@ export function DataTable<T>({
   emptyDescription = 'Crea el primero para empezar.',
   actions,
   getRowKey,
+  onRowClick,
 }: Props<T>) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -64,7 +66,10 @@ export function DataTable<T>({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.18, delay: i * 0.03 }}
           >
-            <Card sx={{ p: 2, pt: 3, position: 'relative' }}>
+            <Card
+              sx={{ p: 2, pt: 3, position: 'relative', cursor: onRowClick ? 'pointer' : undefined }}
+              onClick={() => onRowClick?.(row)}
+            >
               {actions && actions.length > 0 && (
                 <Box sx={{ position: 'absolute', top: 4, right: 4 }}>
                   <RowActions actions={actions} row={row} />
@@ -121,7 +126,8 @@ export function DataTable<T>({
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.18, delay: i * 0.02 }}
-                style={{ display: 'table-row' }}
+                style={{ display: 'table-row', cursor: onRowClick ? 'pointer' : undefined }}
+                onClick={() => onRowClick?.(row)}
               >
                 {columns.map((c) => (
                   <Box

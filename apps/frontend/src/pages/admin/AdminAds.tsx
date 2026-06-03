@@ -1,22 +1,29 @@
-import { Box, Card, Stack, Typography, Button, IconButton, Menu, MenuItem, TextField, FormControl, InputLabel, Select, Chip } from '@mui/material';
-import { AddRounded, MoreVertRounded, LinkRounded } from '@mui/icons-material';
+import { Box, Stack, Typography, Button, TextField, FormControl, InputLabel, Select, Chip, MenuItem } from '@mui/material';
+import { AddRounded } from '@mui/icons-material';
 import { useState } from 'react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { DataTable, type DataTableColumn, type DataTableAction } from '@/components/ui/DataTable';
 import { AppDrawer } from '@/components/ui/AppDrawer';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { DetailDrawer } from '@/components/ui/DetailDrawer';
+import { DetailField } from '@/components/ui/DetailField';
 import { useAdsQuery } from '@/hooks/queries';
 import { useCreateAd, useUpdateAd, useDeleteAd } from '@/hooks/mutations';
 import type { Ad } from '@/api/ads.api';
 import { extractErrorMessage } from '@/api/axios';
+import { useToast } from '@/hooks/common/useToast';
 
 const AdminAds: React.FC = () => {
   const { data: ads = [], isLoading, refetch, error } = useAdsQuery();
+  const toast = useToast();
   const create = useCreateAd();
   const update = useUpdateAd();
   const remove = useDeleteAd();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Ad | null>(null);
   const [form, setForm] = useState({ imageUrl: '', linkUrl: '', placement: 'HOME_BANNER' as Ad['placement'], sortOrder: 0, active: true });
+  const [detailAd, setDetailAd] = useState<Ad | null>(null);
+  const [deletingAd, setDeletingAd] = useState<Ad | null>(null);
 
   const submit = async () => {
     try {
@@ -26,8 +33,9 @@ const AdminAds: React.FC = () => {
       setOpen(false);
       setEditing(null);
       setForm({ imageUrl: '', linkUrl: '', placement: 'HOME_BANNER', sortOrder: 0, active: true });
+      toast.success(editing ? 'Anuncio actualizado' : 'Anuncio creado');
     } catch (e) {
-      alert(extractErrorMessage(e));
+      toast.error(extractErrorMessage(e));
     }
   };
 
@@ -40,7 +48,7 @@ const AdminAds: React.FC = () => {
   const actions: DataTableAction<Ad>[] = [
     { label: 'Editar', onClick: (r) => { setEditing(r); setForm({ imageUrl: r.imageUrl, linkUrl: r.linkUrl ?? '', placement: r.placement, sortOrder: r.sortOrder, active: r.active }); setOpen(true); } },
     { label: (r) => r.active ? 'Desactivar' : 'Activar', onClick: (r) => update.mutate({ id: r.id, data: { active: !r.active } }) },
-    { label: 'Eliminar', color: 'error', onClick: (r) => remove.mutate(r.id) },
+    { label: 'Eliminar', color: 'error', onClick: (r) => setDeletingAd(r) },
   ];
 
   return (
@@ -58,9 +66,22 @@ const AdminAds: React.FC = () => {
         onRetry={refetch}
         getRowKey={(r) => r.id}
         actions={actions}
+        onRowClick={(r) => setDetailAd(r)}
         emptyTitle="Aún no hay anuncios"
         emptyDescription="Crea el primer anuncio para empezar."
       />
+
+      <DetailDrawer open={!!detailAd} onClose={() => setDetailAd(null)} title="Publicidad" subtitle={detailAd?.placement}>
+        {detailAd && (
+          <>
+            <Box component="img" src={detailAd.imageUrl} alt="" sx={{ width: '100%', maxHeight: 200, objectFit: 'contain', borderRadius: 2, mb: 2, bgcolor: 'action.hover', p: 1 }} />
+            <DetailField label="URL de destino" value={detailAd.linkUrl ? <a href={detailAd.linkUrl} target="_blank" rel="noopener">{detailAd.linkUrl}</a> : '—'} />
+            <DetailField label="Ubicación" value={detailAd.placement} />
+            <DetailField label="Orden" value={detailAd.sortOrder} />
+            <DetailField label="Activo" value={detailAd.active ? 'Sí' : 'No'} />
+          </>
+        )}
+      </DetailDrawer>
       <AppDrawer open={open} onClose={() => setOpen(false)} title={editing ? 'Editar anuncio' : 'Nuevo anuncio'}>
         <Stack spacing={2}>
           <TextField label="URL de la imagen" fullWidth value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} />
@@ -82,6 +103,19 @@ const AdminAds: React.FC = () => {
           </Stack>
         </Stack>
       </AppDrawer>
+
+      <ConfirmDialog
+        open={!!deletingAd}
+        onClose={() => setDeletingAd(null)}
+        onConfirm={async () => {
+          if (deletingAd) await remove.mutateAsync(deletingAd.id);
+          setDeletingAd(null);
+          toast.success('Anuncio eliminado');
+        }}
+        title="¿Eliminar anuncio?"
+        message={`Se eliminará el anuncio en "${deletingAd?.placement}".`}
+        loading={remove.isPending}
+      />
     </Box>
   );
 };
