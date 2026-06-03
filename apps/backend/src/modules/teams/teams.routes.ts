@@ -15,6 +15,9 @@ export const teamsRouter = Router();
 
 teamsRouter.get('/', teamsController.list);
 teamsRouter.get('/:id', teamsController.get);
+teamsRouter.get('/:id/history', teamsController.history);
+teamsRouter.get('/:id/stats', teamsController.stats);
+teamsRouter.get('/:id/players', teamsController.players);
 teamsRouter.get('/:id/registrations', teamsController.registrations);
 teamsRouter.post(
   '/',

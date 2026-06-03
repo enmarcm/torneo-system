@@ -72,4 +72,72 @@ export const teamsService = {
         roster: { include: { player: true, stats: true } },
       },
     }),
+
+  history: async (id: string) => {
+    const team = await prisma.team.findUnique({ where: { id }, select: { id: true } });
+    if (!team) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
+    const regs = await prisma.teamRegistration.findMany({
+      where: { teamId: id },
+      select: { id: true },
+    });
+    const regIds = regs.map((r) => r.id);
+    if (regIds.length === 0) return [];
+    return prisma.match.findMany({
+      where: {
+        OR: [{ homeRegistrationId: { in: regIds } }, { awayRegistrationId: { in: regIds } }],
+      },
+      include: {
+        homeRegistration: { include: { team: true } },
+        awayRegistration: { include: { team: true } },
+      },
+      orderBy: { scheduledAt: 'desc' },
+    });
+  },
+
+  stats: async (id: string) => {
+    const team = await prisma.team.findUnique({ where: { id }, select: { id: true } });
+    if (!team) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
+    const regs = await prisma.teamRegistration.findMany({
+      where: { teamId: id },
+      select: { id: true },
+    });
+    const regIds = regs.map((r) => r.id);
+    const matches = await prisma.match.findMany({
+      where: {
+        OR: [{ homeRegistrationId: { in: regIds } }, { awayRegistrationId: { in: regIds } }],
+        status: 'FINISHED',
+      },
+    });
+    const totalPlayed = matches.length;
+    let wins = 0;
+    let losses = 0;
+    let draws = 0;
+    let goalsFor = 0;
+    let goalsAgainst = 0;
+    for (const m of matches) {
+      const isHome = regIds.includes(m.homeRegistrationId);
+      const gf = isHome ? m.homeScore : m.awayScore;
+      const ga = isHome ? m.awayScore : m.homeScore;
+      goalsFor += gf;
+      goalsAgainst += ga;
+      if (gf > ga) wins++;
+      else if (gf < ga) losses++;
+      else draws++;
+    }
+    return { totalPlayed, wins, losses, draws, goalsFor, goalsAgainst, winRate: totalPlayed > 0 ? wins / totalPlayed : 0 };
+  },
+
+  players: async (id: string) => {
+    const team = await prisma.team.findUnique({ where: { id }, select: { id: true } });
+    if (!team) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
+    return prisma.rosterEntry.findMany({
+      where: { teamRegistration: { teamId: id }, status: 'ACTIVE' },
+      include: {
+        player: true,
+        teamRegistration: { include: { competition: true } },
+        stats: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  },
 };

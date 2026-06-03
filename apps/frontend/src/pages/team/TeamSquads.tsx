@@ -7,6 +7,7 @@ import { useAddRoster } from '@/hooks/mutations';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { calcAge } from '@/utils/formatDate';
 import { extractErrorMessage } from '@/api/axios';
+import { useToast } from '@/hooks/common/useToast';
 
 const TeamSquads: React.FC = () => {
   const user = useAuthStore((s) => s.user);
@@ -16,6 +17,7 @@ const TeamSquads: React.FC = () => {
   const team = teams.find((t) => t.id === user?.teamId);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ registrationId: '', playerId: '', jerseyNumber: '' });
+  const toast = useToast();
   const add = useAddRoster();
 
   const submit = async () => {
@@ -26,8 +28,9 @@ const TeamSquads: React.FC = () => {
       });
       setOpen(false);
       setForm({ registrationId: '', playerId: '', jerseyNumber: '' });
+      toast.success('Jugador agregado a la plantilla');
     } catch (e) {
-      alert(extractErrorMessage(e));
+      toast.error(extractErrorMessage(e));
     }
   };
 

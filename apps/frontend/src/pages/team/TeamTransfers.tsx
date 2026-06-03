@@ -5,6 +5,7 @@ import { useEditionsQuery, useTransfersQuery } from '@/hooks/queries';
 import { useCreateTransfer } from '@/hooks/mutations';
 import { formatDateTime } from '@/utils/formatDate';
 import { extractErrorMessage } from '@/api/axios';
+import { useToast } from '@/hooks/common/useToast';
 
 const TeamTransfers: React.FC = () => {
   const { data: editions = [] } = useEditionsQuery();
@@ -12,6 +13,7 @@ const TeamTransfers: React.FC = () => {
   const [editionId, setEditionId] = useState('');
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ playerId: '', fromRegistrationId: '', toRegistrationId: '' });
+  const toast = useToast();
   const create = useCreateTransfer();
 
   const active = editions.find((e) => e.id === editionId);
@@ -26,8 +28,9 @@ const TeamTransfers: React.FC = () => {
         toRegistrationId: form.toRegistrationId,
       });
       setOpen(false);
+      toast.success('Solicitud de traspaso enviada');
     } catch (e) {
-      alert(extractErrorMessage(e));
+      toast.error(extractErrorMessage(e));
     }
   };
 

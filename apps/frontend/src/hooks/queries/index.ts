@@ -2,7 +2,7 @@ import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import { editionsApi, type Edition } from '@/api/editions.api';
 import { categoriesApi, type Category } from '@/api/categories.api';
 import { competitionsApi, type Competition } from '@/api/competitions.api';
-import { teamsApi, type Team, type TeamRegistrationWithRoster } from '@/api/teams.api';
+import { teamsApi, type Team, type TeamRegistrationWithRoster, type TeamStats, type TeamRosterEntry } from '@/api/teams.api';
 import { playersApi, type Player } from '@/api/players.api';
 import { rostersApi, type RosterEntry } from '@/api/rosters.api';
 import { matchesApi, type Match } from '@/api/matches.api';
@@ -42,6 +42,30 @@ export const useTeamRegistrationsQuery = (teamId?: string) =>
   useQuery({
     queryKey: ['teams', teamId, 'registrations'],
     queryFn: () => teamsApi.getRegistrations(teamId!),
+    enabled: !!teamId,
+    staleTime: MID_STALE,
+  });
+
+export const useTeamHistoryQuery = (teamId?: string) =>
+  useQuery({
+    queryKey: ['teams', teamId, 'history'],
+    queryFn: () => teamsApi.getHistory(teamId!),
+    enabled: !!teamId,
+    staleTime: MID_STALE,
+  });
+
+export const useTeamStatsQuery = (teamId?: string) =>
+  useQuery({
+    queryKey: ['teams', teamId, 'stats'],
+    queryFn: () => teamsApi.getStats(teamId!),
+    enabled: !!teamId,
+    staleTime: MID_STALE,
+  });
+
+export const useTeamPlayersQuery = (teamId?: string) =>
+  useQuery({
+    queryKey: ['teams', teamId, 'players'],
+    queryFn: () => teamsApi.getPlayers(teamId!),
     enabled: !!teamId,
     staleTime: MID_STALE,
   });
@@ -123,4 +147,4 @@ export const usePublicAdsQuery = (placement?: string) =>
   useQuery({ queryKey: ['public', 'ads', placement], queryFn: () => publicApi.ads(placement), staleTime: REF_STALE });
 
 // Re-export common types used in pages
-export type { Edition, Category, Competition, Team, Player, RosterEntry, Match, StandingRow, Transfer, Ad, DashboardMetrics, TeamRegistrationWithRoster };
+export type { Edition, Category, Competition, Team, Player, RosterEntry, Match, StandingRow, Transfer, Ad, DashboardMetrics, TeamRegistrationWithRoster, TeamStats, TeamRosterEntry };
