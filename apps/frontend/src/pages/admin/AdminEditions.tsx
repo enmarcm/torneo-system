@@ -125,7 +125,7 @@ const AdminEditions: React.FC = () => {
         <form id="edition-form" onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={2}>
             <TextField label="Nombre" fullWidth {...register('name')} error={!!errors.name} helperText={errors.name?.message} />
-            <Stack direction="row" spacing={1.5}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
               <TextField label="Año" type="number" fullWidth {...register('year')} error={!!errors.year} helperText={errors.year?.message} />
               <TextField label="Temporada (1-3)" type="number" fullWidth {...register('seasonNumber')} error={!!errors.seasonNumber} helperText={errors.seasonNumber?.message} />
             </Stack>

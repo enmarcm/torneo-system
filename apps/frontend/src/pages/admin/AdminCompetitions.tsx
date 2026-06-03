@@ -175,7 +175,7 @@ const AdminCompetitions: React.FC = () => {
               <MenuItem value="GROUPS_KNOCKOUT">Copa (grupos + eliminatoria)</MenuItem>
             </Select>
           </FormControl>
-          <Stack direction="row" spacing={1.5}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
             <Box sx={{ flex: 1 }}>
               <Typography variant="caption" color="text.secondary">Edad mín.</Typography>
               <input
@@ -195,7 +195,7 @@ const AdminCompetitions: React.FC = () => {
               />
             </Box>
           </Stack>
-          <Stack direction="row" spacing={1.5}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
             <Box sx={{ flex: 1 }}>
               <Typography variant="caption" color="text.secondary">Cupo mín.</Typography>
               <input

@@ -39,7 +39,7 @@ export const StatCard: React.FC<Props> = ({ label, value, icon, trend, tint = 'p
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.22 }}
-      sx={{ p: 4, height: '100%', borderRadius: 3 }}
+      sx={{ p: { xs: 2, md: 3 }, height: '100%', borderRadius: 3 }}
     >
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Box

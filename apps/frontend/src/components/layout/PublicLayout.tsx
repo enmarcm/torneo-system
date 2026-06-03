@@ -1,6 +1,7 @@
-import { Box, AppBar, Toolbar, Typography, Stack, Button, IconButton, Tooltip, Container } from '@mui/material';
+import { Box, AppBar, Toolbar, Typography, Stack, Button, IconButton, Tooltip, Container, Drawer, List, ListItemButton, ListItemText, Divider } from '@mui/material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { LightModeRounded, DarkModeRounded } from '@mui/icons-material';
+import { LightModeRounded, DarkModeRounded, MenuRounded, CloseRounded } from '@mui/icons-material';
+import { useState } from 'react';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import { ROUTES } from '@/routes/routes';
 
@@ -8,6 +9,7 @@ export const PublicLayout: React.FC = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { mode, toggleMode } = useGlobalStore();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const NAV = [
     { label: 'Inicio', to: ROUTES.public.home },
@@ -17,6 +19,11 @@ export const PublicLayout: React.FC = () => {
     { label: 'Estadísticas', to: ROUTES.public.stats },
     { label: 'Equipos', to: ROUTES.public.teams },
   ];
+
+  const handleNav = (to: string) => {
+    navigate(to);
+    setDrawerOpen(false);
+  };
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', flexDirection: 'column' }}>
@@ -29,9 +36,11 @@ export const PublicLayout: React.FC = () => {
           <Toolbar disableGutters sx={{ gap: 2, minHeight: 72 }}>
             <Stack direction="row" alignItems="center" spacing={1.5} sx={{ cursor: 'pointer' }} onClick={() => navigate(ROUTES.public.home)}>
               <Box sx={{ width: 36, height: 36, borderRadius: 2, background: 'var(--brandGradient)', display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 800, fontFamily: '"Plus Jakarta Sans"' }}>L</Box>
-              <Typography variant="h4" sx={{ fontFamily: '"Plus Jakarta Sans"', fontWeight: 800 }}>LigaApp</Typography>
+              <Typography variant="h4" sx={{ fontFamily: '"Plus Jakarta Sans"', fontWeight: 800, display: { xs: 'none', sm: 'block' } }}>Liga Lago Futsal</Typography>
             </Stack>
-            <Stack direction="row" spacing={0.5} sx={{ ml: 3, display: { xs: 'none', md: 'flex' } }}>
+
+            {/* Desktop nav */}
+            <Stack direction="row" spacing={0.5} sx={{ ml: 1, display: { xs: 'none', md: 'flex' } }}>
               {NAV.map((n) => (
                 <Button
                   key={n.to}
@@ -43,7 +52,14 @@ export const PublicLayout: React.FC = () => {
                 </Button>
               ))}
             </Stack>
+
             <Box sx={{ flex: 1 }} />
+
+            {/* Mobile hamburger */}
+            <IconButton onClick={() => setDrawerOpen(true)} sx={{ display: { md: 'none' } }} aria-label="Abrir menú">
+              <MenuRounded />
+            </IconButton>
+
             <Tooltip title={mode === 'dark' ? 'Modo claro' : 'Modo oscuro'}>
               <IconButton onClick={toggleMode} aria-label="Cambiar tema">
                 {mode === 'dark' ? <LightModeRounded /> : <DarkModeRounded />}
@@ -56,6 +72,40 @@ export const PublicLayout: React.FC = () => {
         </Container>
       </AppBar>
 
+      {/* Mobile Drawer */}
+      <Drawer
+        anchor="left"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        PaperProps={{ sx: { width: 280, bgcolor: 'background.paper', borderRadius: 0 } }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 2, minHeight: 72 }}>
+          <Stack direction="row" alignItems="center" spacing={1.5}>
+            <Box sx={{ width: 32, height: 32, borderRadius: 1.5, background: 'var(--brandGradient)', display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 800, fontSize: 14 }}>L</Box>
+            <Typography sx={{ fontWeight: 800 }}>Liga Lago Futsal</Typography>
+          </Stack>
+          <IconButton onClick={() => setDrawerOpen(false)} aria-label="Cerrar menú">
+            <CloseRounded />
+          </IconButton>
+        </Box>
+        <Divider />
+        <List sx={{ px: 1, pt: 1 }}>
+          {NAV.map((n) => (
+            <ListItemButton
+              key={n.to}
+              onClick={() => handleNav(n.to)}
+              selected={pathname === n.to}
+              sx={{ borderRadius: 1.5, mb: 0.25, '&.Mui-selected': { bgcolor: 'primary.soft', color: 'primary.main' } }}
+            >
+              <ListItemText
+                primary={n.label}
+                primaryTypographyProps={{ fontWeight: pathname === n.to ? 700 : 500, fontSize: 15 }}
+              />
+            </ListItemButton>
+          ))}
+        </List>
+      </Drawer>
+
       <Box component="main" sx={{ flex: 1 }}>
         <Outlet />
       </Box>
@@ -64,7 +114,7 @@ export const PublicLayout: React.FC = () => {
         <Container maxWidth="xl">
           <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" justifyContent="space-between" spacing={1}>
             <Typography variant="caption" color="text.secondary">
-              © {new Date().getFullYear()} LigaApp — Torneos de fútbol
+              © {new Date().getFullYear()} LLF — Liga Lago Futsal
             </Typography>
             <Typography variant="caption" color="text.secondary">
               Realizado por Enmanuel Colina y Royer Merchan

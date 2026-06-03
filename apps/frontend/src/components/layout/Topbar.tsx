@@ -53,25 +53,23 @@ export const Topbar: React.FC<Props> = ({ onOpenSidebar }) => {
           </Typography>
         </Box>
 
-        {!isMobile && (
-          <FormControl size="small" sx={{ minWidth: 180 }}>
-            <Select
-              value={selectedEditionId ?? ''}
-              onChange={(e) => setSelectedEditionId(e.target.value || null)}
-              displayEmpty
-              inputProps={{ 'aria-label': 'Edición' }}
-            >
-              <MuiMenuItem value="">
-                <em>Todas las ediciones</em>
+        <FormControl size="small" sx={{ minWidth: { xs: 120, md: 180 }, display: { xs: 'none', sm: 'inline-flex' } }}>
+          <Select
+            value={selectedEditionId ?? ''}
+            onChange={(e) => setSelectedEditionId(e.target.value || null)}
+            displayEmpty
+            inputProps={{ 'aria-label': 'Edición' }}
+          >
+            <MuiMenuItem value="">
+              <em>Todas las ediciones</em>
+            </MuiMenuItem>
+            {editions.map((ed) => (
+              <MuiMenuItem key={ed.id} value={ed.id}>
+                {ed.name}
               </MuiMenuItem>
-              {editions.map((ed) => (
-                <MuiMenuItem key={ed.id} value={ed.id}>
-                  {ed.name}
-                </MuiMenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        )}
+            ))}
+          </Select>
+        </FormControl>
 
         <Tooltip title={mode === 'dark' ? 'Modo claro' : 'Modo oscuro'}>
           <IconButton onClick={toggleMode} aria-label="Cambiar tema">
