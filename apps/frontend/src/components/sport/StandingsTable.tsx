@@ -1,6 +1,7 @@
-import { Card, Box, Typography, Stack, Tooltip, useTheme, useMediaQuery } from '@mui/material';
+import { Card, Box, Typography, Stack, Tooltip, Collapse, IconButton, useTheme, useMediaQuery } from '@mui/material';
 import type { StandingRow } from '@/api/standings.api';
-import { ShieldRounded } from '@mui/icons-material';
+import { ShieldRounded, ExpandMoreRounded, ExpandLessRounded } from '@mui/icons-material';
+import { useState } from 'react';
 
 interface Props {
   rows: StandingRow[];
@@ -36,13 +37,7 @@ export const StandingsTable: React.FC<Props> = ({ rows }) => {
         {isMobile ? (
           <Stack spacing={1}>
             {rows.map((r) => (
-              <Box key={r.registrationId} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 3, borderLeftWidth: 4, borderLeftColor: r.zone === 'QUALIFY' ? 'success.main' : r.zone === 'RELEGATION' ? 'error.main' : 'transparent' }}>
-                <Typography sx={{ fontWeight: 700, width: 24 }}>{r.position}</Typography>
-                <ShieldRounded sx={{ color: 'text.secondary' }} />
-                <Typography sx={{ fontWeight: 600, flex: 1 }} noWrap>{r.teamName}</Typography>
-                <Typography variant="caption" color="text.secondary">{r.pj}PJ</Typography>
-                <Typography sx={{ fontWeight: 800, fontVariantNumeric: 'tabular-nums', minWidth: 32, textAlign: 'right' }}>{r.pts}</Typography>
-              </Box>
+              <MobileStandingRow key={r.registrationId} row={r} />
             ))}
           </Stack>
         ) : (
@@ -109,5 +104,47 @@ export const StandingsTable: React.FC<Props> = ({ rows }) => {
         </Stack>
       </Box>
     </Card>
+  );
+};
+
+const MobileStandingRow: React.FC<{ row: StandingRow }> = ({ row }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 3, overflow: 'hidden' }}>
+      <Box
+        sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1.5, borderLeftWidth: 4, borderLeftStyle: 'solid', borderLeftColor: row.zone === 'QUALIFY' ? 'success.main' : row.zone === 'RELEGATION' ? 'error.main' : 'transparent', cursor: 'pointer' }}
+        onClick={() => setOpen(!open)}
+      >
+        <Typography sx={{ fontWeight: 700, width: 24, fontSize: 14 }}>{row.position}</Typography>
+        <ShieldRounded sx={{ color: 'text.secondary', fontSize: 20 }} />
+        <Typography sx={{ fontWeight: 600, flex: 1, fontSize: 14 }} noWrap>{row.teamName}</Typography>
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <Typography variant="caption" color="text.secondary">{row.pj}PJ</Typography>
+          <Typography sx={{ fontWeight: 800, fontVariantNumeric: 'tabular-nums', minWidth: 28, textAlign: 'right', fontSize: 16 }}>{row.pts}</Typography>
+        </Stack>
+        <IconButton size="small" sx={{ color: 'text.secondary' }}>
+          {open ? <ExpandLessRounded fontSize="small" /> : <ExpandMoreRounded fontSize="small" />}
+        </IconButton>
+      </Box>
+      <Collapse in={open}>
+        <Box sx={{ px: 2, pb: 1.5, pt: 0.5, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 1 }}>
+          {[
+            { label: 'G', value: row.g },
+            { label: 'E', value: row.e },
+            { label: 'P', value: row.p },
+            { label: 'GF', value: row.gf },
+            { label: 'GC', value: row.gc },
+            { label: 'DG', value: row.dg > 0 ? `+${row.dg}` : row.dg },
+          ].map((s) => (
+            <Box key={s.label} sx={{ textAlign: 'center', p: 0.75, borderRadius: 1.5, bgcolor: 'background.default' }}>
+              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{s.label}</Typography>
+              <Typography sx={{ fontWeight: 700, fontSize: 15, fontVariantNumeric: 'tabular-nums', color: s.label === 'DG' ? (row.dg > 0 ? 'success.main' : row.dg < 0 ? 'error.main' : 'text.primary') : 'text.primary' }}>
+                {String(s.value)}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      </Collapse>
+    </Box>
   );
 };

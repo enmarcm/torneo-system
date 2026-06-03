@@ -59,7 +59,7 @@ const Login: React.FC = () => {
       >
         <Stack direction="row" alignItems="center" spacing={1.5}>
           <EmojiEventsRounded sx={{ fontSize: 32 }} />
-          <Typography variant="h3" sx={{ fontWeight: 800 }}>LigaApp</Typography>
+          <Typography variant="h3" sx={{ fontWeight: 800 }}>Liga Lago Futsal</Typography>
         </Stack>
         <Box component={motion.div} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
           <Typography variant="h2" sx={{ fontWeight: 800, mb: 2 }}>
@@ -70,7 +70,7 @@ const Login: React.FC = () => {
           </Typography>
         </Box>
         <Typography variant="caption" sx={{ opacity: 0.7 }}>
-          © {new Date().getFullYear()} LigaApp
+          © {new Date().getFullYear()} Liga Lago Futsal
         </Typography>
       </Box>
 
@@ -80,7 +80,7 @@ const Login: React.FC = () => {
           initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
           <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 3, display: { md: 'none' } }}>
             <EmojiEventsRounded color="primary" />
-            <Typography variant="h4" sx={{ fontWeight: 800 }}>LigaApp</Typography>
+            <Typography variant="h4" sx={{ fontWeight: 800 }}>Liga Lago Futsal</Typography>
           </Stack>
           <Typography variant="h2" sx={{ mb: 0.5 }}>Bienvenido</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>

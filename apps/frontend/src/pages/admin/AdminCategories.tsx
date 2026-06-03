@@ -94,13 +94,13 @@ const AdminCategories: React.FC = () => {
           <Stack spacing={2}>
             <TextField label="Nombre" fullWidth {...register('name')} error={!!errors.name} helperText={errors.name?.message} />
             <TextField label="Descripción" fullWidth multiline rows={2} {...register('description')} />
-            <Stack direction="row" spacing={1.5}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
               <TextField select label="Formato" fullWidth defaultValue={watch('defaultFormat')} {...register('defaultFormat')}>
                 <MenuItem value="LEAGUE">Liga</MenuItem>
                 <MenuItem value="GROUPS_KNOCKOUT">Copa (grupos + eliminatoria)</MenuItem>
               </TextField>
             </Stack>
-            <Stack direction="row" spacing={1.5}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
               <TextField label="Edad mínima" type="number" fullWidth {...register('defaultAgeMin')} error={!!errors.defaultAgeMin} helperText={errors.defaultAgeMin?.message} />
               <TextField label="Edad máxima" type="number" fullWidth {...register('defaultAgeMax')} error={!!errors.defaultAgeMax} helperText={errors.defaultAgeMax?.message} />
             </Stack>
@@ -108,7 +108,7 @@ const AdminCategories: React.FC = () => {
               control={<Switch checked={!!watch('defaultRequiresAdminEligibility')} onChange={(e) => setValue('defaultRequiresAdminEligibility', e.target.checked)} />}
               label="Requiere habilitación del administrador"
             />
-            <Stack direction="row" spacing={1.5}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
               <TextField label="Cupo mínimo" type="number" fullWidth {...register('defaultMinPlayers')} />
               <TextField label="Cupo máximo" type="number" fullWidth {...register('defaultMaxPlayers')} />
             </Stack>

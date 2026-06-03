@@ -84,18 +84,18 @@ const AdminPlayers: React.FC = () => {
 
       <AppDrawer open={open} onClose={() => setOpen(false)} title="Nuevo jugador">
         <Stack spacing={2}>
-          <Stack direction="row" spacing={1.5}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
             <TextField select label="Tipo" fullWidth value={form.documentType} onChange={(e) => setForm({ ...form, documentType: e.target.value as 'CEDULA' | 'PARTIDA' })}>
               <MenuItem value="CEDULA">Cédula</MenuItem>
               <MenuItem value="PARTIDA">Partida de nacimiento</MenuItem>
             </TextField>
             <TextField label="Número" fullWidth value={form.documentNumber} onChange={(e) => setForm({ ...form, documentNumber: e.target.value })} />
           </Stack>
-          <Stack direction="row" spacing={1.5}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
             <TextField label="Nombre" fullWidth value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
             <TextField label="Apellido" fullWidth value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
           </Stack>
-          <Stack direction="row" spacing={1.5}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
             <TextField label="Fecha de nacimiento" type="date" fullWidth InputLabelProps={{ shrink: true }} value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} />
             <TextField label="Posición" fullWidth value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })} />
           </Stack>
