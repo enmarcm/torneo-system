@@ -2,16 +2,11 @@ import { Box, List, ListItemButton, ListItemIcon, ListItemText, Avatar, Typograp
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  GridViewRounded,
-  EmojiEventsRounded,
-  CategoryRounded,
-  SportsSoccerRounded,
-  GroupsRounded,
+  HomeRounded,
   PersonRounded,
-  CalendarMonthRounded,
   BarChartRounded,
-  CampaignRounded,
-  FactCheckRounded,
+  HistoryRounded,
+  SwapHorizRounded,
   ChevronLeftRounded,
   ChevronRightRounded,
   LightModeRounded,
@@ -30,19 +25,14 @@ interface NavItem {
 }
 
 const NAV: NavItem[] = [
-  { label: 'Dashboard', icon: <GridViewRounded />, to: ROUTES.admin.dashboard },
-  { label: 'Ediciones', icon: <EmojiEventsRounded />, to: ROUTES.admin.editions },
-  { label: 'Categorías', icon: <CategoryRounded />, to: ROUTES.admin.categories },
-  { label: 'Competiciones', icon: <SportsSoccerRounded />, to: ROUTES.admin.competitions },
-  { label: 'Equipos', icon: <GroupsRounded />, to: ROUTES.admin.teams },
-  { label: 'Jugadores', icon: <PersonRounded />, to: ROUTES.admin.players },
-  { label: 'Programación', icon: <CalendarMonthRounded />, to: ROUTES.admin.schedule },
-  { label: 'Estadísticas', icon: <BarChartRounded />, to: ROUTES.admin.stats },
-  { label: 'Publicidad', icon: <CampaignRounded />, to: ROUTES.admin.ads },
-  { label: 'Auditoría', icon: <FactCheckRounded />, to: ROUTES.admin.audit },
+  { label: 'Inicio', icon: <HomeRounded />, to: ROUTES.team.home },
+  { label: 'Jugadores', icon: <PersonRounded />, to: ROUTES.team.squads },
+  { label: 'Estadísticas', icon: <BarChartRounded />, to: ROUTES.team.stats },
+  { label: 'Historial', icon: <HistoryRounded />, to: ROUTES.team.history },
+  { label: 'Traspasos', icon: <SwapHorizRounded />, to: ROUTES.team.transfers },
 ];
 
-export const Sidebar: React.FC = () => {
+export const TeamSidebar: React.FC = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { sidebarCollapsed, toggleSidebar, mode, toggleMode } = useGlobalStore();
@@ -50,10 +40,7 @@ export const Sidebar: React.FC = () => {
   const user = useAuthStore((s) => s.user);
   const W = sidebarCollapsed ? 64 : 264;
 
-  const isActive = (item: NavItem) => {
-    if (item.to === '/admin') return pathname === '/admin';
-    return pathname === item.to || pathname.startsWith(item.to + '/');
-  };
+  const isActive = (item: NavItem) => pathname === item.to || pathname.startsWith(item.to + '/');
 
   const content = (
     <Box
@@ -90,8 +77,8 @@ export const Sidebar: React.FC = () => {
           L
         </Box>
         {!sidebarCollapsed && (
-          <Typography sx={{ color: 'var(--logo)', fontWeight: 700, fontFamily: '"Inter", system-ui, sans-serif', fontSize: 16, whiteSpace: 'nowrap' }} noWrap>
-            LigaApp
+          <Typography sx={{ color: 'var(--logo)', fontWeight: 700, fontFamily: '"Inter", system-ui, sans-serif', fontSize: 16 }} noWrap>
+            Mi Equipo
           </Typography>
         )}
       </Box>
@@ -128,12 +115,7 @@ export const Sidebar: React.FC = () => {
               {!sidebarCollapsed && (
                 <ListItemText
                   primary={item.label}
-                  primaryTypographyProps={{
-                    fontWeight: active ? 700 : 500,
-                    fontSize: 14,
-                    fontFamily: '"Inter", system-ui, sans-serif',
-                    noWrap: true,
-                  }}
+                  primaryTypographyProps={{ fontWeight: active ? 700 : 500, fontSize: 14, fontFamily: '"Inter", system-ui, sans-serif', noWrap: true }}
                 />
               )}
             </ListItemButton>
@@ -209,9 +191,7 @@ export const Sidebar: React.FC = () => {
               <Typography sx={{ color: 'var(--logo)', fontSize: 12, fontWeight: 600, fontFamily: '"Inter", system-ui, sans-serif' }} noWrap>
                 {user.email}
               </Typography>
-              <Typography sx={{ fontSize: 10, color: 'var(--sidebarText)' }}>
-                {user.role === 'ADMIN' ? 'Administrador' : 'Líder de equipo'}
-              </Typography>
+              <Typography sx={{ fontSize: 10, color: 'var(--sidebarText)' }}>Líder de equipo</Typography>
             </Box>
           )}
           <Tooltip title="Cerrar sesión" placement="right" arrow>

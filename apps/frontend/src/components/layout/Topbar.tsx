@@ -13,11 +13,19 @@ interface Props {
 export const Topbar: React.FC<Props> = ({ onOpenSidebar }) => {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
-  const { mode, toggleMode, selectedEditionId, setSelectedEditionId } = useGlobalStore();
+  const { mode, toggleMode, selectedEditionId, setSelectedEditionId, toggleSidebar } = useGlobalStore();
   const { data: editions = [] } = useEditionsQuery();
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  const handleHamburger = () => {
+    if (isMobile && onOpenSidebar) {
+      onOpenSidebar();
+    } else {
+      toggleSidebar();
+    }
+  };
 
   return (
     <AppBar
@@ -33,11 +41,9 @@ export const Topbar: React.FC<Props> = ({ onOpenSidebar }) => {
       }}
     >
       <Toolbar sx={{ minHeight: 72, gap: 1.5, px: { xs: 2, md: 3 } }}>
-        {isMobile && (
-          <IconButton onClick={onOpenSidebar} aria-label="Abrir menú">
-            <MenuRounded />
-          </IconButton>
-        )}
+        <IconButton onClick={handleHamburger} aria-label="Abrir menú">
+          <MenuRounded />
+        </IconButton>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="h4" sx={{ lineHeight: 1.1, fontSize: { xs: 16, md: 20 } }} noWrap>
             Hola, {user?.email?.split('@')[0] ?? 'equipo'}

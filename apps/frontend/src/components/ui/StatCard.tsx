@@ -1,6 +1,6 @@
 import { Card, Box, Typography, Skeleton } from '@mui/material';
-import { motion } from 'framer-motion';
-import type { ReactNode } from 'react';
+import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
+import { useEffect, type ReactNode } from 'react';
 import { statCardTints } from '@/theme/tokens';
 
 type Tint = keyof typeof statCardTints;
@@ -14,8 +14,25 @@ interface Props {
   loading?: boolean;
 }
 
+const AnimatedNumber: React.FC<{ value: number }> = ({ value }) => {
+  const count = useMotionValue(0);
+  const rounded = useTransform(count, (v) => Math.round(v));
+
+  useEffect(() => {
+    const controls = animate(count, value, { duration: 0.8, ease: 'easeOut' });
+    return controls.stop;
+  }, [value, count]);
+
+  return (
+    <motion.span style={{ fontVariantNumeric: 'tabular-nums' }}>
+      {rounded}
+    </motion.span>
+  );
+};
+
 export const StatCard: React.FC<Props> = ({ label, value, icon, trend, tint = 'primary', loading }) => {
   const [bg, fg] = statCardTints[tint];
+  const isNumeric = typeof value === 'number';
   return (
     <Card
       component={motion.div}
@@ -58,7 +75,7 @@ export const StatCard: React.FC<Props> = ({ label, value, icon, trend, tint = 'p
             lineHeight: 1.1,
           }}
         >
-          {value}
+          {isNumeric ? <AnimatedNumber value={value} /> : value}
         </Typography>
       )}
       <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>

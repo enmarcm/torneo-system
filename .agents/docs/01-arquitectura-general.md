@@ -1,6 +1,6 @@
 # Arquitectura General + Infraestructura (código literal)
 
-**Versión:** 4.0 · **Fuente de verdad.** El backend y el frontend deben usar EXACTAMENTE este modelo de datos, este `docker-compose.yml` y este `.env.example`. No inventar nombres ni campos distintos.
+**Versión:** 4.1 · **Fuente de verdad.** El backend y el frontend deben usar EXACTAMENTE este modelo de datos, este `docker-compose.yml` y este `.env.example`. No inventar nombres ni campos distintos.
 
 ---
 
@@ -39,8 +39,8 @@ torneo-system/
 6. **Traspasos:** solo si `edition.transfersOpen` y dentro de ventana.
 
 ## 5. Diseño (tokens)
-- Estilo EventApp: tema claro por defecto, **sidebar navy** con pastilla blanca en activo, tarjetas redondeadas (radius 18) con sombra suave, tarjetas "hero" oscuras.
-- Primario `#4361EE`, acento `#FF8A4C`, sidebar `#1B2237`, fondo `#F4F6FB`, superficie `#FFFFFF`, en vivo `#FF3B53`. Oscuro disponible.
+- Estilo EventApp: tema claro por defecto, **sidebar navy** con pastilla activa, tarjetas redondeadas (radius 12) con sombra suave, tarjetas "hero" oscuras.
+- Primario `#034292`, acento `#FF8A4C`, sidebar `#1B2237`, fondo `#F4F6FB`, superficie `#FFFFFF`, en vivo `#FF3B53`. Oscuro disponible.
 - Tipografía: **Plus Jakarta Sans** (títulos/números) + **Inter** (texto). Mobile-first, framer-motion.
 
 Para el schema.prisma, docker-compose.yml y .env.example exactos, ver archivos `02-prompt-backend.md` (sección 4 y 7) y `01-arquitectura-general.md` original. Los archivos raíz se mantienen versionados en este proyecto.

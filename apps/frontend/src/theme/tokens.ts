@@ -1,13 +1,13 @@
 export const lightTokens = {
-  primary: '#4361EE',
-  primaryHover: '#3A53D0',
-  primarySoft: '#E8EDFF',
+  primary: '#034292',
+  primaryHover: '#023575',
+  primarySoft: '#E0E8F4',
   accent: '#FF8A4C',
   accentSoft: '#FFEDE1',
   sidebar: '#FFFFFF',
   sidebarHover: '#F4F6FB',
   sidebarText: '#6B7494',
-  sidebarActiveBg: '#E8EDFF',
+  sidebarActiveBg: '#E0E8F4',
   sidebarBorder: '#E6E9F2',
   logo: '#1A2138',
   bg: '#F4F6FB',
@@ -26,13 +26,13 @@ export const lightTokens = {
   infoSoft: '#E8F1FE',
   live: '#FF3B53',
   heroGradient: 'linear-gradient(135deg,#2A3352 0%,#1B2237 100%)',
-  brandGradient: 'linear-gradient(135deg,#4361EE 0%,#7B8CFF 100%)',
+  brandGradient: 'linear-gradient(135deg,#034292 0%,#2563EB 100%)',
 };
 
 export const darkTokens = {
-  primary: '#5B72F2',
-  primaryHover: '#6E83F5',
-  primarySoft: 'rgba(91,114,242,0.16)',
+  primary: '#3B82F6',
+  primaryHover: '#60A5FA',
+  primarySoft: 'rgba(59,130,246,0.16)',
   accent: '#FF9A63',
   accentSoft: 'rgba(255,154,99,0.16)',
   sidebar: '#11172A',
@@ -57,7 +57,7 @@ export const darkTokens = {
   infoSoft: 'rgba(96,165,250,0.16)',
   live: '#FF5C72',
   heroGradient: 'linear-gradient(135deg,#222B42 0%,#141B2E 100%)',
-  brandGradient: 'linear-gradient(135deg,#5B72F2 0%,#8B9BFF 100%)',
+  brandGradient: 'linear-gradient(135deg,#2563EB 0%,#60A5FA 100%)',
 };
 
 export type Tokens = typeof lightTokens;
