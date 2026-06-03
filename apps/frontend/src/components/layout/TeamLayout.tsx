@@ -3,14 +3,13 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { TeamSidebar } from './TeamSidebar';
 import { Topbar } from './Topbar';
-import { useGlobalStore } from '@/store/useGlobalStore';
+
+const SIDEBAR_WIDTH = 264;
 
 export const TeamLayout: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { sidebarCollapsed } = useGlobalStore();
-  const sidebarWidth = sidebarCollapsed ? 64 : 264;
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
@@ -30,8 +29,7 @@ export const TeamLayout: React.FC = () => {
           minWidth: 0,
           display: 'flex',
           flexDirection: 'column',
-          ml: { xs: 0, md: `${sidebarWidth}px` },
-          transition: 'margin-left 0.2s ease-in-out',
+          ml: { xs: 0, md: `${SIDEBAR_WIDTH}px` },
         }}
       >
         <Topbar onOpenSidebar={() => setMobileOpen(true)} />

@@ -22,7 +22,7 @@ playersRouter.post('/', validate(createPlayerSchema), audit('CREATE', 'Player'),
 playersRouter.patch('/:id', validate(updatePlayerSchema), audit('UPDATE', 'Player'), playersController.update);
 playersRouter.patch(
   '/:id/status',
-  requireRole('ADMIN'),
+  requireRole('ADMIN', 'TEAM_LEADER'),
   validate(playerStatusSchema),
   playersController.setStatus,
 );
