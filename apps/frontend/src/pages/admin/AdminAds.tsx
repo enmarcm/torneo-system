@@ -6,8 +6,6 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { DataTable, type DataTableColumn, type DataTableAction } from '@/components/ui/DataTable';
 import { AppDrawer } from '@/components/ui/AppDrawer';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
-import { DetailDrawer } from '@/components/ui/DetailDrawer';
-import { DetailField } from '@/components/ui/DetailField';
 import { useAdsQuery } from '@/hooks/queries';
 import { useCreateAd, useUpdateAd, useDeleteAd } from '@/hooks/mutations';
 import type { Ad } from '@/api/ads.api';
@@ -23,7 +21,6 @@ const AdminAds: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Ad | null>(null);
   const [form, setForm] = useState({ imageUrl: '', linkUrl: '', placement: 'HOME_BANNER' as Ad['placement'], sortOrder: 0, active: true });
-  const [detailAd, setDetailAd] = useState<Ad | null>(null);
   const [deletingAd, setDeletingAd] = useState<Ad | null>(null);
 
   const submit = async () => {
@@ -67,22 +64,9 @@ const AdminAds: React.FC = () => {
         onRetry={refetch}
         getRowKey={(r) => r.id}
         actions={actions}
-        onRowClick={(r) => setDetailAd(r)}
         emptyTitle="Aún no hay anuncios"
         emptyDescription="Crea el primer anuncio para empezar."
       />
-
-      <DetailDrawer open={!!detailAd} onClose={() => setDetailAd(null)} title="Publicidad" subtitle={detailAd?.placement}>
-        {detailAd && (
-          <>
-            <Box component="img" src={detailAd.imageUrl} alt="" sx={{ width: '100%', maxHeight: 200, objectFit: 'contain', borderRadius: 2, mb: 2, bgcolor: 'action.hover', p: 1 }} />
-            <DetailField label="URL de destino" value={detailAd.linkUrl ? <a href={detailAd.linkUrl} target="_blank" rel="noopener">{detailAd.linkUrl}</a> : '—'} />
-            <DetailField label="Ubicación" value={detailAd.placement} />
-            <DetailField label="Orden" value={detailAd.sortOrder} />
-            <DetailField label="Activo" value={detailAd.active ? 'Sí' : 'No'} />
-          </>
-        )}
-      </DetailDrawer>
       <AppDrawer open={open} onClose={() => setOpen(false)} title={editing ? 'Editar anuncio' : 'Nuevo anuncio'}>
         <Stack spacing={2}>
           <ImageUpload value={form.imageUrl} onChange={(v) => setForm({ ...form, imageUrl: v })} label="Subir imagen del anuncio" />

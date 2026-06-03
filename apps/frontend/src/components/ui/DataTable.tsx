@@ -1,6 +1,6 @@
-import { Card, Box, Stack, IconButton, Menu, MenuItem, Typography, Tooltip, useTheme, useMediaQuery } from '@mui/material';
-import { MoreVertRounded } from '@mui/icons-material';
-import { useState, type ReactNode } from 'react';
+import { Card, Box, Stack, IconButton, Typography, Tooltip, useTheme, useMediaQuery } from '@mui/material';
+import { EditRounded, DeleteRounded } from '@mui/icons-material';
+import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { LoadingState } from './LoadingState';
 import { EmptyState } from './EmptyState';
@@ -72,7 +72,7 @@ export function DataTable<T>({
             >
               {actions && actions.length > 0 && (
                 <Box sx={{ position: 'absolute', top: 4, right: 4 }}>
-                  <RowActions actions={actions} row={row} />
+                  <RowActionsIcons actions={actions} row={row} />
                 </Box>
               )}
               {columns
@@ -147,9 +147,9 @@ export function DataTable<T>({
                 {actions && actions.length > 0 && (
                   <Box
                     component="td"
-                    sx={{ p: 1, borderTop: '1px solid', borderColor: 'divider', textAlign: 'right' }}
+                    sx={{ p: 0.5, borderTop: '1px solid', borderColor: 'divider', textAlign: 'right', whiteSpace: 'nowrap' }}
                   >
-                    <RowActions actions={actions} row={row} />
+                    <RowActionsIcons actions={actions} row={row} />
                   </Box>
                 )}
               </motion.tr>
@@ -161,31 +161,24 @@ export function DataTable<T>({
   );
 }
 
-function RowActions<T>({ actions, row }: { actions: DataTableAction<T>[]; row: T }) {
-  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+function RowActionsIcons<T>({ actions, row }: { actions: DataTableAction<T>[]; row: T }) {
+  const getIcon = (a: DataTableAction<T>) => {
+    if (a.icon) return a.icon;
+    const label = typeof a.label === 'function' ? a.label(row) : a.label;
+    if (label.toLowerCase().includes('edit') || label.toLowerCase().includes('editar')) return <EditRounded fontSize="small" />;
+    if (label.toLowerCase().includes('delete') || label.toLowerCase().includes('eliminar') || label.toLowerCase().includes('desactivar') || label.toLowerCase().includes('remove')) return <DeleteRounded fontSize="small" />;
+    return <EditRounded fontSize="small" />;
+  };
+  const getColor = (a: DataTableAction<T>) => a.color === 'error' ? 'error' : 'inherit';
   return (
-    <>
-      <Tooltip title="Ver más opciones">
-        <IconButton size="small" onClick={(e) => setAnchor(e.currentTarget)} aria-label="Acciones">
-          <MoreVertRounded fontSize="small" />
-        </IconButton>
-      </Tooltip>
-      <Menu anchorEl={anchor} open={!!anchor} onClose={() => setAnchor(null)}>
-        {actions.map((a, i) => (
-          <MenuItem
-            key={i}
-            onClick={() => {
-              setAnchor(null);
-              a.onClick(row);
-            }}
-            sx={a.color === 'error' ? { color: 'error.main' } : {}}
-            divider={a.divider}
-          >
-            {a.icon && <Box sx={{ mr: 1, display: 'inline-flex' }}>{a.icon}</Box>}
-            {typeof a.label === 'function' ? a.label(row) : a.label}
-          </MenuItem>
-        ))}
-      </Menu>
-    </>
+    <Stack direction="row" spacing={0.25}>
+      {actions.map((a, i) => (
+        <Tooltip key={i} title={typeof a.label === 'function' ? a.label(row) : a.label}>
+          <IconButton size="small" color={getColor(a)} onClick={() => a.onClick(row)} sx={{ p: 0.5 }}>
+            {getIcon(a)}
+          </IconButton>
+        </Tooltip>
+      ))}
+    </Stack>
   );
 }

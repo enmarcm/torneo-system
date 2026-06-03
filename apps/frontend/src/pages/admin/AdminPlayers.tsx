@@ -6,11 +6,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { DataTable, type DataTableColumn, type DataTableAction } from '@/components/ui/DataTable';
 import { AppDrawer } from '@/components/ui/AppDrawer';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
-import { DetailDrawer } from '@/components/ui/DetailDrawer';
-import { DetailField } from '@/components/ui/DetailField';
-import { DetailSection } from '@/components/ui/DetailSection';
-import { LoadingState } from '@/components/ui/LoadingState';
-import { usePlayersQuery, usePlayerQuery } from '@/hooks/queries';
+import { usePlayersQuery } from '@/hooks/queries';
 import { useCreatePlayer, useSetPlayerDegree, useSetPlayerStatus } from '@/hooks/mutations';
 import type { Player } from '@/api/players.api';
 import { calcAge } from '@/utils/formatDate';
@@ -31,9 +27,7 @@ const AdminPlayers: React.FC = () => {
   const setDegree = useSetPlayerDegree();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ documentType: 'CEDULA' as 'CEDULA' | 'PARTIDA', documentNumber: '', firstName: '', lastName: '', birthDate: '', position: '' });
-  const [detailId, setDetailId] = useState<string | null>(null);
   const [deletingPlayer, setDeletingPlayer] = useState<Player | null>(null);
-  const { data: detailPlayer, isLoading: detailLoading } = usePlayerQuery(detailId ?? '');
 
   const submit = async () => {
     try {
@@ -89,27 +83,9 @@ const AdminPlayers: React.FC = () => {
         onRetry={refetch}
         getRowKey={(r) => r.id}
         actions={actions}
-        onRowClick={(r) => setDetailId(r.id)}
         emptyTitle="Aún no hay jugadores"
         emptyDescription="Crea el primer jugador para empezar."
       />
-
-      <DetailDrawer open={!!detailId} onClose={() => setDetailId(null)} title={detailPlayer ? `${detailPlayer.firstName} ${detailPlayer.lastName}` : 'Jugador'} subtitle={`${detailPlayer?.documentType === 'CEDULA' ? 'C.I.' : 'P.N.'} ${detailPlayer?.documentNumber}`}>
-        {detailLoading ? <LoadingState rows={4} /> : detailPlayer && (
-          <>
-            <DetailField label="Documento" value={`${detailPlayer.documentType === 'CEDULA' ? 'C.I.' : 'P.N.'} ${detailPlayer.documentNumber}`} />
-            <DetailField label="Edad" value={calcAge(detailPlayer.birthDate)} />
-            <DetailField label="Posición" value={detailPlayer.position ?? '—'} />
-            <DetailField label="Estado" value={detailPlayer.status} />
-            <DetailField label="Título universitario" value={detailPlayer.universityDegreeVerified ? 'Verificado' : 'Sin verificar'} />
-            <DetailSection title="Competiciones donde juega">
-              {(detailPlayer as any).registrations?.map((r: any) => (
-                <DetailField key={r.id} label={r.competition?.name ?? 'Competición'} value={r.team?.name ?? '—'} />
-              )) ?? <Typography variant="body2" color="text.secondary">No está inscrito en ninguna competición</Typography>}
-            </DetailSection>
-          </>
-        )}
-      </DetailDrawer>
 
       <AppDrawer open={open} onClose={() => setOpen(false)} title="Nuevo jugador">
         <Stack spacing={2}>

@@ -1,5 +1,5 @@
-import { Box, Stack, Typography, Button, Chip, Switch, TextField, FormControlLabel, MenuItem as MuiMenuItem, Avatar } from '@mui/material';
-import { AddRounded } from '@mui/icons-material';
+import { Box, Stack, Typography, Button, Chip, Switch, TextField, FormControlLabel, MenuItem as MuiMenuItem, Avatar, Tooltip } from '@mui/material';
+import { AddRounded, InfoRounded } from '@mui/icons-material';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -9,8 +9,6 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { DataTable, type DataTableColumn, type DataTableAction } from '@/components/ui/DataTable';
 import { AppDrawer } from '@/components/ui/AppDrawer';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
-import { DetailDrawer } from '@/components/ui/DetailDrawer';
-import { DetailField } from '@/components/ui/DetailField';
 import { useCategoriesQuery } from '@/hooks/queries';
 import { useCreateCategory, useDeleteCategory, useUpdateCategory } from '@/hooks/mutations';
 import type { Category } from '@/api/categories.api';
@@ -38,7 +36,6 @@ const AdminCategories: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
   const [deleting, setDeleting] = useState<Category | null>(null);
-  const [detailCat, setDetailCat] = useState<Category | null>(null);
 
   const [imageUrl, setImageUrl] = useState('');
 
@@ -99,24 +96,9 @@ const AdminCategories: React.FC = () => {
         onRetry={refetch}
         getRowKey={(r) => r.id}
         actions={actions}
-        onRowClick={(r) => setDetailCat(r)}
         emptyTitle="Aún no hay categorías"
         emptyDescription="Crea la primera categoría para empezar."
       />
-
-      <DetailDrawer open={!!detailCat} onClose={() => setDetailCat(null)} title={detailCat?.name ?? 'Categoría'} subtitle="Detalle de la categoría">
-        {detailCat && (
-          <>
-            {detailCat.imageUrl && <Box component="img" src={detailCat.imageUrl} alt="" sx={{ width: '100%', maxHeight: 160, objectFit: 'contain', borderRadius: 2, mb: 2, bgcolor: 'action.hover', p: 1 }} />}
-            <DetailField label="Formato" value={detailCat.defaultFormat === 'LEAGUE' ? 'Liga' : 'Copa'} />
-            <DetailField label="Rango de edad" value={`${detailCat.defaultAgeMin ?? '—'} – ${detailCat.defaultAgeMax ?? '∞'}`} />
-            <DetailField label="Requiere habilitación" value={detailCat.defaultRequiresAdminEligibility ? 'Sí' : 'No'} />
-            <DetailField label="Cupo mínimo" value={detailCat.defaultMinPlayers} />
-            <DetailField label="Cupo máximo" value={detailCat.defaultMaxPlayers} />
-            <DetailField label="Activa" value={detailCat.active ? 'Sí' : 'No'} />
-          </>
-        )}
-      </DetailDrawer>
 
       <AppDrawer open={open} onClose={() => setOpen(false)} title={editing ? 'Editar categoría' : 'Nueva categoría'}>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -136,7 +118,14 @@ const AdminCategories: React.FC = () => {
             </Stack>
             <FormControlLabel
               control={<Switch checked={!!watch('defaultRequiresAdminEligibility')} onChange={(e) => setValue('defaultRequiresAdminEligibility', e.target.checked)} />}
-              label="Requiere habilitación del administrador"
+              label={
+                <Stack direction="row" alignItems="center" spacing={0.5}>
+                  <Typography>Requiere habilitación del administrador</Typography>
+                  <Tooltip title="Si se activa, los jugadores inscritos en esta categoría deberán ser aprobados manualmente por un administrador antes de poder jugar partidos oficiales." arrow>
+                    <InfoRounded sx={{ fontSize: 16, color: 'text.secondary', cursor: 'help' }} />
+                  </Tooltip>
+                </Stack>
+              }
             />
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
               <TextField label="Cupo mínimo" type="number" fullWidth {...register('defaultMinPlayers')} />

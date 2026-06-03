@@ -1,5 +1,5 @@
-import { Box, Card, Stack, Typography, Button, Avatar, IconButton, Menu, MenuItem, TextField, FormControl, InputLabel, Select, Chip, InputAdornment } from '@mui/material';
-import { AddRounded, MoreVertRounded, GroupsRounded, SearchRounded } from '@mui/icons-material';
+import { Box, Card, Stack, Typography, Button, Avatar, TextField, FormControl, InputLabel, Select, MenuItem, Chip, InputAdornment } from '@mui/material';
+import { AddRounded, SearchRounded } from '@mui/icons-material';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { useState, useMemo } from 'react';
 import { PageHeader } from '@/components/ui/PageHeader';
@@ -7,11 +7,7 @@ import { DataTable, type DataTableColumn, type DataTableAction } from '@/compone
 import { AppDrawer } from '@/components/ui/AppDrawer';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { DetailDrawer } from '@/components/ui/DetailDrawer';
-import { DetailField } from '@/components/ui/DetailField';
-import { DetailSection } from '@/components/ui/DetailSection';
-import { LoadingState } from '@/components/ui/LoadingState';
-import { useTeamsQuery, useTeamQuery, useCompetitionsQuery, useCategoriesQuery } from '@/hooks/queries';
+import { useTeamsQuery, useCompetitionsQuery, useCategoriesQuery } from '@/hooks/queries';
 import { useCreateTeam, useUpdateTeam, useSetTeamStatus, useRegisterTeam } from '@/hooks/mutations';
 import type { Team } from '@/api/teams.api';
 import { extractErrorMessage } from '@/api/axios';
@@ -32,9 +28,7 @@ const AdminTeams: React.FC = () => {
   const [regOpen, setRegOpen] = useState<{ team: Team; competitionId: string } | null>(null);
   const [form, setForm] = useState({ name: '', leaderEmail: '', leaderPassword: '', logoUrl: '' });
   const [editForm, setEditForm] = useState({ name: '', logoUrl: '' });
-  const [detailId, setDetailId] = useState<string | null>(null);
   const [deletingTeam, setDeletingTeam] = useState<Team | null>(null);
-  const { data: detailTeam, isLoading: detailLoading } = useTeamQuery(detailId ?? '');
 
   // Filters
   const [search, setSearch] = useState('');
@@ -150,24 +144,9 @@ const AdminTeams: React.FC = () => {
         onRetry={refetch}
         getRowKey={(r) => r.id}
         actions={actions}
-        onRowClick={(r) => setDetailId(r.id)}
         emptyTitle="Aún no hay equipos"
         emptyDescription="Crea el primer equipo para empezar."
       />
-
-      <DetailDrawer open={!!detailId} onClose={() => setDetailId(null)} title={detailTeam?.name ?? 'Equipo'} subtitle={detailTeam?.leader?.email}>
-        {detailLoading ? <LoadingState rows={3} /> : detailTeam && (
-          <>
-            <DetailField label="Estado" value={detailTeam.status} />
-            <DetailField label="Líder" value={detailTeam.leader?.email ?? '—'} />
-            <DetailSection title="Inscripciones">
-              {(detailTeam as any).registrations?.length > 0 ? (detailTeam as any).registrations.map((r: any) => (
-                <DetailField key={r.id} label={r.competition?.name ?? 'Competición'} value={`${r.roster?.length ?? 0} jugadores`} />
-              )) : <Typography variant="body2" color="text.secondary">Sin inscripciones</Typography>}
-            </DetailSection>
-          </>
-        )}
-      </DetailDrawer>
 
       <AppDrawer open={!!open} onClose={() => { setOpen(null); setEditingTeam(null); }} title={editingTeam ? 'Editar equipo' : 'Nuevo equipo'} subtitle={editingTeam ? 'Actualiza los datos del equipo.' : 'Crea el equipo y su líder (recibirá estas credenciales).'}>
         {open === 'edit' && editingTeam ? (
