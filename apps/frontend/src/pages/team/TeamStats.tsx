@@ -6,6 +6,7 @@ import {
   SquareRounded, FlagRounded,
 } from '@mui/icons-material';
 import { BarChart } from '@mui/x-charts/BarChart';
+import { PieChart } from '@mui/x-charts/PieChart';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatCard } from '@/components/ui/StatCard';
 import { DataTable } from '@/components/ui/DataTable';
@@ -162,6 +163,68 @@ const TeamStats: React.FC = () => {
           <StatCard label="Tarjetas Rojas" value={summary.totalRed} icon={<FlagRounded />} tint="danger" />
         </Grid>
       </Grid>
+
+      {/* Goal distribution by competition */}
+      {(() => {
+        const byComp = registrations
+          .filter((r) => !filterCompetition || r.competitionId === filterCompetition)
+          .map((r) => ({
+            id: r.competitionId,
+            name: r.competition.name,
+            goals: r.roster.reduce((s, e) => s + (e.stats?.goals ?? 0), 0),
+            color: r.competitionId === registrations[0]?.competitionId ? '#034292' : '#22C55E',
+          }))
+          .filter((c) => c.goals > 0);
+        if (byComp.length > 0) {
+          const colors = ['#034292', '#22C55E', '#F59E0B', '#EF4444', '#3B82F6', '#8B5CF6', '#EC4899', '#14B8A6'];
+          return (
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Card sx={{ p: { xs: 2, md: 3 } }}>
+                  <Typography variant="h3" sx={{ mb: 2 }}>Goles por Competición</Typography>
+                  <Box sx={{ width: '100%', height: 280 }}>
+                    <PieChart
+                      series={[{
+                        data: byComp.map((c, i) => ({ id: c.id, value: c.goals, label: c.name, color: colors[i % colors.length] })),
+                        arcLabel: (v) => `${v.label}`,
+                        arcLabelMinAngle: 30,
+                      }]}
+                      margin={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      slotProps={{ legend: { hidden: true } }}
+                    />
+                  </Box>
+                </Card>
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Card sx={{ p: { xs: 2, md: 3 } }}>
+                  <Typography variant="h3" sx={{ mb: 2 }}>Promedio de Goles por Jugador</Typography>
+                  {(() => {
+                    const avg = players.length > 0 ? (summary.totalGoals / players.length).toFixed(1) : '0.0';
+                    const best = [...players].sort((a, b) => b.goals - a.goals)[0];
+                    return (
+                      <Stack spacing={2} sx={{ py: 2 }}>
+                        <Box sx={{ p: 2, borderRadius: 2, bgcolor: 'primary.soft', textAlign: 'center' }}>
+                          <Typography variant="caption" color="text.secondary">Promedio general</Typography>
+                          <Typography sx={{ fontFamily: '"Plus Jakarta Sans"', fontWeight: 800, fontSize: 36, color: 'primary.main' }}>{avg}</Typography>
+                          <Typography variant="caption" color="text.secondary">goles por jugador</Typography>
+                        </Box>
+                        {best && best.goals > 0 && (
+                          <Box sx={{ p: 2, borderRadius: 2, bgcolor: 'success.soft', textAlign: 'center' }}>
+                            <Typography variant="caption" color="text.secondary">Máximo goleador</Typography>
+                            <Typography sx={{ fontFamily: '"Plus Jakarta Sans"', fontWeight: 800, fontSize: 28, color: 'success.main' }}>{best.name}</Typography>
+                            <Typography variant="caption" color="text.secondary">{best.goals} goles · {best.matchesPlayed} PJ</Typography>
+                          </Box>
+                        )}
+                      </Stack>
+                    );
+                  })()}
+                </Card>
+              </Grid>
+            </Grid>
+          );
+        }
+        return null;
+      })()}
 
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid size={{ xs: 12, md: 6 }}>

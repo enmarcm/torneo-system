@@ -19,9 +19,12 @@ export const ROUTES = {
   },
   team: {
     home: '/equipo',
+    players: '/equipo/jugadores',
     squads: '/equipo/plantillas',
+    matches: '/equipo/partidos',
     stats: '/equipo/estadisticas',
     history: '/equipo/historial',
+    historyDetail: '/equipo/historial/:id',
     transfers: '/equipo/traspasos',
   },
   public: {

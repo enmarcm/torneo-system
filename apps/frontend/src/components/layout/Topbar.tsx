@@ -46,7 +46,7 @@ export const Topbar: React.FC<Props> = ({ onOpenSidebar }) => {
         </IconButton>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="h4" sx={{ lineHeight: 1.1, fontSize: { xs: 16, md: 20 } }} noWrap>
-            Hola, {user?.email?.split('@')[0] ?? 'equipo'}
+            Hola, {user?.email?.split('@')[0]?.toUpperCase() ?? 'EQUIPO'}
           </Typography>
           <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'capitalize' }}>
             {todayLong()}

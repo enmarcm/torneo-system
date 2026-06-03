@@ -4,11 +4,11 @@ import { motion } from 'framer-motion';
 import {
   HomeRounded,
   PersonRounded,
+  GroupRounded,
   BarChartRounded,
   HistoryRounded,
   SwapHorizRounded,
-  ChevronLeftRounded,
-  ChevronRightRounded,
+  SportsSoccerRounded,
   LightModeRounded,
   DarkModeRounded,
   LogoutRounded,
@@ -26,7 +26,9 @@ interface NavItem {
 
 const NAV: NavItem[] = [
   { label: 'Inicio', icon: <HomeRounded />, to: ROUTES.team.home },
-  { label: 'Jugadores', icon: <PersonRounded />, to: ROUTES.team.squads },
+  { label: 'Jugadores', icon: <PersonRounded />, to: ROUTES.team.players },
+  { label: 'Plantillas', icon: <GroupRounded />, to: ROUTES.team.squads },
+  { label: 'Partidos', icon: <SportsSoccerRounded />, to: ROUTES.team.matches },
   { label: 'Estadísticas', icon: <BarChartRounded />, to: ROUTES.team.stats },
   { label: 'Historial', icon: <HistoryRounded />, to: ROUTES.team.history },
   { label: 'Traspasos', icon: <SwapHorizRounded />, to: ROUTES.team.transfers },
@@ -35,7 +37,7 @@ const NAV: NavItem[] = [
 export const TeamSidebar: React.FC = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { sidebarCollapsed, toggleSidebar, mode, toggleMode } = useGlobalStore();
+  const { sidebarCollapsed, mode, toggleMode } = useGlobalStore();
   const logout = useAuthStore((s) => s.logout);
   const user = useAuthStore((s) => s.user);
   const expanded = !sidebarCollapsed;
@@ -144,12 +146,6 @@ export const TeamSidebar: React.FC = () => {
           <>
             <Divider sx={{ borderColor: 'var(--sidebarBorder)', mx: 1.5 }} />
             <Box sx={{ display: 'flex', flexDirection: 'column', px: 1, py: 0.75, gap: 0.25 }}>
-              <ListItemButton onClick={toggleSidebar} sx={{ borderRadius: 1.5, color: 'var(--sidebarText)', px: 1.5, py: 0.5, minHeight: 36, '&:hover': { bgcolor: 'var(--sidebarHover)' } }}>
-                <ListItemIcon sx={{ minWidth: 0, mr: 1.5, color: 'inherit', '& svg': { fontSize: 20 } }}>
-                  <ChevronLeftRounded />
-                </ListItemIcon>
-                <ListItemText primary="Colapsar" primaryTypographyProps={{ fontSize: 13, fontFamily: '"Inter", system-ui, sans-serif' }} />
-              </ListItemButton>
               <ListItemButton onClick={toggleMode} sx={{ borderRadius: 1.5, color: 'var(--sidebarText)', px: 1.5, py: 0.5, minHeight: 36, '&:hover': { bgcolor: 'var(--sidebarHover)' } }}>
                 <ListItemIcon sx={{ minWidth: 0, mr: 1.5, color: 'inherit', '& svg': { fontSize: 20 } }}>
                   {mode === 'dark' ? <LightModeRounded /> : <DarkModeRounded />}
@@ -181,16 +177,6 @@ export const TeamSidebar: React.FC = () => {
               </Box>
             )}
           </>
-        )}
-
-        {!expanded && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
-            <Tooltip title="Expandir menú" placement="right" arrow>
-              <IconButton onClick={toggleSidebar} size="small" sx={{ color: 'var(--sidebarText)', '&:hover': { bgcolor: 'var(--sidebarHover)' } }}>
-                <ChevronRightRounded />
-              </IconButton>
-            </Tooltip>
-          </Box>
         )}
       </Box>
     </motion.div>
