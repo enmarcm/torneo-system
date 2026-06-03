@@ -1,6 +1,6 @@
 ---
 name: sport-tournament-frontend
-version: 5.0
+version: 5.1
 description: "Sports Tournament — UI/UX First Full-Stack Skill. Sistema de diseño estilo EventApp + reglas full-stack para construir el sistema de torneos de fútbol (Vite+React+MUI+TanStack+Express+Prisma+PostgreSQL+Socket.io+MinIO)."
 author: "General"
 tags: [ui, ux, design-system, react, mui, typescript, express, prisma, postgresql, zod, tanstack, zustand, docker, sports]
@@ -23,11 +23,11 @@ Todo debe **compilar, conectar y verse bien**. Una vista sin estados (loading/em
 # PARTE A — UI/UX (lo más importante)
 
 ## 2. Estética objetivo (referencia "EventApp")
-Tema claro por defecto, **sidebar navy** con ítem activo en **pastilla blanca**, contenido sobre fondo gris claro, **tarjetas blancas redondeadas (radius 18) con sombra suave**, avatares circulares, **chips de estado**, y **tarjetas "hero" oscuras** para el detalle.
+Tema claro por defecto, **sidebar navy** con ítem activo en **pastilla de color**, contenido sobre fondo gris claro, **tarjetas blancas redondeadas (radius 12) con sombra suave**, avatares circulares, **chips de estado**, y **tarjetas "hero" oscuras** para el detalle.
 
 ## 3. Tokens de color
-**CLARO**: primary `#4361EE`, accent `#FF8A4C`, sidebar `#1B2237`, bg `#F4F6FB`, surface `#FFFFFF`, border `#E6E9F2`, text `#1A2138`, live `#FF3B53`, heroGradient navy.
-**OSCuro**: primary `#5B72F2`, sidebar `#11172A`, bg `#0F1525`, surface `#1A2236`.
+**CLARO**: primary `#034292`, accent `#FF8A4C`, sidebar `#1B2237`, bg `#F4F6FB`, surface `#FFFFFF`, border `#E6E9F2`, text `#1A2138`, live `#FF3B53`, heroGradient navy.
+**OSCuro**: primary `#3B82F6`, sidebar `#11172A`, bg `#0F1525`, surface `#1A2236`.
 **Regla**: ningún `#hex` suelto en componentes. Todo sale de `theme/tokens.ts`.
 
 ## 4. Tipografía
@@ -35,18 +35,18 @@ Tema claro por defecto, **sidebar navy** con ítem activo en **pastilla blanca**
 - Escala: h1 30 / h2 24 / h3 20 / h4 17 / body 14-15 / caption 12. Números con `tabular-nums`.
 
 ## 5. Medidas, forma, sombra, movimiento
-- Radios: tarjeta 18, input/botón 12, chip 999, hero 24.
+- Radios: tarjeta 12, input/botón 10, chip 999, hero 24.
 - Espaciado base 8 (8/16/24/32). **Padding de tarjeta: 24.**
-- Sombras (claro): reposo `0 4px 16px rgba(27,34,55,.06)`, hover `0 10px 28px rgba(27,34,55,.10)`, botón primario `0 6px 16px rgba(67,97,238,.25)`.
+- Sombras (claro): reposo `0 4px 16px rgba(27,34,55,.06)`, hover `0 10px 28px rgba(27,34,55,.10)`, botón primario `0 6px 16px rgba(3,66,146,.25)`.
 - Animaciones 150-250ms con framer-motion; respeta `prefers-reduced-motion`.
 
 ## 6. Principios de UX
 1. Aire. 2. Jerarquía. 3. Tarjetas, no listas planas. 4. Estados siempre. 5. Color con intención. 6. Estado con texto + color (chip). 7. Microcopy humano en español. 8. Confirmar acciones destructivas. 9. Feedback inmediato. 10. Accesibilidad básica.
 
 ## 7. Patrones de componente obligatorios
-- **Sidebar** navy, ítems ícono+label, **activo = pastilla blanca**, colapsable a 80px.
-- **Topbar** 72px: saludo + fecha + buscador + selector de edición + tema + campana + avatar.
-- **StatCard**: ícono en chip de color + número grande (tabular) + etiqueta + tendencia.
+- **Sidebar** navy, ítems ícono+label, **activo = pastilla de color**, colapsable a iconos.
+- **Topbar** 72px: hamburger + saludo + fecha + buscador + selector de edición + tema + campana + avatar.
+- **StatCard**: ícono en chip de color + número grande (tabular) + etiqueta + tendencia + animación de conteo.
 - **DataTable**: header `surface2` sticky, filas con hover, chip de estado, menú kebab.
 - **EntityHeroCard**: tarjeta oscura con `heroGradient` para detalle.
 - **RosterPullout**: drawer derecho con `PersonRow`.
@@ -82,7 +82,7 @@ JWT access+refresh (rotación), argon2; RBAC; helmet, cors restringido, rate-lim
 `useMemo/React.memo` donde aporte; lazy-load; paginación en servidor; Prisma con `select/include` precisos; evitar N+1.
 
 ## 13. Responsive
-Mobile-first; sin overflow; tablas→tarjetas en móvil; sidebar→drawer; tamaño táctil.
+Mobile-first; sin overflow; tablas→tarjetas en móvil; sidebar→drawer overlay; tamaño táctil.
 
 ## 14. Docker, logs, migraciones
 `docker compose up` levanta todo; variables solo en `.env`; Winston+Morgan+`AuditLog`; cada cambio de esquema → migración + nota en `docs/MIGRATIONS.md`.
@@ -91,7 +91,7 @@ Mobile-first; sin overflow; tablas→tarjetas en móvil; sidebar→drawer; tama�
 - [ ] `tsc --noEmit` y lint OK.
 - [ ] `docker compose up` levanta todo; migrate+seed limpios.
 - [ ] Todos los CRUD conectados.
-- [ ] UI = referencia (claro, sidebar navy con pastilla blanca, tarjetas redondeadas, hero oscuro).
+- [ ] UI = referencia (claro, sidebar navy con pastilla activa, tarjetas redondeadas, hero oscuro).
 - [ ] Estados loading/vacío/error en cada vista; microcopy humano.
 - [ ] Sin colores sueltos, magic strings, hardcodeo, **sin pagos**.
 - [ ] Zod en todo; axios singleton + TanStack.

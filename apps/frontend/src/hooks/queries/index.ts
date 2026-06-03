@@ -41,6 +41,9 @@ export const useTeamQuery = (id: string) =>
 export const usePlayersQuery = (search?: string) =>
   useQuery({ queryKey: ['players', search], queryFn: () => playersApi.list(search), staleTime: MID_STALE });
 
+export const usePlayerQuery = (id: string) =>
+  useQuery({ queryKey: ['players', id], queryFn: () => playersApi.get(id), enabled: !!id, staleTime: MID_STALE });
+
 export const useRosterQuery = (registrationId: string) =>
   useQuery({
     queryKey: ['roster', registrationId],

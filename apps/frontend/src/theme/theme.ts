@@ -16,7 +16,7 @@ export const buildTheme = (mode: 'light' | 'dark') => {
       text: { primary: t.text, secondary: t.textMuted },
       divider: t.border,
     },
-    shape: { borderRadius: 12 },
+    shape: { borderRadius: 8 },
     typography: {
       fontFamily: 'Inter, system-ui, sans-serif',
       h1: { fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: '1.875rem' },
@@ -33,13 +33,13 @@ export const buildTheme = (mode: 'light' | 'dark') => {
     components: {
       MuiPaper: {
         styleOverrides: {
-          root: { backgroundImage: 'none', borderRadius: 18 },
+          root: { backgroundImage: 'none', borderRadius: 12 },
         },
       },
       MuiCard: {
         styleOverrides: {
           root: {
-            borderRadius: 18,
+            borderRadius: 12,
             border: `1px solid ${t.border}`,
             boxShadow: '0 4px 16px rgba(27,34,55,0.06)',
             backgroundImage: 'none',
@@ -49,16 +49,16 @@ export const buildTheme = (mode: 'light' | 'dark') => {
       MuiButton: {
         defaultProps: { disableElevation: true },
         styleOverrides: {
-          root: { borderRadius: 12, padding: '9px 18px', fontWeight: 600 },
+          root: { borderRadius: 10, padding: '9px 18px', fontWeight: 600 },
           containedPrimary: {
-            boxShadow: '0 6px 16px rgba(67,97,238,0.25)',
-            '&:hover': { boxShadow: '0 8px 22px rgba(67,97,238,0.35)' },
+            boxShadow: '0 6px 16px rgba(3,66,146,0.25)',
+            '&:hover': { boxShadow: '0 8px 22px rgba(3,66,146,0.35)' },
           },
         },
       },
       MuiOutlinedInput: {
         styleOverrides: {
-          root: { borderRadius: 12, backgroundColor: t.surface2 },
+          root: { borderRadius: 10, backgroundColor: t.surface2 },
           notchedOutline: { borderColor: t.border },
         },
       },
