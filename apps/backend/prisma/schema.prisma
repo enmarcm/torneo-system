@@ -110,6 +110,7 @@ model Category {
   id                              String            @id @default(uuid())
   name                            String            @unique
   description                     String?
+  imageUrl                        String?
   defaultFormat                   CompetitionFormat @default(LEAGUE)
   defaultAgeMin                   Int?
   defaultAgeMax                   Int?

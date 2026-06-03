@@ -1,5 +1,6 @@
 import { Box, Card, Stack, Typography, Button, Avatar, IconButton, Menu, MenuItem, TextField, FormControl, InputLabel, Select, Chip, InputAdornment } from '@mui/material';
 import { AddRounded, MoreVertRounded, GroupsRounded, SearchRounded } from '@mui/icons-material';
+import { ImageUpload } from '@/components/ui/ImageUpload';
 import { useState, useMemo } from 'react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { DataTable, type DataTableColumn, type DataTableAction } from '@/components/ui/DataTable';
@@ -172,7 +173,7 @@ const AdminTeams: React.FC = () => {
         {open === 'edit' && editingTeam ? (
           <Stack spacing={2}>
             <TextField label="Nombre del equipo" fullWidth value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
-            <TextField label="URL del logo (opcional)" fullWidth value={editForm.logoUrl} onChange={(e) => setEditForm({ ...editForm, logoUrl: e.target.value })} />
+            <ImageUpload value={editForm.logoUrl} onChange={(v) => setEditForm({ ...editForm, logoUrl: v })} label="Subir logo del equipo" />
             <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
               <Button onClick={() => { setOpen(null); setEditingTeam(null); }}>Cancelar</Button>
               <Button variant="contained" onClick={submit} disabled={!editForm.name || update.isPending}>
@@ -183,7 +184,7 @@ const AdminTeams: React.FC = () => {
         ) : (
           <Stack spacing={2}>
             <TextField label="Nombre del equipo" fullWidth value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-            <TextField label="URL del logo (opcional)" fullWidth value={form.logoUrl} onChange={(e) => setForm({ ...form, logoUrl: e.target.value })} />
+            <ImageUpload value={form.logoUrl} onChange={(v) => setForm({ ...form, logoUrl: v })} label="Subir logo del equipo" />
             <TextField label="Correo del líder" type="email" fullWidth value={form.leaderEmail} onChange={(e) => setForm({ ...form, leaderEmail: e.target.value })} />
             <TextField label="Contraseña del líder" type="text" fullWidth value={form.leaderPassword} onChange={(e) => setForm({ ...form, leaderPassword: e.target.value })} helperText="El líder deberá cambiarla al primer ingreso." />
             <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>

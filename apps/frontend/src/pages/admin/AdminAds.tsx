@@ -1,5 +1,6 @@
 import { Box, Stack, Typography, Button, TextField, FormControl, InputLabel, Select, Chip, MenuItem } from '@mui/material';
 import { AddRounded } from '@mui/icons-material';
+import { ImageUpload } from '@/components/ui/ImageUpload';
 import { useState } from 'react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { DataTable, type DataTableColumn, type DataTableAction } from '@/components/ui/DataTable';
@@ -84,7 +85,7 @@ const AdminAds: React.FC = () => {
       </DetailDrawer>
       <AppDrawer open={open} onClose={() => setOpen(false)} title={editing ? 'Editar anuncio' : 'Nuevo anuncio'}>
         <Stack spacing={2}>
-          <TextField label="URL de la imagen" fullWidth value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} />
+          <ImageUpload value={form.imageUrl} onChange={(v) => setForm({ ...form, imageUrl: v })} label="Subir imagen del anuncio" />
           <TextField label="URL de destino (opcional)" fullWidth value={form.linkUrl} onChange={(e) => setForm({ ...form, linkUrl: e.target.value })} />
           <FormControl fullWidth>
             <InputLabel>Ubicación</InputLabel>

@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const createCategorySchema = z.object({
   name: z.string().min(2),
   description: z.string().optional(),
+  imageUrl: z.string().optional(),
   defaultFormat: z.enum(['LEAGUE', 'GROUPS_KNOCKOUT']).default('LEAGUE'),
   defaultAgeMin: z.number().int().optional(),
   defaultAgeMax: z.number().int().optional(),
