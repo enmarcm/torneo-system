@@ -1,0 +1,16 @@
+{
+  "project": "torneo-system",
+  "version": "1.0.0",
+  "startedAt": "2026-06-03",
+  "status": "in_progress",
+  "currentPhase": "A",
+  "phases": {
+    "A": { "name": "Andamiaje y persistencia", "status": "in_progress", "files": [] },
+    "B": { "name": "Backend (Fases 0-23)", "status": "pending", "files": [] },
+    "C": { "name": "Frontend (sección por sección)", "status": "pending", "files": [] },
+    "D": { "name": "Docker, seed y verificación QA", "status": "pending", "files": [] }
+  },
+  "commands": [],
+  "errors": [],
+  "completed": []
+}

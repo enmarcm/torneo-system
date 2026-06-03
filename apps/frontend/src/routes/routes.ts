@@ -1,0 +1,30 @@
+export const ROUTES = {
+  login: '/login',
+  admin: {
+    dashboard: '/admin',
+    editions: '/admin/ediciones',
+    categories: '/admin/categorias',
+    competitions: '/admin/competiciones',
+    teams: '/admin/equipos',
+    players: '/admin/jugadores',
+    schedule: '/admin/programacion',
+    stats: '/admin/estadisticas',
+    ads: '/admin/publicidad',
+    audit: '/admin/auditoria',
+  },
+  team: {
+    home: '/equipo',
+    squads: '/equipo/plantillas',
+    stats: '/equipo/estadisticas',
+    transfers: '/equipo/traspasos',
+  },
+  public: {
+    home: '/',
+    competitions: '/competiciones',
+    stats: '/estadisticas',
+    teams: '/equipos',
+    schedule: '/calendario',
+    live: '/en-vivo',
+    history: '/historico',
+  },
+} as const;
