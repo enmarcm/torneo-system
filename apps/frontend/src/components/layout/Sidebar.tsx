@@ -1,5 +1,6 @@
 import { Box, List, ListItemButton, ListItemIcon, ListItemText, Avatar, Typography, Tooltip, IconButton, Divider, useMediaQuery, useTheme } from '@mui/material';
-import logoSrc from '@/assets/escudo.PNG';
+import logoAzul from '@/assets/logo_azul.PNG';
+import logoBlanco from '@/assets/logo.PNG';
 import { useLocation, useNavigate, matchPath } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -47,6 +48,7 @@ export const Sidebar: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { sidebarCollapsed, mode, toggleMode } = useGlobalStore();
+  const logoSrc = mode === 'dark' ? logoBlanco : logoAzul;
   const logout = useAuthStore((s) => s.logout);
   const user = useAuthStore((s) => s.user);
   const expanded = !sidebarCollapsed;
