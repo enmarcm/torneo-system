@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid, Card, Stack, Typography, Switch, IconButton, Menu, MenuItem, Chip, Button, TextField } from '@mui/material';
+import { Box, Grid2 as Grid, Card, Stack, Typography, Switch, IconButton, Menu, MenuItem, Chip, Button, TextField, Tooltip } from '@mui/material';
 import { AddRounded, MoreVertRounded, EmojiEventsRounded } from '@mui/icons-material';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -78,9 +78,11 @@ const AdminEditions: React.FC = () => {
                       <Typography variant="caption" color="text.secondary">Temporada {ed.seasonNumber} · {ed.year}</Typography>
                     </Box>
                   </Stack>
-                  <IconButton size="small" onClick={(e) => setAnchor({ el: e.currentTarget, ed })} aria-label="Más opciones">
-                    <MoreVertRounded fontSize="small" />
-                  </IconButton>
+                  <Tooltip title="Ver más opciones">
+                    <IconButton size="small" onClick={(e) => setAnchor({ el: e.currentTarget, ed })} aria-label="Más opciones">
+                      <MoreVertRounded fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
                 </Stack>
                 <Stack direction="row" spacing={1} sx={{ mt: 2, mb: 2 }}>
                   <StatusBadge status={ed.status} />

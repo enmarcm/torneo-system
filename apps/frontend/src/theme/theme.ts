@@ -79,7 +79,7 @@ export const buildTheme = (mode: 'light' | 'dark') => {
       },
       MuiAppBar: {
         styleOverrides: {
-          root: { backgroundImage: 'none' },
+          root: { backgroundImage: 'none', borderRadius: 0 },
         },
       },
       MuiDrawer: {

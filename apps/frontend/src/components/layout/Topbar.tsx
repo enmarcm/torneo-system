@@ -28,7 +28,8 @@ export const Topbar: React.FC<Props> = ({ onOpenSidebar }) => {
         color: 'text.primary',
         borderBottom: '1px solid',
         borderColor: 'divider',
-        zIndex: theme.zIndex.drawer + 1,
+        borderRadius: '0 !important',
+        zIndex: theme.zIndex.appBar,
       }}
     >
       <Toolbar sx={{ minHeight: 72, gap: 1.5, px: { xs: 2, md: 3 } }}>

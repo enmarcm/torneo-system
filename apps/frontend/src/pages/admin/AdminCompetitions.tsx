@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Button, IconButton, Menu, MenuItem, FormControl, Select, InputLabel } from '@mui/material';
+import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Button, IconButton, Menu, MenuItem, FormControl, Select, InputLabel, Tooltip } from '@mui/material';
 import { AddRounded, MoreVertRounded, EmojiEventsRounded } from '@mui/icons-material';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
@@ -98,9 +98,11 @@ const AdminCompetitions: React.FC = () => {
                         <Typography variant="caption" color="text.secondary">{c.category?.name}</Typography>
                       </Box>
                     </Stack>
-                    <IconButton size="small" onClick={(e) => setAnchor({ el: e.currentTarget, c })}>
-                      <MoreVertRounded fontSize="small" />
-                    </IconButton>
+                    <Tooltip title="Ver más opciones">
+                      <IconButton size="small" onClick={(e) => setAnchor({ el: e.currentTarget, c })}>
+                        <MoreVertRounded fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
                   </Stack>
                   <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
                     <StatusBadge status={c.format} />

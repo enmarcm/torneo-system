@@ -12,7 +12,8 @@ import {
   BarChartRounded,
   CampaignRounded,
   FactCheckRounded,
-  MenuOpenRounded,
+  ChevronLeftRounded,
+  ChevronRightRounded,
   LightModeRounded,
   DarkModeRounded,
   LogoutRounded,
@@ -64,15 +65,18 @@ export const Sidebar: React.FC = () => {
         color: 'var(--sidebarText)',
         display: 'flex',
         flexDirection: 'column',
-        p: 1.5,
+        p: 1,
         overflow: 'hidden',
+        '&::-webkit-scrollbar': { width: 4 },
+        '&::-webkit-scrollbar-track': { bgcolor: 'transparent' },
+        '&::-webkit-scrollbar-thumb': { bgcolor: 'rgba(255,255,255,0.12)', borderRadius: 4 },
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 1, py: 2, minHeight: 56 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 1, py: 1.5, minHeight: 48 }}>
         <Box
           sx={{
-            width: 36,
-            height: 36,
+            width: 32,
+            height: 32,
             borderRadius: 2,
             background: 'var(--brandGradient)',
             flexShrink: 0,
@@ -81,18 +85,19 @@ export const Sidebar: React.FC = () => {
             color: '#fff',
             fontWeight: 800,
             fontFamily: '"Plus Jakarta Sans"',
+            fontSize: 16,
           }}
         >
           L
         </Box>
         {!sidebarCollapsed && (
-          <Typography sx={{ color: '#fff', fontWeight: 800, fontFamily: '"Plus Jakarta Sans"' }} noWrap>
+          <Typography sx={{ color: '#fff', fontWeight: 800, fontFamily: '"Plus Jakarta Sans"', fontSize: 15 }} noWrap>
             LigaApp
           </Typography>
         )}
       </Box>
 
-      <List sx={{ flex: 1, mt: 1, overflow: 'auto' }}>
+      <List sx={{ flex: 1, mt: 0.5, overflow: 'auto', '&::-webkit-scrollbar': { width: 3 }, '&::-webkit-scrollbar-thumb': { bgcolor: 'rgba(255,255,255,0.1)', borderRadius: 4 } }}>
         {NAV.map((item) => {
           const active = pathname === item.to || pathname.startsWith(item.to + '/');
           const btn = (
@@ -100,11 +105,12 @@ export const Sidebar: React.FC = () => {
               key={item.to}
               onClick={() => navigate(item.to)}
               sx={{
-                borderRadius: 2.5,
-                mb: 0.5,
+                borderRadius: 2,
+                mb: 0.25,
+                py: 0.5,
                 color: active ? 'var(--text)' : 'var(--sidebarText)',
                 bgcolor: active ? 'var(--sidebarActiveBg)' : 'transparent',
-                boxShadow: active ? '0 4px 12px rgba(0,0,0,0.18)' : 'none',
+                boxShadow: active ? '0 2px 8px rgba(0,0,0,0.15)' : 'none',
                 '&:hover': { bgcolor: active ? 'var(--sidebarActiveBg)' : 'var(--sidebarHover)' },
                 px: 1.5,
               }}
@@ -114,7 +120,7 @@ export const Sidebar: React.FC = () => {
                   minWidth: 0,
                   mr: sidebarCollapsed ? 0 : 1.5,
                   color: active ? 'var(--primary)' : 'inherit',
-                  '& svg': { fontSize: 22 },
+                  '& svg': { fontSize: 20 },
                 }}
               >
                 {item.icon}
@@ -122,7 +128,7 @@ export const Sidebar: React.FC = () => {
               {!sidebarCollapsed && (
                 <ListItemText
                   primary={item.label}
-                  primaryTypographyProps={{ fontWeight: 600, fontSize: 14 }}
+                  primaryTypographyProps={{ fontWeight: 600, fontSize: 13 }}
                 />
               )}
             </ListItemButton>
@@ -137,51 +143,65 @@ export const Sidebar: React.FC = () => {
         })}
       </List>
 
-      <Divider sx={{ borderColor: 'var(--sidebarHover)', my: 1 }} />
+      <Divider sx={{ borderColor: 'var(--sidebarHover)', my: 0.75 }} />
 
-      <ListItemButton onClick={toggleSidebar} sx={{ borderRadius: 2.5, color: 'var(--sidebarText)', px: 1.5 }}>
-        <ListItemIcon sx={{ minWidth: 0, mr: sidebarCollapsed ? 0 : 1.5, color: 'inherit' }}>
-          <MenuOpenRounded />
-        </ListItemIcon>
-        {!sidebarCollapsed && <ListItemText primary="Colapsar" />}
-      </ListItemButton>
-      <ListItemButton onClick={toggleMode} sx={{ borderRadius: 2.5, color: 'var(--sidebarText)', px: 1.5 }}>
-        <ListItemIcon sx={{ minWidth: 0, mr: sidebarCollapsed ? 0 : 1.5, color: 'inherit' }}>
-          {mode === 'dark' ? <LightModeRounded /> : <DarkModeRounded />}
-        </ListItemIcon>
-        {!sidebarCollapsed && <ListItemText primary={mode === 'dark' ? 'Modo claro' : 'Modo oscuro'} />}
-      </ListItemButton>
-      <ListItemButton onClick={logout} sx={{ borderRadius: 2.5, color: 'var(--danger)', px: 1.5 }}>
-        <ListItemIcon sx={{ minWidth: 0, mr: sidebarCollapsed ? 0 : 1.5, color: 'inherit' }}>
-          <LogoutRounded />
-        </ListItemIcon>
-        {!sidebarCollapsed && <ListItemText primary="Cerrar sesión" />}
-      </ListItemButton>
+      <Tooltip title={sidebarCollapsed ? 'Expandir menú' : 'Colapsar menú'} placement="right" arrow disableHoverListener={!sidebarCollapsed}>
+        <ListItemButton onClick={toggleSidebar} sx={{ borderRadius: 2, color: 'var(--sidebarText)', px: 1.5, py: 0.5, '&:hover': { bgcolor: 'var(--sidebarHover)' } }}>
+          <ListItemIcon sx={{ minWidth: 0, mr: sidebarCollapsed ? 0 : 1.5, color: 'inherit', '& svg': { fontSize: 20 } }}>
+            {sidebarCollapsed ? <ChevronRightRounded /> : <ChevronLeftRounded />}
+          </ListItemIcon>
+          {!sidebarCollapsed && <ListItemText primary="Colapsar" primaryTypographyProps={{ fontSize: 13 }} />}
+        </ListItemButton>
+      </Tooltip>
 
-      {!sidebarCollapsed && (
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1.5,
-            px: 1.5,
-            py: 1.5,
-            mt: 1,
-            borderTop: '1px solid var(--sidebarHover)',
-          }}
-        >
-          <Avatar sx={{ width: 34, height: 34, bgcolor: 'primary.main', fontWeight: 700 }}>
-            {user?.email?.[0]?.toUpperCase()}
-          </Avatar>
-          <Box sx={{ overflow: 'hidden' }}>
-            <Typography sx={{ color: '#fff', fontSize: 13, fontWeight: 600 }} noWrap>
-              {user?.email}
-            </Typography>
-            <Typography sx={{ fontSize: 11, color: 'var(--sidebarText)' }}>
-              {user?.role === 'ADMIN' ? 'Administrador' : 'Líder de equipo'}
-            </Typography>
+      <Tooltip title={mode === 'dark' ? 'Modo claro' : 'Modo oscuro'} placement="right" arrow disableHoverListener={!sidebarCollapsed}>
+        <ListItemButton onClick={toggleMode} sx={{ borderRadius: 2, color: 'var(--sidebarText)', px: 1.5, py: 0.5, '&:hover': { bgcolor: 'var(--sidebarHover)' } }}>
+          <ListItemIcon sx={{ minWidth: 0, mr: sidebarCollapsed ? 0 : 1.5, color: 'inherit', '& svg': { fontSize: 20 } }}>
+            {mode === 'dark' ? <LightModeRounded /> : <DarkModeRounded />}
+          </ListItemIcon>
+          {!sidebarCollapsed && <ListItemText primary={mode === 'dark' ? 'Modo claro' : 'Modo oscuro'} primaryTypographyProps={{ fontSize: 13 }} />}
+        </ListItemButton>
+      </Tooltip>
+
+      <Tooltip title="Cerrar sesión" placement="right" arrow disableHoverListener={!sidebarCollapsed}>
+        <ListItemButton onClick={logout} sx={{ borderRadius: 2, color: 'var(--danger)', px: 1.5, py: 0.5, '&:hover': { bgcolor: 'var(--sidebarHover)' } }}>
+          <ListItemIcon sx={{ minWidth: 0, mr: sidebarCollapsed ? 0 : 1.5, color: 'inherit', '& svg': { fontSize: 20 } }}>
+            <LogoutRounded />
+          </ListItemIcon>
+          {!sidebarCollapsed && <ListItemText primary="Cerrar sesión" primaryTypographyProps={{ fontSize: 13 }} />}
+        </ListItemButton>
+      </Tooltip>
+
+      {user && (
+        <Tooltip title={user.email} placement="right" arrow disableHoverListener={!sidebarCollapsed}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5,
+              px: 1.5,
+              py: 1,
+              mt: 0.5,
+              borderTop: '1px solid var(--sidebarHover)',
+              cursor: 'pointer',
+              '&:hover': { bgcolor: 'var(--sidebarHover)', borderRadius: 2 },
+            }}
+          >
+            <Avatar sx={{ width: 30, height: 30, bgcolor: 'primary.main', fontWeight: 700, fontSize: 13 }}>
+              {user?.email?.[0]?.toUpperCase()}
+            </Avatar>
+            {!sidebarCollapsed && (
+              <Box sx={{ overflow: 'hidden' }}>
+                <Typography sx={{ color: '#fff', fontSize: 12, fontWeight: 600 }} noWrap>
+                  {user?.email}
+                </Typography>
+                <Typography sx={{ fontSize: 10, color: 'var(--sidebarText)' }}>
+                  {user?.role === 'ADMIN' ? 'Administrador' : 'Líder de equipo'}
+                </Typography>
+              </Box>
+            )}
           </Box>
-        </Box>
+        </Tooltip>
       )}
     </Box>
   );

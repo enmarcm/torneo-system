@@ -1,4 +1,4 @@
-import { Card, Box, Stack, IconButton, Menu, MenuItem, Typography, useTheme, useMediaQuery } from '@mui/material';
+import { Card, Box, Stack, IconButton, Menu, MenuItem, Typography, Tooltip, useTheme, useMediaQuery } from '@mui/material';
 import { MoreVertRounded } from '@mui/icons-material';
 import { useState, type ReactNode } from 'react';
 import { motion } from 'framer-motion';
@@ -64,18 +64,22 @@ export function DataTable<T>({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.18, delay: i * 0.03 }}
           >
-            <Card sx={{ p: 2 }}>
+            <Card sx={{ p: 2, position: 'relative' }}>
+              {actions && actions.length > 0 && (
+                <Box sx={{ position: 'absolute', top: 4, right: 4 }}>
+                  <RowActions actions={actions} row={row} />
+                </Box>
+              )}
               {columns
                 .filter((c) => !c.hideInMobile)
                 .map((c) => (
-                  <Box key={c.key} sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, py: 0.5 }}>
+                  <Box key={c.key} sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, py: 0.5, '&:first-of-type': { mt: 2.5 } }}>
                     <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
                       {c.label}
                     </Typography>
                     <Box sx={{ textAlign: 'right' }}>{c.render(row)}</Box>
                   </Box>
                 ))}
-              {actions && actions.length > 0 && <RowActions actions={actions} row={row} />}
             </Card>
           </motion.div>
         ))}
@@ -155,9 +159,11 @@ function RowActions<T>({ actions, row }: { actions: DataTableAction<T>[]; row: T
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   return (
     <>
-      <IconButton size="small" onClick={(e) => setAnchor(e.currentTarget)} aria-label="Acciones">
-        <MoreVertRounded fontSize="small" />
-      </IconButton>
+      <Tooltip title="Ver más opciones">
+        <IconButton size="small" onClick={(e) => setAnchor(e.currentTarget)} aria-label="Acciones">
+          <MoreVertRounded fontSize="small" />
+        </IconButton>
+      </Tooltip>
       <Menu anchorEl={anchor} open={!!anchor} onClose={() => setAnchor(null)}>
         {actions.map((a, i) => (
           <MenuItem
