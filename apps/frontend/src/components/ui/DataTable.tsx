@@ -1,5 +1,11 @@
 import { Card, Box, Stack, IconButton, Typography, Tooltip, useTheme, useMediaQuery } from '@mui/material';
-import { EditRounded, DeleteRounded } from '@mui/icons-material';
+import {
+  EditRounded,
+  DeleteRounded,
+  ToggleOnRounded,
+  VisibilityRounded,
+  MoreHorizRounded,
+} from '@mui/icons-material';
 import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { LoadingState } from './LoadingState';
@@ -162,12 +168,27 @@ export function DataTable<T>({
 }
 
 function RowActionsIcons<T>({ actions, row }: { actions: DataTableAction<T>[]; row: T }) {
+  /**
+   * Lo correcto es que cada acción traiga su `icon`. Esto es solo una red de
+   * seguridad por si alguna se define sin él: antes cualquier etiqueta
+   * desconocida caía en el lápiz de "editar", así que acciones distintas
+   * terminaban con el mismo icono y parecían la misma cosa.
+   */
   const getIcon = (a: DataTableAction<T>) => {
     if (a.icon) return a.icon;
-    const label = typeof a.label === 'function' ? a.label(row) : a.label;
-    if (label.toLowerCase().includes('edit') || label.toLowerCase().includes('editar')) return <EditRounded fontSize="small" />;
-    if (label.toLowerCase().includes('delete') || label.toLowerCase().includes('eliminar') || label.toLowerCase().includes('desactivar') || label.toLowerCase().includes('remove')) return <DeleteRounded fontSize="small" />;
-    return <EditRounded fontSize="small" />;
+    const label = (typeof a.label === 'function' ? a.label(row) : a.label).toLowerCase();
+    if (label.includes('editar') || label.includes('edit')) return <EditRounded fontSize="small" />;
+    if (
+      label.includes('eliminar') ||
+      label.includes('delete') ||
+      label.includes('remove') ||
+      label.includes('desactivar')
+    ) {
+      return <DeleteRounded fontSize="small" />;
+    }
+    if (label.includes('activar')) return <ToggleOnRounded fontSize="small" />;
+    if (label.includes('detalle') || label.includes('ver ')) return <VisibilityRounded fontSize="small" />;
+    return <MoreHorizRounded fontSize="small" />;
   };
   const getColor = (a: DataTableAction<T>) => a.color === 'error' ? 'error' : 'inherit';
   return (

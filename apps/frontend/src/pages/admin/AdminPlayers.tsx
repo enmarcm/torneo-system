@@ -1,6 +1,6 @@
 import { Box, Stack, Typography, Button, Avatar, Chip, TextField, MenuItem } from '@mui/material';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { AddRounded, VerifiedRounded } from '@mui/icons-material';
+import { AddRounded, VerifiedRounded, PowerSettingsNewRounded } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { DataTable, type DataTableColumn, type DataTableAction } from '@/components/ui/DataTable';
@@ -63,8 +63,19 @@ const AdminPlayers: React.FC = () => {
     { key: 'status', label: 'Estado', render: (r) => <StatusBadge status={r.status} /> },
   ];
   const actions: DataTableAction<Player>[] = [
-    { label: (r) => r.universityDegreeVerified ? 'Quitar verificación' : 'Verificar título', onClick: (r) => setDegree.mutate({ id: r.id, data: { universityDegreeVerified: !r.universityDegreeVerified } }) },
-    { label: (r) => r.status === 'ACTIVE' ? 'Desactivar' : 'Activar', onClick: (r) => r.status === 'ACTIVE' ? setDeletingPlayer(r) : setStatus.mutate({ id: r.id, status: 'ACTIVE' }) },
+    {
+      label: (r) => (r.universityDegreeVerified ? 'Quitar verificación' : 'Verificar título'),
+      icon: <VerifiedRounded fontSize="small" />,
+      onClick: (r) => setDegree.mutate({ id: r.id, data: { universityDegreeVerified: !r.universityDegreeVerified } }),
+    },
+    {
+      label: (r) => (r.status === 'ACTIVE' ? 'Desactivar' : 'Activar'),
+      icon: <PowerSettingsNewRounded fontSize="small" />,
+      color: 'error',
+      onClick: (r) => (r.status === 'ACTIVE'
+        ? setDeletingPlayer(r)
+        : setStatus.mutate({ id: r.id, status: 'ACTIVE' })),
+    },
   ];
 
   return (

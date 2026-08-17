@@ -4,7 +4,14 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { PersonRounded, FlagRounded, AddRounded, EditRounded } from '@mui/icons-material';
+import {
+  PersonRounded,
+  FlagRounded,
+  AddRounded,
+  EditRounded,
+  VisibilityRounded,
+  PowerSettingsNewRounded,
+} from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { PageHeader } from '@/components/ui/PageHeader';
@@ -248,13 +255,15 @@ const TeamPlayers: React.FC = () => {
   ];
 
   const actions: DataTableAction<PlayerRow>[] = [
-    { label: 'Ver detalle', onClick: (r) => openDetail(r.id) },
-    { label: 'Editar', icon: <EditRounded />, onClick: (r) => openEdit(r.id) },
+    { label: 'Ver detalle', icon: <VisibilityRounded fontSize="small" />, onClick: (r) => openDetail(r.id) },
+    { label: 'Editar', icon: <EditRounded fontSize="small" />, onClick: (r) => openEdit(r.id) },
     {
       label: (r) => {
         const anyActive = r.registrations.some((reg) => reg.entryStatus === 'ACTIVE');
         return anyActive ? 'Desactivar' : 'Activar';
       },
+      icon: <PowerSettingsNewRounded fontSize="small" />,
+      color: 'error',
       onClick: (r) => {
         const anyActive = r.registrations.some((reg) => reg.entryStatus === 'ACTIVE');
         setStatus.mutate({ id: r.id, status: anyActive ? 'INACTIVE' : 'ACTIVE' });

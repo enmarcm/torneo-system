@@ -1,5 +1,5 @@
 import { Box, Stack, Typography, Button, TextField, FormControl, InputLabel, Select, Chip, MenuItem } from '@mui/material';
-import { AddRounded } from '@mui/icons-material';
+import { AddRounded, EditRounded, DeleteRounded, PowerSettingsNewRounded } from '@mui/icons-material';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { useState } from 'react';
 import { PageHeader } from '@/components/ui/PageHeader';
@@ -44,9 +44,22 @@ const AdminAds: React.FC = () => {
     { key: 'active', label: 'Activo', render: (r) => <Chip size="small" color={r.active ? 'success' : 'default'} label={r.active ? 'Sí' : 'No'} variant="outlined" /> },
   ];
   const actions: DataTableAction<Ad>[] = [
-    { label: 'Editar', onClick: (r) => { setEditing(r); setForm({ imageUrl: r.imageUrl, linkUrl: r.linkUrl ?? '', placement: r.placement, sortOrder: r.sortOrder, active: r.active }); setOpen(true); } },
-    { label: (r) => r.active ? 'Desactivar' : 'Activar', onClick: (r) => update.mutate({ id: r.id, data: { active: !r.active } }) },
-    { label: 'Eliminar', color: 'error', onClick: (r) => setDeletingAd(r) },
+    {
+      label: 'Editar',
+      icon: <EditRounded fontSize="small" />,
+      onClick: (r) => { setEditing(r); setForm({ imageUrl: r.imageUrl, linkUrl: r.linkUrl ?? '', placement: r.placement, sortOrder: r.sortOrder, active: r.active }); setOpen(true); },
+    },
+    {
+      label: (r) => (r.active ? 'Desactivar' : 'Activar'),
+      icon: <PowerSettingsNewRounded fontSize="small" />,
+      onClick: (r) => update.mutate({ id: r.id, data: { active: !r.active } }),
+    },
+    {
+      label: 'Eliminar',
+      icon: <DeleteRounded fontSize="small" />,
+      color: 'error',
+      onClick: (r) => setDeletingAd(r),
+    },
   ];
 
   return (

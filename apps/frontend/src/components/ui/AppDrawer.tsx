@@ -42,7 +42,13 @@ export const AppDrawer: React.FC<Props> = ({ open, onClose, title, subtitle, chi
           </IconButton>
         </Stack>
         <Divider sx={{ mb: 2 }} />
-        <Box sx={{ flex: 1, overflow: 'auto' }}>{children}</Box>
+        {/*
+          `overflow: auto` recorta lo que se dibuje fuera de la caja, y la etiqueta
+          flotante de un TextField se posiciona ~9px por encima del input. Sin este
+          padding superior, la etiqueta del primer campo del formulario aparece
+          cortada por la mitad.
+        */}
+        <Box sx={{ flex: 1, overflow: 'auto', pt: 1.5, px: 0.25, mx: -0.25 }}>{children}</Box>
         {footer && (
           <Box sx={{ pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>{footer}</Box>
         )}

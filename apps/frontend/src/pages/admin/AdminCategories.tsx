@@ -1,5 +1,5 @@
 import { Box, Stack, Typography, Button, Chip, Switch, TextField, FormControlLabel, MenuItem as MuiMenuItem, Avatar, Tooltip } from '@mui/material';
-import { AddRounded, InfoRounded } from '@mui/icons-material';
+import { AddRounded, InfoRounded, EditRounded, DeleteRounded } from '@mui/icons-material';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -75,8 +75,13 @@ const AdminCategories: React.FC = () => {
     { key: 'active', label: 'Activa', render: (r) => <Switch size="small" checked={r.active} onChange={() => update.mutate({ id: r.id, data: { active: !r.active } })} /> },
   ];
   const actions: DataTableAction<Category>[] = [
-    { label: 'Editar', onClick: onOpenEdit },
-    { label: 'Eliminar', color: 'error', onClick: (r) => setDeleting(r) },
+    { label: 'Editar', icon: <EditRounded fontSize="small" />, onClick: onOpenEdit },
+    {
+      label: 'Eliminar',
+      icon: <DeleteRounded fontSize="small" />,
+      color: 'error',
+      onClick: (r) => setDeleting(r),
+    },
   ];
 
   return (

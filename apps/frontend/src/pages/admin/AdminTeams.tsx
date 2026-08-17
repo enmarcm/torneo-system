@@ -1,6 +1,16 @@
 import { Box, Card, Stack, Typography, Button, Avatar, TextField, FormControl, InputLabel, Select, MenuItem, Chip, InputAdornment } from '@mui/material';
-import { AddRounded, SearchRounded } from '@mui/icons-material';
+import {
+  AddRounded,
+  SearchRounded,
+  EditRounded,
+  VisibilityRounded,
+  PlaylistAddRounded,
+  PowerSettingsNewRounded,
+  BlockRounded,
+} from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import { ImageUpload } from '@/components/ui/ImageUpload';
+import { ROUTES } from '@/routes/routes';
 import { useState, useMemo } from 'react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { DataTable, type DataTableColumn, type DataTableAction } from '@/components/ui/DataTable';
@@ -14,6 +24,7 @@ import { extractErrorMessage } from '@/api/axios';
 import { useToast } from '@/hooks/common/useToast';
 
 const AdminTeams: React.FC = () => {
+  const navigate = useNavigate();
   const { data: teams = [], isLoading, refetch, error } = useTeamsQuery();
   const { data: competitions = [] } = useCompetitionsQuery();
   const { data: categories = [] } = useCategoriesQuery();
@@ -96,10 +107,34 @@ const AdminTeams: React.FC = () => {
     { key: 'active', label: 'Estado', render: (r) => <StatusBadge status={r.status} /> },
   ];
   const actions: DataTableAction<Team>[] = [
-    { label: 'Ver detalle', onClick: (t) => { window.open(`/admin/equipos/${t.id}`, '_self'); } },
-    { label: 'Editar', onClick: (t) => onOpenEdit(t) },
-    { label: 'Inscribir en competición', onClick: (t) => setRegOpen({ team: t, competitionId: competitions[0]?.id ?? '' }) },
-    { label: (t) => t.status === 'ACTIVE' ? 'Desactivar' : 'Activar', onClick: (t) => t.status === 'ACTIVE' ? setDeletingTeam(t) : setStatus.mutate({ id: t.id, status: 'ACTIVE' }) },
+    {
+      label: 'Ver detalle',
+      icon: <VisibilityRounded fontSize="small" />,
+      onClick: (t) => { window.open(`/admin/equipos/${t.id}`, '_self'); },
+    },
+    {
+      label: 'Editar',
+      icon: <EditRounded fontSize="small" />,
+      onClick: (t) => onOpenEdit(t),
+    },
+    {
+      label: 'Inscribir en competición',
+      icon: <PlaylistAddRounded fontSize="small" />,
+      onClick: (t) => setRegOpen({ team: t, competitionId: competitions[0]?.id ?? '' }),
+    },
+    {
+      label: (t) => (t.status === 'ACTIVE' ? 'Desactivar' : 'Activar'),
+      icon: <PowerSettingsNewRounded fontSize="small" />,
+      color: 'error',
+      onClick: (t) => (t.status === 'ACTIVE'
+        ? setDeletingTeam(t)
+        : setStatus.mutate({ id: t.id, status: 'ACTIVE' })),
+    },
+    {
+      label: 'Bloquear / sanciones',
+      icon: <BlockRounded fontSize="small" />,
+      onClick: () => navigate(ROUTES.admin.teamBlocks),
+    },
   ];
 
   return (
