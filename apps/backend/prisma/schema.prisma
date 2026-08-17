@@ -28,6 +28,23 @@ enum CompetitionFormat {
   GROUPS_KNOCKOUT
 }
 
+/// Tipo de torneo. Determina si la competición forma parte del sistema de liga
+/// (con ascenso/descenso entre divisiones) o si es un torneo independiente.
+enum CompetitionKind {
+  LEAGUE_DIVISION // Primera / Segunda / Tercera — ligadas entre sí
+  CUP // Copa de la Liga — se nutre de las divisiones
+  YOUTH // Sub-12, Sub-15, Sub-17… cada una es un torneo aparte
+  SPECIAL // Gremial, Veterano — torneos independientes
+}
+
+/// Decisión del administrador al cerrar la edición para cada equipo inscrito.
+enum RegistrationOutcome {
+  NONE
+  PROMOTED
+  RELEGATED
+  WITHDRAWN // no participa en la próxima edición
+}
+
 enum CompetitionStatus {
   DRAFT
   ACTIVE
@@ -85,6 +102,8 @@ model User {
   team         Team?        @relation("TeamLeader", fields: [teamId], references: [id])
   teamId       String?      @unique
   auditLogs    AuditLog[]
+  blocksIssued TeamBlock[]  @relation("BlockedBy")
+  blocksLifted TeamBlock[]  @relation("LiftedBy")
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 }
@@ -101,9 +120,25 @@ model Edition {
   transferWindowStart DateTime?
   transferWindowEnd   DateTime?
   competitions        Competition[]
+  leagueSystems       LeagueSystem[]
   transfers           Transfer[]
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
+}
+
+/// Agrupa las divisiones de una misma edición (Primera / Segunda / Tercera) para
+/// que compartan ascenso/descenso y para que la Copa sepa de dónde salen sus equipos.
+model LeagueSystem {
+  id        String        @id @default(uuid())
+  edition   Edition       @relation(fields: [editionId], references: [id])
+  editionId String
+  name      String
+  divisions Competition[] @relation("SystemDivisions")
+  cups      Competition[] @relation("SystemCups")
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([editionId])
 }
 
 model Category {
@@ -112,6 +147,8 @@ model Category {
   description                     String?
   imageUrl                        String?
   defaultFormat                   CompetitionFormat @default(LEAGUE)
+  defaultKind                     CompetitionKind   @default(SPECIAL)
+  defaultDivisionLevel            Int?
   defaultAgeMin                   Int?
   defaultAgeMax                   Int?
   defaultRequiresAdminEligibility Boolean           @default(false)
@@ -131,13 +168,30 @@ model Competition {
   categoryId               String
   name                     String
   format                   CompetitionFormat
+  kind                     CompetitionKind    @default(SPECIAL)
+  imageUrl                 String?
   division                 String?
+  /// 1 = Primera, 2 = Segunda, 3 = Tercera. Ordena el ascenso/descenso.
+  divisionLevel            Int?
+  /// Sistema de liga al que pertenece esta división.
+  leagueSystem             LeagueSystem?      @relation("SystemDivisions", fields: [leagueSystemId], references: [id])
+  leagueSystemId           String?
+  /// Para una Copa: sistema de liga del que se nutre de equipos.
+  sourceLeagueSystem       LeagueSystem?      @relation("SystemCups", fields: [sourceLeagueSystemId], references: [id])
+  sourceLeagueSystemId     String?
   ageMin                   Int?
   ageMax                   Int?
   requiresAdminEligibility Boolean            @default(false)
   minPlayers               Int                @default(11)
   maxPlayers               Int                @default(25)
   manualTeamSelection      Boolean            @default(false)
+  /// Vueltas del todos contra todos (1 = solo ida, 2 = ida y vuelta).
+  rounds                   Int                @default(1)
+  /// Rondas de eliminatoria que se juegan a doble partido.
+  twoLeggedStages          MatchStage[]       @default([])
+  /// Plazas de ascenso/descenso que se pintan en la tabla. La decisión final es del admin.
+  promotionSpots           Int                @default(0)
+  relegationSpots          Int                @default(0)
   knockoutQualifiers       Int?
   numGroups                Int?
   groupSize                Int?
@@ -146,10 +200,13 @@ model Competition {
   groups                   CompetitionGroup[]
   registrations            TeamRegistration[]
   matches                  Match[]
+  ties                     KnockoutTie[]
+  blocks                   TeamBlock[]
   createdAt                DateTime           @default(now())
   updatedAt                DateTime           @updatedAt
   @@index([editionId])
   @@index([categoryId])
+  @@index([leagueSystemId])
 }
 
 model CompetitionGroup {
@@ -168,11 +225,47 @@ model Team {
   id            String             @id @default(uuid())
   name          String
   logoUrl       String?
+  /// Los equipos NUNCA se eliminan: se desactivan y conservan todo su historial
+  /// para poder reincorporarlos en una edición futura.
   status        EntityStatus       @default(ACTIVE)
   leader        User?              @relation("TeamLeader")
   registrations TeamRegistration[]
+  blocks        TeamBlock[]
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
+}
+
+/// Alcance de un bloqueo: el club entero, o solo una de sus inscripciones.
+/// Un club puede tener equipos en varias categorías a la vez, por eso se puede
+/// sancionar una competición sin afectar las demás.
+enum TeamBlockScope {
+  CLUB // bloqueo total: el líder no puede iniciar sesión
+  COMPETITION // solo queda fuera de esa competición
+}
+
+/// Historial de bloqueos y sanciones. No se borra al levantar el bloqueo:
+/// queda el registro de por qué se bloqueó y quién lo levantó.
+model TeamBlock {
+  id            String         @id @default(uuid())
+  team          Team           @relation(fields: [teamId], references: [id])
+  teamId        String
+  scope         TeamBlockScope @default(CLUB)
+  competition   Competition?   @relation(fields: [competitionId], references: [id])
+  competitionId String?
+  reason        String
+  active        Boolean        @default(true)
+  blockedBy     User?          @relation("BlockedBy", fields: [blockedById], references: [id])
+  blockedById   String?
+  liftedBy      User?          @relation("LiftedBy", fields: [liftedById], references: [id])
+  liftedById    String?
+  liftedAt      DateTime?
+  liftReason    String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([teamId])
+  @@index([competitionId])
+  @@index([active])
 }
 
 model TeamRegistration {
@@ -184,15 +277,50 @@ model TeamRegistration {
   group         CompetitionGroup? @relation(fields: [groupId], references: [id])
   groupId       String?
   status        EntityStatus      @default(ACTIVE)
+  /// Ascenso / descenso / no participa. Lo decide el administrador, no la tabla.
+  outcome       RegistrationOutcome @default(NONE)
+  outcomeNote   String?
   roster        RosterEntry[]
   homeMatches   Match[]           @relation("HomeRegistration")
   awayMatches   Match[]           @relation("AwayRegistration")
   matchEvents   MatchEvent[]
+  tiesAsHome    KnockoutTie[]     @relation("TieHome")
+  tiesAsAway    KnockoutTie[]     @relation("TieAway")
+  tiesWon       KnockoutTie[]     @relation("TieWinner")
   transfersFrom Transfer[]        @relation("TransferFrom")
   transfersTo   Transfer[]        @relation("TransferTo")
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
   @@unique([teamId, competitionId])
+  @@index([competitionId])
+}
+
+/// Una llave del cuadro de eliminatoria. Agrupa 1 partido (único) o 2 (ida y vuelta)
+/// y apunta a la llave siguiente para que el ganador avance solo.
+model KnockoutTie {
+  id                   String            @id @default(uuid())
+  competition          Competition       @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  competitionId        String
+  stage                MatchStage
+  /// Posición dentro de la ronda (0-based), define el orden del cuadro.
+  slot                 Int
+  twoLegged            Boolean           @default(false)
+  homeRegistration     TeamRegistration? @relation("TieHome", fields: [homeRegistrationId], references: [id])
+  homeRegistrationId   String?
+  awayRegistration     TeamRegistration? @relation("TieAway", fields: [awayRegistrationId], references: [id])
+  awayRegistrationId   String?
+  winnerRegistration   TeamRegistration? @relation("TieWinner", fields: [winnerRegistrationId], references: [id])
+  winnerRegistrationId String?
+  /// Llave a la que avanza el ganador.
+  nextTie              KnockoutTie?      @relation("TieProgression", fields: [nextTieId], references: [id])
+  nextTieId            String?
+  /// Si el ganador entra como local en la llave siguiente.
+  nextSlotIsHome       Boolean           @default(true)
+  previousTies         KnockoutTie[]     @relation("TieProgression")
+  matches              Match[]
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  @@unique([competitionId, stage, slot])
   @@index([competitionId])
 }
 
@@ -210,6 +338,7 @@ model Player {
   status                   EntityStatus  @default(ACTIVE)
   rosterEntries            RosterEntry[]
   matchEvents              MatchEvent[]
+  mvpMatches               Match[]       @relation("MatchMvp")
   transfers                Transfer[]
   createdAt                DateTime      @default(now())
   updatedAt                DateTime      @updatedAt
@@ -254,20 +383,30 @@ model Match {
   groupId            String?
   stage              MatchStage        @default(LEAGUE)
   matchday           Int               @default(1)
+  tie                KnockoutTie?      @relation(fields: [tieId], references: [id], onDelete: Cascade)
+  tieId              String?
+  /// 1 = ida, 2 = vuelta. Null en partido único o de liga.
+  leg                Int?
   homeRegistration   TeamRegistration  @relation("HomeRegistration", fields: [homeRegistrationId], references: [id])
   homeRegistrationId String
   awayRegistration   TeamRegistration  @relation("AwayRegistration", fields: [awayRegistrationId], references: [id])
   awayRegistrationId String
-  scheduledAt        DateTime
+  /// Null hasta que el admin le asigna día y hora. El sorteo genera solo los cruces.
+  scheduledAt        DateTime?
   status             MatchStatus       @default(SCHEDULED)
   homeScore          Int               @default(0)
   awayScore          Int               @default(0)
   venue              String?
+  mvpPlayer          Player?           @relation("MatchMvp", fields: [mvpPlayerId], references: [id])
+  mvpPlayerId        String?
+  mvpPhotoUrl        String?
+  mvpNote            String?
   events             MatchEvent[]
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
   @@index([competitionId])
   @@index([status])
+  @@index([tieId])
 }
 
 model MatchEvent {

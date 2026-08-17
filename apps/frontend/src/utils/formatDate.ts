@@ -18,6 +18,21 @@ export const formatDate = (d: string | Date) =>
 export const formatTime = (d: string | Date) =>
   dayjs(d).tz(TZ).format('hh:mm A');
 
+/**
+ * Los partidos recién sorteados no tienen día ni hora todavía: el admin se los
+ * asigna después, así que la fecha puede venir en null.
+ */
+export const UNSCHEDULED_LABEL = 'Por programar';
+
+export const formatDateTimeOrPending = (d: string | Date | null | undefined) =>
+  d ? formatDateTime(d) : UNSCHEDULED_LABEL;
+
+export const formatDateOrPending = (d: string | Date | null | undefined) =>
+  d ? formatDate(d) : UNSCHEDULED_LABEL;
+
+export const formatTimeOrPending = (d: string | Date | null | undefined) =>
+  d ? formatTime(d) : '--:--';
+
 export const calcAge = (birthDate: string | Date) =>
   dayjs().diff(dayjs(birthDate), 'year');
 

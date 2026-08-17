@@ -13,7 +13,10 @@ export interface StandingRow {
   gc: number;
   dg: number;
   pts: number;
-  zone: 'QUALIFY' | 'RELEGATION' | 'NORMAL';
+  /** Zona calculada: ascenso, clasificación a eliminatoria o descenso. */
+  zone: 'PROMOTION' | 'QUALIFY' | 'RELEGATION' | 'NORMAL';
+  /** Decisión explícita del admin, manda por encima de la zona calculada. */
+  outcome: 'NONE' | 'PROMOTED' | 'RELEGATED' | 'WITHDRAWN';
 }
 
 export const standingsApi = {

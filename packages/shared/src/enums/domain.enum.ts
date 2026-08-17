@@ -23,6 +23,28 @@ export const CompetitionFormat = {
 } as const;
 export type CompetitionFormat = (typeof CompetitionFormat)[keyof typeof CompetitionFormat];
 
+export const CompetitionKind = {
+  LEAGUE_DIVISION: 'LEAGUE_DIVISION',
+  CUP: 'CUP',
+  YOUTH: 'YOUTH',
+  SPECIAL: 'SPECIAL',
+} as const;
+export type CompetitionKind = (typeof CompetitionKind)[keyof typeof CompetitionKind];
+
+export const RegistrationOutcome = {
+  NONE: 'NONE',
+  PROMOTED: 'PROMOTED',
+  RELEGATED: 'RELEGATED',
+  WITHDRAWN: 'WITHDRAWN',
+} as const;
+export type RegistrationOutcome = (typeof RegistrationOutcome)[keyof typeof RegistrationOutcome];
+
+export const TeamBlockScope = {
+  CLUB: 'CLUB',
+  COMPETITION: 'COMPETITION',
+} as const;
+export type TeamBlockScope = (typeof TeamBlockScope)[keyof typeof TeamBlockScope];
+
 export const CompetitionStatus = {
   DRAFT: 'DRAFT',
   ACTIVE: 'ACTIVE',

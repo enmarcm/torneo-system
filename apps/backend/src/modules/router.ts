@@ -17,6 +17,10 @@ import { adsRouter } from './ads/ads.routes';
 import { uploadsRouter } from './uploads/uploads.routes';
 import { dashboardRouter } from './dashboard/dashboard.routes';
 import { publicRouter } from './public/public.routes';
+import { leagueSystemsRouter } from './league-systems/league-systems.routes';
+import { teamBlocksRouter } from './team-blocks/team-blocks.routes';
+import { fixturesRouter } from './fixtures/fixtures.routes';
+import { knockoutRouter } from './knockout/knockout.routes';
 
 export const apiRouter = Router();
 
@@ -34,7 +38,11 @@ apiRouter.use('/transfers', transfersRouter);
 apiRouter.use('/ads', adsRouter);
 apiRouter.use('/uploads', uploadsRouter);
 apiRouter.use('/dashboard', dashboardRouter);
+apiRouter.use('/league-systems', leagueSystemsRouter);
+apiRouter.use('/team-blocks', teamBlocksRouter);
 apiRouter.use('/public', publicRouter);
 apiRouter.use('/', groupsRouter);
 apiRouter.use('/', rostersRouter);
 apiRouter.use('/', matchEventsRouter);
+apiRouter.use('/', fixturesRouter);
+apiRouter.use('/', knockoutRouter);

@@ -5,6 +5,8 @@ export const createCategorySchema = z.object({
   description: z.string().optional(),
   imageUrl: z.string().optional(),
   defaultFormat: z.enum(['LEAGUE', 'GROUPS_KNOCKOUT']).default('LEAGUE'),
+  defaultKind: z.enum(['LEAGUE_DIVISION', 'CUP', 'YOUTH', 'SPECIAL']).default('SPECIAL'),
+  defaultDivisionLevel: z.number().int().min(1).max(10).nullable().optional(),
   defaultAgeMin: z.number().int().optional(),
   defaultAgeMax: z.number().int().optional(),
   defaultRequiresAdminEligibility: z.boolean().default(false),

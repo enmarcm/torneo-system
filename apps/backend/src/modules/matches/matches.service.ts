@@ -19,7 +19,10 @@ export const matchesService = {
       include: {
         homeRegistration: { include: teamInclude },
         awayRegistration: { include: teamInclude },
+        mvpPlayer: true,
       },
+      // Postgres deja los NULL al final, así los partidos sin día asignado
+      // quedan después de los ya programados.
       orderBy: { scheduledAt: 'asc' },
     }),
   count: (competitionId?: string, status?: string) =>
@@ -37,6 +40,8 @@ export const matchesService = {
         homeRegistration: { include: teamInclude },
         awayRegistration: { include: teamInclude },
         events: { include: { player: true }, orderBy: { minute: 'desc' } },
+        mvpPlayer: true,
+        tie: true,
       },
     });
     if (!m) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
@@ -45,8 +50,18 @@ export const matchesService = {
 
   create: (data: CreateMatchDto) => prisma.match.create({ data }),
 
-  update: (id: string, data: Partial<CreateMatchDto>) =>
-    prisma.match.update({ where: { id }, data }),
+  update: async (id: string, data: Partial<CreateMatchDto>) => {
+    const m = await prisma.match.update({ where: { id }, data });
+    getIo()
+      .to(`match:${id}`)
+      .emit('match:update', {
+        matchId: id,
+        status: m.status,
+        homeScore: m.homeScore,
+        awayScore: m.awayScore,
+      });
+    return m;
+  },
 
   start: async (id: string) => {
     const m = await prisma.match.update({ where: { id }, data: { status: 'LIVE' } });
@@ -105,6 +120,46 @@ export const matchesService = {
           awayScore: match.awayScore,
         });
       return tx.match.findUnique({ where: { id } });
+    }),
+
+  /**
+   * Designa el MVP de un partido ya finalizado y guarda su foto.
+   * La imagen va al bucket público, así cualquiera puede descargarla desde el
+   * portal sin iniciar sesión.
+   */
+  setMvp: async (
+    id: string,
+    data: { playerId: string; photoUrl?: string | null; note?: string | null },
+  ) => {
+    const match = await prisma.match.findUnique({ where: { id } });
+    if (!match) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
+    if (match.status !== 'FINISHED') {
+      throw new AppError(422, MESSAGES.matchNotFinished, 'NOT_FINISHED');
+    }
+
+    const inRoster = await prisma.rosterEntry.findFirst({
+      where: {
+        playerId: data.playerId,
+        teamRegistrationId: { in: [match.homeRegistrationId, match.awayRegistrationId] },
+      },
+    });
+    if (!inRoster) throw new AppError(422, MESSAGES.mvpNotInMatch, 'MVP_NOT_IN_MATCH');
+
+    return prisma.match.update({
+      where: { id },
+      data: {
+        mvpPlayerId: data.playerId,
+        mvpPhotoUrl: data.photoUrl ?? null,
+        mvpNote: data.note ?? null,
+      },
+      include: { mvpPlayer: true },
+    });
+  },
+
+  clearMvp: (id: string) =>
+    prisma.match.update({
+      where: { id },
+      data: { mvpPlayerId: null, mvpPhotoUrl: null, mvpNote: null },
     }),
 
   remove: (id: string) => prisma.match.delete({ where: { id } }),

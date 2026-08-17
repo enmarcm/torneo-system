@@ -1,7 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { editionsApi, type Edition } from '@/api/editions.api';
 import { categoriesApi, type Category } from '@/api/categories.api';
-import { competitionsApi, type Competition } from '@/api/competitions.api';
+import { competitionsApi, fixturesApi, type Competition } from '@/api/competitions.api';
+import { knockoutApi } from '@/api/knockout.api';
+import { teamBlocksApi } from '@/api/team-blocks.api';
 import { teamsApi, type Team } from '@/api/teams.api';
 import { playersApi, type Player } from '@/api/players.api';
 import { rostersApi, type RosterEntry } from '@/api/rosters.api';
@@ -225,6 +227,141 @@ export const useDeleteMatch = () => {
   return useMutation({
     mutationFn: matchesApi.remove,
     onSuccess: () => invalidate(qc, [['matches'], ['public', 'matches'], ['dashboard']]),
+  });
+};
+/** Asigna día y hora a un partido que salió del sorteo sin fecha. */
+export const useScheduleMatch = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: { scheduledAt: string | null; venue?: string | null };
+    }) => matchesApi.schedule(id, data),
+    onSuccess: () => invalidate(qc, [['matches'], ['public', 'matches'], ['dashboard']]),
+  });
+};
+export const useSetMatchMvp = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: { playerId: string; photoUrl?: string | null; note?: string | null };
+    }) => matchesApi.setMvp(id, data),
+    onSuccess: () => invalidate(qc, [['matches'], ['public', 'matches']]),
+  });
+};
+export const useClearMatchMvp = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: matchesApi.clearMvp,
+    onSuccess: () => invalidate(qc, [['matches'], ['public', 'matches']]),
+  });
+};
+
+// Sorteo de calendario
+const FIXTURE_KEYS = [['matches'], ['public', 'matches'], ['standings'], ['public', 'standings'], ['competitions'], ['dashboard']];
+
+export const useDrawLeagueFixture = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: fixturesApi.drawLeague,
+    onSuccess: () => invalidate(qc, FIXTURE_KEYS),
+  });
+};
+export const useDrawGroupStage = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: fixturesApi.drawGroups,
+    onSuccess: () => invalidate(qc, [...FIXTURE_KEYS, ['public', 'groups']]),
+  });
+};
+export const useClearFixture = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ competitionId, stage }: { competitionId: string; stage: 'LEAGUE' | 'GROUP' }) =>
+      fixturesApi.clear(competitionId, stage),
+    onSuccess: () => invalidate(qc, FIXTURE_KEYS),
+  });
+};
+
+// Cuadro de eliminatoria
+const BRACKET_KEYS = [['bracket'], ['matches'], ['public', 'matches']];
+
+export const useGenerateBracket = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: knockoutApi.generate,
+    onSuccess: () => invalidate(qc, BRACKET_KEYS),
+  });
+};
+export const useSeedBracket = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: knockoutApi.seedFromGroups,
+    onSuccess: () => invalidate(qc, BRACKET_KEYS),
+  });
+};
+export const useCreateTieMatches = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: knockoutApi.createMatches,
+    onSuccess: () => invalidate(qc, BRACKET_KEYS),
+  });
+};
+export const useResolveTie = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: knockoutApi.resolve,
+    onSuccess: () => invalidate(qc, BRACKET_KEYS),
+  });
+};
+export const useSetTieWinner = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ tieId, winnerRegistrationId }: { tieId: string; winnerRegistrationId: string }) =>
+      knockoutApi.setWinner(tieId, winnerRegistrationId),
+    onSuccess: () => invalidate(qc, BRACKET_KEYS),
+  });
+};
+
+// Bloqueo de equipos
+export const useBlockTeam = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: teamBlocksApi.create,
+    onSuccess: () => invalidate(qc, [['team-blocks'], ['teams'], ['public', 'teams']]),
+  });
+};
+export const useLiftTeamBlock = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, liftReason }: { id: string; liftReason?: string }) =>
+      teamBlocksApi.lift(id, liftReason),
+    onSuccess: () => invalidate(qc, [['team-blocks'], ['teams'], ['public', 'teams']]),
+  });
+};
+
+/** Ascenso / descenso / no participa: decisión del admin sobre la inscripción. */
+export const useSetRegistrationOutcome = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      registrationId,
+      outcome,
+      outcomeNote,
+    }: {
+      registrationId: string;
+      outcome: 'NONE' | 'PROMOTED' | 'RELEGATED' | 'WITHDRAWN';
+      outcomeNote?: string;
+    }) => competitionsApi.setRegistrationOutcome(registrationId, outcome, outcomeNote),
+    onSuccess: () =>
+      invalidate(qc, [['competitions'], ['standings'], ['public', 'standings'], ['teams']]),
   });
 };
 export const useCreateMatchEvent = () => {

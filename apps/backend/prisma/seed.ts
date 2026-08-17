@@ -4,16 +4,49 @@ import argon2 from 'argon2';
 
 const prisma = new PrismaClient();
 
+/**
+ * Estructura real del torneo:
+ *  - La liga son tres divisiones ligadas entre sí (Primera → Segunda → Tercera),
+ *    con ascenso y descenso que decide el administrador.
+ *  - La Copa de la Liga se nutre de esas tres divisiones: grupos de 4 y luego
+ *    eliminatoria desde octavos a ida y vuelta.
+ *  - Las menores (Sub-X), el Gremial y el Veterano son torneos independientes.
+ */
 const CATEGORIES: Prisma.CategoryCreateInput[] = [
-  { name: 'Sub-12', defaultAgeMin: 0, defaultAgeMax: 12, defaultMinPlayers: 7, defaultMaxPlayers: 20 },
-  { name: 'Sub-15', defaultAgeMin: 13, defaultAgeMax: 15, defaultMinPlayers: 7, defaultMaxPlayers: 20 },
-  { name: 'Sub-17', defaultAgeMin: 16, defaultAgeMax: 17, defaultMinPlayers: 7, defaultMaxPlayers: 22 },
-  { name: 'Primera División', defaultAgeMin: 18 },
-  { name: 'Segunda División', defaultAgeMin: 18 },
-  { name: 'Tercera División', defaultAgeMin: 18 },
-  { name: 'Gremial', defaultAgeMin: 18, defaultRequiresAdminEligibility: true },
-  { name: 'Master', defaultAgeMin: 35, defaultRequiresAdminEligibility: true },
-  { name: 'Copa de la Liga', defaultFormat: 'GROUPS_KNOCKOUT' },
+  {
+    name: 'Sub-12',
+    defaultKind: 'YOUTH',
+    defaultAgeMin: 0,
+    defaultAgeMax: 12,
+    defaultMinPlayers: 7,
+    defaultMaxPlayers: 20,
+  },
+  {
+    name: 'Sub-15',
+    defaultKind: 'YOUTH',
+    defaultAgeMin: 13,
+    defaultAgeMax: 15,
+    defaultMinPlayers: 7,
+    defaultMaxPlayers: 20,
+  },
+  {
+    name: 'Sub-17',
+    defaultKind: 'YOUTH',
+    defaultAgeMin: 16,
+    defaultAgeMax: 17,
+    defaultMinPlayers: 7,
+    defaultMaxPlayers: 22,
+  },
+  { name: 'Primera División', defaultKind: 'LEAGUE_DIVISION', defaultDivisionLevel: 1, defaultAgeMin: 18 },
+  { name: 'Segunda División', defaultKind: 'LEAGUE_DIVISION', defaultDivisionLevel: 2, defaultAgeMin: 18 },
+  { name: 'Tercera División', defaultKind: 'LEAGUE_DIVISION', defaultDivisionLevel: 3, defaultAgeMin: 18 },
+  { name: 'Gremial', defaultKind: 'SPECIAL', defaultAgeMin: 18, defaultRequiresAdminEligibility: true },
+  { name: 'Veterano', defaultKind: 'SPECIAL', defaultAgeMin: 35, defaultRequiresAdminEligibility: true },
+  {
+    name: 'Copa de la Liga',
+    defaultKind: 'CUP',
+    defaultFormat: 'GROUPS_KNOCKOUT',
+  },
 ];
 
 async function main() {
@@ -56,12 +89,23 @@ async function main() {
   const primera = await prisma.category.findUnique({ where: { name: 'Primera División' } });
   if (!primera) throw new Error('No se encontró categoría Primera División');
 
+  // Sistema de liga: agrupa las divisiones para el ascenso/descenso y le dice a
+  // la Copa de dónde salen sus equipos.
+  const leagueSystem = await prisma.leagueSystem.create({
+    data: { editionId: edition.id, name: `Liga ${edition.name}` },
+  });
+
   const comp = await prisma.competition.create({
     data: {
       editionId: edition.id,
       categoryId: primera.id,
       name: 'Primera División',
       format: 'LEAGUE',
+      kind: 'LEAGUE_DIVISION',
+      leagueSystemId: leagueSystem.id,
+      divisionLevel: 1,
+      rounds: 2,
+      relegationSpots: 2,
       ageMin: 18,
       minPlayers: 11,
       maxPlayers: 25,
@@ -69,6 +113,29 @@ async function main() {
       status: 'ACTIVE',
     },
   });
+
+  // Copa de la Liga: 8 grupos de 4 → octavos, cuartos y semis a ida y vuelta,
+  // final a partido único.
+  const copaCat = await prisma.category.findUnique({ where: { name: 'Copa de la Liga' } });
+  if (copaCat) {
+    await prisma.competition.create({
+      data: {
+        editionId: edition.id,
+        categoryId: copaCat.id,
+        name: 'Copa de la Liga',
+        format: 'GROUPS_KNOCKOUT',
+        kind: 'CUP',
+        sourceLeagueSystemId: leagueSystem.id,
+        manualTeamSelection: true,
+        numGroups: 8,
+        groupSize: 4,
+        qualifiersPerGroup: 2,
+        knockoutQualifiers: 16,
+        twoLeggedStages: ['R16', 'QUARTER', 'SEMI'],
+        status: 'DRAFT',
+      },
+    });
+  }
 
   const teamData = [
     { name: 'Águilas FC', email: 'aguilas@torneo.com' },

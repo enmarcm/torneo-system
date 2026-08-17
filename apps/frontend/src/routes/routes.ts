@@ -9,6 +9,7 @@ export const ROUTES = {
     competitionDetail: '/admin/competiciones/:id',
     teams: '/admin/equipos',
     teamDetail: '/admin/equipos/:id',
+    teamBlocks: '/admin/bloqueos',
     players: '/admin/jugadores',
     playerDetail: '/admin/jugadores/:id',
     schedule: '/admin/programacion',

@@ -6,8 +6,9 @@ import type { Player } from './players.api';
 import type { Match } from './matches.api';
 import type { StandingRow } from './standings.api';
 import type { Ad } from './ads.api';
+import type { BracketRound } from './knockout.api';
 
-export type { Edition, Competition, Team, Player, Match, StandingRow, Ad };
+export type { Edition, Competition, Team, Player, Match, StandingRow, Ad, BracketRound };
 
 export const publicApi = {
   editions: async (): Promise<Edition[]> => (await api.get('/public/editions')).data.data,
@@ -24,4 +25,9 @@ export const publicApi = {
     (await api.get('/public/stats', { params: { competitionId } })).data.data,
   ads: async (placement?: string): Promise<Ad[]> =>
     (await api.get('/public/ads', { params: { placement } })).data.data,
+  groups: async (competitionId: string) =>
+    (await api.get(`/public/competitions/${competitionId}/groups`)).data.data,
+  bracket: async (competitionId: string): Promise<BracketRound[]> =>
+    (await api.get(`/public/competitions/${competitionId}/bracket`)).data.data,
+  match: async (id: string): Promise<Match> => (await api.get(`/public/matches/${id}`)).data.data,
 };

@@ -14,19 +14,34 @@ export interface MatchEvent {
   player?: { id: string; firstName: string; lastName: string } | null;
 }
 
+export interface MatchMvpPlayer {
+  id: string;
+  firstName: string;
+  lastName: string;
+  photoUrl: string | null;
+}
+
 export interface Match {
   id: string;
   competitionId: string;
   groupId: string | null;
   stage: 'LEAGUE' | 'GROUP' | 'R16' | 'QUARTER' | 'SEMI' | 'THIRD' | 'FINAL';
   matchday: number;
+  tieId: string | null;
+  /** 1 = ida, 2 = vuelta. Null en partido único o de liga. */
+  leg: number | null;
   homeRegistrationId: string;
   awayRegistrationId: string;
-  scheduledAt: string;
+  /** Null mientras el partido está sorteado pero sin día ni hora asignados. */
+  scheduledAt: string | null;
   status: 'SCHEDULED' | 'LIVE' | 'FINISHED' | 'POSTPONED';
   homeScore: number;
   awayScore: number;
   venue: string | null;
+  mvpPlayerId: string | null;
+  mvpPhotoUrl: string | null;
+  mvpNote: string | null;
+  mvpPlayer?: MatchMvpPlayer | null;
   homeRegistration: MatchTeamRegistration;
   awayRegistration: MatchTeamRegistration;
   events?: MatchEvent[];
@@ -41,6 +56,16 @@ export const matchesApi = {
     (await api.patch(`/matches/${id}`, data)).data.data,
   start: async (id: string): Promise<Match> => (await api.patch(`/matches/${id}/start`)).data.data,
   finish: async (id: string): Promise<Match> => (await api.patch(`/matches/${id}/finish`)).data.data,
+  /** Asigna día, hora y sede a un partido que salió del sorteo sin fecha. */
+  schedule: async (
+    id: string,
+    data: { scheduledAt: string | null; venue?: string | null },
+  ): Promise<Match> => (await api.patch(`/matches/${id}/schedule`, data)).data.data,
+  setMvp: async (
+    id: string,
+    data: { playerId: string; photoUrl?: string | null; note?: string | null },
+  ): Promise<Match> => (await api.patch(`/matches/${id}/mvp`, data)).data.data,
+  clearMvp: async (id: string): Promise<Match> => (await api.delete(`/matches/${id}/mvp`)).data.data,
   remove: async (id: string) => (await api.delete(`/matches/${id}`)).data.data,
 };
 

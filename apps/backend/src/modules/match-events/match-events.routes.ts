@@ -8,11 +8,14 @@ import { createEventSchema } from './match-events.schema';
 
 export const matchEventsRouter = Router();
 
-matchEventsRouter.use(authMiddleware, requireRole('ADMIN'));
+// Montado en '/': autenticación por ruta para no interceptar todo lo demás.
+const adminOnly = [authMiddleware, requireRole('ADMIN')] as const;
+
 matchEventsRouter.post(
   '/matches/:id/events',
+  ...adminOnly,
   validate(createEventSchema),
   audit('EVENT', 'MatchEvent'),
   matchEventsController.create,
 );
-matchEventsRouter.delete('/events/:id', matchEventsController.remove);
+matchEventsRouter.delete('/events/:id', ...adminOnly, matchEventsController.remove);
