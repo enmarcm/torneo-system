@@ -16,6 +16,8 @@ export const competitionsService = {
       where: { id },
       include: {
         category: true,
+        leagueSystem: { include: { divisions: { orderBy: { divisionLevel: 'asc' } } } },
+        sourceLeagueSystem: { include: { divisions: { orderBy: { divisionLevel: 'asc' } } } },
         groups: { include: { registrations: { include: { team: true } } } },
         registrations: { include: { team: true, roster: { include: { player: true } } } },
       },
@@ -33,7 +35,16 @@ export const competitionsService = {
         categoryId: d.categoryId,
         name: d.name ?? cat.name,
         format: d.format ?? cat.defaultFormat,
+        kind: d.kind ?? cat.defaultKind,
+        imageUrl: d.imageUrl ?? cat.imageUrl,
         division: d.division ?? null,
+        divisionLevel: d.divisionLevel ?? cat.defaultDivisionLevel,
+        leagueSystemId: d.leagueSystemId ?? null,
+        sourceLeagueSystemId: d.sourceLeagueSystemId ?? null,
+        rounds: d.rounds ?? 1,
+        twoLeggedStages: d.twoLeggedStages ?? [],
+        promotionSpots: d.promotionSpots ?? 0,
+        relegationSpots: d.relegationSpots ?? 0,
         ageMin: d.ageMin ?? cat.defaultAgeMin,
         ageMax: d.ageMax ?? cat.defaultAgeMax,
         requiresAdminEligibility: d.requiresAdminEligibility ?? cat.defaultRequiresAdminEligibility,
@@ -53,4 +64,22 @@ export const competitionsService = {
 
   setStatus: (id: string, status: 'DRAFT' | 'ACTIVE' | 'FINISHED') =>
     prisma.competition.update({ where: { id }, data: { status } }),
+
+  /**
+   * Ascenso / descenso / no participa. Es una decisión del administrador sobre
+   * la inscripción, independiente de dónde haya quedado el equipo en la tabla.
+   */
+  setRegistrationOutcome: async (
+    registrationId: string,
+    outcome: 'NONE' | 'PROMOTED' | 'RELEGATED' | 'WITHDRAWN',
+    outcomeNote?: string,
+  ) => {
+    const reg = await prisma.teamRegistration.findUnique({ where: { id: registrationId } });
+    if (!reg) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
+    return prisma.teamRegistration.update({
+      where: { id: registrationId },
+      data: { outcome, outcomeNote: outcomeNote ?? null },
+      include: { team: true, competition: { select: { id: true, name: true } } },
+    });
+  },
 };

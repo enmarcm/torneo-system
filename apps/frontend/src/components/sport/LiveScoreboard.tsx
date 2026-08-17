@@ -2,7 +2,7 @@ import { Card, Box, Typography, Avatar, Stack } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { formatTime } from '@/utils/formatDate';
+import { formatTime, UNSCHEDULED_LABEL } from '@/utils/formatDate';
 import { joinMatchRoom, leaveMatchRoom, getSocket } from '@/lib/socket';
 import type { Match, MatchEvent } from '@/api/matches.api';
 
@@ -55,7 +55,8 @@ export const LiveScoreboard: React.FC<Props> = ({ match, showFeed = true, size =
     <Card sx={{ p: 3, overflow: 'hidden' }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
         <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-          {match.venue ?? 'Estadio por confirmar'} · {formatTime(match.scheduledAt)}
+          {match.venue ?? 'Sede por confirmar'} ·{' '}
+          {match.scheduledAt ? formatTime(match.scheduledAt) : UNSCHEDULED_LABEL}
         </Typography>
         {isLive ? (
           <Box

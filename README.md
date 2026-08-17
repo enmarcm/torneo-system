@@ -70,6 +70,31 @@ npm run dev
 ## Reglas del proyecto
 
 - **Sin módulo de pagos.** No agregar.
+- **Los equipos nunca se eliminan.** Se desactivan o se bloquean, conservando todo
+  su historial para poder reincorporarlos en una edición futura.
 - Categorías = CRUD con defaults sembrados.
 - Equipo = club; se inscribe en varias competiciones; cada inscripción tiene plantilla.
 - Jugador único por documento; puede jugar varias competiciones.
+- Tabla de posiciones: **Pts → enfrentamiento directo → DG → GF.**
+- El ascenso, el descenso y las bajas los decide el administrador equipo por
+  equipo (`TeamRegistration.outcome`), no la posición en la tabla.
+
+## Estructura de torneos
+
+```
+Edición (3 al año)
+├─ LIGA (LeagueSystem)          ← divisiones ligadas por ascenso/descenso
+│   ├─ Primera   (divisionLevel 1)
+│   ├─ Segunda   (divisionLevel 2)
+│   └─ Tercera   (divisionLevel 3)
+├─ COPA DE LA LIGA              ← sourceLeagueSystemId apunta a la liga
+│   └─ 8 grupos de 4 → octavos → cuartos → semis → final
+│      (las rondas a ida y vuelta se configuran en twoLeggedStages)
+├─ MENORES (YOUTH)              ← Sub-12 / Sub-15 / Sub-17, independientes
+├─ GREMIAL (SPECIAL)            ← independiente
+└─ VETERANO (SPECIAL)           ← independiente
+```
+
+El sorteo (`POST /competitions/:id/fixture/league` o `/groups`) genera **solo los
+cruces, sin día ni hora**. El admin les asigna fecha desde la pestaña
+«Por programar» de Programación.

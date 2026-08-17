@@ -14,4 +14,15 @@ export const competitionsController = {
   setStatus: asyncHandler(async (req, res) =>
     ok(res, await competitionsService.setStatus(req.params.id, req.body.status)),
   ),
+  setRegistrationOutcome: asyncHandler(async (req, res) =>
+    ok(
+      res,
+      await competitionsService.setRegistrationOutcome(
+        req.params.registrationId,
+        req.body.outcome,
+        req.body.outcomeNote,
+      ),
+      'Decisión registrada',
+    ),
+  ),
 };

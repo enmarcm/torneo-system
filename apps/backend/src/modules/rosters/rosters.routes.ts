@@ -8,20 +8,29 @@ import { addRosterSchema, updateRosterSchema, eligibilitySchema } from './roster
 
 export const rostersRouter = Router();
 
-rostersRouter.use(authMiddleware, requireRole('ADMIN', 'TEAM_LEADER'));
-rostersRouter.get('/registrations/:registrationId/roster', rostersController.list);
+// Montado en '/': autenticación por ruta para no interceptar todo lo demás.
+const staff = [authMiddleware, requireRole('ADMIN', 'TEAM_LEADER')] as const;
+const adminOnly = [authMiddleware, requireRole('ADMIN')] as const;
+
+rostersRouter.get('/registrations/:registrationId/roster', ...staff, rostersController.list);
 rostersRouter.post(
   '/registrations/:registrationId/roster',
+  ...staff,
   validate(addRosterSchema),
   audit('ADD', 'RosterEntry'),
   rostersController.add,
 );
-rostersRouter.patch('/roster/:id', validate(updateRosterSchema), rostersController.update);
+rostersRouter.patch('/roster/:id', ...staff, validate(updateRosterSchema), rostersController.update);
 rostersRouter.patch(
   '/roster/:id/eligibility',
-  requireRole('ADMIN'),
+  ...adminOnly,
   validate(eligibilitySchema),
   audit('ELIGIBILITY', 'RosterEntry'),
   rostersController.setEligibility,
 );
-rostersRouter.delete('/roster/:id', audit('REMOVE', 'RosterEntry'), rostersController.remove);
+rostersRouter.delete(
+  '/roster/:id',
+  ...staff,
+  audit('REMOVE', 'RosterEntry'),
+  rostersController.remove,
+);

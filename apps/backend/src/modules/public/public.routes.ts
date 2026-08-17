@@ -9,6 +9,9 @@ import { matchesService } from '@/modules/matches/matches.service';
 import { standingsService } from '@/modules/standings/standings.service';
 import { statsService } from '@/modules/stats/stats.service';
 import { adsService } from '@/modules/ads/ads.service';
+import { groupsService } from '@/modules/groups/groups.service';
+import { knockoutService } from '@/modules/knockout/knockout.service';
+import { leagueSystemsService } from '@/modules/league-systems/league-systems.service';
 
 export const publicRouter = Router();
 
@@ -37,4 +40,16 @@ publicRouter.get('/stats', asyncHandler(async (req, res) =>
 ));
 publicRouter.get('/ads', asyncHandler(async (req, res) =>
   ok(res, await adsService.list(req.query.placement as string | undefined)),
+));
+publicRouter.get('/competitions/:competitionId/groups', asyncHandler(async (req, res) =>
+  ok(res, await groupsService.list(req.params.competitionId)),
+));
+publicRouter.get('/competitions/:competitionId/bracket', asyncHandler(async (req, res) =>
+  ok(res, await knockoutService.bracket(req.params.competitionId)),
+));
+publicRouter.get('/league-systems', asyncHandler(async (req, res) =>
+  ok(res, await leagueSystemsService.list(req.query.editionId as string | undefined)),
+));
+publicRouter.get('/matches/:id', asyncHandler(async (req, res) =>
+  ok(res, await matchesService.get(req.params.id)),
 ));

@@ -29,6 +29,16 @@ export const STATUS_LABELS: Record<string, string> = {
   HOME_BANNER: 'Banner principal',
   SIDEBAR: 'Sidebar',
   FOOTER: 'Footer',
+  LEAGUE_DIVISION: 'División de liga',
+  CUP: 'Copa',
+  YOUTH: 'Menores',
+  SPECIAL: 'Torneo especial',
+  PROMOTED: 'Ascendido',
+  RELEGATED: 'Descendido',
+  WITHDRAWN: 'No participa',
+  NONE: 'Sin decisión',
+  CLUB: 'Club completo',
+  COMPETITION: 'Solo esa competición',
 };
 
 export const STATUS_COLORS: Record<string, 'success' | 'warning' | 'error' | 'info' | 'default' | 'secondary'> = {
@@ -50,6 +60,10 @@ export const STATUS_COLORS: Record<string, 'success' | 'warning' | 'error' | 'in
   SEMI: 'info',
   THIRD: 'info',
   FINAL: 'warning',
+  PROMOTED: 'success',
+  RELEGATED: 'error',
+  WITHDRAWN: 'default',
+  NONE: 'default',
 };
 
 export const getStatusLabel = (status: string): string => STATUS_LABELS[status] ?? status;

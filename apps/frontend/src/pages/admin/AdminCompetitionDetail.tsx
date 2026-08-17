@@ -1,8 +1,11 @@
-import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Button, Tabs, Tab, Avatar } from '@mui/material';
+import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Button, Tabs, Tab, Avatar, TextField, MenuItem } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { ArrowBackRounded, EmojiEventsRounded, GroupsRounded, SportsSoccerRounded, TableChartRounded } from '@mui/icons-material';
+import { ArrowBackRounded, GroupsRounded, SportsSoccerRounded, TableChartRounded } from '@mui/icons-material';
 import { useCompetitionQuery, useStandingsQuery, useMatchesQuery } from '@/hooks/queries';
+import { useSetRegistrationOutcome } from '@/hooks/mutations';
+import { useToast } from '@/hooks/common/useToast';
+import { extractErrorMessage } from '@/api/axios';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { StatCard } from '@/components/ui/StatCard';
@@ -11,6 +14,8 @@ import { MatchCard } from '@/components/sport/MatchCard';
 import { ROUTES } from '@/routes/routes';
 import { getStatusLabel } from '@/utils/statusLabels';
 
+type Outcome = 'NONE' | 'PROMOTED' | 'RELEGATED' | 'WITHDRAWN';
+
 const AdminCompetitionDetail: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -18,8 +23,19 @@ const AdminCompetitionDetail: React.FC = () => {
   const { data: comp, isLoading } = useCompetitionQuery(id!);
   const { data: standings = [] } = useStandingsQuery(id ?? '');
   const { data: matches = [] } = useMatchesQuery(id);
+  const setOutcome = useSetRegistrationOutcome();
+  const toast = useToast();
 
   const compTeams = (comp as any)?.registrations ?? [];
+
+  const changeOutcome = async (registrationId: string, outcome: Outcome) => {
+    try {
+      await setOutcome.mutateAsync({ registrationId, outcome });
+      toast.success('Decisión registrada');
+    } catch (e) {
+      toast.error(extractErrorMessage(e));
+    }
+  };
 
   if (isLoading) return <Typography color="text.secondary">Cargando…</Typography>;
   if (!comp) return <Typography color="text.secondary">Competición no encontrada.</Typography>;
@@ -87,12 +103,33 @@ const AdminCompetitionDetail: React.FC = () => {
                       <Avatar src={r.team?.logoUrl ?? undefined} sx={{ width: 40, height: 40, bgcolor: 'primary.soft', color: 'primary.main' }}>
                         {r.team?.name?.[0] ?? '?'}
                       </Avatar>
-                      <Box sx={{ flex: 1 }}>
-                        <Typography sx={{ fontWeight: 600 }}>{r.team?.name ?? '—'}</Typography>
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography sx={{ fontWeight: 600 }} noWrap>{r.team?.name ?? '—'}</Typography>
                         <Typography variant="caption" color="text.secondary">{r.roster?.length ?? 0} jugadores</Typography>
                       </Box>
                       <StatusBadge status={r.status} />
                     </Stack>
+
+                    {/* El ascenso, el descenso y la baja los decidís vos, no la tabla. */}
+                    <TextField
+                      select
+                      fullWidth
+                      size="small"
+                      label="Decisión de fin de temporada"
+                      value={r.outcome ?? 'NONE'}
+                      onChange={(e) => changeOutcome(r.id, e.target.value as Outcome)}
+                      sx={{ mt: 2 }}
+                    >
+                      <MenuItem value="NONE">Sin decisión</MenuItem>
+                      <MenuItem value="PROMOTED">Asciende</MenuItem>
+                      <MenuItem value="RELEGATED">Desciende</MenuItem>
+                      <MenuItem value="WITHDRAWN">No participa</MenuItem>
+                    </TextField>
+                    {r.outcomeNote && (
+                      <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                        {r.outcomeNote}
+                      </Typography>
+                    )}
                   </Card>
                 </Grid>
               ))}

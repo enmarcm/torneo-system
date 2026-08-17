@@ -1,11 +1,20 @@
-import { Card, Box, Typography, Stack, Tooltip, Collapse, IconButton, useTheme, useMediaQuery } from '@mui/material';
+import { Card, Box, Typography, Stack, Tooltip, Collapse, IconButton, Chip, useTheme, useMediaQuery } from '@mui/material';
 import type { StandingRow } from '@/api/standings.api';
 import { ShieldRounded, ExpandMoreRounded, ExpandLessRounded } from '@mui/icons-material';
 import { useState } from 'react';
+import { getStatusLabel, getStatusColor } from '@/utils/statusLabels';
 
 interface Props {
   rows: StandingRow[];
 }
+
+/** Franja lateral que marca en qué zona de la tabla quedó el equipo. */
+const zoneColor = (zone: StandingRow['zone']) => {
+  if (zone === 'PROMOTION') return 'var(--info, #2563eb)';
+  if (zone === 'QUALIFY') return 'var(--success)';
+  if (zone === 'RELEGATION') return 'var(--danger)';
+  return 'transparent';
+};
 
 export const StandingsTable: React.FC<Props> = ({ rows }) => {
   const theme = useTheme();
@@ -25,7 +34,7 @@ export const StandingsTable: React.FC<Props> = ({ rows }) => {
         <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
           <Typography variant="h4">Tabla de posiciones</Typography>
           <Tooltip
-            title="Orden: puntos → diferencia de gol → goles a favor. Verde: zona de clasificación. Rojo: descenso."
+            title="Orden: puntos → enfrentamiento directo entre los equipos empatados → diferencia de gol → goles a favor. Azul: ascenso. Verde: clasificación. Rojo: descenso."
             arrow
           >
             <Box sx={{ width: 18, height: 18, borderRadius: '50%', bgcolor: 'background.default', display: 'grid', placeItems: 'center', cursor: 'help', fontSize: 11, color: 'text.secondary' }}>
@@ -64,7 +73,8 @@ export const StandingsTable: React.FC<Props> = ({ rows }) => {
                     sx={{
                       borderTop: '1px solid',
                       borderColor: 'divider',
-                      boxShadow: `inset 4px 0 0 ${r.zone === 'QUALIFY' ? 'var(--success)' : r.zone === 'RELEGATION' ? 'var(--danger)' : 'transparent'}`,
+                      boxShadow: `inset 4px 0 0 ${zoneColor(r.zone)}`,
+                      opacity: r.outcome === 'WITHDRAWN' ? 0.55 : 1,
                       '&:hover': { bgcolor: 'background.default' },
                     }}
                   >
@@ -73,6 +83,15 @@ export const StandingsTable: React.FC<Props> = ({ rows }) => {
                       <Stack direction="row" alignItems="center" spacing={1.5}>
                         <ShieldRounded sx={{ color: 'text.secondary' }} />
                         <Typography sx={{ fontWeight: 600 }}>{r.teamName}</Typography>
+                        {r.outcome !== 'NONE' && (
+                          <Chip
+                            size="small"
+                            variant="outlined"
+                            color={getStatusColor(r.outcome)}
+                            label={getStatusLabel(r.outcome)}
+                            sx={{ height: 20, fontSize: 11 }}
+                          />
+                        )}
                       </Stack>
                     </Box>
                     <Box component="td" sx={{ p: 1.5, textAlign: 'right' }}>{r.pj}</Box>
@@ -92,7 +111,19 @@ export const StandingsTable: React.FC<Props> = ({ rows }) => {
           </Box>
         )}
 
-        <Stack direction="row" spacing={2} sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+        <Stack
+          direction="row"
+          spacing={2}
+          flexWrap="wrap"
+          useFlexGap
+          sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}
+        >
+          {rows.some((r) => r.zone === 'PROMOTION') && (
+            <Stack direction="row" alignItems="center" spacing={0.75}>
+              <Box sx={{ width: 14, height: 14, borderRadius: 0.5, bgcolor: 'info.main' }} />
+              <Typography variant="caption">Ascenso</Typography>
+            </Stack>
+          )}
           <Stack direction="row" alignItems="center" spacing={0.75}>
             <Box sx={{ width: 14, height: 14, borderRadius: 0.5, bgcolor: 'success.main' }} />
             <Typography variant="caption">Zona de clasificación</Typography>
@@ -101,6 +132,9 @@ export const StandingsTable: React.FC<Props> = ({ rows }) => {
             <Box sx={{ width: 14, height: 14, borderRadius: 0.5, bgcolor: 'error.main' }} />
             <Typography variant="caption">Descenso</Typography>
           </Stack>
+          <Typography variant="caption" color="text.disabled">
+            El ascenso y el descenso definitivos los decide el administrador.
+          </Typography>
         </Stack>
       </Box>
     </Card>
@@ -112,7 +146,7 @@ const MobileStandingRow: React.FC<{ row: StandingRow }> = ({ row }) => {
   return (
     <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 3, overflow: 'hidden' }}>
       <Box
-        sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1.5, borderLeftWidth: 4, borderLeftStyle: 'solid', borderLeftColor: row.zone === 'QUALIFY' ? 'success.main' : row.zone === 'RELEGATION' ? 'error.main' : 'transparent', cursor: 'pointer' }}
+        sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1.5, borderLeftWidth: 4, borderLeftStyle: 'solid', borderLeftColor: zoneColor(row.zone), cursor: 'pointer' }}
         onClick={() => setOpen(!open)}
       >
         <Typography sx={{ fontWeight: 700, width: 24, fontSize: 14 }}>{row.position}</Typography>

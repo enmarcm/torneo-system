@@ -1,5 +1,5 @@
-import { Box, Grid2 as Grid, Card, Stack, Typography, Button, FormControl, InputLabel, Select, MenuItem, IconButton, TextField, Menu, Tooltip } from '@mui/material';
-import { AddRounded, PlayArrowRounded, StopRounded, FiberManualRecordRounded, ChevronLeftRounded, ChevronRightRounded, MoreVertRounded } from '@mui/icons-material';
+import { Box, Grid2 as Grid, Card, Stack, Typography, Button, FormControl, InputLabel, Select, MenuItem, IconButton, TextField, Menu, Tooltip, Tabs, Tab, Chip } from '@mui/material';
+import { AddRounded, PlayArrowRounded, StopRounded, FiberManualRecordRounded, ChevronLeftRounded, ChevronRightRounded, MoreVertRounded, CasinoRounded } from '@mui/icons-material';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import dayjs from 'dayjs';
@@ -9,7 +9,8 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { LiveScoreboard } from '@/components/sport/LiveScoreboard';
 import { AppDrawer } from '@/components/ui/AppDrawer';
 import { useCompetitionsQuery, useMatchesQuery } from '@/hooks/queries';
-import { useCreateMatch, useUpdateMatch, useDeleteMatch, useStartMatch, useFinishMatch, useCreateMatchEvent } from '@/hooks/mutations';
+import { useCreateMatch, useUpdateMatch, useDeleteMatch, useStartMatch, useFinishMatch, useCreateMatchEvent, useDrawLeagueFixture, useDrawGroupStage } from '@/hooks/mutations';
+import { MatchCard } from '@/components/sport/MatchCard';
 import { formatDateTime } from '@/utils/formatDate';
 import type { Match } from '@/api/matches.api';
 import { extractErrorMessage } from '@/api/axios';
@@ -28,6 +29,9 @@ const AdminSchedule: React.FC = () => {
   const start = useStartMatch();
   const finish = useFinishMatch();
   const createEvent = useCreateMatchEvent();
+  const drawLeague = useDrawLeagueFixture();
+  const drawGroups = useDrawGroupStage();
+  const [view, setView] = useState<'day' | 'pending'>('day');
   const [open, setOpen] = useState<'create' | 'edit' | null>(null);
   const [liveMatch, setLiveMatch] = useState<Match | null>(null);
   const [anchor, setAnchor] = useState<{ el: HTMLElement; m: Match } | null>(null);
@@ -36,19 +40,42 @@ const AdminSchedule: React.FC = () => {
   const [form, setForm] = useState({ homeRegistrationId: '', awayRegistrationId: '', scheduledAt: '', matchday: 1, venue: '' });
   const [editForm, setEditForm] = useState({ scheduledAt: '', matchday: 1, venue: '', status: 'SCHEDULED' as Match['status'] });
 
-  const filteredMatches = matches.filter((m) =>
-    dayjs(m.scheduledAt).format('YYYY-MM-DD') === selectedDate,
+  const filteredMatches = matches.filter(
+    (m) => m.scheduledAt && dayjs(m.scheduledAt).format('YYYY-MM-DD') === selectedDate,
   );
+  // Salidos del sorteo: el cruce está definido pero falta ponerles día y hora.
+  const pendingMatches = matches.filter((m) => !m.scheduledAt);
+  const selectedComp = comps.find((c) => c.id === competitionId);
 
   const onOpenEdit = (m: Match) => {
     setEditingMatch(m);
     setEditForm({
-      scheduledAt: dayjs(m.scheduledAt).format('YYYY-MM-DDTHH:mm'),
+      // Un partido recién sorteado no trae fecha: se arranca con el día que esté
+      // seleccionado en el calendario para no dejar el campo vacío.
+      scheduledAt: m.scheduledAt
+        ? dayjs(m.scheduledAt).format('YYYY-MM-DDTHH:mm')
+        : `${selectedDate}T15:00`,
       matchday: m.matchday,
       venue: m.venue ?? '',
       status: m.status,
     });
     setOpen('edit');
+  };
+
+  const runDraw = async (kind: 'league' | 'groups') => {
+    if (!competitionId) return;
+    try {
+      if (kind === 'league') {
+        const res = await drawLeague.mutateAsync(competitionId);
+        toast.success(`Sorteo listo: ${res.matches} partidos en ${res.matchdays} jornadas`);
+      } else {
+        const res = await drawGroups.mutateAsync(competitionId);
+        toast.success(`Sorteo listo: ${res.groups} grupos y ${res.matches} partidos`);
+      }
+      setView('pending');
+    } catch (e) {
+      toast.error(extractErrorMessage(e));
+    }
   };
   const onOpenCreate = () => {
     setEditingMatch(null);
@@ -98,11 +125,25 @@ const AdminSchedule: React.FC = () => {
     <Box>
       <PageHeader
         title="Programación"
-        subtitle="Partidos agendados por día."
+        subtitle="Sorteá los cruces y después asignales día y hora."
         action={
+          <Stack direction="row" spacing={1}>
+            {selectedComp && (
+              <Button
+                variant="outlined"
+                startIcon={<CasinoRounded />}
+                onClick={() =>
+                  runDraw(selectedComp.format === 'GROUPS_KNOCKOUT' ? 'groups' : 'league')
+                }
+                disabled={drawLeague.isPending || drawGroups.isPending}
+              >
+                {selectedComp.format === 'GROUPS_KNOCKOUT' ? 'Sortear grupos' : 'Sortear calendario'}
+              </Button>
+            )}
             <Button variant="contained" startIcon={<AddRounded />} onClick={onOpenCreate} disabled={!competitionId}>
               Nuevo partido
             </Button>
+          </Stack>
         }
       />
 
@@ -151,12 +192,60 @@ const AdminSchedule: React.FC = () => {
         </Box>
       )}
 
+      {competitionId && (
+        <Tabs value={view} onChange={(_, v) => setView(v)} sx={{ mb: 2 }}>
+          <Tab value="day" label="Por día" sx={{ textTransform: 'none' }} />
+          <Tab
+            value="pending"
+            sx={{ textTransform: 'none' }}
+            label={
+              <Stack direction="row" alignItems="center" spacing={0.75}>
+                <span>Por programar</span>
+                {pendingMatches.length > 0 && (
+                  <Chip
+                    size="small"
+                    color="warning"
+                    label={pendingMatches.length}
+                    sx={{ height: 18, fontSize: 11, fontWeight: 700 }}
+                  />
+                )}
+              </Stack>
+            }
+          />
+        </Tabs>
+      )}
+
       {!competitionId ? (
         <Card sx={{ p: 4, textAlign: 'center' }}>
           <Typography color="text.secondary">Selecciona una competición para ver sus partidos.</Typography>
         </Card>
       ) : isLoading ? (
         <Typography color="text.secondary">Cargando…</Typography>
+      ) : view === 'pending' ? (
+        <Box>
+          <Typography variant="h4" sx={{ mb: 1 }}>
+            Partidos sin día ni hora
+          </Typography>
+          <Typography color="text.secondary" sx={{ mb: 2 }}>
+            Salieron del sorteo con el cruce ya definido. Hacé clic en cualquiera para asignarle
+            fecha, hora y sede.
+          </Typography>
+          {pendingMatches.length === 0 ? (
+            <Card sx={{ p: 4, textAlign: 'center' }}>
+              <Typography color="text.secondary">
+                No queda ningún partido pendiente de programar.
+              </Typography>
+            </Card>
+          ) : (
+            <Grid container spacing={2}>
+              {pendingMatches.map((m) => (
+                <Grid size={{ xs: 12, md: 6, lg: 4 }} key={m.id}>
+                  <MatchCard match={m} onClick={() => onOpenEdit(m)} />
+                </Grid>
+              ))}
+            </Grid>
+          )}
+        </Box>
       ) : (
         <Box>
           <Typography variant="h4" sx={{ mb: 2 }}>

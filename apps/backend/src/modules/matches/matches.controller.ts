@@ -19,6 +19,12 @@ export const matchesController = {
   ),
   start: asyncHandler(async (req, res) => ok(res, await matchesService.start(req.params.id))),
   finish: asyncHandler(async (req, res) => ok(res, await matchesService.finish(req.params.id))),
+  setMvp: asyncHandler(async (req, res) =>
+    ok(res, await matchesService.setMvp(req.params.id, req.body), 'MVP designado'),
+  ),
+  clearMvp: asyncHandler(async (req, res) =>
+    ok(res, await matchesService.clearMvp(req.params.id), 'MVP quitado'),
+  ),
   remove: asyncHandler(async (req, res) =>
     ok(res, await matchesService.remove(req.params.id), 'Eliminado'),
   ),

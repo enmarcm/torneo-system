@@ -6,6 +6,10 @@ export interface Category {
   description: string | null;
   imageUrl: string | null;
   defaultFormat: 'LEAGUE' | 'GROUPS_KNOCKOUT';
+  /** Tipo de torneo por defecto al crear una competición desde esta categoría. */
+  defaultKind: 'LEAGUE_DIVISION' | 'CUP' | 'YOUTH' | 'SPECIAL';
+  /** 1 = Primera, 2 = Segunda, 3 = Tercera. Solo para divisiones de liga. */
+  defaultDivisionLevel: number | null;
   defaultAgeMin: number | null;
   defaultAgeMax: number | null;
   defaultRequiresAdminEligibility: boolean;

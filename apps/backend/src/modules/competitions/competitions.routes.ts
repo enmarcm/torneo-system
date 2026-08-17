@@ -8,6 +8,7 @@ import {
   createCompetitionSchema,
   updateCompetitionSchema,
   competitionStatusSchema,
+  registrationOutcomeSchema,
 } from './competitions.schema';
 
 export const competitionsRouter = Router();
@@ -37,4 +38,12 @@ competitionsRouter.patch(
   validate(competitionStatusSchema),
   audit('STATUS', 'Competition'),
   competitionsController.setStatus,
+);
+competitionsRouter.patch(
+  '/registrations/:registrationId/outcome',
+  authMiddleware,
+  requireRole('ADMIN'),
+  validate(registrationOutcomeSchema),
+  audit('OUTCOME', 'TeamRegistration'),
+  competitionsController.setRegistrationOutcome,
 );

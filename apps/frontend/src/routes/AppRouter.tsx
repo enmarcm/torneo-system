@@ -33,6 +33,7 @@ const AdminCompetitions = lazy(() => import('@/pages/admin/AdminCompetitions'));
 const AdminCompetitionDetail = lazy(() => import('@/pages/admin/AdminCompetitionDetail'));
 const AdminTeams = lazy(() => import('@/pages/admin/AdminTeams'));
 const AdminTeamDetail = lazy(() => import('@/pages/admin/AdminTeamDetail'));
+const AdminTeamBlocks = lazy(() => import('@/pages/admin/AdminTeamBlocks'));
 const AdminPlayers = lazy(() => import('@/pages/admin/AdminPlayers'));
 const AdminPlayerDetail = lazy(() => import('@/pages/admin/AdminPlayerDetail'));
 const AdminSchedule = lazy(() => import('@/pages/admin/AdminSchedule'));
@@ -70,6 +71,7 @@ export const AppRouter: React.FC = () => (
           <Route path={ROUTES.admin.competitionDetail} element={<AdminCompetitionDetail />} />
           <Route path={ROUTES.admin.teams} element={<AdminTeams />} />
           <Route path={ROUTES.admin.teamDetail} element={<AdminTeamDetail />} />
+          <Route path={ROUTES.admin.teamBlocks} element={<AdminTeamBlocks />} />
           <Route path={ROUTES.admin.players} element={<AdminPlayers />} />
           <Route path={ROUTES.admin.playerDetail} element={<AdminPlayerDetail />} />
           <Route path={ROUTES.admin.schedule} element={<AdminSchedule />} />
