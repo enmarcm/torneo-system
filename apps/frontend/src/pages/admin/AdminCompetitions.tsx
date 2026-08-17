@@ -65,8 +65,8 @@ const KINDS: Array<{ value: Competition['kind']; label: string; hint: string }> 
   { value: 'SPECIAL', label: 'Especial (Gremial / Veterano)', hint: 'Torneo independiente.' },
 ];
 
-/** Niveles disponibles del sistema de liga. El 1 es el más alto. */
-const DIVISION_LEVELS = [1, 2, 3, 4];
+/** La liga se juega en tres divisiones: Primera, Segunda y Tercera. */
+const DIVISION_LEVELS = [1, 2, 3];
 
 /**
  * En la liga la eliminatoria es fija y la define el nivel de división, así que
@@ -76,7 +76,6 @@ const LEAGUE_KNOCKOUT_HINT: Record<number, string> = {
   1: 'Eliminatoria desde cuartos de final (8 clasificados), a partido único.',
   2: 'Eliminatoria desde cuartos de final (8 clasificados), a partido único.',
   3: 'Eliminatoria desde octavos de final (16 clasificados), a partido único.',
-  4: 'Eliminatoria desde octavos de final (16 clasificados), a partido único.',
 };
 
 const KO_STAGES: Array<{ value: 'R16' | 'QUARTER' | 'SEMI' | 'FINAL'; label: string }> = [
@@ -86,13 +85,19 @@ const KO_STAGES: Array<{ value: 'R16' | 'QUARTER' | 'SEMI' | 'FINAL'; label: str
   { value: 'FINAL', label: 'Final' },
 ];
 
+const TOP_DIVISION = DIVISION_LEVELS[0];
+const BOTTOM_DIVISION = DIVISION_LEVELS[DIVISION_LEVELS.length - 1];
+
 /** Campos de estructura del torneo, compartidos por el alta y la edición. */
 const StructureFields: React.FC<{
   value: CompForm;
   onChange: (v: CompForm) => void;
-}> = ({ value, onChange }) => {
+  /** Niveles ya ocupados por otra competición de la misma edición. */
+  takenLevels?: number[];
+}> = ({ value, onChange, takenLevels = [] }) => {
   const set = <K extends keyof CompForm>(key: K, v: CompForm[K]) =>
     onChange({ ...value, [key]: v });
+  const divisionLevel = value.divisionLevel ? Number(value.divisionLevel) : null;
 
   return (
     <>
@@ -145,24 +150,31 @@ const StructureFields: React.FC<{
           label="División"
           value={value.divisionLevel}
           onChange={(e) => {
-            const level = e.target.value;
+            const level = Number(e.target.value);
             // Un solo selector define las dos cosas: el nivel (número que ordena
             // el ascenso y el descenso) y la etiqueta que se muestra en pantalla.
-            // Así no quedan dos campos que puedan contradecirse.
+            // Además se ponen en cero las plazas que ese nivel no puede tener.
             onChange({
               ...value,
-              divisionLevel: level,
-              division: getDivisionLabel(level ? Number(level) : null) ?? '',
+              divisionLevel: String(level),
+              division: getDivisionLabel(level) ?? '',
+              promotionSpots: level === TOP_DIVISION ? 0 : value.promotionSpots,
+              relegationSpots: level === BOTTOM_DIVISION ? 0 : value.relegationSpots,
             });
           }}
-          helperText="Primera está por encima de Segunda, y Segunda por encima de Tercera. Define el ascenso y el descenso."
+          helperText="Primera está por encima de Segunda, y Segunda por encima de Tercera."
         >
-          <MenuItem value="">Sin división</MenuItem>
-          {DIVISION_LEVELS.map((lvl) => (
-            <MenuItem key={lvl} value={String(lvl)}>
-              {getDivisionLabel(lvl)}
-            </MenuItem>
-          ))}
+          {DIVISION_LEVELS.map((lvl) => {
+            // Una edición no puede tener dos veces la misma división: el nivel ya
+            // usado se muestra deshabilitado y con el nombre de quien lo ocupa.
+            const taken = takenLevels.includes(lvl);
+            return (
+              <MenuItem key={lvl} value={String(lvl)} disabled={taken}>
+                {getDivisionLabel(lvl)}
+                {taken ? ' — ya existe en esta edición' : ''}
+              </MenuItem>
+            );
+          })}
         </TextField>
       )}
 
@@ -220,25 +232,39 @@ const StructureFields: React.FC<{
         </FormControl>
       )}
 
+      {/*
+        La división más alta no tiene a dónde ascender y la más baja no tiene a
+        dónde descender, así que esas plazas ni se muestran: un campo que no puede
+        tener otro valor que cero solo confunde.
+      */}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-        <TextField
-          fullWidth
-          size="small"
-          type="number"
-          label="Plazas de ascenso"
-          value={value.promotionSpots}
-          onChange={(e) => set('promotionSpots', Number(e.target.value))}
-        />
-        <TextField
-          fullWidth
-          size="small"
-          type="number"
-          label="Plazas de descenso"
-          value={value.relegationSpots}
-          onChange={(e) => set('relegationSpots', Number(e.target.value))}
-        />
+        {divisionLevel !== TOP_DIVISION && (
+          <TextField
+            fullWidth
+            size="small"
+            type="number"
+            label="Plazas de ascenso"
+            value={value.promotionSpots}
+            onChange={(e) => set('promotionSpots', Math.max(0, Number(e.target.value)))}
+          />
+        )}
+        {divisionLevel !== BOTTOM_DIVISION && (
+          <TextField
+            fullWidth
+            size="small"
+            type="number"
+            label="Plazas de descenso"
+            value={value.relegationSpots}
+            onChange={(e) => set('relegationSpots', Math.max(0, Number(e.target.value)))}
+          />
+        )}
       </Stack>
       <Typography variant="caption" color="text.secondary">
+        {divisionLevel === TOP_DIVISION
+          ? 'Primera es la división más alta: no tiene ascenso. '
+          : divisionLevel === BOTTOM_DIVISION
+            ? 'Tercera es la división más baja: no tiene descenso. '
+            : ''}
         Estas plazas solo pintan las zonas en la tabla. El ascenso y el descenso definitivos los
         marcás vos equipo por equipo.
       </Typography>
@@ -271,6 +297,19 @@ const AdminCompetitions: React.FC = () => {
 
   const cat = categories.find((c) => c.id === selectedCat);
   const currentEdition = editions.find((e) => e.id === editionId);
+
+  // Competiciones de la edición elegida en el formulario de alta: puede ser
+  // distinta de la que se está viendo en pantalla.
+  const { data: formEditionComps = [] } = useCompetitionsQuery(formEditionId || undefined);
+
+  /** Niveles de división ya usados, para no permitir duplicarlos en una edición. */
+  const takenLevelsForCreate = formEditionComps
+    .filter((c) => c.divisionLevel != null)
+    .map((c) => c.divisionLevel as number);
+
+  const takenLevelsForEdit = competitions
+    .filter((c) => c.divisionLevel != null && c.id !== editingComp?.id)
+    .map((c) => c.divisionLevel as number);
 
   const submit = async () => {
     try {
@@ -550,7 +589,7 @@ const AdminCompetitions: React.FC = () => {
                 <input type="number" value={editForm.maxPlayers} onChange={(e) => setEditForm({ ...editForm, maxPlayers: Number(e.target.value) })} style={{ width: '100%', padding: 10, borderRadius: 12, border: '1px solid var(--border)', fontSize: 14 }} />
               </Box>
             </Stack>
-            <StructureFields value={editForm} onChange={setEditForm} />
+            <StructureFields value={editForm} onChange={setEditForm} takenLevels={takenLevelsForEdit} />
             <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
               <Button onClick={() => { setOpen(null); setEditingComp(null); }}>Cancelar</Button>
               <Button variant="contained" onClick={submit} disabled={update.isPending}>
@@ -649,7 +688,7 @@ const AdminCompetitions: React.FC = () => {
                 <input type="number" value={form.maxPlayers} onChange={(e) => setForm({ ...form, maxPlayers: Number(e.target.value) })} style={{ width: '100%', padding: 10, borderRadius: 12, border: '1px solid var(--border)', fontSize: 14 }} />
               </Box>
             </Stack>
-            <StructureFields value={form} onChange={setForm} />
+            <StructureFields value={form} onChange={setForm} takenLevels={takenLevelsForCreate} />
             <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
               <Button onClick={() => { setOpen(null); setEditingComp(null); }}>Cancelar</Button>
               <Button variant="contained" onClick={submit} disabled={!selectedCat || !formEditionId || create.isPending}>

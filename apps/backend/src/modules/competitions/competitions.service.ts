@@ -60,6 +60,24 @@ const resolveLeagueLinks = async (
 const LEAGUE_KNOCKOUT_QUALIFIERS: Record<number, number> = { 1: 8, 2: 8, 3: 16 };
 const LEAGUE_KNOCKOUT_FALLBACK = 16;
 
+/** La liga se juega en tres divisiones: Primera (1), Segunda (2) y Tercera (3). */
+const TOP_DIVISION = 1;
+const BOTTOM_DIVISION = 3;
+
+/**
+ * La división más alta no puede tener ascenso y la más baja no puede tener
+ * descenso: no hay categoría por encima ni por debajo. Se fuerza en el servidor
+ * para que no dependa de que la pantalla lo esconda.
+ */
+const clampSpots = (
+  divisionLevel: number | null,
+  promotionSpots: number,
+  relegationSpots: number,
+) => ({
+  promotionSpots: divisionLevel === TOP_DIVISION ? 0 : promotionSpots,
+  relegationSpots: divisionLevel === BOTTOM_DIVISION ? 0 : relegationSpots,
+});
+
 /**
  * Aplica esas reglas a una división de liga. Se recalcula cada vez que se crea o
  * se cambia el nivel, para que un cambio de división ajuste solo su eliminatoria.
@@ -151,8 +169,9 @@ export const competitionsService = {
         sourceLeagueSystemId: links.sourceLeagueSystemId,
         rounds: d.rounds ?? 1,
         twoLeggedStages: knockout ? knockout.twoLeggedStages : (d.twoLeggedStages ?? []),
-        promotionSpots: d.promotionSpots ?? 0,
-        relegationSpots: d.relegationSpots ?? 0,
+        ...(kind === 'LEAGUE_DIVISION'
+          ? clampSpots(divisionLevel ?? null, d.promotionSpots ?? 0, d.relegationSpots ?? 0)
+          : { promotionSpots: d.promotionSpots ?? 0, relegationSpots: d.relegationSpots ?? 0 }),
         ageMin: d.ageMin ?? cat.defaultAgeMin,
         ageMax: d.ageMax ?? cat.defaultAgeMax,
         requiresAdminEligibility: d.requiresAdminEligibility ?? cat.defaultRequiresAdminEligibility,
@@ -203,6 +222,13 @@ export const competitionsService = {
         divisionLevel,
         ...links,
         ...(knockout ?? {}),
+        ...(kind === 'LEAGUE_DIVISION'
+          ? clampSpots(
+              divisionLevel ?? null,
+              data.promotionSpots ?? current.promotionSpots,
+              data.relegationSpots ?? current.relegationSpots,
+            )
+          : {}),
       },
     });
   },
