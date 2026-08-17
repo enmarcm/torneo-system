@@ -47,3 +47,10 @@ competitionsRouter.patch(
   audit('OUTCOME', 'TeamRegistration'),
   competitionsController.setRegistrationOutcome,
 );
+competitionsRouter.delete(
+  '/:id',
+  authMiddleware,
+  requireRole('ADMIN'),
+  audit('DELETE', 'Competition'),
+  competitionsController.remove,
+);

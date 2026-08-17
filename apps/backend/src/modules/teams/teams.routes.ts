@@ -51,3 +51,10 @@ teamsRouter.post(
   audit('REGISTER', 'TeamRegistration'),
   teamsController.register,
 );
+teamsRouter.delete(
+  '/:id',
+  authMiddleware,
+  requireRole('ADMIN'),
+  audit('DELETE', 'Team'),
+  teamsController.remove,
+);

@@ -23,4 +23,7 @@ export const playersController = {
   competitions: asyncHandler(async (req, res) =>
     ok(res, await playersService.competitions(req.params.id)),
   ),
+  remove: asyncHandler(async (req, res) =>
+    ok(res, await playersService.remove(req.params.id), 'Eliminado definitivamente'),
+  ),
 };

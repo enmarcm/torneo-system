@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid, Card, Stack, Typography, Switch, IconButton, Menu, MenuItem, Chip, Button, TextField, Tooltip } from '@mui/material';
+import { Box, Grid2 as Grid, Card, Stack, Typography, Switch, IconButton, Menu, MenuItem, Chip, Button, TextField, Tooltip, Divider } from '@mui/material';
 import { getStatusLabel, getStatusColor } from '@/utils/statusLabels';
 import { AddRounded, MoreVertRounded, EmojiEventsRounded } from '@mui/icons-material';
 import { useState } from 'react';
@@ -11,7 +11,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { AppDrawer } from '@/components/ui/AppDrawer';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useEditionsQuery } from '@/hooks/queries';
-import { useCreateEdition, useSetEditionStatus, useSetTransfers } from '@/hooks/mutations';
+import { useCreateEdition, useSetEditionStatus, useSetTransfers, useDeleteEdition } from '@/hooks/mutations';
 import { formatDate } from '@/utils/formatDate';
 import type { Edition } from '@/api/editions.api';
 import { extractErrorMessage } from '@/api/axios';
@@ -35,6 +35,8 @@ const AdminEditions: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Edition | null>(null);
   const [anchor, setAnchor] = useState<{ el: HTMLElement; ed: Edition } | null>(null);
+  const [purgingEdition, setPurgingEdition] = useState<Edition | null>(null);
+  const deleteEdition = useDeleteEdition();
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema) });
 
@@ -117,7 +119,34 @@ const AdminEditions: React.FC = () => {
             Cambiar a {getStatusLabel(s)}
           </MenuItem>
         ))}
+        <Divider />
+        <MenuItem
+          onClick={() => { if (anchor) setPurgingEdition(anchor.ed); setAnchor(null); }}
+          sx={{ color: 'error.main', fontWeight: 700 }}
+        >
+          Eliminar definitivamente
+        </MenuItem>
       </Menu>
+
+      {/* Borrado definitivo: el backend lo rechaza si la edición tiene competiciones. */}
+      <ConfirmDialog
+        open={!!purgingEdition}
+        onClose={() => setPurgingEdition(null)}
+        onConfirm={async () => {
+          if (!purgingEdition) return;
+          try {
+            await deleteEdition.mutateAsync(purgingEdition.id);
+            toast.success('Edición eliminada definitivamente');
+            setPurgingEdition(null);
+          } catch (e) {
+            toast.error(extractErrorMessage(e));
+          }
+        }}
+        title="¿Eliminar definitivamente?"
+        message={`Se borrará "${purgingEdition?.name ?? ''}" sin posibilidad de recuperarla. Si ya tiene competiciones creadas, la operación se rechaza: una edición con torneos contiene toda una temporada.`}
+        confirmLabel="Eliminar definitivamente"
+        loading={deleteEdition.isPending}
+      />
 
       <AppDrawer
         open={open}

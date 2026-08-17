@@ -32,3 +32,10 @@ playersRouter.patch(
   validate(degreeSchema),
   playersController.setDegree,
 );
+playersRouter.delete(
+  '/:id',
+  authMiddleware,
+  requireRole('ADMIN'),
+  audit('DELETE', 'Player'),
+  playersController.remove,
+);

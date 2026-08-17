@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { AppError } from '@/utils/app-error';
 import { MESSAGES } from '@/config/constants';
 import { hashPassword } from '@/utils/password.util';
+import { assertDeletable } from '@/utils/deletion.util';
 import { Prisma } from '@prisma/client';
 
 export const teamsService = {
@@ -60,6 +61,32 @@ export const teamsService = {
 
   setStatus: (id: string, status: 'ACTIVE' | 'INACTIVE') =>
     prisma.team.update({ where: { id }, data: { status } }),
+
+  /**
+   * Borrado definitivo. Solo procede si el equipo nunca se inscribió ni tuvo
+   * sanciones: con historial se conserva y se desactiva, porque borrarlo se
+   * llevaría puestos partidos y tablas de sus rivales.
+   */
+  remove: async (id: string) => {
+    const team = await prisma.team.findUnique({ where: { id }, include: { leader: true } });
+    if (!team) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
+
+    const [registrations, blocks] = await Promise.all([
+      prisma.teamRegistration.count({ where: { teamId: id } }),
+      prisma.teamBlock.count({ where: { teamId: id } }),
+    ]);
+    assertDeletable('el equipo', [
+      { label: 'inscripciones en competiciones', count: registrations },
+      { label: 'registros de bloqueo', count: blocks },
+    ]);
+
+    return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      // El usuario del líder existe solo para este equipo, así que se va con él.
+      if (team.leader) await tx.user.delete({ where: { id: team.leader.id } });
+      await tx.team.delete({ where: { id } });
+      return { id };
+    });
+  },
 
   register: (teamId: string, competitionId: string) =>
     prisma.teamRegistration.create({ data: { teamId, competitionId } }),

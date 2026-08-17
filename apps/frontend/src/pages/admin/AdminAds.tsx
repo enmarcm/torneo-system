@@ -52,6 +52,8 @@ const AdminAds: React.FC = () => {
     {
       label: (r) => (r.active ? 'Desactivar' : 'Activar'),
       icon: <PowerSettingsNewRounded fontSize="small" />,
+      // Rojo si va a desactivar, verde si va a reactivar.
+      color: (r) => (r.active ? 'error' : 'success'),
       onClick: (r) => update.mutate({ id: r.id, data: { active: !r.active } }),
     },
     {

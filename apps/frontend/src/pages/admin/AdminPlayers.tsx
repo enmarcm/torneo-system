@@ -1,13 +1,13 @@
 import { Box, Stack, Typography, Button, Avatar, Chip, TextField, MenuItem } from '@mui/material';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { AddRounded, VerifiedRounded, PowerSettingsNewRounded } from '@mui/icons-material';
+import { AddRounded, VerifiedRounded, VerifiedOutlined, PowerSettingsNewRounded, DeleteForeverRounded } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { DataTable, type DataTableColumn, type DataTableAction } from '@/components/ui/DataTable';
 import { AppDrawer } from '@/components/ui/AppDrawer';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { usePlayersQuery } from '@/hooks/queries';
-import { useCreatePlayer, useSetPlayerDegree, useSetPlayerStatus } from '@/hooks/mutations';
+import { useCreatePlayer, useSetPlayerDegree, useSetPlayerStatus, useDeletePlayer } from '@/hooks/mutations';
 import type { Player } from '@/api/players.api';
 import { calcAge } from '@/utils/formatDate';
 import { extractErrorMessage } from '@/api/axios';
@@ -28,6 +28,8 @@ const AdminPlayers: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ documentType: 'CEDULA' as 'CEDULA' | 'PARTIDA', documentNumber: '', firstName: '', lastName: '', birthDate: '', position: '' });
   const [deletingPlayer, setDeletingPlayer] = useState<Player | null>(null);
+  const [purgingPlayer, setPurgingPlayer] = useState<Player | null>(null);
+  const deletePlayer = useDeletePlayer();
 
   const submit = async () => {
     try {
@@ -65,16 +67,30 @@ const AdminPlayers: React.FC = () => {
   const actions: DataTableAction<Player>[] = [
     {
       label: (r) => (r.universityDegreeVerified ? 'Quitar verificación' : 'Verificar título'),
-      icon: <VerifiedRounded fontSize="small" />,
+      icon: (r) =>
+        r.universityDegreeVerified ? (
+          <VerifiedRounded fontSize="small" />
+        ) : (
+          <VerifiedOutlined fontSize="small" />
+        ),
+      // Verde cuando ya está verificado; neutro cuando todavía no.
+      color: (r) => (r.universityDegreeVerified ? 'success' : 'inherit'),
       onClick: (r) => setDegree.mutate({ id: r.id, data: { universityDegreeVerified: !r.universityDegreeVerified } }),
     },
     {
       label: (r) => (r.status === 'ACTIVE' ? 'Desactivar' : 'Activar'),
       icon: <PowerSettingsNewRounded fontSize="small" />,
-      color: 'error',
+      // Rojo si la acción va a desactivar, verde si va a reactivar.
+      color: (r) => (r.status === 'ACTIVE' ? 'error' : 'success'),
       onClick: (r) => (r.status === 'ACTIVE'
         ? setDeletingPlayer(r)
         : setStatus.mutate({ id: r.id, status: 'ACTIVE' })),
+    },
+    {
+      label: 'Eliminar definitivamente',
+      icon: <DeleteForeverRounded fontSize="small" />,
+      color: 'error',
+      onClick: (r) => setPurgingPlayer(r),
     },
   ];
 
@@ -136,6 +152,25 @@ const AdminPlayers: React.FC = () => {
         message={`Se desactivará a "${deletingPlayer?.firstName} ${deletingPlayer?.lastName}". No podrá participar en competiciones.`}
         confirmLabel="Desactivar"
         loading={setStatus.isPending}
+      />
+      {/* Borrado definitivo: el backend lo rechaza si el jugador ya jugó. */}
+      <ConfirmDialog
+        open={!!purgingPlayer}
+        onClose={() => setPurgingPlayer(null)}
+        onConfirm={async () => {
+          if (!purgingPlayer) return;
+          try {
+            await deletePlayer.mutateAsync(purgingPlayer.id);
+            toast.success('Jugador eliminado definitivamente');
+            setPurgingPlayer(null);
+          } catch (e) {
+            toast.error(extractErrorMessage(e));
+          }
+        }}
+        title="¿Eliminar definitivamente?"
+        message={`Se borrará a "${purgingPlayer?.firstName ?? ''} ${purgingPlayer?.lastName ?? ''}" sin posibilidad de recuperarlo. Si ya integró una plantilla o marcó goles, la operación se rechaza: en ese caso desactivalo.`}
+        confirmLabel="Eliminar definitivamente"
+        loading={deletePlayer.isPending}
       />
     </Box>
   );

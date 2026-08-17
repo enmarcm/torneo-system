@@ -1,4 +1,5 @@
-import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Button, Tabs, Tab, Avatar, TextField, MenuItem } from '@mui/material';
+import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Button, Tabs, Tab, Avatar, TextField, MenuItem, Alert } from '@mui/material';
+import { AppModal } from '@/components/ui/AppModal';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { ArrowBackRounded, GroupsRounded, SportsSoccerRounded, TableChartRounded } from '@mui/icons-material';
@@ -16,6 +17,35 @@ import { getStatusLabel } from '@/utils/statusLabels';
 
 type Outcome = 'NONE' | 'PROMOTED' | 'RELEGATED' | 'WITHDRAWN';
 
+/**
+ * Mover un equipo de división es una decisión de peso y no se puede deshacer
+ * sola: arrastra su inscripción, su plantilla y su historial a otra categoría.
+ * Por eso cada cambio pasa por una confirmación explícita que dice qué implica.
+ */
+const OUTCOME_CONFIRM: Record<
+  Exclude<Outcome, 'NONE'>,
+  { title: string; consequence: string; color: 'success' | 'error' | 'warning' }
+> = {
+  PROMOTED: {
+    title: 'Confirmar ascenso',
+    consequence:
+      'El equipo sube de división para la próxima edición. Vas a tener que inscribirlo en la división de arriba cuando la crees.',
+    color: 'success',
+  },
+  RELEGATED: {
+    title: 'Confirmar descenso',
+    consequence:
+      'El equipo baja de división para la próxima edición. Vas a tener que inscribirlo en la división de abajo cuando la crees.',
+    color: 'error',
+  },
+  WITHDRAWN: {
+    title: 'Confirmar que no participa',
+    consequence:
+      'El equipo queda fuera de la próxima edición. No se borra nada: su historial y sus estadísticas se conservan para poder reincorporarlo más adelante.',
+    color: 'warning',
+  },
+};
+
 const AdminCompetitionDetail: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -28,13 +58,38 @@ const AdminCompetitionDetail: React.FC = () => {
 
   const compTeams = (comp as any)?.registrations ?? [];
 
-  const changeOutcome = async (registrationId: string, outcome: Outcome) => {
+  // Movimiento pendiente de confirmar. Nada se guarda hasta que el admin acepta.
+  const [pendingMove, setPendingMove] = useState<{
+    registrationId: string;
+    teamName: string;
+    outcome: Outcome;
+  } | null>(null);
+  const [moveNote, setMoveNote] = useState('');
+
+  const requestOutcome = (registrationId: string, teamName: string, outcome: Outcome) => {
+    // Volver a "sin decisión" no mueve a nadie, así que no necesita confirmación.
+    if (outcome === 'NONE') {
+      void applyOutcome(registrationId, 'NONE');
+      return;
+    }
+    setMoveNote('');
+    setPendingMove({ registrationId, teamName, outcome });
+  };
+
+  const applyOutcome = async (registrationId: string, outcome: Outcome, note?: string) => {
     try {
-      await setOutcome.mutateAsync({ registrationId, outcome });
+      await setOutcome.mutateAsync({ registrationId, outcome, outcomeNote: note || undefined });
       toast.success('Decisión registrada');
     } catch (e) {
       toast.error(extractErrorMessage(e));
     }
+  };
+
+  const confirmMove = async () => {
+    if (!pendingMove) return;
+    await applyOutcome(pendingMove.registrationId, pendingMove.outcome, moveNote);
+    setPendingMove(null);
+    setMoveNote('');
   };
 
   if (isLoading) return <Typography color="text.secondary">Cargando…</Typography>;
@@ -117,7 +172,9 @@ const AdminCompetitionDetail: React.FC = () => {
                       size="small"
                       label="Decisión de fin de temporada"
                       value={r.outcome ?? 'NONE'}
-                      onChange={(e) => changeOutcome(r.id, e.target.value as Outcome)}
+                      onChange={(e) =>
+                        requestOutcome(r.id, r.team?.name ?? 'el equipo', e.target.value as Outcome)
+                      }
                       sx={{ mt: 2 }}
                     >
                       <MenuItem value="NONE">Sin decisión</MenuItem>
@@ -137,6 +194,49 @@ const AdminCompetitionDetail: React.FC = () => {
           )}
         </Box>
       )}
+
+      <AppModal
+        open={!!pendingMove}
+        onClose={() => setPendingMove(null)}
+        title={pendingMove ? OUTCOME_CONFIRM[pendingMove.outcome as Exclude<Outcome, 'NONE'>].title : ''}
+        subtitle={pendingMove?.teamName}
+        maxWidth={480}
+      >
+        {pendingMove && (
+          <Stack spacing={2}>
+            <Alert
+              severity={OUTCOME_CONFIRM[pendingMove.outcome as Exclude<Outcome, 'NONE'>].color}
+              variant="outlined"
+            >
+              {OUTCOME_CONFIRM[pendingMove.outcome as Exclude<Outcome, 'NONE'>].consequence}
+            </Alert>
+
+            <TextField
+              fullWidth
+              size="small"
+              multiline
+              minRows={2}
+              label="Motivo (opcional)"
+              placeholder="Ej: descenso deportivo por posición final"
+              value={moveNote}
+              onChange={(e) => setMoveNote(e.target.value)}
+              helperText="Queda guardado junto a la decisión, para poder justificarla después."
+            />
+
+            <Stack direction="row" spacing={1} justifyContent="flex-end">
+              <Button onClick={() => setPendingMove(null)}>Cancelar</Button>
+              <Button
+                variant="contained"
+                color={OUTCOME_CONFIRM[pendingMove.outcome as Exclude<Outcome, 'NONE'>].color}
+                onClick={confirmMove}
+                disabled={setOutcome.isPending}
+              >
+                {setOutcome.isPending ? 'Guardando…' : 'Confirmar'}
+              </Button>
+            </Stack>
+          </Stack>
+        )}
+      </AppModal>
     </Box>
   );
 };

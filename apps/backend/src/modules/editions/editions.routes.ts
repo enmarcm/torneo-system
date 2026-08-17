@@ -47,3 +47,10 @@ editionsRouter.patch(
   audit('TRANSFERS', 'Edition'),
   editionsController.setTransfers,
 );
+editionsRouter.delete(
+  '/:id',
+  authMiddleware,
+  requireRole('ADMIN'),
+  audit('DELETE', 'Edition'),
+  editionsController.remove,
+);

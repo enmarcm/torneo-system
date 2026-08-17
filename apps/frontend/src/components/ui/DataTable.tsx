@@ -21,11 +21,18 @@ export interface DataTableColumn<T> {
   hideInMobile?: boolean;
 }
 
+export type DataTableActionColor = 'primary' | 'error' | 'success' | 'warning' | 'inherit';
+
 export interface DataTableAction<T> {
   label: string | ((row: T) => string);
-  icon?: ReactNode;
+  /** Igual que `label`, acepta función para depender de la fila. */
+  icon?: ReactNode | ((row: T) => ReactNode);
   onClick: (row: T) => void;
-  color?: 'primary' | 'error' | 'inherit';
+  /**
+   * Acepta función para que el color siga al estado de la fila: por ejemplo,
+   * rojo en "Desactivar" y verde en "Activar", que son la misma acción invertida.
+   */
+  color?: DataTableActionColor | ((row: T) => DataTableActionColor);
   divider?: boolean;
 }
 
@@ -175,7 +182,7 @@ function RowActionsIcons<T>({ actions, row }: { actions: DataTableAction<T>[]; r
    * terminaban con el mismo icono y parecían la misma cosa.
    */
   const getIcon = (a: DataTableAction<T>) => {
-    if (a.icon) return a.icon;
+    if (a.icon) return typeof a.icon === 'function' ? a.icon(row) : a.icon;
     const label = (typeof a.label === 'function' ? a.label(row) : a.label).toLowerCase();
     if (label.includes('editar') || label.includes('edit')) return <EditRounded fontSize="small" />;
     if (
@@ -190,7 +197,8 @@ function RowActionsIcons<T>({ actions, row }: { actions: DataTableAction<T>[]; r
     if (label.includes('detalle') || label.includes('ver ')) return <VisibilityRounded fontSize="small" />;
     return <MoreHorizRounded fontSize="small" />;
   };
-  const getColor = (a: DataTableAction<T>) => a.color === 'error' ? 'error' : 'inherit';
+  const getColor = (a: DataTableAction<T>): DataTableActionColor =>
+    (typeof a.color === 'function' ? a.color(row) : a.color) ?? 'inherit';
   return (
     <Stack direction="row" spacing={0.25}>
       {actions.map((a, i) => (

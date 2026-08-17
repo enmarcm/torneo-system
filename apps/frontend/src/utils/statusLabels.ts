@@ -66,6 +66,20 @@ export const STATUS_COLORS: Record<string, 'success' | 'warning' | 'error' | 'in
   NONE: 'default',
 };
 
+const DIVISION_NAMES: Record<number, string> = {
+  1: 'Primera División',
+  2: 'Segunda División',
+  3: 'Tercera División',
+  4: 'Cuarta División',
+};
+
+/**
+ * Nombre del nivel de división dentro del sistema de liga.
+ * El nivel 1 está por encima del 2, y así sucesivamente.
+ */
+export const getDivisionLabel = (level?: number | null): string | null =>
+  level == null ? null : (DIVISION_NAMES[level] ?? `División ${level}`);
+
 export const getStatusLabel = (status: string): string => STATUS_LABELS[status] ?? status;
 
 export const getStatusColor = (status: string): 'success' | 'warning' | 'error' | 'info' | 'default' | 'secondary' =>

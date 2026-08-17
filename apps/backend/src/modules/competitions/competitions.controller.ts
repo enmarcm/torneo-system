@@ -25,4 +25,7 @@ export const competitionsController = {
       'Decisión registrada',
     ),
   ),
+  remove: asyncHandler(async (req, res) =>
+    ok(res, await competitionsService.remove(req.params.id), 'Eliminado definitivamente'),
+  ),
 };

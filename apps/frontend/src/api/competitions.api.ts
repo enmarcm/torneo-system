@@ -54,6 +54,9 @@ export const competitionsApi = {
       outcome,
       outcomeNote,
     })).data.data,
+  /** Borrado definitivo. El backend lo rechaza si tiene historial. */
+  remove: async (id: string): Promise<{ id: string }> =>
+    (await api.delete(`/competitions/${id}`)).data.data,
 };
 
 export const fixturesApi = {

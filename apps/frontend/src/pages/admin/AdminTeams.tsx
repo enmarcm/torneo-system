@@ -7,6 +7,7 @@ import {
   PlaylistAddRounded,
   PowerSettingsNewRounded,
   BlockRounded,
+  DeleteForeverRounded,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { ImageUpload } from '@/components/ui/ImageUpload';
@@ -18,13 +19,14 @@ import { AppDrawer } from '@/components/ui/AppDrawer';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useTeamsQuery, useCompetitionsQuery, useCategoriesQuery } from '@/hooks/queries';
-import { useCreateTeam, useUpdateTeam, useSetTeamStatus, useRegisterTeam } from '@/hooks/mutations';
+import { useCreateTeam, useUpdateTeam, useSetTeamStatus, useRegisterTeam, useDeleteTeam } from '@/hooks/mutations';
 import type { Team } from '@/api/teams.api';
 import { extractErrorMessage } from '@/api/axios';
 import { useToast } from '@/hooks/common/useToast';
 
 const AdminTeams: React.FC = () => {
   const navigate = useNavigate();
+  const deleteTeam = useDeleteTeam();
   const { data: teams = [], isLoading, refetch, error } = useTeamsQuery();
   const { data: competitions = [] } = useCompetitionsQuery();
   const { data: categories = [] } = useCategoriesQuery();
@@ -40,6 +42,7 @@ const AdminTeams: React.FC = () => {
   const [form, setForm] = useState({ name: '', leaderEmail: '', leaderPassword: '', logoUrl: '' });
   const [editForm, setEditForm] = useState({ name: '', logoUrl: '' });
   const [deletingTeam, setDeletingTeam] = useState<Team | null>(null);
+  const [purgingTeam, setPurgingTeam] = useState<Team | null>(null);
 
   // Filters
   const [search, setSearch] = useState('');
@@ -125,7 +128,8 @@ const AdminTeams: React.FC = () => {
     {
       label: (t) => (t.status === 'ACTIVE' ? 'Desactivar' : 'Activar'),
       icon: <PowerSettingsNewRounded fontSize="small" />,
-      color: 'error',
+      // Rojo si va a desactivar, verde si va a reactivar.
+      color: (t) => (t.status === 'ACTIVE' ? 'error' : 'success'),
       onClick: (t) => (t.status === 'ACTIVE'
         ? setDeletingTeam(t)
         : setStatus.mutate({ id: t.id, status: 'ACTIVE' })),
@@ -134,6 +138,12 @@ const AdminTeams: React.FC = () => {
       label: 'Bloquear / sanciones',
       icon: <BlockRounded fontSize="small" />,
       onClick: () => navigate(ROUTES.admin.teamBlocks),
+    },
+    {
+      label: 'Eliminar definitivamente',
+      icon: <DeleteForeverRounded fontSize="small" />,
+      color: 'error',
+      onClick: (t) => setPurgingTeam(t),
     },
   ];
 
@@ -250,6 +260,27 @@ const AdminTeams: React.FC = () => {
         message={`Se desactivará "${deletingTeam?.name}". El equipo dejará de participar en competiciones activas.`}
         confirmLabel="Desactivar"
         loading={setStatus.isPending}
+      />
+
+      {/* Borrado definitivo: distinto de desactivar y sin vuelta atrás. */}
+      <ConfirmDialog
+        open={!!purgingTeam}
+        onClose={() => setPurgingTeam(null)}
+        onConfirm={async () => {
+          if (!purgingTeam) return;
+          try {
+            await deleteTeam.mutateAsync(purgingTeam.id);
+            toast.success('Equipo eliminado definitivamente');
+            setPurgingTeam(null);
+          } catch (e) {
+            // Si tiene historial el backend lo rechaza y explica el motivo.
+            toast.error(extractErrorMessage(e));
+          }
+        }}
+        title="¿Eliminar definitivamente?"
+        message={`Se borrará "${purgingTeam?.name}" y su usuario de líder, sin posibilidad de recuperarlo. Si el equipo ya se inscribió o jugó, la operación se rechaza: en ese caso desactivalo para conservar el historial.`}
+        confirmLabel="Eliminar definitivamente"
+        loading={deleteTeam.isPending}
       />
     </Box>
   );

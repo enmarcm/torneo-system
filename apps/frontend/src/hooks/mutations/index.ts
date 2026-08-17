@@ -347,6 +347,40 @@ export const useLiftTeamBlock = () => {
   });
 };
 
+/**
+ * Borrado definitivo. El backend lo rechaza con 409 si la entidad tiene
+ * historial, así que la UI muestra ese mensaje en vez de romper.
+ */
+export const useDeleteTeam = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: teamsApi.remove,
+    onSuccess: () => invalidate(qc, [['teams'], ['public', 'teams'], ['dashboard']]),
+  });
+};
+export const useDeletePlayer = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: playersApi.remove,
+    onSuccess: () => invalidate(qc, [['players'], ['public', 'players'], ['dashboard']]),
+  });
+};
+export const useDeleteCompetition = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: competitionsApi.remove,
+    onSuccess: () =>
+      invalidate(qc, [['competitions'], ['public', 'competitions'], ['dashboard']]),
+  });
+};
+export const useDeleteEdition = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: editionsApi.remove,
+    onSuccess: () => invalidate(qc, [['editions'], ['public', 'editions'], ['dashboard']]),
+  });
+};
+
 /** Ascenso / descenso / no participa: decisión del admin sobre la inscripción. */
 export const useSetRegistrationOutcome = () => {
   const qc = useQueryClient();

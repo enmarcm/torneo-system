@@ -1,5 +1,5 @@
-import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Button, IconButton, Menu, MenuItem, FormControl, Select, InputLabel, Tooltip, TextField, Divider, ListItemText, Checkbox, OutlinedInput } from '@mui/material';
-import { getStatusLabel } from '@/utils/statusLabels';
+import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Button, IconButton, Menu, MenuItem, FormControl, Select, InputLabel, Tooltip, TextField, Divider, ListItemText, Checkbox, OutlinedInput, FormHelperText, Alert } from '@mui/material';
+import { getStatusLabel, getDivisionLabel } from '@/utils/statusLabels';
 import { AddRounded, MoreVertRounded, EmojiEventsRounded } from '@mui/icons-material';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
@@ -10,7 +10,7 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { EntityHeroCard } from '@/components/sport/EntityHeroCard';
 import { useEditionsQuery, useCategoriesQuery, useCompetitionsQuery } from '@/hooks/queries';
-import { useCreateCompetition, useUpdateCompetition, useSetCompetitionStatus } from '@/hooks/mutations';
+import { useCreateCompetition, useUpdateCompetition, useSetCompetitionStatus, useDeleteCompetition } from '@/hooks/mutations';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import { extractErrorMessage } from '@/api/axios';
 import { useToast } from '@/hooks/common/useToast';
@@ -65,6 +65,20 @@ const KINDS: Array<{ value: Competition['kind']; label: string; hint: string }> 
   { value: 'SPECIAL', label: 'Especial (Gremial / Veterano)', hint: 'Torneo independiente.' },
 ];
 
+/** Niveles disponibles del sistema de liga. El 1 es el más alto. */
+const DIVISION_LEVELS = [1, 2, 3, 4];
+
+/**
+ * En la liga la eliminatoria es fija y la define el nivel de división, así que
+ * acá solo se informa. La ida y vuelta es exclusiva de la Copa.
+ */
+const LEAGUE_KNOCKOUT_HINT: Record<number, string> = {
+  1: 'Eliminatoria desde cuartos de final (8 clasificados), a partido único.',
+  2: 'Eliminatoria desde cuartos de final (8 clasificados), a partido único.',
+  3: 'Eliminatoria desde octavos de final (16 clasificados), a partido único.',
+  4: 'Eliminatoria desde octavos de final (16 clasificados), a partido único.',
+};
+
 const KO_STAGES: Array<{ value: 'R16' | 'QUARTER' | 'SEMI' | 'FINAL'; label: string }> = [
   { value: 'R16', label: 'Octavos' },
   { value: 'QUARTER', label: 'Cuartos' },
@@ -104,7 +118,16 @@ const StructureFields: React.FC<{
         <Select
           label="Tipo de torneo"
           value={value.kind}
-          onChange={(e) => set('kind', e.target.value as Competition['kind'])}
+          onChange={(e) => {
+            const kind = e.target.value as Competition['kind'];
+            // Solo las divisiones de liga tienen nivel; al cambiar a otro tipo se
+            // limpian nivel y etiqueta para no arrastrar un dato que ya no aplica.
+            onChange(
+              kind === 'LEAGUE_DIVISION'
+                ? { ...value, kind }
+                : { ...value, kind, divisionLevel: '', division: '' },
+            );
+          }}
         >
           {KINDS.map((k) => (
             <MenuItem key={k.value} value={k.value}>
@@ -119,14 +142,27 @@ const StructureFields: React.FC<{
           select
           fullWidth
           size="small"
-          label="Nivel de división"
+          label="División"
           value={value.divisionLevel}
-          onChange={(e) => set('divisionLevel', e.target.value)}
-          helperText="1 está por encima de 2, y 2 por encima de 3."
+          onChange={(e) => {
+            const level = e.target.value;
+            // Un solo selector define las dos cosas: el nivel (número que ordena
+            // el ascenso y el descenso) y la etiqueta que se muestra en pantalla.
+            // Así no quedan dos campos que puedan contradecirse.
+            onChange({
+              ...value,
+              divisionLevel: level,
+              division: getDivisionLabel(level ? Number(level) : null) ?? '',
+            });
+          }}
+          helperText="Primera está por encima de Segunda, y Segunda por encima de Tercera. Define el ascenso y el descenso."
         >
-          <MenuItem value="1">1 · Primera</MenuItem>
-          <MenuItem value="2">2 · Segunda</MenuItem>
-          <MenuItem value="3">3 · Tercera</MenuItem>
+          <MenuItem value="">Sin división</MenuItem>
+          {DIVISION_LEVELS.map((lvl) => (
+            <MenuItem key={lvl} value={String(lvl)}>
+              {getDivisionLabel(lvl)}
+            </MenuItem>
+          ))}
         </TextField>
       )}
 
@@ -144,7 +180,18 @@ const StructureFields: React.FC<{
         </TextField>
       )}
 
-      {value.format === 'GROUPS_KNOCKOUT' && (
+      {/*
+        En la liga la eliminatoria no se elige: la fija el nivel de división.
+        Se muestra como informativo para que el admin sepa qué va a pasar.
+      */}
+      {value.kind === 'LEAGUE_DIVISION' && (
+        <Alert severity="info" variant="outlined" icon={<EmojiEventsRounded fontSize="small" />}>
+          {LEAGUE_KNOCKOUT_HINT[Number(value.divisionLevel)] ??
+            'Elegí la división para ver desde qué ronda arranca la eliminatoria.'}
+        </Alert>
+      )}
+
+      {value.kind !== 'LEAGUE_DIVISION' && value.format === 'GROUPS_KNOCKOUT' && (
         <FormControl fullWidth size="small">
           <InputLabel>Rondas a ida y vuelta</InputLabel>
           <Select
@@ -214,10 +261,16 @@ const AdminCompetitions: React.FC = () => {
   const [anchor, setAnchor] = useState<{ el: HTMLElement; c: Competition } | null>(null);
   const [selectedCat, setSelectedCat] = useState('');
   const [deletingComp, setDeletingComp] = useState<Competition | null>(null);
+  const [purgingComp, setPurgingComp] = useState<Competition | null>(null);
+  const deleteComp = useDeleteCompetition();
   const [form, setForm] = useState({ ...EMPTY_FORM });
   const [editForm, setEditForm] = useState({ ...EMPTY_FORM });
+  // Edición elegida en el formulario de alta. Arranca en la del Topbar, pero se
+  // puede cambiar sin salir del drawer.
+  const [formEditionId, setFormEditionId] = useState('');
 
   const cat = categories.find((c) => c.id === selectedCat);
+  const currentEdition = editions.find((e) => e.id === editionId);
 
   const submit = async () => {
     try {
@@ -245,9 +298,9 @@ const AdminCompetitions: React.FC = () => {
         setEditingComp(null);
         toast.success('Competición actualizada');
       } else {
-        if (!editionId || !selectedCat) return;
+        if (!formEditionId || !selectedCat) return;
         await create.mutateAsync({
-          editionId,
+          editionId: formEditionId,
           categoryId: selectedCat,
           name: form.name || undefined,
           division: form.division || undefined,
@@ -298,6 +351,10 @@ const AdminCompetitions: React.FC = () => {
   const onOpenCreate = () => {
     setEditingComp(null);
     setForm({ ...EMPTY_FORM });
+    setSelectedCat('');
+    // Se propone la edición que está activa en el Topbar, pero queda visible y
+    // editable para no crear a ciegas.
+    setFormEditionId(editionId ?? '');
     setOpen('create');
   };
 
@@ -305,7 +362,13 @@ const AdminCompetitions: React.FC = () => {
     <Box>
       <PageHeader
         title="Competiciones"
-        subtitle="Instancias de categorías dentro de una edición."
+        // Se nombra la edición que se está viendo: el listado está filtrado por
+        // ella y, sin decirlo, no se distingue de qué temporada son los torneos.
+        subtitle={
+          currentEdition
+            ? `Torneos que se juegan en ${currentEdition.name} (${currentEdition.year}). Cambiá de edición desde el selector de arriba.`
+            : 'Cada competición es una categoría jugándose dentro de una edición.'
+        }
         action={
           <Button variant="contained" startIcon={<AddRounded />} onClick={onOpenCreate} disabled={!editionId}>
             Nueva competición
@@ -355,9 +418,26 @@ const AdminCompetitions: React.FC = () => {
                       </IconButton>
                     </Tooltip>
                   </Stack>
-                  <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+                  <Stack direction="row" spacing={1} sx={{ mt: 2 }} flexWrap="wrap" useFlexGap>
                     <StatusBadge status={c.format} />
-                    {c.division && <Chip size="small" label={c.division} variant="outlined" />}
+                    {/* Nivel dentro del sistema de liga: Primera, Segunda o Tercera. */}
+                    {getDivisionLabel(c.divisionLevel) && (
+                      <Chip
+                        size="small"
+                        color="primary"
+                        label={getDivisionLabel(c.divisionLevel)}
+                        sx={{ fontWeight: 700 }}
+                      />
+                    )}
+                    {/* Para lo que no es división de liga, se muestra el tipo de torneo. */}
+                    {c.divisionLevel == null && c.kind && c.kind !== 'SPECIAL' && (
+                      <Chip size="small" variant="outlined" label={getStatusLabel(c.kind)} />
+                    )}
+                    {/* Solo si viene de un registro viejo sin nivel: con nivel, el
+                        chip de arriba ya muestra ese mismo texto. */}
+                    {c.divisionLevel == null && c.division && (
+                      <Chip size="small" label={c.division} variant="outlined" />
+                    )}
                     <StatusBadge status={c.status} />
                   </Stack>
                   <Stack direction="row" spacing={3} sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
@@ -391,7 +471,34 @@ const AdminCompetitions: React.FC = () => {
             Cambiar a {getStatusLabel(s)}
           </MenuItem>
         ))}
+        <Divider />
+        <MenuItem
+          onClick={() => { if (anchor) setPurgingComp(anchor.c); setAnchor(null); }}
+          sx={{ color: 'error.main', fontWeight: 700 }}
+        >
+          Eliminar definitivamente
+        </MenuItem>
       </Menu>
+
+      {/* Borrado definitivo: el backend lo rechaza si ya tiene equipos o partidos. */}
+      <ConfirmDialog
+        open={!!purgingComp}
+        onClose={() => setPurgingComp(null)}
+        onConfirm={async () => {
+          if (!purgingComp) return;
+          try {
+            await deleteComp.mutateAsync(purgingComp.id);
+            toast.success('Competición eliminada definitivamente');
+            setPurgingComp(null);
+          } catch (e) {
+            toast.error(extractErrorMessage(e));
+          }
+        }}
+        title="¿Eliminar definitivamente?"
+        message={`Se borrará "${purgingComp?.name}" sin posibilidad de recuperarla. Si ya tiene equipos inscritos o partidos, la operación se rechaza: en ese caso finalizala para conservar la temporada.`}
+        confirmLabel="Eliminar definitivamente"
+        loading={deleteComp.isPending}
+      />
 
       <ConfirmDialog
         open={!!deletingComp}
@@ -453,6 +560,30 @@ const AdminCompetitions: React.FC = () => {
           </Stack>
         ) : (
           <Stack spacing={2}>
+            {/*
+              La competición es la instancia de una categoría DENTRO de una edición,
+              así que la edición se elige acá de forma explícita. Antes se tomaba del
+              selector del Topbar y, si estaba sin tocar, caía silenciosamente en la
+              última edición creada: se podía crear en la edición equivocada sin aviso.
+            */}
+            <FormControl fullWidth>
+              <InputLabel>Edición</InputLabel>
+              <Select
+                label="Edición"
+                value={formEditionId}
+                onChange={(e) => setFormEditionId(e.target.value as string)}
+              >
+                {editions.map((ed) => (
+                  <MenuItem key={ed.id} value={ed.id}>
+                    {ed.name} · {ed.year} {ed.status === 'ACTIVE' ? '(activa)' : ''}
+                  </MenuItem>
+                ))}
+              </Select>
+              <FormHelperText>
+                La competición va a existir solo dentro de esta edición.
+              </FormHelperText>
+            </FormControl>
+
             <FormControl fullWidth>
               <InputLabel>Categoría</InputLabel>
               <Select
@@ -461,8 +592,9 @@ const AdminCompetitions: React.FC = () => {
                 onChange={(e) => {
                   const id = e.target.value as string;
                   setSelectedCat(id);
-                  // Al elegir la categoría se arrastran sus defaults de estructura
-                  // (tipo de torneo, formato y nivel de división).
+                  // Al elegir la categoría se copian TODOS sus defaults al
+                  // formulario: formato, tipo, nivel de división, rango de edad
+                  // y cupos. Quedan visibles y editables antes de crear.
                   const picked = categories.find((c) => c.id === id);
                   if (picked) {
                     setForm((f) => ({
@@ -470,7 +602,12 @@ const AdminCompetitions: React.FC = () => {
                       format: picked.defaultFormat,
                       kind: picked.defaultKind ?? f.kind,
                       divisionLevel: picked.defaultDivisionLevel?.toString() ?? '',
+                      division: getDivisionLabel(picked.defaultDivisionLevel) ?? '',
                       imageUrl: f.imageUrl || (picked.imageUrl ?? ''),
+                      ageMin: picked.defaultAgeMin?.toString() ?? '',
+                      ageMax: picked.defaultAgeMax?.toString() ?? '',
+                      minPlayers: picked.defaultMinPlayers ?? EMPTY_FORM.minPlayers,
+                      maxPlayers: picked.defaultMaxPlayers ?? EMPTY_FORM.maxPlayers,
                     }));
                   }
                 }}
@@ -515,7 +652,7 @@ const AdminCompetitions: React.FC = () => {
             <StructureFields value={form} onChange={setForm} />
             <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
               <Button onClick={() => { setOpen(null); setEditingComp(null); }}>Cancelar</Button>
-              <Button variant="contained" onClick={submit} disabled={!selectedCat || create.isPending}>
+              <Button variant="contained" onClick={submit} disabled={!selectedCat || !formEditionId || create.isPending}>
                 {create.isPending ? 'Creando…' : 'Crear competición'}
               </Button>
             </Stack>
