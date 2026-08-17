@@ -20,8 +20,19 @@ const schema = z.object({
   UPLOAD_MAX_MB: z.coerce.number().default(5),
   ADMIN_EMAIL: z.string().email(),
   ADMIN_PASSWORD: z.string().min(6),
+  // Endpoint INTERNO: el que usa el backend para conectarse a MinIO.
+  // Dentro de Docker es el nombre del servicio ("minio"), que el navegador
+  // del usuario no puede resolver.
   MINIO_ENDPOINT: z.string().min(1),
   MINIO_PORT: z.coerce.number().default(9000),
+  /**
+   * Base PÚBLICA desde la que el navegador descarga los archivos del bucket
+   * público (por ejemplo https://assets-torneo.enmarcm.site/public-assets).
+   * Va separada del endpoint interno a propósito: si se usara el mismo valor,
+   * las imágenes quedarían apuntando a un host interno de Docker y no cargarían.
+   * Si se omite, se arma con el endpoint interno (sirve para desarrollo local).
+   */
+  PUBLIC_ASSETS_BASE_URL: z.string().url().optional(),
   MINIO_USE_SSL: z
     .string()
     .default('false')

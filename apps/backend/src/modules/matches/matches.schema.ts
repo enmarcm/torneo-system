@@ -10,8 +10,8 @@ export const createMatchSchema = z.object({
   homeRegistrationId: z.string().uuid(),
   awayRegistrationId: z.string().uuid(),
   // Nullable: el sorteo genera los cruces sin fecha y el admin la asigna después.
-  scheduledAt: z.coerce.date().nullable().optional(),
-  venue: z.string().optional(),
+  scheduledAt: z.coerce.date().nullish(),
+  venue: z.string().nullish(),
   homeScore: z.number().int().min(0).optional(),
   awayScore: z.number().int().min(0).optional(),
   status: z.enum(['SCHEDULED', 'LIVE', 'FINISHED', 'POSTPONED']).optional(),

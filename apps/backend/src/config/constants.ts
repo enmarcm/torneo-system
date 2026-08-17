@@ -24,4 +24,9 @@ export const MESSAGES = {
 };
 
 export const IMAGE_MIME = ['image/jpeg', 'image/png', 'image/webp'];
+
+/** Lado máximo al que se reescalan las imágenes subidas, en píxeles. */
+export const IMAGE_MAX_SIDE = 1024;
+/** Calidad WebP. 82 es el punto donde ya no se nota la pérdida a simple vista. */
+export const IMAGE_WEBP_QUALITY = 82;
 export const DOC_MIME = ['image/jpeg', 'image/png', 'application/pdf'];

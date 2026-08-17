@@ -6,8 +6,9 @@ export const createPlayerSchema = z.object({
   firstName: z.string().min(2),
   lastName: z.string().min(2),
   birthDate: z.coerce.date(),
-  position: z.string().optional(),
-  photoUrl: z.string().optional(),
+  // `.nullish()` en los campos que admiten NULL en la base.
+  position: z.string().nullish(),
+  photoUrl: z.string().nullish(),
 });
 export const updatePlayerSchema = createPlayerSchema.partial();
 export const playerStatusSchema = z.object({ status: z.enum(['ACTIVE', 'INACTIVE']) });
