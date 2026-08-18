@@ -34,6 +34,21 @@ export interface Competition {
   _count?: { registrations: number; matches: number };
 }
 
+/**
+ * Datos mínimos de la competición que viajan dentro de otros recursos
+ * (partidos, estadísticas) para poder etiquetarlos sin pedirla aparte.
+ */
+export interface CompetitionSummary {
+  id: string;
+  name: string;
+  kind: Competition['kind'];
+  format: Competition['format'];
+  division: string | null;
+  divisionLevel: number | null;
+  editionId: string;
+  category?: { id: string; name: string } | null;
+}
+
 export const competitionsApi = {
   list: async (editionId?: string): Promise<Competition[]> =>
     (await api.get('/competitions', { params: { editionId } })).data.data,

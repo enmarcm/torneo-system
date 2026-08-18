@@ -5,10 +5,6 @@ import {
   Card,
   Typography,
   Button,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   TextField,
   Stack,
   Tabs,
@@ -20,14 +16,18 @@ import { ArrowBackRounded, EventBusyRounded, PendingActionsRounded } from '@mui/
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { usePublicCompetitionsQuery, usePublicMatchesQuery } from '@/hooks/queries';
+import { usePublicMatchesQuery } from '@/hooks/queries';
+import { usePublicScope, ALL_COMPETITIONS } from '@/hooks/common/usePublicScope';
+import { PublicScopeFilters } from '@/components/sport/PublicScopeFilters';
+import { CompetitionTags } from '@/components/sport/CompetitionTags';
 import { MatchCard } from '@/components/sport/MatchCard';
 import { MvpCard } from '@/components/sport/MvpCard';
 import { LiveScoreboard } from '@/components/sport/LiveScoreboard';
 import { AppModal } from '@/components/ui/AppModal';
 import { ROUTES } from '@/routes/routes';
 import { formatDate, UNSCHEDULED_LABEL } from '@/utils/formatDate';
-import type { Competition, Match } from '@/api/public.api';
+import { getCompetitionShortLabel } from '@/utils/competitionMeta';
+import type { Match } from '@/api/public.api';
 
 type Filter = 'ALL' | 'LIVE' | 'SCHEDULED' | 'FINISHED';
 
@@ -46,14 +46,22 @@ const matchesFilter = (m: Match, f: Filter) => {
 
 const PublicSchedule: React.FC = () => {
   const navigate = useNavigate();
+  const scope = usePublicScope();
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
-  const [cid, setCid] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const [filter, setFilter] = useState<Filter>('ALL');
 
-  const { data: comps = [] } = usePublicCompetitionsQuery();
-  const competitionId: string | undefined = cid || comps[0]?.id;
-  const { data: matches = [] } = usePublicMatchesQuery(competitionId);
+  const { data: matches = [] } = usePublicMatchesQuery(
+    scope.competitionId || undefined,
+    undefined,
+    scope.editionId || undefined,
+  );
+
+  // Con "todas las competiciones" el día mezcla torneos, así que cada tarjeta
+  // lleva de cuál viene.
+  const showCompetition = scope.competitionId === ALL_COMPETITIONS;
+  const competitionLabel = (m: Match) =>
+    showCompetition && m.competition ? getCompetitionShortLabel(m.competition) : undefined;
 
   const counts = useMemo(
     () =>
@@ -110,67 +118,65 @@ const PublicSchedule: React.FC = () => {
         Calendario
       </Typography>
       <Typography color="text.secondary" sx={{ mb: 3 }}>
-        Todos los encuentros de la competición, día por día.
+        Todos los encuentros de la edición, día por día. Toca un partido para ver el detalle.
       </Typography>
 
-      <Card sx={{ p: 2, mb: 3 }}>
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ md: 'center' }}>
-          <FormControl size="small" sx={{ minWidth: 240 }}>
-            <InputLabel>Competición</InputLabel>
-            <Select
-              label="Competición"
-              value={competitionId ?? ''}
-              onChange={(e) => setCid(e.target.value as string)}
-            >
-              {comps.map((c: Competition) => (
-                <MenuItem key={c.id} value={c.id}>
-                  {c.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <TextField
-            type="date"
-            size="small"
-            label="Día"
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            InputLabelProps={{ shrink: true }}
-            sx={{ minWidth: 170 }}
-          />
-          {dateFilter && (
-            <Button size="small" onClick={() => setDateFilter('')} sx={{ color: 'text.secondary' }}>
-              Limpiar día
-            </Button>
-          )}
-          <Box sx={{ flex: 1 }} />
-          <Tabs
-            value={filter}
-            onChange={(_, v: Filter) => setFilter(v)}
-            variant="scrollable"
-            scrollButtons="auto"
-            sx={{ minHeight: 38, '& .MuiTab-root': { minHeight: 38, textTransform: 'none' } }}
-          >
-            {FILTERS.map((f) => (
-              <Tab
-                key={f.value}
-                value={f.value}
-                label={
-                  <Stack direction="row" alignItems="center" spacing={0.75}>
-                    <span>{f.label}</span>
-                    <Chip
-                      size="small"
-                      label={counts[f.value]}
-                      sx={{ height: 18, fontSize: 11, fontWeight: 700 }}
-                      color={f.value === 'LIVE' && counts.LIVE > 0 ? 'error' : 'default'}
-                    />
-                  </Stack>
-                }
-              />
-            ))}
-          </Tabs>
-        </Stack>
-      </Card>
+      <PublicScopeFilters
+        editions={scope.editions}
+        editionId={scope.editionId}
+        onEditionChange={scope.setEditionId}
+        isCurrentEdition={scope.isCurrentEdition}
+        competitions={scope.competitions}
+        competitionId={scope.competitionId}
+        onCompetitionChange={scope.setCompetitionId}
+      >
+        <TextField
+          type="date"
+          size="small"
+          label="Día"
+          value={dateFilter}
+          onChange={(e) => setDateFilter(e.target.value)}
+          InputLabelProps={{ shrink: true }}
+          sx={{ minWidth: 170 }}
+        />
+        {dateFilter && (
+          <Button size="small" onClick={() => setDateFilter('')} sx={{ color: 'text.secondary' }}>
+            Limpiar día
+          </Button>
+        )}
+        <Box sx={{ flex: 1 }} />
+        <Tabs
+          value={filter}
+          onChange={(_, v: Filter) => setFilter(v)}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{ minHeight: 38, '& .MuiTab-root': { minHeight: 38, textTransform: 'none' } }}
+        >
+          {FILTERS.map((f) => (
+            <Tab
+              key={f.value}
+              value={f.value}
+              label={
+                <Stack direction="row" alignItems="center" spacing={0.75}>
+                  <span>{f.label}</span>
+                  <Chip
+                    size="small"
+                    label={counts[f.value]}
+                    sx={{ height: 18, fontSize: 11, fontWeight: 700 }}
+                    color={f.value === 'LIVE' && counts.LIVE > 0 ? 'error' : 'default'}
+                  />
+                </Stack>
+              }
+            />
+          ))}
+        </Tabs>
+      </PublicScopeFilters>
+
+      {scope.competition && (
+        <Box sx={{ mb: 3 }}>
+          <CompetitionTags competition={scope.competition} />
+        </Box>
+      )}
 
       {groups.total === 0 ? (
         <Card sx={{ p: 6, textAlign: 'center' }}>
@@ -197,7 +203,11 @@ const PublicSchedule: React.FC = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.2, delay: Math.min(i * 0.03, 0.24) }}
                     >
-                      <MatchCard match={m} onClick={() => setSelectedMatch(m)} />
+                      <MatchCard
+                        match={m}
+                        competitionLabel={competitionLabel(m)}
+                        onClick={() => setSelectedMatch(m)}
+                      />
                     </Box>
                   </Grid>
                 ))}
@@ -226,7 +236,11 @@ const PublicSchedule: React.FC = () => {
               <Grid container spacing={2}>
                 {groups.pending.map((m: Match) => (
                   <Grid size={{ xs: 12, md: 6, lg: 4 }} key={m.id}>
-                    <MatchCard match={m} onClick={() => setSelectedMatch(m)} />
+                    <MatchCard
+                      match={m}
+                      competitionLabel={competitionLabel(m)}
+                      onClick={() => setSelectedMatch(m)}
+                    />
                   </Grid>
                 ))}
               </Grid>
@@ -243,11 +257,23 @@ const PublicSchedule: React.FC = () => {
             ? `${selectedMatch.homeRegistration.team.name} vs ${selectedMatch.awayRegistration.team.name}`
             : ''
         }
-        subtitle={selectedMatch ? selectedMatch.venue ?? 'Sede por confirmar' : undefined}
+        subtitle={
+          selectedMatch
+            ? [
+                selectedMatch.competition ? getCompetitionShortLabel(selectedMatch.competition) : null,
+                selectedMatch.venue ?? 'Sede por confirmar',
+              ]
+                .filter(Boolean)
+                .join(' · ')
+            : undefined
+        }
         maxWidth={640}
       >
         {selectedMatch && (
           <Stack spacing={2}>
+            {selectedMatch.competition && (
+              <CompetitionTags competition={selectedMatch.competition} />
+            )}
             <LiveScoreboard match={selectedMatch} size="lg" />
             <MvpCard match={selectedMatch} />
           </Stack>

@@ -124,6 +124,25 @@ export const competitionsService = {
       orderBy: { createdAt: 'desc' },
     }),
 
+  /**
+   * Inscripciones de una edición o de una competición concreta. La pantalla
+   * pública de equipos las agrupa por torneo, para que se vea qué club juega
+   * en cada división, en la copa o en las categorías de menores.
+   */
+  registrations: (filters: { editionId?: string; competitionId?: string } = {}) =>
+    prisma.teamRegistration.findMany({
+      where: {
+        status: 'ACTIVE',
+        ...(filters.competitionId ? { competitionId: filters.competitionId } : {}),
+        ...(filters.editionId ? { competition: { editionId: filters.editionId } } : {}),
+      },
+      include: {
+        team: { select: { id: true, name: true, logoUrl: true, status: true } },
+        group: { select: { id: true, name: true } },
+      },
+      orderBy: { team: { name: 'asc' } },
+    }),
+
   get: async (id: string) => {
     const c = await prisma.competition.findUnique({
       where: { id },

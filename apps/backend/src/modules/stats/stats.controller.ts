@@ -8,6 +8,7 @@ export const statsController = {
       res,
       await statsService.players({
         competitionId: req.query.competitionId as string | undefined,
+        editionId: req.query.editionId as string | undefined,
         teamId: req.query.teamId as string | undefined,
         playerId: req.query.playerId as string | undefined,
       }),

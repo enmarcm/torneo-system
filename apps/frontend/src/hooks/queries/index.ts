@@ -130,11 +130,18 @@ export const usePublicTeamsQuery = () =>
   useQuery({ queryKey: ['public', 'teams'], queryFn: publicApi.teams, staleTime: MID_STALE });
 export const usePublicPlayersQuery = (search?: string) =>
   useQuery({ queryKey: ['public', 'players', search], queryFn: () => publicApi.players(search), staleTime: MID_STALE });
-export const usePublicMatchesQuery = (competitionId?: string, status?: string) =>
+export const usePublicMatchesQuery = (competitionId?: string, status?: string, editionId?: string) =>
   useQuery({
-    queryKey: ['public', 'matches', competitionId, status],
-    queryFn: () => publicApi.matches(competitionId, status),
+    queryKey: ['public', 'matches', competitionId, status, editionId],
+    queryFn: () => publicApi.matches(competitionId, status, editionId),
     staleTime: status === 'LIVE' ? FRESH_STALE : MID_STALE,
+  });
+export const usePublicRegistrationsQuery = (editionId?: string, competitionId?: string) =>
+  useQuery({
+    queryKey: ['public', 'registrations', editionId, competitionId],
+    queryFn: () => publicApi.registrations(editionId, competitionId),
+    enabled: !!editionId || !!competitionId,
+    staleTime: MID_STALE,
   });
 export const usePublicStandingsQuery = (competitionId: string, groupId?: string) =>
   useQuery({
@@ -143,8 +150,12 @@ export const usePublicStandingsQuery = (competitionId: string, groupId?: string)
     enabled: !!competitionId,
     staleTime: MID_STALE,
   });
-export const usePublicStatsQuery = (competitionId?: string) =>
-  useQuery({ queryKey: ['public', 'stats', competitionId], queryFn: () => publicApi.stats(competitionId), staleTime: MID_STALE });
+export const usePublicStatsQuery = (competitionId?: string, editionId?: string) =>
+  useQuery({
+    queryKey: ['public', 'stats', competitionId, editionId],
+    queryFn: () => publicApi.stats(competitionId, editionId),
+    staleTime: MID_STALE,
+  });
 export const usePublicAdsQuery = (placement?: string) =>
   useQuery({ queryKey: ['public', 'ads', placement], queryFn: () => publicApi.ads(placement), staleTime: REF_STALE });
 export const usePublicGroupsQuery = (competitionId: string) =>

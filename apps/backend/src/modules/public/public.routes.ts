@@ -23,11 +23,22 @@ publicRouter.get('/teams', asyncHandler(async (_req, res) => ok(res, await teams
 publicRouter.get('/players', asyncHandler(async (req, res) =>
   ok(res, await playersService.list(req.query.search as string | undefined)),
 ));
+publicRouter.get('/registrations', asyncHandler(async (req, res) =>
+  ok(res, await competitionsService.registrations({
+    editionId: req.query.editionId as string | undefined,
+    competitionId: req.query.competitionId as string | undefined,
+  })),
+));
+// El calendario público muestra todas las competiciones de la edición a la vez,
+// así que necesita un tope más alto que el de las pantallas de administración.
+const PUBLIC_MATCHES_LIMIT = 500;
 publicRouter.get('/matches', asyncHandler(async (req, res) =>
-  ok(res, await matchesService.list(
-    req.query.competitionId as string | undefined,
-    req.query.status as string | undefined,
-  )),
+  ok(res, await matchesService.list({
+    competitionId: req.query.competitionId as string | undefined,
+    status: req.query.status as string | undefined,
+    editionId: req.query.editionId as string | undefined,
+    limit: PUBLIC_MATCHES_LIMIT,
+  })),
 ));
 publicRouter.get('/standings', asyncHandler(async (req, res) =>
   ok(res, await standingsService.byCompetition(
@@ -36,7 +47,10 @@ publicRouter.get('/standings', asyncHandler(async (req, res) =>
   )),
 ));
 publicRouter.get('/stats', asyncHandler(async (req, res) =>
-  ok(res, await statsService.players({ competitionId: req.query.competitionId as string | undefined })),
+  ok(res, await statsService.players({
+    competitionId: req.query.competitionId as string | undefined,
+    editionId: req.query.editionId as string | undefined,
+  })),
 ));
 publicRouter.get('/ads', asyncHandler(async (req, res) =>
   ok(res, await adsService.list(req.query.placement as string | undefined)),

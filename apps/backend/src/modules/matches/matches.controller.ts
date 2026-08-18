@@ -6,10 +6,11 @@ export const matchesController = {
   list: asyncHandler(async (req, res) =>
     ok(
       res,
-      await matchesService.list(
-        req.query.competitionId as string | undefined,
-        req.query.status as string | undefined,
-      ),
+      await matchesService.list({
+        competitionId: req.query.competitionId as string | undefined,
+        status: req.query.status as string | undefined,
+        editionId: req.query.editionId as string | undefined,
+      }),
     ),
   ),
   get: asyncHandler(async (req, res) => ok(res, await matchesService.get(req.params.id))),

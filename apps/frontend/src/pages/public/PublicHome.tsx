@@ -6,9 +6,11 @@ import { usePublicEditionsQuery, usePublicCompetitionsQuery, usePublicMatchesQue
 import { MatchCard } from '@/components/sport/MatchCard';
 import { LiveScoreboard } from '@/components/sport/LiveScoreboard';
 import { EntityHeroCard } from '@/components/sport/EntityHeroCard';
+import { CompetitionTags } from '@/components/sport/CompetitionTags';
 import { AppModal } from '@/components/ui/AppModal';
 import { ROUTES } from '@/routes/routes';
 import { motion } from 'framer-motion';
+import { sortCompetitions, getCompetitionShortLabel } from '@/utils/competitionMeta';
 import type { Edition, Competition, Match } from '@/api/public.api';
 
 const PublicHome: React.FC = () => {
@@ -16,9 +18,13 @@ const PublicHome: React.FC = () => {
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const { data: editions = [] } = usePublicEditionsQuery();
   const active: Edition | undefined = editions.find((e: Edition) => e.status === 'ACTIVE') ?? editions[0];
-  const { data: comps = [] } = usePublicCompetitionsQuery(active?.id);
-  const { data: liveMatches = [] } = usePublicMatchesQuery(undefined, 'LIVE');
-  const { data: upcoming = [] } = usePublicMatchesQuery(undefined, 'SCHEDULED');
+  const { data: rawComps = [] } = usePublicCompetitionsQuery(active?.id);
+  const comps = sortCompetitions(rawComps as Competition[]);
+  const { data: liveMatches = [] } = usePublicMatchesQuery(undefined, 'LIVE', active?.id);
+  const { data: upcoming = [] } = usePublicMatchesQuery(undefined, 'SCHEDULED', active?.id);
+
+  const competitionLabel = (m: Match) =>
+    m.competition ? getCompetitionShortLabel(m.competition) : undefined;
 
   return (
     <Box>
@@ -49,7 +55,11 @@ const PublicHome: React.FC = () => {
             <Grid container spacing={2}>
               {liveMatches.map((m: Match) => (
                 <Grid size={{ xs: 12, md: 6 }} key={m.id}>
-                  <MatchCard match={m} onClick={() => setSelectedMatch(m)} />
+                  <MatchCard
+                    match={m}
+                    competitionLabel={competitionLabel(m)}
+                    onClick={() => setSelectedMatch(m)}
+                  />
                 </Grid>
               ))}
             </Grid>
@@ -66,7 +76,11 @@ const PublicHome: React.FC = () => {
             <Grid container spacing={2}>
               {upcoming.slice(0, 6).map((m: Match) => (
                 <Grid size={{ xs: 12, md: 6, lg: 4 }} key={m.id}>
-                  <MatchCard match={m} onClick={() => setSelectedMatch(m)} />
+                  <MatchCard
+                    match={m}
+                    competitionLabel={competitionLabel(m)}
+                    onClick={() => setSelectedMatch(m)}
+                  />
                 </Grid>
               ))}
             </Grid>
@@ -78,14 +92,14 @@ const PublicHome: React.FC = () => {
           <Grid container spacing={2}>
             {comps.slice(0, 6).map((c: Competition) => (
               <Grid size={{ xs: 12, sm: 6, md: 4 }} key={c.id}>
-                <Card component={motion.div} whileHover={{ y: -2 }} sx={{ p: 2.5, cursor: 'pointer' }} onClick={() => navigate(ROUTES.public.competitions)}>
-                  <Stack direction="row" alignItems="center" spacing={1.5}>
-                    <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: 'primary.soft', color: 'primary.main', display: 'grid', placeItems: 'center' }}>
+                <Card component={motion.div} whileHover={{ y: -2 }} sx={{ p: 2.5, cursor: 'pointer', height: '100%' }} onClick={() => navigate(ROUTES.public.competitions)}>
+                  <Stack direction="row" alignItems="flex-start" spacing={1.5}>
+                    <Box sx={{ width: 40, height: 40, flexShrink: 0, borderRadius: 2, bgcolor: 'primary.soft', color: 'primary.main', display: 'grid', placeItems: 'center' }}>
                       <SportsSoccerRounded />
                     </Box>
-                    <Box>
-                      <Typography sx={{ fontWeight: 600 }}>{c.name}</Typography>
-                      <Typography variant="caption" color="text.secondary">{c.category?.name}</Typography>
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography sx={{ fontWeight: 600, mb: 0.75 }}>{c.name}</Typography>
+                      <CompetitionTags competition={c} />
                     </Box>
                   </Stack>
                 </Card>
@@ -99,7 +113,13 @@ const PublicHome: React.FC = () => {
         open={!!selectedMatch}
         onClose={() => setSelectedMatch(null)}
         title={selectedMatch ? `${selectedMatch.homeRegistration.team.name} vs ${selectedMatch.awayRegistration.team.name}` : ''}
-        subtitle={selectedMatch ? selectedMatch.venue ?? 'Estadio por confirmar' : undefined}
+        subtitle={
+          selectedMatch
+            ? [competitionLabel(selectedMatch), selectedMatch.venue ?? 'Sede por confirmar']
+                .filter(Boolean)
+                .join(' · ')
+            : undefined
+        }
         maxWidth={640}
       >
         {selectedMatch && <LiveScoreboard match={selectedMatch} size="lg" />}

@@ -7,31 +7,58 @@ import type { CreateMatchDto } from './matches.schema';
 
 const teamInclude = { team: true };
 
+/**
+ * Datos de la competición que viajan con cada partido. La pantalla pública
+ * mezcla partidos de varias competiciones en un mismo día, así que necesita
+ * saber de cuál viene cada uno (división, copa, juvenil…) sin pedirlo aparte.
+ */
+const competitionInclude = {
+  select: {
+    id: true,
+    name: true,
+    kind: true,
+    format: true,
+    division: true,
+    divisionLevel: true,
+    editionId: true,
+    category: { select: { id: true, name: true } },
+  },
+} as const;
+
+export interface MatchListFilters {
+  competitionId?: string;
+  status?: string;
+  /** Acota a todas las competiciones de una edición. */
+  editionId?: string;
+  page?: number;
+  limit?: number;
+}
+
+const matchWhere = ({ competitionId, status, editionId }: MatchListFilters) => ({
+  ...(competitionId ? { competitionId } : {}),
+  ...(editionId ? { competition: { editionId } } : {}),
+  ...(status ? { status: status as 'SCHEDULED' | 'LIVE' | 'FINISHED' | 'POSTPONED' } : {}),
+});
+
 export const matchesService = {
-  list: (competitionId?: string, status?: string, page = 1, limit = 50) =>
-    prisma.match.findMany({
+  list: (filters: MatchListFilters = {}) => {
+    const { page = 1, limit = 50 } = filters;
+    return prisma.match.findMany({
       skip: (page - 1) * limit,
       take: limit,
-      where: {
-        ...(competitionId ? { competitionId } : {}),
-        ...(status ? { status: status as 'SCHEDULED' | 'LIVE' | 'FINISHED' | 'POSTPONED' } : {}),
-      },
+      where: matchWhere(filters),
       include: {
         homeRegistration: { include: teamInclude },
         awayRegistration: { include: teamInclude },
+        competition: competitionInclude,
         mvpPlayer: true,
       },
       // Postgres deja los NULL al final, así los partidos sin día asignado
       // quedan después de los ya programados.
       orderBy: { scheduledAt: 'asc' },
-    }),
-  count: (competitionId?: string, status?: string) =>
-    prisma.match.count({
-      where: {
-        ...(competitionId ? { competitionId } : {}),
-        ...(status ? { status: status as 'SCHEDULED' | 'LIVE' | 'FINISHED' | 'POSTPONED' } : {}),
-      },
-    }),
+    });
+  },
+  count: (filters: MatchListFilters = {}) => prisma.match.count({ where: matchWhere(filters) }),
 
   get: async (id: string) => {
     const m = await prisma.match.findUnique({

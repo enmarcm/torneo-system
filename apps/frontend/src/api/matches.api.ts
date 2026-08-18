@@ -1,4 +1,5 @@
 import { api } from './axios';
+import type { CompetitionSummary } from './competitions.api';
 
 export interface MatchTeamRegistration {
   id: string;
@@ -44,12 +45,14 @@ export interface Match {
   mvpPlayer?: MatchMvpPlayer | null;
   homeRegistration: MatchTeamRegistration;
   awayRegistration: MatchTeamRegistration;
+  /** Competición de la que sale el partido, para etiquetarlo en listas mixtas. */
+  competition?: CompetitionSummary | null;
   events?: MatchEvent[];
 }
 
 export const matchesApi = {
-  list: async (competitionId?: string, status?: string): Promise<Match[]> =>
-    (await api.get('/matches', { params: { competitionId, status } })).data.data,
+  list: async (competitionId?: string, status?: string, editionId?: string): Promise<Match[]> =>
+    (await api.get('/matches', { params: { competitionId, status, editionId } })).data.data,
   get: async (id: string): Promise<Match> => (await api.get(`/matches/${id}`)).data.data,
   create: async (data: Partial<Match>): Promise<Match> => (await api.post('/matches', data)).data.data,
   update: async (id: string, data: Partial<Match>): Promise<Match> =>

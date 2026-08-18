@@ -10,6 +10,7 @@ import { z } from 'zod';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useLoginMutation } from '@/hooks/mutations';
+import FutsalScene from '@/components/sport/FutsalScene';
 import { useAuthStore } from '@/store/useAuthStore';
 import { extractErrorMessage } from '@/api/axios';
 import { ROUTES } from '@/routes/routes';
@@ -51,30 +52,45 @@ const Login: React.FC = () => {
 
   return (
     <Box sx={{ minHeight: '100vh', display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' } }}>
-      {/* Panel izquierdo (gradiente) */}
+      {/* Panel izquierdo (escena 3D de futsal) */}
       <Box
         sx={{
+          position: 'relative',
+          isolation: 'isolate',
           display: { xs: 'none', md: 'flex' },
           background: 'var(--brandGradient)',
           color: '#fff',
           p: 6,
           flexDirection: 'column',
           justifyContent: 'space-between',
+          overflow: 'hidden',
         }}
       >
-        <Stack direction="row" alignItems="center" spacing={1.5}>
-          <Box component="img" src={logoSrc} sx={{ width: 40, height: 40, borderRadius: '50%' }} />
+        <FutsalScene />
+
+        <Stack direction="row" alignItems="center" spacing={1.5} sx={{ position: 'relative', zIndex: 1 }}>
+          <Box
+            component="img"
+            src={logoSrc}
+            sx={{ width: 40, height: 40, borderRadius: '50%', boxShadow: '0 8px 20px rgba(1,17,45,0.35)' }}
+          />
           <Typography variant="h3" sx={{ fontWeight: 800 }}>Liga Lago Futsal</Typography>
         </Stack>
-        <Box component={motion.div} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-          <Typography variant="h2" sx={{ fontWeight: 800, mb: 2 }}>
+        <Box
+          component={motion.div}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          sx={{ position: 'relative', zIndex: 1 }}
+        >
+          <Typography variant="h2" sx={{ fontWeight: 800, mb: 2, textShadow: '0 6px 24px rgba(1,17,45,0.45)' }}>
             La liga, en vivo y sin fricción.
           </Typography>
-          <Typography sx={{ opacity: 0.85, maxWidth: 460 }}>
+          <Typography sx={{ opacity: 0.85, maxWidth: 460, textShadow: '0 2px 12px rgba(1,17,45,0.35)' }}>
             Programa partidos, gestiona plantillas, sigue a tus equipos favoritos y vive cada gol en tiempo real.
           </Typography>
         </Box>
-        <Typography variant="caption" sx={{ opacity: 0.7 }}>
+        <Typography variant="caption" sx={{ opacity: 0.7, position: 'relative', zIndex: 1 }}>
           © {new Date().getFullYear()} Liga Lago Futsal
         </Typography>
       </Box>

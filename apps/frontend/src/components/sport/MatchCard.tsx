@@ -15,6 +15,11 @@ interface Props {
   onClick?: () => void;
   /** Muestra la jornada / ronda arriba a la izquierda. */
   showStage?: boolean;
+  /**
+   * Nombre de la competición. Se muestra cuando la lista mezcla torneos, para
+   * que se sepa si el partido es de una división, de la copa o de menores.
+   */
+  competitionLabel?: string;
 }
 
 /** Franja de color a la izquierda, según en qué estado está el partido. */
@@ -34,7 +39,12 @@ const stageLabel = (match: Match) => {
   return base;
 };
 
-export const MatchCard: React.FC<Props> = ({ match, onClick, showStage = true }) => {
+export const MatchCard: React.FC<Props> = ({
+  match,
+  onClick,
+  showStage = true,
+  competitionLabel,
+}) => {
   const isLive = match.status === 'LIVE';
   const isFinished = match.status === 'FINISHED';
   const isPending = !match.scheduledAt;
@@ -71,14 +81,27 @@ export const MatchCard: React.FC<Props> = ({ match, onClick, showStage = true })
         spacing={1}
         sx={{ mb: 2 }}
       >
-        {showStage && (
-          <Typography
-            variant="caption"
-            sx={{ fontWeight: 700, color: 'text.secondary', letterSpacing: 0.3 }}
-            noWrap
-          >
-            {stageLabel(match)}
-          </Typography>
+        {(showStage || competitionLabel) && (
+          <Box sx={{ minWidth: 0 }}>
+            {competitionLabel && (
+              <Typography
+                variant="caption"
+                sx={{ display: 'block', fontWeight: 800, color: 'primary.main', letterSpacing: 0.3 }}
+                noWrap
+              >
+                {competitionLabel}
+              </Typography>
+            )}
+            {showStage && (
+              <Typography
+                variant="caption"
+                sx={{ display: 'block', fontWeight: 700, color: 'text.secondary', letterSpacing: 0.3 }}
+                noWrap
+              >
+                {stageLabel(match)}
+              </Typography>
+            )}
+          </Box>
         )}
         {isLive ? (
           <Box
