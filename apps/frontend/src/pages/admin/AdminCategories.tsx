@@ -110,7 +110,12 @@ const AdminCategories: React.FC = () => {
           <Stack spacing={2}>
             <TextField label="Nombre" fullWidth {...register('name')} error={!!errors.name} helperText={errors.name?.message} />
             <TextField label="Descripción" fullWidth multiline rows={2} {...register('description')} />
-            <ImageUpload value={imageUrl} onChange={setImageUrl} label="Subir imagen de categoría" />
+            <ImageUpload
+              value={imageUrl}
+              onChange={setImageUrl}
+              label="Subir imagen de categoría"
+              hint="512 × 512 px (cuadrado)"
+            />
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
               <TextField select label="Formato" fullWidth defaultValue={watch('defaultFormat')} {...register('defaultFormat')}>
                 <MuiMenuItem value="LEAGUE">Liga</MuiMenuItem>

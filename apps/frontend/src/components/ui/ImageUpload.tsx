@@ -1,5 +1,5 @@
 import { Box, Typography, Stack, CircularProgress } from '@mui/material';
-import { CloudUploadRounded, DeleteRounded } from '@mui/icons-material';
+import { CloudUploadRounded, DeleteRounded, InfoOutlined } from '@mui/icons-material';
 import { useRef, useState } from 'react';
 import { uploadsApi } from '@/api/uploads.api';
 
@@ -8,9 +8,15 @@ interface Props {
   onChange: (url: string) => void;
   accept?: string;
   label?: string;
+  /**
+   * Medida sugerida para esta imagen. Es un consejo, no una validación: la
+   * imagen se recorta para llenar su caja, así que quien sube una foto con otra
+   * proporción va a perder los bordes sin que nadie se lo haya avisado.
+   */
+  hint?: string;
 }
 
-export const ImageUpload: React.FC<Props> = ({ value, onChange, accept = 'image/jpeg,image/png,image/webp', label = 'Subir imagen' }) => {
+export const ImageUpload: React.FC<Props> = ({ value, onChange, accept = 'image/jpeg,image/png,image/webp', label = 'Subir imagen', hint }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -102,6 +108,16 @@ export const ImageUpload: React.FC<Props> = ({ value, onChange, accept = 'image/
             </Stack>
           )}
         </Box>
+      )}
+
+      {hint && (
+        <Stack direction="row" spacing={0.75} alignItems="flex-start" sx={{ px: 0.5 }}>
+          <InfoOutlined sx={{ fontSize: 15, color: 'text.secondary', mt: '1px', flexShrink: 0 }} />
+          <Typography variant="caption" color="text.secondary">
+            Medida sugerida: <strong>{hint}</strong>. No es obligatoria: si subís otra,
+            la imagen se recorta desde el centro para llenar su espacio.
+          </Typography>
+        </Stack>
       )}
     </Stack>
   );

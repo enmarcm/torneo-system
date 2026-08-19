@@ -166,6 +166,18 @@ const AdminAds: React.FC = () => {
 
   const canSubmit = !!form.imageUrl && !!form.title.trim() && form.placements.length > 0;
 
+  /*
+    La medida sugerida depende de dónde se va a mostrar, así que se arma con lo
+    que el administrador ya eligió en vez de repetir un número fijo.
+  */
+  const uploadHint = useMemo(() => {
+    const chosen = AD_PLACEMENTS.filter((m) => form.placements.includes(m.value));
+    if (chosen.length === 0) return '1200 × 240 px (horizontal)';
+    const sizes = [...new Set(chosen.map((m) => m.hint))];
+    if (sizes.length === 1) return sizes[0];
+    return `${sizes[0]} — ojo, las otras ubicaciones elegidas piden ${sizes.slice(1).join(' y ')}`;
+  }, [form.placements]);
+
   const AdRow: React.FC<{ ad: Ad }> = ({ ad }) => {
     const state = STATE_META[adState(ad)];
     return (
@@ -363,6 +375,7 @@ const AdminAds: React.FC = () => {
             value={form.imageUrl}
             onChange={(v) => set('imageUrl', v)}
             label="Subir imagen del anuncio"
+            hint={uploadHint}
           />
 
           <TextField

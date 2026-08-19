@@ -70,7 +70,7 @@ const TeamHome: React.FC = () => {
               } catch (e) {
                 toast.error(extractErrorMessage(e));
               }
-            }} label="Seleccionar imagen" />
+            }} label="Seleccionar imagen" hint="512 × 512 px (cuadrado, preferí PNG con fondo transparente)" />
             <Button onClick={() => setLogoOpen(false)} fullWidth>Cancelar</Button>
           </Stack>
         </DialogContent>

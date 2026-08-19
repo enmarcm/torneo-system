@@ -110,6 +110,7 @@ const StructureFields: React.FC<{
         value={value.imageUrl}
         onChange={(url) => set('imageUrl', url)}
         label="Subir imagen del torneo"
+        hint="1200 × 400 px (horizontal)"
       />
 
       <Divider textAlign="left">

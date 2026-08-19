@@ -31,7 +31,7 @@ export const AD_PLACEMENTS: AdPlacementMeta[] = [
     label: 'Banner principal',
     where: 'Arriba de la portada, debajo de la barra de la edición.',
     variant: 'panel',
-    hint: 'Horizontal, tipo 1200 × 240 px',
+    hint: '1200 × 240 px (horizontal)',
     ratio: '5 / 1',
   },
   {
@@ -39,7 +39,7 @@ export const AD_PLACEMENTS: AdPlacementMeta[] = [
     label: 'Portada, entre secciones',
     where: 'En la portada, entre los próximos partidos y las competiciones.',
     variant: 'panel',
-    hint: 'Horizontal, tipo 1200 × 200 px',
+    hint: '1200 × 200 px (horizontal)',
     ratio: '6 / 1',
   },
   {
@@ -47,7 +47,7 @@ export const AD_PLACEMENTS: AdPlacementMeta[] = [
     label: 'Calendario',
     where: 'Dentro del listado de partidos, después de los primeros días.',
     variant: 'panel',
-    hint: 'Horizontal, tipo 1200 × 200 px',
+    hint: '1200 × 200 px (horizontal)',
     ratio: '6 / 1',
   },
   {
@@ -55,7 +55,7 @@ export const AD_PLACEMENTS: AdPlacementMeta[] = [
     label: 'Ficha de partido',
     where: 'Al pie del detalle que se abre al tocar un partido.',
     variant: 'bare',
-    hint: 'Horizontal y chato, tipo 600 × 120 px',
+    hint: '600 × 120 px (horizontal y chato)',
     ratio: '5 / 1',
   },
   {
@@ -63,7 +63,7 @@ export const AD_PLACEMENTS: AdPlacementMeta[] = [
     label: 'Tabla de posiciones',
     where: 'Debajo de la tabla, en la pantalla de competiciones.',
     variant: 'panel',
-    hint: 'Horizontal, tipo 1200 × 200 px',
+    hint: '1200 × 200 px (horizontal)',
     ratio: '6 / 1',
   },
   {
@@ -71,7 +71,7 @@ export const AD_PLACEMENTS: AdPlacementMeta[] = [
     label: 'En vivo',
     where: 'En la pantalla de partidos en vivo.',
     variant: 'panel',
-    hint: 'Horizontal, tipo 1200 × 200 px',
+    hint: '1200 × 200 px (horizontal)',
     ratio: '6 / 1',
   },
   {
@@ -79,7 +79,7 @@ export const AD_PLACEMENTS: AdPlacementMeta[] = [
     label: 'Estadísticas',
     where: 'En la pantalla de goleadores y estadísticas.',
     variant: 'panel',
-    hint: 'Horizontal, tipo 1200 × 200 px',
+    hint: '1200 × 200 px (horizontal)',
     ratio: '6 / 1',
   },
   {
@@ -87,7 +87,7 @@ export const AD_PLACEMENTS: AdPlacementMeta[] = [
     label: 'Equipos',
     where: 'En el listado público de equipos.',
     variant: 'panel',
-    hint: 'Horizontal, tipo 1200 × 200 px',
+    hint: '1200 × 200 px (horizontal)',
     ratio: '6 / 1',
   },
   {
@@ -95,7 +95,7 @@ export const AD_PLACEMENTS: AdPlacementMeta[] = [
     label: 'Columna lateral',
     where: 'Al costado del contenido, apilados uno debajo del otro.',
     variant: 'sidebar',
-    hint: 'Vertical o cuadrado, tipo 400 × 400 px',
+    hint: '400 × 400 px (cuadrado)',
     ratio: '1 / 1',
   },
   {
@@ -103,7 +103,7 @@ export const AD_PLACEMENTS: AdPlacementMeta[] = [
     label: 'Pie de página',
     where: 'Panel ancho dentro del pie, en todas las pantallas públicas.',
     variant: 'panel',
-    hint: 'Horizontal, tipo 1200 × 160 px',
+    hint: '1200 × 160 px (horizontal)',
     ratio: '15 / 2',
   },
   {
@@ -111,7 +111,7 @@ export const AD_PLACEMENTS: AdPlacementMeta[] = [
     label: 'Tira de logos del pie',
     where: 'Fila de logos al pie, sin fondo y todos al mismo alto.',
     variant: 'logos',
-    hint: 'Logo suelto en PNG con fondo transparente, alto ≥ 120 px',
+    hint: 'PNG con fondo transparente, alto ≥ 120 px',
   },
 ];
 

@@ -136,10 +136,15 @@ export const PublicLayout: React.FC = () => {
         </Suspense>
       </Box>
 
+      {/* Los patrocinadores van sobre el fondo de la página, justo antes del pie. */}
+      <Container maxWidth="xl" sx={{ pt: 2, pb: 3 }}>
+        <AdSlot placement="FOOTER_LOGOS" />
+      </Container>
+
       <Box
         component="footer"
         sx={{
-          mt: 5,
+          mt: 0,
           py: { xs: 4, md: 5 },
           background: 'var(--heroGradient)',
           color: '#fff',
@@ -156,13 +161,31 @@ export const PublicLayout: React.FC = () => {
               alignItems={{ xs: 'flex-start', md: 'flex-start' }}
             >
               <Box sx={{ maxWidth: 320 }}>
-                {/* El logotipo va tal cual, sin recorte circular ni fondo. */}
-                <Box
-                  component="img"
-                  src={logoBlanco}
-                  alt="Liga Lago Futsal"
-                  sx={{ height: 52, width: 'auto', display: 'block', mb: 1.5 }}
-                />
+                {/*
+                  El monograma va sin fondo ni recorte, apoyado directo sobre el
+                  navy. Como es solo la sigla, el nombre completo lo pone el texto
+                  de al lado: el logotipo suelto no dice de qué liga se trata.
+                */}
+                <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1.5 }}>
+                  <Box
+                    component="img"
+                    src="/llf-removebg-preview.png"
+                    alt=""
+                    sx={{ height: 56, width: 'auto', display: 'block' }}
+                  />
+                  <Typography
+                    sx={{
+                      fontFamily: '"Plus Jakarta Sans", sans-serif',
+                      fontWeight: 800,
+                      fontSize: 18,
+                      lineHeight: 1.15,
+                    }}
+                  >
+                    Liga Lago
+                    <br />
+                    Futsal
+                  </Typography>
+                </Stack>
                 <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.65)' }}>
                   Resultados, posiciones y calendario de la liga, al minuto y en un
                   solo lugar.
@@ -238,19 +261,6 @@ export const PublicLayout: React.FC = () => {
                 </Stack>
               </Box>
             </Stack>
-
-            {/* Tira de patrocinadores: en blanco, para que los logos se lean. */}
-            <Box
-              sx={{
-                bgcolor: '#FFFFFF',
-                border: '1px solid #E6E9F2',
-                borderRadius: 2,
-                px: 2,
-                py: 1.5,
-              }}
-            >
-              <AdSlot placement="FOOTER_LOGOS" />
-            </Box>
 
             <Stack
               direction={{ xs: 'column', md: 'row' }}
