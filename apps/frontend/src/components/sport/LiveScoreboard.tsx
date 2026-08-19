@@ -1,8 +1,9 @@
 import { Card, Box, Typography, Avatar, Stack } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { formatTime, UNSCHEDULED_LABEL } from '@/utils/formatDate';
+import { getStatusLabel } from '@/utils/statusLabels';
+import { formatTime, formatDateTimeOrPending, UNSCHEDULED_LABEL } from '@/utils/formatDate';
 import { getCompetitionShortLabel } from '@/utils/competitionMeta';
 import { joinMatchRoom, leaveMatchRoom, getSocket } from '@/lib/socket';
 import type { Match, MatchEvent } from '@/api/matches.api';
@@ -48,7 +49,14 @@ export const LiveScoreboard: React.FC<Props> = ({ match, showFeed = true, size =
     };
   }, [match.id]);
 
+  const reduceMotion = useReducedMotion();
   const isLive = status === 'LIVE';
+  /*
+    Un partido que todavía no se jugó no tiene marcador. Mostrar "0 : 0" a 64px
+    lo hace parecer un empate consumado, y es justo el dato que alguien después
+    repite en un grupo de WhatsApp. En su lugar va cuándo y dónde se juega.
+  */
+  const notPlayedYet = status === 'SCHEDULED' || status === 'POSTPONED';
   const isFinished = status === 'FINISHED';
   const scoreSize = size === 'lg' ? 64 : size === 'md' ? 48 : 32;
 
@@ -78,7 +86,7 @@ export const LiveScoreboard: React.FC<Props> = ({ match, showFeed = true, size =
         {isLive ? (
           <Box
             component={motion.div}
-            animate={{ opacity: [1, 0.4, 1] }}
+            animate={reduceMotion ? undefined : { opacity: [1, 0.4, 1] }}
             transition={{ duration: 1.4, repeat: Infinity }}
             sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75, px: 1.25, py: 0.5, borderRadius: 999, bgcolor: 'var(--live)', color: '#fff', fontSize: 12, fontWeight: 700 }}
           >
@@ -92,30 +100,61 @@ export const LiveScoreboard: React.FC<Props> = ({ match, showFeed = true, size =
 
       <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
         <Stack alignItems="center" sx={{ flex: 1 }}>
-          <Avatar src={match.homeRegistration.team.logoUrl ?? undefined} sx={{ width: 64, height: 64, mb: 1 }}>
+          <Avatar alt={match.homeRegistration.team.name} src={match.homeRegistration.team.logoUrl ?? undefined} sx={{ width: 64, height: 64, mb: 1 }}>
             {match.homeRegistration.team.name[0]}
           </Avatar>
           <Typography sx={{ fontWeight: 600, textAlign: 'center' }}>{match.homeRegistration.team.name}</Typography>
         </Stack>
 
         <Stack alignItems="center" sx={{ minWidth: 120 }}>
-          <Typography
-            sx={{
-              fontFamily: '"Plus Jakarta Sans", sans-serif',
-              fontWeight: 800,
-              fontSize: scoreSize,
-              fontVariantNumeric: 'tabular-nums',
-              color: isLive ? 'var(--live)' : 'text.primary',
-              lineHeight: 1,
-            }}
-          >
-            {score.home} : {score.away}
-          </Typography>
+          {/*
+            El marcador cambia solo por socket. Sin `aria-live` el cambio ocurre
+            en silencio: quien escucha la pantalla nunca se entera del gol.
+          */}
+          {notPlayedYet ? (
+            <Stack alignItems="center" spacing={0.5}>
+              <Typography
+                sx={{
+                  fontFamily: '"Plus Jakarta Sans", sans-serif',
+                  fontWeight: 800,
+                  fontSize: Math.round(scoreSize * 0.42),
+                  color: 'text.secondary',
+                  lineHeight: 1,
+                }}
+              >
+                VS
+              </Typography>
+              <Typography variant="body2" align="center" sx={{ fontWeight: 600 }}>
+                {formatDateTimeOrPending(match.scheduledAt)}
+              </Typography>
+              {match.venue && (
+                <Typography variant="caption" color="text.secondary" align="center">
+                  {match.venue}
+                </Typography>
+              )}
+            </Stack>
+          ) : (
+            <Typography
+              aria-live={isLive ? 'polite' : 'off'}
+              aria-atomic="true"
+              aria-label={`Marcador: ${match.homeRegistration.team.name} ${score.home}, ${match.awayRegistration.team.name} ${score.away}`}
+              sx={{
+                fontFamily: '"Plus Jakarta Sans", sans-serif',
+                fontWeight: 800,
+                fontSize: scoreSize,
+                fontVariantNumeric: 'tabular-nums',
+                color: isLive ? 'var(--live)' : 'text.primary',
+                lineHeight: 1,
+              }}
+            >
+              {score.home} : {score.away}
+            </Typography>
+          )}
           {isFinished && <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>Final</Typography>}
         </Stack>
 
         <Stack alignItems="center" sx={{ flex: 1 }}>
-          <Avatar src={match.awayRegistration.team.logoUrl ?? undefined} sx={{ width: 64, height: 64, mb: 1 }}>
+          <Avatar alt={match.awayRegistration.team.name} src={match.awayRegistration.team.logoUrl ?? undefined} sx={{ width: 64, height: 64, mb: 1 }}>
             {match.awayRegistration.team.name[0]}
           </Avatar>
           <Typography sx={{ fontWeight: 600, textAlign: 'center' }}>{match.awayRegistration.team.name}</Typography>
@@ -155,7 +194,7 @@ export const LiveScoreboard: React.FC<Props> = ({ match, showFeed = true, size =
                       {e.type === 'GOAL' ? '⚽' : e.type === 'YELLOW' ? '🟨' : e.type === 'RED' ? '🟥' : '•'}
                     </Box>
                     <Typography variant="body2">
-                      {e.type} {e.player ? `· ${e.player.firstName} ${e.player.lastName}` : ''}
+                      {getStatusLabel(e.type)}{e.player ? ` · ${e.player.firstName} ${e.player.lastName}` : ''}
                     </Typography>
                   </Stack>
                 </motion.div>

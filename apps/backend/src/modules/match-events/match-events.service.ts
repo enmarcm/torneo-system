@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/utils/app-error';
-import { getIo } from '@/lib/socket';
+import { emitMatchEvent, emitMatchUpdate } from '@/lib/socket';
 import { MatchEventType } from '@prisma/client';
 
 export const matchEventsService = {
@@ -33,20 +33,14 @@ export const matchEventsService = {
       await prisma.match.update({ where: { id: matchId }, data: { homeScore, awayScore } });
     }
 
-    const io = getIo();
-    io.to(`match:${matchId}`).emit('match:event', {
+    emitMatchEvent({
       matchId,
       type: data.type,
       minute: data.minute,
       playerId: data.playerId,
       teamRegistrationId: data.teamRegistrationId,
     });
-    io.to(`match:${matchId}`).emit('match:update', {
-      matchId,
-      homeScore,
-      awayScore,
-      status: match.status,
-    });
+    emitMatchUpdate({ matchId, homeScore, awayScore, status: match.status });
 
     return event;
   },

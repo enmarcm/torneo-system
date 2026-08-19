@@ -16,6 +16,12 @@ export const lightTokens = {
   border: '#E6E9F2',
   text: '#1A2138',
   textMuted: '#6B7494',
+  /*
+    Sin este valor regía el default de MUI (rgba(0,0,0,0.38)): ~2.9:1 sobre
+    blanco, por debajo de AA. Carga el "VS" y el separador del marcador, o sea
+    lo único que distingue un partido futuro, en una pantalla que se lee al sol.
+  */
+  textDisabled: '#8A92AD',
   success: '#22C55E',
   successSoft: '#E7F8EE',
   warning: '#F59E0B',
@@ -47,6 +53,7 @@ export const darkTokens = {
   border: 'rgba(255,255,255,0.08)',
   text: '#EEF1F8',
   textMuted: '#9AA4BF',
+  textDisabled: '#7D87A6',
   success: '#34D399',
   successSoft: 'rgba(52,211,153,0.16)',
   warning: '#FBBF24',

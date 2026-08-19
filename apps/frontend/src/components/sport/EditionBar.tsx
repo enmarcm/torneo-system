@@ -37,6 +37,7 @@ export const EditionBar: React.FC<Props> = ({ name, seasonNumber, liveCount }) =
       <Stack direction="row" alignItems="center" spacing={1.25} sx={{ minWidth: 0 }}>
         <EmojiEventsRounded sx={{ fontSize: 20, opacity: 0.9, flexShrink: 0 }} />
         <Typography
+          component="h1"
           noWrap
           sx={{
             fontFamily: '"Plus Jakarta Sans", sans-serif',

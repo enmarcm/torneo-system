@@ -32,12 +32,26 @@ publicRouter.get('/registrations', asyncHandler(async (req, res) =>
 // El calendario público muestra todas las competiciones de la edición a la vez,
 // así que necesita un tope más alto que el de las pantallas de administración.
 const PUBLIC_MATCHES_LIMIT = 500;
+
+/**
+ * Tope pedido por el cliente, acotado al máximo público. La portada muestra seis
+ * partidos: bajarse quinientos para pintar seis se paga con datos móviles en la
+ * cancha, que es donde se usa esto.
+ */
+const resolveLimit = (raw: unknown) => {
+  const asked = Number(raw);
+  if (!Number.isFinite(asked) || asked <= 0) return PUBLIC_MATCHES_LIMIT;
+  return Math.min(Math.floor(asked), PUBLIC_MATCHES_LIMIT);
+};
+
 publicRouter.get('/matches', asyncHandler(async (req, res) =>
   ok(res, await matchesService.list({
     competitionId: req.query.competitionId as string | undefined,
     status: req.query.status as string | undefined,
     editionId: req.query.editionId as string | undefined,
-    limit: PUBLIC_MATCHES_LIMIT,
+    limit: resolveLimit(req.query.limit),
+    order: req.query.order === 'desc' ? 'desc' : 'asc',
+    upcoming: req.query.upcoming === 'true',
   })),
 ));
 publicRouter.get('/standings', asyncHandler(async (req, res) =>

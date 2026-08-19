@@ -12,6 +12,11 @@ interface Props {
   label?: string | null;
   /** Tope de piezas a mostrar en las ranuras que apilan (lateral y logos). */
   max?: number;
+  /**
+   * Para la ranura que cae arriba del pliegue: se carga con prioridad y se le
+   * reserva el alto, en vez de aparecer tarde y correr el contenido.
+   */
+  priority?: boolean;
   sx?: object;
 }
 
@@ -19,13 +24,14 @@ interface Props {
 const ROTATE_MS = 8000;
 
 /** La imagen, envuelta en su enlace solo si el anuncio tiene destino. */
-const AdImage: React.FC<{ ad: Ad; sx?: object; className?: string }> = ({ ad, sx }) => {
+const AdImage: React.FC<{ ad: Ad; sx?: object; priority?: boolean }> = ({ ad, sx, priority }) => {
   const img = (
     <Box
       component="img"
       src={ad.imageUrl}
       alt={ad.title || 'Publicidad'}
-      loading="lazy"
+      loading={priority ? 'eager' : 'lazy'}
+      fetchPriority={priority ? 'high' : undefined}
       sx={{ display: 'block', width: '100%', height: 'auto', ...sx }}
     />
   );
@@ -51,9 +57,10 @@ const AdImage: React.FC<{ ad: Ad; sx?: object; className?: string }> = ({ ad, sx
  * espacio en lugar de apilarlos, salvo en las ranuras que existen justamente
  * para mostrar varios juntos (la columna lateral y la tira de logos del pie).
  */
-export const AdSlot: React.FC<Props> = ({ placement, variant, label, max, sx }) => {
+export const AdSlot: React.FC<Props> = ({ placement, variant, label, max, priority, sx }) => {
   const { data: ads = [] } = usePublicAdsQuery(placement);
-  const shape = variant ?? getPlacementMeta(placement)?.variant ?? 'panel';
+  const meta = getPlacementMeta(placement);
+  const shape = variant ?? meta?.variant ?? 'panel';
   const stacked = shape === 'logos' || shape === 'sidebar';
   const list = max ? ads.slice(0, max) : ads;
 
@@ -65,10 +72,10 @@ export const AdSlot: React.FC<Props> = ({ placement, variant, label, max, sx }) 
     return () => clearInterval(t);
   }, [stacked, list.length]);
 
+  if (list.length === 0) return null;
+
   // Si se borra un anuncio mientras alguien mira la página, el índice queda fuera de rango.
   const current = list[index % list.length];
-
-  if (list.length === 0) return null;
 
   if (shape === 'logos') {
     return (
@@ -117,10 +124,15 @@ export const AdSlot: React.FC<Props> = ({ placement, variant, label, max, sx }) 
     );
   }
 
+  const reserved = priority && meta?.ratio ? { aspectRatio: meta.ratio, objectFit: 'contain' as const } : {};
   const rotating = (
     <Fade in key={current.id} timeout={400}>
       <Box>
-        <AdImage ad={current} sx={{ borderRadius: shape === 'bare' ? 2 : 1.5 }} />
+        <AdImage
+          ad={current}
+          priority={priority}
+          sx={{ borderRadius: shape === 'bare' ? 2 : 1.5, ...reserved }}
+        />
       </Box>
     </Fade>
   );

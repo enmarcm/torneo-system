@@ -1,7 +1,7 @@
 import { Modal, Box, Typography, IconButton, Stack } from '@mui/material';
 import { CloseRounded } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 
 interface Props {
   open: boolean;
@@ -13,8 +13,17 @@ interface Props {
   maxWidth?: number;
 }
 
-export const AppModal: React.FC<Props> = ({ open, onClose, title, subtitle, children, actions, maxWidth = 560 }) => (
-  <Modal open={open} onClose={onClose} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2 }}>
+export const AppModal: React.FC<Props> = ({ open, onClose, title, subtitle, children, actions, maxWidth = 560 }) => {
+  // Sin esto el diálogo se abre sin nombre: el lector de pantalla anuncia
+  // "diálogo" y nada más, aunque el título esté dibujado dos líneas abajo.
+  const titleId = useId();
+  return (
+  <Modal
+    open={open}
+    onClose={onClose}
+    aria-labelledby={titleId}
+    sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2 }}
+  >
     <Box
       component={motion.div}
       initial={{ opacity: 0, scale: 0.95, y: 8 }}
@@ -35,7 +44,7 @@ export const AppModal: React.FC<Props> = ({ open, onClose, title, subtitle, chil
     >
       <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 2 }}>
         <Box>
-          <Typography variant="h3">{title}</Typography>
+          <Typography variant="h3" id={titleId}>{title}</Typography>
           {subtitle && (
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
               {subtitle}
@@ -54,4 +63,5 @@ export const AppModal: React.FC<Props> = ({ open, onClose, title, subtitle, chil
       )}
     </Box>
   </Modal>
-);
+  );
+};

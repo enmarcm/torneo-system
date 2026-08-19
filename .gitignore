@@ -14,3 +14,28 @@ coverage/
 .cache/
 prisma/migrations/dev.db*
 *.tsbuildinfo
+
+# --- Herramientas de agentes de IA (se reinstalan con npx, no se versionan) ---
+# Ojo: .agents/docs y .agents/skills propias del proyecto SÍ van al repo.
+.claude/settings.local.json
+.claude/skills/impeccable/
+.agents/skills/impeccable/
+.codex/
+.impeccable/config.local.json
+.impeccable/live/
+
+# --- Entornos ---
+.env.*
+!.env.example
+
+# --- Cachés y temporales ---
+.eslintcache
+.vite/
+*.tgz
+*.tmp
+*.swp
+.pnpm-store/
+
+# --- Sistema operativo ---
+Thumbs.db
+desktop.ini

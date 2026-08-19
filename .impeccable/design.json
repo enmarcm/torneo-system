@@ -1,0 +1,500 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-19T17:39:34.284Z",
+  "title": "Design System: Liga Lago Futsal",
+  "extensions": {
+    "colorMeta": {
+      "azul-nocturno": {
+        "role": "primary",
+        "displayName": "Azul Nocturno",
+        "canonical": "#034292",
+        "tonalRamp": [
+          "#02224B",
+          "#033C84",
+          "#0456BD",
+          "#056FF6",
+          "#3B8FFB",
+          "#74B0FC",
+          "#ADD0FD",
+          "#E6F1FE"
+        ]
+      },
+      "azul-nocturno-hover": {
+        "role": "primary",
+        "displayName": "Azul Nocturno Profundo",
+        "canonical": "#023575",
+        "tonalRamp": [
+          "#01224B",
+          "#023C85",
+          "#0356BE",
+          "#0470F7",
+          "#3A90FC",
+          "#73B0FD",
+          "#ADD1FE",
+          "#E6F1FF"
+        ]
+      },
+      "azul-nocturno-suave": {
+        "role": "primary",
+        "displayName": "Azul Nocturno Suave",
+        "canonical": "#E0E8F4",
+        "tonalRamp": [
+          "#142338",
+          "#233D63",
+          "#33578F",
+          "#4272BA",
+          "#6B91CB",
+          "#96B1DA",
+          "#C1D1E9",
+          "#ECF1F8"
+        ]
+      },
+      "naranja-bengala": {
+        "role": "secondary",
+        "displayName": "Naranja Bengala",
+        "canonical": "#FF8A4C",
+        "tonalRamp": [
+          "#4D1A00",
+          "#872F00",
+          "#C14300",
+          "#FB5700",
+          "#FF7C37",
+          "#FFA271",
+          "#FFC8AB",
+          "#FFEEE5"
+        ]
+      },
+      "naranja-bengala-suave": {
+        "role": "secondary",
+        "displayName": "Naranja Bengala Suave",
+        "canonical": "#FFEDE1",
+        "tonalRamp": [
+          "#4D1F00",
+          "#873600",
+          "#C14D00",
+          "#FB6500",
+          "#FF8737",
+          "#FFAA71",
+          "#FFCDAB",
+          "#FFF0E5"
+        ]
+      },
+      "rojo-directo": {
+        "role": "tertiary",
+        "displayName": "Rojo Directo",
+        "canonical": "#FF3B53",
+        "tonalRamp": [
+          "#4D0009",
+          "#870011",
+          "#C10018",
+          "#FB001F",
+          "#FF374F",
+          "#FF7182",
+          "#FFABB5",
+          "#FFE5E9"
+        ]
+      },
+      "navy-profundo": {
+        "role": "neutral",
+        "displayName": "Navy Profundo",
+        "canonical": "#1B2237",
+        "tonalRamp": [
+          "#192033",
+          "#2C385A",
+          "#405081",
+          "#5368A9",
+          "#798ABD",
+          "#A0ACD0",
+          "#C7CEE3",
+          "#EEF0F7"
+        ]
+      },
+      "tinta": {
+        "role": "neutral",
+        "displayName": "Tinta",
+        "canonical": "#1A2138",
+        "tonalRamp": [
+          "#181F34",
+          "#2B365C",
+          "#3D4E84",
+          "#5065AC",
+          "#7687BF",
+          "#9EAAD2",
+          "#C6CDE4",
+          "#EEF0F7"
+        ]
+      },
+      "tinta-suave": {
+        "role": "neutral",
+        "displayName": "Tinta Suave",
+        "canonical": "#6B7494",
+        "tonalRamp": [
+          "#20232C",
+          "#393D4E",
+          "#515870",
+          "#697292",
+          "#8B92AB",
+          "#ADB2C3",
+          "#CED1DC",
+          "#F0F1F4"
+        ]
+      },
+      "papel": {
+        "role": "neutral",
+        "displayName": "Papel",
+        "canonical": "#F4F6FB",
+        "tonalRamp": [
+          "#141F38",
+          "#243663",
+          "#334D8E",
+          "#4365B8",
+          "#6C87CA",
+          "#97AAD9",
+          "#C2CDE9",
+          "#ECF0F8"
+        ]
+      },
+      "superficie": {
+        "role": "neutral",
+        "displayName": "Superficie",
+        "canonical": "#FFFFFF",
+        "tonalRamp": [
+          "#262626",
+          "#434343",
+          "#616161",
+          "#7E7E7E",
+          "#9B9B9B",
+          "#B8B8B8",
+          "#D5D5D5",
+          "#F2F2F2"
+        ]
+      },
+      "superficie-elevada": {
+        "role": "neutral",
+        "displayName": "Superficie Elevada",
+        "canonical": "#F8FAFD",
+        "tonalRamp": [
+          "#11223C",
+          "#1E3C69",
+          "#2B5696",
+          "#3870C4",
+          "#6390D2",
+          "#90B0DF",
+          "#BED0EC",
+          "#EBF1F9"
+        ]
+      },
+      "borde": {
+        "role": "neutral",
+        "displayName": "Borde",
+        "canonical": "#E6E9F2",
+        "tonalRamp": [
+          "#1A2032",
+          "#2E3959",
+          "#42517F",
+          "#566AA5",
+          "#7B8BBA",
+          "#A2ADCE",
+          "#C8CEE2",
+          "#EEF0F6"
+        ]
+      },
+      "verde-cerrado": {
+        "role": "neutral",
+        "displayName": "Verde Cerrado",
+        "canonical": "#22C55E",
+        "tonalRamp": [
+          "#0B411F",
+          "#147337",
+          "#1CA54F",
+          "#25D666",
+          "#54E288",
+          "#86EAAB",
+          "#B8F3CD",
+          "#E9FBF0"
+        ]
+      },
+      "ambar-atencion": {
+        "role": "neutral",
+        "displayName": "Ámbar Atención",
+        "canonical": "#F59E0B",
+        "tonalRamp": [
+          "#492F03",
+          "#815305",
+          "#B97708",
+          "#F19B0A",
+          "#F7B23F",
+          "#F9C977",
+          "#FCDFAF",
+          "#FEF5E7"
+        ]
+      },
+      "rojo-error": {
+        "role": "neutral",
+        "displayName": "Rojo Error",
+        "canonical": "#EF4444",
+        "tonalRamp": [
+          "#460606",
+          "#7C0B0B",
+          "#B20F0F",
+          "#E81414",
+          "#EF4646",
+          "#F47C7C",
+          "#F8B2B2",
+          "#FDE8E8"
+        ]
+      },
+      "azul-info": {
+        "role": "neutral",
+        "displayName": "Azul Info",
+        "canonical": "#3B82F6",
+        "tonalRamp": [
+          "#031E49",
+          "#063581",
+          "#084BB9",
+          "#0B62F0",
+          "#3F85F6",
+          "#77A8F9",
+          "#AFCCFB",
+          "#E7EFFE"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Título de pantalla pública. Uno por vista."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Título de sección y nombre de entidad."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Encabezado de bloque dentro de una pantalla."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Texto corrido, celdas de tabla y campos de formulario."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Chips, leyendas y cabeceras de tabla."
+      },
+      "action": {
+        "displayName": "Action",
+        "purpose": "Botones. Sin mayúsculas forzadas."
+      }
+    },
+    "shadows": [
+      {
+        "name": "reposo-superficie",
+        "value": "0 4px 16px rgba(27,34,55,0.06)",
+        "purpose": "Todas las tarjetas y paneles. Despega la superficie del lienzo sin jerarquizarla."
+      },
+      {
+        "name": "boton-primario",
+        "value": "0 6px 16px rgba(3,66,146,0.25)",
+        "purpose": "Única sombra con color del sistema. Marca lo que se puede apretar."
+      },
+      {
+        "name": "boton-primario-hover",
+        "value": "0 8px 22px rgba(3,66,146,0.35)",
+        "purpose": "La misma sombra crecida al pasar el cursor."
+      }
+    ],
+    "motion": [
+      {
+        "name": "hover-lift",
+        "value": "transform: translateY(-3px); 0.18s",
+        "purpose": "Tarjetas interactivas al pasar el cursor."
+      },
+      {
+        "name": "entrada-lista",
+        "value": "opacity 0→1, translateY(10px→0); 0.2s, stagger 0.03s (tope 0.24s)",
+        "purpose": "Aparición escalonada de fichas de partido."
+      },
+      {
+        "name": "latido-vivo",
+        "value": "pulse 1.4s infinite — opacity 1→0.45, scale 1→0.82",
+        "purpose": "Punto de partido en vivo."
+      },
+      {
+        "name": "conteo-metrica",
+        "value": "0.8s easeOut desde 0",
+        "purpose": "Números de las tarjetas de métrica."
+      },
+      {
+        "name": "transicion-estado",
+        "value": "0.2s ease",
+        "purpose": "Cambios de color en botones, enlaces y campos."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "xs",
+        "value": "0px"
+      },
+      {
+        "name": "sm",
+        "value": "600px"
+      },
+      {
+        "name": "md",
+        "value": "900px"
+      },
+      {
+        "name": "lg",
+        "value": "1200px"
+      },
+      {
+        "name": "xl",
+        "value": "1536px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Acción principal de cualquier pantalla. La única pieza con sombra de color.",
+      "html": "<button class=\"ds-btn-primary\">Guardar cambios</button>",
+      "css": ".ds-btn-primary { background: #034292; color: #FFFFFF; font-family: \"Plus Jakarta Sans\", sans-serif; font-size: 0.875rem; font-weight: 600; padding: 9px 18px; border: none; border-radius: 10px; box-shadow: 0 6px 16px rgba(3,66,146,0.25); cursor: pointer; transition: background 0.2s ease, box-shadow 0.2s ease; } .ds-btn-primary:hover { background: #023575; box-shadow: 0 8px 22px rgba(3,66,146,0.35); } .ds-btn-primary:focus-visible { outline: 2px solid #034292; outline-offset: 2px; } .ds-btn-primary:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Text Button",
+      "kind": "button",
+      "refersTo": "button-text",
+      "description": "Navegación hacia atrás en las pantallas públicas. Sin relleno ni sombra.",
+      "html": "<button class=\"ds-btn-text\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z\"/></svg>Volver</button>",
+      "css": ".ds-btn-text { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: #6B7494; font-family: \"Plus Jakarta Sans\", sans-serif; font-size: 0.875rem; font-weight: 600; padding: 9px 18px; border: none; border-radius: 10px; cursor: pointer; transition: background 0.2s ease, color 0.2s ease; } .ds-btn-text:hover { background: rgba(3,66,146,0.06); color: #1A2138; } .ds-btn-text:focus-visible { outline: 2px solid #034292; outline-offset: 2px; }"
+    },
+    {
+      "name": "Live Chip",
+      "kind": "chip",
+      "refersTo": "chip-live",
+      "description": "Contador de partidos en vivo. El punto late; el rojo no se usa para nada más.",
+      "html": "<span class=\"ds-chip-live\"><i class=\"ds-chip-live__dot\"></i>2 EN VIVO</span>",
+      "css": ".ds-chip-live { display: inline-flex; align-items: center; gap: 6px; background: #FF3B53; color: #FFFFFF; font-family: Inter, system-ui, sans-serif; font-size: 12px; font-weight: 700; height: 24px; padding: 0 10px; border-radius: 999px; } .ds-chip-live__dot { width: 7px; height: 7px; border-radius: 50%; background: #FFFFFF; animation: ds-pulse 1.4s infinite; } @keyframes ds-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.45; transform: scale(0.82); } } @media (prefers-reduced-motion: reduce) { .ds-chip-live__dot { animation: none; } }"
+    },
+    {
+      "name": "Status Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Clasificación y estado: división, categoría, jornada. Contorneado por defecto.",
+      "html": "<span class=\"ds-chip\">Primera División</span> <span class=\"ds-chip ds-chip--solid\">Finalizado</span>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; background: transparent; color: #1A2138; border: 1px solid #E6E9F2; font-family: Inter, system-ui, sans-serif; font-size: 11px; font-weight: 700; height: 24px; padding: 0 10px; border-radius: 999px; } .ds-chip--solid { background: #034292; border-color: #034292; color: #FFFFFF; }"
+    },
+    {
+      "name": "Search Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Campo de formulario y de búsqueda. Se hunde respecto de la tarjeta que lo contiene.",
+      "html": "<div class=\"ds-field\"><svg class=\"ds-field__icon\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z\"/></svg><input class=\"ds-field__input\" type=\"search\" placeholder=\"Buscar equipo…\" /></div>",
+      "css": ".ds-field { display: inline-flex; align-items: center; gap: 8px; background: #F8FAFD; border: 1px solid #E6E9F2; border-radius: 10px; padding: 0 14px; height: 44px; transition: border-color 0.2s ease, box-shadow 0.2s ease; } .ds-field__icon { color: #6B7494; flex-shrink: 0; } .ds-field__input { background: transparent; border: none; outline: none; color: #1A2138; font-family: Inter, system-ui, sans-serif; font-size: 0.9375rem; width: 220px; } .ds-field__input::placeholder { color: #6B7494; } .ds-field:focus-within { border-color: #034292; box-shadow: 0 0 0 3px rgba(3,66,146,0.12); }"
+    },
+    {
+      "name": "Top Navigation",
+      "kind": "nav",
+      "refersTo": null,
+      "description": "Barra pública fija de 72px. El enlace activo se tiñe de Azul Nocturno.",
+      "html": "<nav class=\"ds-nav\"><span class=\"ds-nav__brand\">Liga Lago Futsal</span><a class=\"ds-nav__link ds-nav__link--active\" href=\"#\">Inicio</a><a class=\"ds-nav__link\" href=\"#\">Competiciones</a><a class=\"ds-nav__link\" href=\"#\">Calendario</a></nav>",
+      "css": ".ds-nav { display: flex; align-items: center; gap: 4px; height: 72px; padding: 0 20px; background: #FFFFFF; border-bottom: 1px solid #E6E9F2; } .ds-nav__brand { font-family: \"Plus Jakarta Sans\", sans-serif; font-weight: 800; font-size: 1.0625rem; color: #1A2138; margin-right: 20px; } .ds-nav__link { font-family: \"Plus Jakarta Sans\", sans-serif; font-size: 0.875rem; font-weight: 600; color: #6B7494; text-decoration: none; padding: 9px 14px; border-radius: 10px; transition: background 0.2s ease, color 0.2s ease; } .ds-nav__link:hover { background: rgba(3,66,146,0.06); color: #1A2138; } .ds-nav__link--active { color: #034292; }"
+    },
+    {
+      "name": "Match Card",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Componente firma. La franja de 4px a la izquierda codifica el estado del partido.",
+      "html": "<article class=\"ds-match ds-match--live\"><header class=\"ds-match__head\"><span class=\"ds-match__stage\">Jornada 7</span><span class=\"ds-chip-live\"><i class=\"ds-chip-live__dot\"></i>EN VIVO</span></header><div class=\"ds-match__row\"><span class=\"ds-match__team\">Abogados FC</span><span class=\"ds-match__score ds-match__score--won\">3</span></div><div class=\"ds-match__row\"><span class=\"ds-match__team\">Lago Unido</span><span class=\"ds-match__score\">1</span></div></article>",
+      "css": ".ds-match { position: relative; overflow: hidden; background: #FFFFFF; border: 1px solid #E6E9F2; border-radius: 12px; box-shadow: 0 4px 16px rgba(27,34,55,0.06); padding: 16px 20px 16px 24px; width: 320px; transition: transform 0.18s ease; } .ds-match::before { content: \"\"; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #E6E9F2; } .ds-match--live::before { background: #FF3B53; } .ds-match:hover { transform: translateY(-3px); } .ds-match__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; } .ds-match__stage { font-family: Inter, system-ui, sans-serif; font-size: 12px; font-weight: 600; color: #6B7494; } .ds-match__row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; } .ds-match__team { font-family: Inter, system-ui, sans-serif; font-size: 0.9375rem; color: #1A2138; } .ds-match__score { font-family: \"Plus Jakarta Sans\", sans-serif; font-size: 1.25rem; font-weight: 600; color: #1A2138; font-variant-numeric: tabular-nums; } .ds-match__score--won { font-weight: 800; } @media (prefers-reduced-motion: reduce) { .ds-match { transition: none; } }"
+    },
+    {
+      "name": "Edition Bar",
+      "kind": "custom",
+      "refersTo": "panel-hero",
+      "description": "Franja de contexto de la portada: única superficie oscura del modo claro.",
+      "html": "<div class=\"ds-edition\"><span class=\"ds-edition__name\">Apertura 2026</span><span class=\"ds-edition__season\">· Temporada 1</span><span class=\"ds-edition__live\">0 EN VIVO</span></div>",
+      "css": ".ds-edition { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 10px 20px; border-radius: 12px; background: linear-gradient(135deg,#2A3352 0%,#1B2237 100%); color: #FFFFFF; } .ds-edition__name { font-family: \"Plus Jakarta Sans\", sans-serif; font-size: 1.125rem; font-weight: 800; } .ds-edition__season { font-family: Inter, system-ui, sans-serif; font-size: 0.875rem; color: rgba(255,255,255,0.6); } .ds-edition__live { margin-left: auto; background: rgba(255,255,255,0.12); font-family: Inter, system-ui, sans-serif; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }"
+    },
+    {
+      "name": "Surface Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Contenedor genérico: borde primero, sombra de apoyo.",
+      "html": "<div class=\"ds-card\"><h3 class=\"ds-card__title\">Tabla de posiciones</h3><p class=\"ds-card__body\">Actualizada al cierre de la jornada 7.</p></div>",
+      "css": ".ds-card { background: #FFFFFF; border: 1px solid #E6E9F2; border-radius: 12px; box-shadow: 0 4px 16px rgba(27,34,55,0.06); padding: 20px; width: 320px; } .ds-card__title { font-family: \"Plus Jakarta Sans\", sans-serif; font-size: 1.25rem; font-weight: 600; color: #1A2138; margin: 0 0 8px; } .ds-card__body { font-family: Inter, system-ui, sans-serif; font-size: 0.9375rem; color: #6B7494; margin: 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "La Cancha de Noche",
+    "overview": "Futsal bajo luz artificial. El fondo es el azul profundo del gimnasio a las nueve de la noche; las superficies son las zonas iluminadas donde efectivamente pasa algo, limpias y recortadas contra ese fondo; y el rojo del vivo es una bengala: aparece poco, y cuando aparece no se puede ignorar. Nada en el sistema es neutral por comodidad — el azul es institucional porque la liga lo es, y el contraste existe porque la pantalla se lee parada en una cancha, no sentado en una oficina.\n\nEl registro es deportivo y enérgico: la liga está en marcha y se tiene que notar desde el primer scroll. Pero la energía se administra, no se derrama. El color fuerte se gana su lugar: el naranja aparece cuando alguien logró algo y el rojo cuando algo está sucediendo ahora mismo. Todo lo demás —tablas, plantillas, fichas, formularios— se mantiene ordenado y legible, porque el visitante llegó con una pregunta y el sistema se juzga por cuántos segundos tarda en contestarla.\n\nLa densidad es media-alta y honesta: hay mucho dato real que mostrar (posiciones, goleadores, fixtures, plantillas) y el sistema no lo esconde detrás de tarjetas decorativas. Cada superficie que existe contiene información que alguien fue a buscar.",
+    "keyCharacteristics": [
+      "Azul institucional profundo como voz principal, en claro y en oscuro.",
+      "Un solo rojo, reservado exclusivamente a lo que está pasando en vivo.",
+      "Dos alfabetos con trabajos distintos: Plus Jakarta Sans manda en títulos y números, Inter en todo lo que se lee de corrido.",
+      "Superficies definidas por su borde antes que por su sombra.",
+      "Píldoras para estados, esquinas de 12px para contenedores.",
+      "Movimiento corto y de una sola dirección: las cosas suben apenas al tocarlas."
+    ],
+    "rules": [
+      {
+        "name": "La Regla de la Bengala",
+        "body": "El Naranja Bengala nunca supera el 10% de una pantalla y no aparece más de una vez por vista. Vale porque es raro; si empieza a aparecer en cada sección, deja de significar algo y hay que sacarlo, no multiplicarlo.",
+        "section": "colors"
+      },
+      {
+        "name": "La Regla del Rojo Reservado",
+        "body": "#FF3B53 es exclusivo del estado en vivo. Un error, un botón de borrar o una alerta usan #EF4444. Si los dos rojos aparecen en la misma pantalla con el mismo significado, el sistema está roto.",
+        "section": "colors"
+      },
+      {
+        "name": "La Regla del Fondo Gris",
+        "body": "El fondo de la aplicación nunca es #FFFFFF. Las tarjetas son blancas y el lienzo es #F4F6FB; esa diferencia de un punto de luminosidad es lo que hace que las superficies existan sin necesidad de sombra.",
+        "section": "colors"
+      },
+      {
+        "name": "La Regla de los Dos Alfabetos",
+        "body": "Jakarta para títulos, botones y números que importan; Inter para todo lo que se lee de corrido. Un párrafo en Jakarta o una tabla de posiciones en Inter son errores, no variantes.",
+        "section": "typography"
+      },
+      {
+        "name": "La Regla del Número Tabular",
+        "body": "Todo número que se compara entre filas usa font-variant-numeric: tabular-nums. Un marcador que baila de ancho mientras cambia es un marcador que no se puede leer de reojo.",
+        "section": "typography"
+      },
+      {
+        "name": "La Regla del Pulgar",
+        "body": "La respuesta que el visitante vino a buscar entra en el primer viewport de un teléfono. Todo lo que la empuja hacia abajo es candidato a irse.",
+        "section": "layout"
+      },
+      {
+        "name": "La Regla del Borde Primero",
+        "body": "Si hay que elegir entre subir la sombra o marcar el borde, se marca el borde. La única excepción permitida es el botón primario.",
+        "section": "elevation"
+      },
+      {
+        "name": "La Regla de la Píldora",
+        "body": "Todo lo que describe un estado o clasifica algo es una píldora completa (999px). Todo lo que contiene información es un rectángulo de 12px. Nunca al revés.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do definir toda superficie con su borde de 1px en #E6E9F2 antes de pensar en la sombra.",
+      "Do usar #FF3B53 únicamente para lo que está ocurriendo en este momento, y #EF4444 para errores y acciones destructivas.",
+      "Do poner números comparables en Plus Jakarta Sans con tabular-nums.",
+      "Do resolver la pregunta del visitante dentro del primer viewport móvil.",
+      "Do dar a cada estado su píldora: división, categoría, estado del partido y contadores son chips de 999px, nunca texto suelto.",
+      "Do declarar el peso de cada imagen: se consume con datos móviles en la cancha."
+    ],
+    "donts": [
+      "Don't subir el Naranja Bengala a segundo color de trabajo. Su valor es la escasez.",
+      "Don't apilar tarjetas dentro de tarjetas. Si un bloque necesita subdividirse, se separa con espacio y un encabezado.",
+      "Don't usar fondo blanco puro para el lienzo de una pantalla.",
+      "Don't poner texto en degradado ni sombras duras de desplazamiento.",
+      "Don't animar propiedades de layout (margin, width, height).",
+      "Don't dejar un rótulo decorativo arriba de un título."
+    ]
+  }
+}

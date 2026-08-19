@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { usePublicEditionsQuery, usePublicCompetitionsQuery } from '@/hooks/queries';
 import { sortCompetitions } from '@/utils/competitionMeta';
 import type { Edition } from '@/api/editions.api';
@@ -13,8 +14,34 @@ export const ALL_COMPETITIONS = '';
  */
 export const usePublicScope = () => {
   const { data: editions = [], isLoading: editionsLoading } = usePublicEditionsQuery();
-  const [pickedEditionId, setEditionId] = useState('');
-  const [pickedCompetitionId, setCompetitionId] = useState(ALL_COMPETITIONS);
+
+  /*
+    La elección vive en la URL y no en el estado del componente. El producto se
+    distribuye pegando enlaces: si la competición elegida no viaja en el enlace,
+    no existe forma de mandarle a alguien la tabla de Primera, que es justo el
+    gesto con el que se cierra una discusión.
+  */
+  const [params, setParams] = useSearchParams();
+  const pickedEditionId = params.get('e') ?? '';
+  const pickedCompetitionId = params.get('c') ?? ALL_COMPETITIONS;
+
+  const setParam = useCallback(
+    (key: string, value: string) => {
+      setParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (value) next.set(key, value);
+          else next.delete(key);
+          return next;
+        },
+        { replace: true },
+      );
+    },
+    [setParams],
+  );
+
+  const setEditionId = useCallback((id: string) => setParam('e', id), [setParam]);
+  const setCompetitionId = useCallback((id: string) => setParam('c', id), [setParam]);
 
   const currentEdition: Edition | undefined = useMemo(
     () => editions.find((e: Edition) => e.status === 'ACTIVE') ?? editions[0],

@@ -13,7 +13,7 @@ export const buildTheme = (mode: 'light' | 'dark') => {
       error: { main: t.danger, contrastText: '#fff' },
       info: { main: t.info, contrastText: '#fff' },
       background: { default: t.bg, paper: t.surface },
-      text: { primary: t.text, secondary: t.textMuted },
+      text: { primary: t.text, secondary: t.textMuted, disabled: t.textDisabled },
       divider: t.border,
     },
     shape: { borderRadius: 8 },
@@ -31,6 +31,29 @@ export const buildTheme = (mode: 'light' | 'dark') => {
       caption: { fontSize: '0.75rem' },
     },
     components: {
+      MuiCssBaseline: {
+        styleOverrides: {
+          /*
+            El punto de "en vivo" late con esta animación. Estaba usada en dos
+            componentes pero el keyframe no existía en ningún lado, así que el
+            punto quedaba quieto: la única señal de que hay algo pasando ahora
+            no se movía.
+          */
+          '@keyframes pulse': {
+            '0%, 100%': { opacity: 1, transform: 'scale(1)' },
+            '50%': { opacity: 0.45, transform: 'scale(0.82)' },
+          },
+          // Se consume a la intemperie y en movimiento: quien pide menos
+          // animación deja de ver latidos y transiciones.
+          '@media (prefers-reduced-motion: reduce)': {
+            '*': {
+              animationDuration: '0.01ms !important',
+              animationIterationCount: '1 !important',
+              transitionDuration: '0.01ms !important',
+            },
+          },
+        },
+      },
       MuiPaper: {
         styleOverrides: {
           root: { backgroundImage: 'none', borderRadius: 12 },

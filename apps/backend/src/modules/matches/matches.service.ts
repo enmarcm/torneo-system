@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/utils/app-error';
 import { MESSAGES } from '@/config/constants';
-import { getIo } from '@/lib/socket';
+import { emitMatchUpdate } from '@/lib/socket';
 import { Prisma } from '@prisma/client';
 import type { CreateMatchDto } from './matches.schema';
 
@@ -32,12 +32,23 @@ export interface MatchListFilters {
   editionId?: string;
   page?: number;
   limit?: number;
+  /**
+   * `desc` para lo que ya pasó: la última jornada se lee de lo más reciente
+   * hacia atrás, al revés que el calendario.
+   */
+  order?: 'asc' | 'desc';
+  /**
+   * Deja solo los partidos con fecha de hoy en adelante. Sin esto, un partido
+   * programado que nunca se cerró sigue apareciendo entre "los que vienen".
+   */
+  upcoming?: boolean;
 }
 
-const matchWhere = ({ competitionId, status, editionId }: MatchListFilters) => ({
+const matchWhere = ({ competitionId, status, editionId, upcoming }: MatchListFilters) => ({
   ...(competitionId ? { competitionId } : {}),
   ...(editionId ? { competition: { editionId } } : {}),
   ...(status ? { status: status as 'SCHEDULED' | 'LIVE' | 'FINISHED' | 'POSTPONED' } : {}),
+  ...(upcoming ? { scheduledAt: { gte: new Date() } } : {}),
 });
 
 export const matchesService = {
@@ -55,7 +66,7 @@ export const matchesService = {
       },
       // Postgres deja los NULL al final, así los partidos sin día asignado
       // quedan después de los ya programados.
-      orderBy: { scheduledAt: 'asc' },
+      orderBy: { scheduledAt: filters.order === 'desc' ? 'desc' : 'asc' },
     });
   },
   count: (filters: MatchListFilters = {}) => prisma.match.count({ where: matchWhere(filters) }),
@@ -79,22 +90,18 @@ export const matchesService = {
 
   update: async (id: string, data: Partial<CreateMatchDto>) => {
     const m = await prisma.match.update({ where: { id }, data });
-    getIo()
-      .to(`match:${id}`)
-      .emit('match:update', {
-        matchId: id,
-        status: m.status,
-        homeScore: m.homeScore,
-        awayScore: m.awayScore,
-      });
+    emitMatchUpdate({
+      matchId: id,
+      status: m.status,
+      homeScore: m.homeScore,
+      awayScore: m.awayScore,
+    });
     return m;
   },
 
   start: async (id: string) => {
     const m = await prisma.match.update({ where: { id }, data: { status: 'LIVE' } });
-    getIo()
-      .to(`match:${id}`)
-      .emit('match:update', { matchId: id, status: 'LIVE', homeScore: m.homeScore, awayScore: m.awayScore });
+    emitMatchUpdate({ matchId: id, status: 'LIVE', homeScore: m.homeScore, awayScore: m.awayScore });
     return m;
   },
 
@@ -138,14 +145,12 @@ export const matchesService = {
           },
         });
       }
-      getIo()
-        .to(`match:${id}`)
-        .emit('match:update', {
-          matchId: id,
-          status: 'FINISHED',
-          homeScore: match.homeScore,
-          awayScore: match.awayScore,
-        });
+      emitMatchUpdate({
+        matchId: id,
+        status: 'FINISHED',
+        homeScore: match.homeScore,
+        awayScore: match.awayScore,
+      });
       return tx.match.findUnique({ where: { id } });
     }),
 

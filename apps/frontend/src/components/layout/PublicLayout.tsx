@@ -7,12 +7,16 @@ import { useState, Suspense, useMemo } from 'react';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { AdSlot } from '@/components/ui/AdSlot';
+import { useLiveMatchSync } from '@/hooks/common/useLiveMatchSync';
 import { ROUTES } from '@/routes/routes';
 
 export const PublicLayout: React.FC = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { mode, toggleMode } = useGlobalStore();
+  // Un solo oyente para todo el sitio público: sin esto los marcadores de las
+  // listas quedan congelados en el valor con el que cargó la página.
+  useLiveMatchSync();
   const logoSrc = useMemo(() => mode === 'dark' ? logoBlanco : logoAzul, [mode]);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -40,7 +44,7 @@ export const PublicLayout: React.FC = () => {
         <Container maxWidth="xl">
           <Toolbar disableGutters sx={{ gap: 2, minHeight: 72 }}>
             <Stack direction="row" alignItems="center" spacing={1.5} sx={{ cursor: 'pointer' }} onClick={() => navigate(ROUTES.public.home)}>
-              <Box component="img" src={logoSrc} sx={{ width: 36, height: 36, borderRadius: '50%' }} />
+              <Box component="img" src={logoSrc} alt="Liga Lago Futsal" sx={{ width: 36, height: 36, borderRadius: '50%' }} />
               <Typography variant="h4" sx={{ fontFamily: '"Plus Jakarta Sans"', fontWeight: 800, display: { xs: 'none', sm: 'block' } }}>Liga Lago Futsal</Typography>
             </Stack>
 
@@ -87,7 +91,7 @@ export const PublicLayout: React.FC = () => {
       >
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 2, minHeight: 72 }}>
           <Stack direction="row" alignItems="center" spacing={1.5}>
-            <Box component="img" src={logoSrc} sx={{ width: 32, height: 32, borderRadius: '50%' }} />
+            <Box component="img" src={logoSrc} alt="" sx={{ width: 32, height: 32, borderRadius: '50%' }} />
             <Typography sx={{ fontWeight: 800 }}>Liga Lago Futsal</Typography>
           </Stack>
           <IconButton onClick={() => setDrawerOpen(false)} aria-label="Cerrar menú">

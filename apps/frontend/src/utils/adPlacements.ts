@@ -11,6 +11,12 @@ export interface AdPlacementMeta {
   variant: AdVariant;
   /** Medida recomendada de la imagen, para que el que la sube sepa qué mandar. */
   hint: string;
+  /**
+   * Proporción con la que se reserva el espacio antes de que la imagen llegue.
+   * Sin esto, un banner arriba del pliegue empuja el contenido hacia abajo justo
+   * cuando el visitante ya apuntó el dedo a un partido.
+   */
+  ratio?: string;
 }
 
 /**
@@ -26,6 +32,7 @@ export const AD_PLACEMENTS: AdPlacementMeta[] = [
     where: 'Arriba de la portada, debajo de la barra de la edición.',
     variant: 'panel',
     hint: 'Horizontal, tipo 1200 × 240 px',
+    ratio: '5 / 1',
   },
   {
     value: 'HOME_INLINE',

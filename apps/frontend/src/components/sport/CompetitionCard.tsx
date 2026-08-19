@@ -33,6 +33,18 @@ export const CompetitionCard: React.FC<Props> = ({ competition, onClick }) => {
       component={motion.div}
       whileHover={{ y: -4 }}
       onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={
+        onClick
+          ? (e: React.KeyboardEvent) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
       sx={{
         position: 'relative',
         overflow: 'hidden',

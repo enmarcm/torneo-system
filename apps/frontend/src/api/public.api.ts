@@ -21,6 +21,13 @@ export interface PublicRegistration {
   group: { id: string; name: string } | null;
 }
 
+/** Acotaciones de la lista de partidos: cuántos, en qué orden y si solo los que vienen. */
+export interface MatchListOpts {
+  limit?: number;
+  order?: 'asc' | 'desc';
+  upcoming?: boolean;
+}
+
 export const publicApi = {
   editions: async (): Promise<Edition[]> => (await api.get('/public/editions')).data.data,
   competitions: async (editionId?: string): Promise<Competition[]> =>
@@ -28,8 +35,15 @@ export const publicApi = {
   teams: async (): Promise<Team[]> => (await api.get('/public/teams')).data.data,
   players: async (search?: string): Promise<Player[]> =>
     (await api.get('/public/players', { params: { search } })).data.data,
-  matches: async (competitionId?: string, status?: string, editionId?: string): Promise<Match[]> =>
-    (await api.get('/public/matches', { params: { competitionId, status, editionId } })).data.data,
+  matches: async (
+    competitionId?: string,
+    status?: string,
+    editionId?: string,
+    opts?: MatchListOpts,
+  ): Promise<Match[]> =>
+    (await api.get('/public/matches', {
+      params: { competitionId, status, editionId, ...opts },
+    })).data.data,
   registrations: async (editionId?: string, competitionId?: string): Promise<PublicRegistration[]> =>
     (await api.get('/public/registrations', { params: { editionId, competitionId } })).data.data,
   standings: async (competitionId: string, groupId?: string): Promise<StandingRow[]> =>

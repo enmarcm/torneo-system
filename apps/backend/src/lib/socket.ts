@@ -19,3 +19,41 @@ export const getIo = (): Server => {
   if (!io) throw new Error('Socket.io no inicializado');
   return io;
 };
+
+/**
+ * Sala global de partidos.
+ *
+ * Las novedades de un partido viajaban solo a `match:{id}`, así que únicamente
+ * las veía quien tenía ese partido abierto. Las pantallas que muestran varios a
+ * la vez —la portada, el calendario, la de en vivo— quedaban con el marcador
+ * congelado desde que cargaron. Cada novedad se emite ahora también acá, para
+ * que un oyente único pueda seguir todos los partidos sin entrar a ninguno.
+ */
+export const MATCHES_ROOM = 'matches';
+
+interface MatchUpdate {
+  matchId: string;
+  status?: string;
+  homeScore?: number;
+  awayScore?: number;
+}
+
+/** Marcador o estado de un partido, a quien lo mira de cerca y a quien mira la lista. */
+export const emitMatchUpdate = (payload: MatchUpdate) => {
+  const server = getIo();
+  server.to(`match:${payload.matchId}`).emit('match:update', payload);
+  server.to(MATCHES_ROOM).emit('match:update', payload);
+};
+
+/** Gol o tarjeta. Mismo doble destino que el marcador. */
+export const emitMatchEvent = (payload: {
+  matchId: string;
+  type: string;
+  minute: number;
+  playerId?: string | null;
+  teamRegistrationId: string;
+}) => {
+  const server = getIo();
+  server.to(`match:${payload.matchId}`).emit('match:event', payload);
+  server.to(MATCHES_ROOM).emit('match:event', payload);
+};

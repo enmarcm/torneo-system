@@ -13,7 +13,7 @@ import { adsApi, type Ad } from '@/api/ads.api';
 import { dashboardApi, type DashboardMetrics } from '@/api/dashboard.api';
 import { knockoutApi, type BracketRound } from '@/api/knockout.api';
 import { teamBlocksApi, type TeamBlock } from '@/api/team-blocks.api';
-import { publicApi } from '@/api/public.api';
+import { publicApi, type MatchListOpts } from '@/api/public.api';
 
 const REF_STALE = 5 * 60 * 1000;
 const MID_STALE = 2 * 60 * 1000;
@@ -131,11 +131,23 @@ export const usePublicTeamsQuery = () =>
   useQuery({ queryKey: ['public', 'teams'], queryFn: publicApi.teams, staleTime: MID_STALE });
 export const usePublicPlayersQuery = (search?: string) =>
   useQuery({ queryKey: ['public', 'players', search], queryFn: () => publicApi.players(search), staleTime: MID_STALE });
-export const usePublicMatchesQuery = (competitionId?: string, status?: string, editionId?: string) =>
+export const usePublicMatchesQuery = (
+  competitionId?: string,
+  status?: string,
+  editionId?: string,
+  opts?: MatchListOpts,
+) =>
   useQuery({
-    queryKey: ['public', 'matches', competitionId, status, editionId],
-    queryFn: () => publicApi.matches(competitionId, status, editionId),
+    queryKey: ['public', 'matches', competitionId, status, editionId, opts],
+    queryFn: () => publicApi.matches(competitionId, status, editionId, opts),
     staleTime: status === 'LIVE' ? FRESH_STALE : MID_STALE,
+    /*
+      El socket es el camino rápido; esto es la red debajo. Si la conexión se
+      cae —y en la cancha, con datos móviles, se cae— el marcador se refresca
+      igual cada 20 segundos en vez de quedarse clavado sin que nadie se entere.
+    */
+    refetchInterval: status === 'LIVE' ? 20_000 : false,
+    refetchOnWindowFocus: status === 'LIVE',
   });
 export const usePublicRegistrationsQuery = (editionId?: string, competitionId?: string) =>
   useQuery({
@@ -143,6 +155,17 @@ export const usePublicRegistrationsQuery = (editionId?: string, competitionId?: 
     queryFn: () => publicApi.registrations(editionId, competitionId),
     enabled: !!editionId || !!competitionId,
     staleTime: MID_STALE,
+  });
+/**
+ * Detalle de un partido con sus goles y tarjetas. El listado no los incluye, así
+ * que sin esta consulta el detalle abre siempre con el historial vacío.
+ */
+export const usePublicMatchQuery = (id?: string) =>
+  useQuery({
+    queryKey: ['public', 'match', id],
+    queryFn: () => publicApi.match(id as string),
+    enabled: !!id,
+    staleTime: FRESH_STALE,
   });
 export const usePublicStandingsQuery = (competitionId: string, groupId?: string) =>
   useQuery({

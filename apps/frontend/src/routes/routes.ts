@@ -35,6 +35,5 @@ export const ROUTES = {
     teams: '/equipos',
     schedule: '/calendario',
     live: '/en-vivo',
-    history: '/historico',
   },
 } as const;

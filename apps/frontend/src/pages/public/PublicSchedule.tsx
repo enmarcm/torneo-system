@@ -16,7 +16,7 @@ import { ArrowBackRounded, EventBusyRounded, PendingActionsRounded } from '@mui/
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { usePublicMatchesQuery } from '@/hooks/queries';
+import { usePublicMatchesQuery, usePublicMatchQuery } from '@/hooks/queries';
 import { usePublicScope, ALL_COMPETITIONS } from '@/hooks/common/usePublicScope';
 import { PublicScopeFilters } from '@/components/sport/PublicScopeFilters';
 import { CompetitionTags } from '@/components/sport/CompetitionTags';
@@ -61,6 +61,10 @@ const PublicSchedule: React.FC = () => {
   // Con "todas las competiciones" el día mezcla torneos, así que cada tarjeta
   // lleva de cuál viene.
   const showCompetition = scope.competitionId === ALL_COMPETITIONS;
+  // Sin el detalle, el modal muestra el partido sin sus goles ni tarjetas.
+  const detailQuery = usePublicMatchQuery(selectedMatch?.id);
+  const detailedMatch: Match | null = detailQuery.data ?? selectedMatch;
+
   const competitionLabel = (m: Match) =>
     showCompetition && m.competition ? getCompetitionShortLabel(m.competition) : undefined;
 
@@ -272,13 +276,13 @@ const PublicSchedule: React.FC = () => {
         }
         maxWidth={640}
       >
-        {selectedMatch && (
+        {detailedMatch && (
           <Stack spacing={2}>
-            {selectedMatch.competition && (
-              <CompetitionTags competition={selectedMatch.competition} />
+            {detailedMatch.competition && (
+              <CompetitionTags competition={detailedMatch.competition} />
             )}
-            <LiveScoreboard match={selectedMatch} size="lg" />
-            <MvpCard match={selectedMatch} />
+            <LiveScoreboard match={detailedMatch} size="lg" />
+            <MvpCard match={detailedMatch} />
             <AdSlot placement="MATCH_DETAIL" />
           </Stack>
         )}

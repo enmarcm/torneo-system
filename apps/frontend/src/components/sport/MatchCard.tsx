@@ -5,7 +5,7 @@ import {
   MilitaryTechRounded,
   PendingActionsRounded,
 } from '@mui/icons-material';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { formatDateTimeOrPending } from '@/utils/formatDate';
 import { getStatusLabel } from '@/utils/statusLabels';
 import type { Match } from '@/api/matches.api';
@@ -20,6 +20,12 @@ interface Props {
    * que se sepa si el partido es de una división, de la copa o de menores.
    */
   competitionLabel?: string;
+  /**
+   * Etiqueta de estado. Se apaga cuando la sección que contiene la tarjeta ya lo
+   * dice: seis chips "Programado" idénticos bajo el título "Próximos partidos"
+   * no distinguen nada, solo repiten.
+   */
+  showStatus?: boolean;
 }
 
 /** Franja de color a la izquierda, según en qué estado está el partido. */
@@ -44,7 +50,13 @@ export const MatchCard: React.FC<Props> = ({
   onClick,
   showStage = true,
   competitionLabel,
+  showStatus = true,
 }) => {
+  /*
+    El bloque CSS de prefers-reduced-motion no alcanza acá: framer-motion anima
+    por JS y sigue destellando igual. Hay que preguntarle a la preferencia.
+  */
+  const reduceMotion = useReducedMotion();
   const isLive = match.status === 'LIVE';
   const isFinished = match.status === 'FINISHED';
   const isPending = !match.scheduledAt;
@@ -57,6 +69,20 @@ export const MatchCard: React.FC<Props> = ({
       whileHover={onClick ? { y: -3 } : undefined}
       transition={{ duration: 0.18 }}
       onClick={onClick}
+      // Una tarjeta que se puede tocar tiene que poder alcanzarse con el teclado
+      // y anunciarse como acción; un div con onClick no es ninguna de las dos.
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={
+        onClick
+          ? (e: React.KeyboardEvent) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
       sx={{
         position: 'relative',
         p: { xs: 2, md: 2.5 },
@@ -106,7 +132,7 @@ export const MatchCard: React.FC<Props> = ({
         {isLive ? (
           <Box
             component={motion.div}
-            animate={{ opacity: [1, 0.45, 1] }}
+            animate={reduceMotion ? undefined : { opacity: [1, 0.45, 1] }}
             transition={{ duration: 1.4, repeat: Infinity }}
             sx={{
               display: 'inline-flex',
@@ -126,19 +152,20 @@ export const MatchCard: React.FC<Props> = ({
             <Box sx={{ width: 5, height: 5, borderRadius: '50%', bgcolor: '#fff' }} />
             EN VIVO
           </Box>
-        ) : (
+        ) : showStatus ? (
           <Chip
             size="small"
             variant="outlined"
             label={getStatusLabel(match.status)}
             sx={{ height: 22, fontSize: 11, fontWeight: 700, flexShrink: 0 }}
           />
-        )}
+        ) : null}
       </Stack>
 
       <Stack direction="row" alignItems="center" spacing={1.5}>
         <Stack alignItems="center" spacing={0.75} sx={{ flex: 1, minWidth: 0 }}>
           <Avatar
+            alt={match.homeRegistration.team.name}
             src={match.homeRegistration.team.logoUrl ?? undefined}
             sx={{ width: 48, height: 48, opacity: awayWon ? 0.55 : 1 }}
           >
@@ -179,6 +206,7 @@ export const MatchCard: React.FC<Props> = ({
 
         <Stack alignItems="center" spacing={0.75} sx={{ flex: 1, minWidth: 0 }}>
           <Avatar
+            alt={match.awayRegistration.team.name}
             src={match.awayRegistration.team.logoUrl ?? undefined}
             sx={{ width: 48, height: 48, opacity: homeWon ? 0.55 : 1 }}
           >
@@ -229,7 +257,11 @@ export const MatchCard: React.FC<Props> = ({
               title={`MVP: ${match.mvpPlayer.firstName} ${match.mvpPlayer.lastName}`}
               arrow
             >
-              <MilitaryTechRounded sx={{ fontSize: 17, color: 'warning.main' }} />
+              {/*
+                El ámbar marca lo que falta ("Por programar"); el logro es del
+                acento, que hasta ahora no aparecía en ninguna pantalla pública.
+              */}
+              <MilitaryTechRounded sx={{ fontSize: 17, color: 'var(--accent)' }} />
             </Tooltip>
           )}
           {match.venue && (

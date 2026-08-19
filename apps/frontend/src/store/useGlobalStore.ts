@@ -14,7 +14,16 @@ type State = {
 export const useGlobalStore = create<State>()(
   persist(
     (set) => ({
-      mode: 'light',
+      /*
+        El norte creativo del sistema se llama "La Cancha de Noche" y el default
+        era blanco a todo brillo. Ahora se arranca en lo que el visitante ya
+        eligió en su teléfono; el interruptor sigue mandando por encima.
+      */
+      mode:
+        typeof window !== 'undefined' &&
+        window.matchMedia?.('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light',
       sidebarCollapsed: false,
       selectedEditionId: null,
       toggleMode: () => set((s) => ({ mode: s.mode === 'light' ? 'dark' : 'light' })),
