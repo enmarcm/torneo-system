@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { hashPassword } from '@/utils/password.util';
 import { AppError } from '@/utils/app-error';
 import { MESSAGES } from '@/config/constants';
+import { purgeUser, CASCADE_TX } from '@/utils/cascade.util';
 
 export const usersService = {
   list: () =>
@@ -24,10 +25,16 @@ export const usersService = {
   setStatus: (id: string, status: 'ACTIVE' | 'INACTIVE') =>
     prisma.user.update({ where: { id }, data: { status }, select: { id: true, status: true } }),
 
+  /** Borrado definitivo: la auditoría y las sanciones que firmó quedan sin autor. */
   remove: async (id: string) => {
     const u = await prisma.user.findUnique({ where: { id } });
     if (!u) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
-    await prisma.user.delete({ where: { id } });
-    return { id };
+    return prisma.$transaction(
+      async (tx) => {
+        await purgeUser(tx, id);
+        return { id };
+      },
+      CASCADE_TX,
+    );
   },
 };

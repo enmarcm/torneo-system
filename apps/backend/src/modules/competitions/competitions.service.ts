@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/utils/app-error';
 import { MESSAGES } from '@/config/constants';
-import { assertDeletable } from '@/utils/deletion.util';
+import { purgeCompetitions, CASCADE_TX } from '@/utils/cascade.util';
 import { Prisma, type CompetitionKind } from '@prisma/client';
 import type { CreateCompetitionDto } from './competitions.schema';
 
@@ -256,29 +256,21 @@ export const competitionsService = {
     prisma.competition.update({ where: { id }, data: { status } }),
 
   /**
-   * Borrado definitivo. Solo si no tiene equipos inscritos ni partidos: con
-   * partidos jugados, borrarla destruye la tabla y las estadísticas de la
-   * temporada. Los grupos y el cuadro vacíos sí se van con ella.
+   * Borrado definitivo y en cascada. Se lleva inscripciones, partidos, eventos,
+   * grupos, llaves y sanciones de la competición. No hay red de seguridad: si el
+   * administrador la borra, la temporada de ese torneo desaparece con ella.
    */
   remove: async (id: string) => {
     const competition = await prisma.competition.findUnique({ where: { id } });
     if (!competition) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
 
-    const [registrations, matches] = await Promise.all([
-      prisma.teamRegistration.count({ where: { competitionId: id } }),
-      prisma.match.count({ where: { competitionId: id } }),
-    ]);
-    assertDeletable('la competición', [
-      { label: 'equipos inscritos', count: registrations },
-      { label: 'partidos', count: matches },
-    ]);
-
-    return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      await tx.knockoutTie.deleteMany({ where: { competitionId: id } });
-      await tx.competitionGroup.deleteMany({ where: { competitionId: id } });
-      await tx.competition.delete({ where: { id } });
-      return { id };
-    });
+    return prisma.$transaction(
+      async (tx: Prisma.TransactionClient) => {
+        await purgeCompetitions(tx, [id]);
+        return { id };
+      },
+      CASCADE_TX,
+    );
   },
 
   /**

@@ -1,15 +1,13 @@
 import { Box, Container, Grid2 as Grid, Card, Stack, Typography, Button } from '@mui/material';
-import { SportsSoccerRounded } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { usePublicEditionsQuery, usePublicCompetitionsQuery, usePublicMatchesQuery } from '@/hooks/queries';
 import { MatchCard } from '@/components/sport/MatchCard';
 import { LiveScoreboard } from '@/components/sport/LiveScoreboard';
 import { EntityHeroCard } from '@/components/sport/EntityHeroCard';
-import { CompetitionTags } from '@/components/sport/CompetitionTags';
+import { CompetitionCard } from '@/components/sport/CompetitionCard';
 import { AppModal } from '@/components/ui/AppModal';
 import { ROUTES } from '@/routes/routes';
-import { motion } from 'framer-motion';
 import { sortCompetitions, getCompetitionShortLabel } from '@/utils/competitionMeta';
 import type { Edition, Competition, Match } from '@/api/public.api';
 
@@ -89,20 +87,13 @@ const PublicHome: React.FC = () => {
 
         <Box sx={{ mt: 5 }}>
           <Typography variant="h3" sx={{ mb: 2 }}>Competiciones</Typography>
-          <Grid container spacing={2}>
+          <Grid container spacing={2.5}>
             {comps.slice(0, 6).map((c: Competition) => (
-              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={c.id}>
-                <Card component={motion.div} whileHover={{ y: -2 }} sx={{ p: 2.5, cursor: 'pointer', height: '100%' }} onClick={() => navigate(ROUTES.public.competitions)}>
-                  <Stack direction="row" alignItems="flex-start" spacing={1.5}>
-                    <Box sx={{ width: 40, height: 40, flexShrink: 0, borderRadius: 2, bgcolor: 'primary.soft', color: 'primary.main', display: 'grid', placeItems: 'center' }}>
-                      <SportsSoccerRounded />
-                    </Box>
-                    <Box sx={{ minWidth: 0 }}>
-                      <Typography sx={{ fontWeight: 600, mb: 0.75 }}>{c.name}</Typography>
-                      <CompetitionTags competition={c} />
-                    </Box>
-                  </Stack>
-                </Card>
+              <Grid size={{ xs: 12, md: 6 }} key={c.id}>
+                <CompetitionCard
+                  competition={c}
+                  onClick={() => navigate(ROUTES.public.competitions)}
+                />
               </Grid>
             ))}
           </Grid>

@@ -143,7 +143,7 @@ const AdminEditions: React.FC = () => {
           }
         }}
         title="¿Eliminar definitivamente?"
-        message={`Se borrará "${purgingEdition?.name ?? ''}" sin posibilidad de recuperarla. Si ya tiene competiciones creadas, la operación se rechaza: una edición con torneos contiene toda una temporada.`}
+        message={`Se borrará "${purgingEdition?.name ?? ''}" con todas sus competiciones, partidos, tablas, plantillas y traspasos. No hay vuelta atrás: es toda una temporada.`}
         confirmLabel="Eliminar definitivamente"
         loading={deleteEdition.isPending}
       />

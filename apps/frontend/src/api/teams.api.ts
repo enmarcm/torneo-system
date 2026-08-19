@@ -101,7 +101,7 @@ export const teamsApi = {
   getHistory: async (id: string): Promise<Match[]> => (await api.get(`/teams/${id}/history`)).data.data,
   getStats: async (id: string): Promise<TeamStats> => (await api.get(`/teams/${id}/stats`)).data.data,
   getPlayers: async (id: string): Promise<TeamRosterEntry[]> => (await api.get(`/teams/${id}/players`)).data.data,
-  /** Borrado definitivo. El backend lo rechaza si tiene historial. */
+  /** Borrado definitivo en cascada: se lleva inscripciones, partidos y el usuario líder. */
   remove: async (id: string): Promise<{ id: string }> =>
     (await api.delete(`/teams/${id}`)).data.data,
 };

@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/utils/app-error';
 import { MESSAGES } from '@/config/constants';
-import { assertDeletable } from '@/utils/deletion.util';
+import { purgeCompetitions, CASCADE_TX } from '@/utils/cascade.util';
 import type { CreateCategoryDto } from './categories.schema';
 
 export const categoriesService = {
@@ -13,20 +13,24 @@ export const categoriesService = {
     prisma.category.update({ where: { id }, data }),
 
   /**
-   * Borrado definitivo. Antes, si la categoría tenía competiciones, se
-   * desactivaba en silencio: el admin apretaba "Eliminar" y creía haber
-   * borrado algo que seguía existiendo. Ahora se avisa explícitamente.
+   * Borrado definitivo y en cascada: se lleva las competiciones que la usan y
+   * todo lo que cuelga de ellas. Nunca se desactiva en silencio.
    */
   remove: async (id: string) => {
     const category = await prisma.category.findUnique({ where: { id } });
     if (!category) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
 
-    const competitions = await prisma.competition.count({ where: { categoryId: id } });
-    assertDeletable('la categoría', [
-      { label: 'competiciones que la usan', count: competitions },
-    ]);
-
-    await prisma.category.delete({ where: { id } });
-    return { id, deleted: true };
+    return prisma.$transaction(
+      async (tx) => {
+        const competitions = await tx.competition.findMany({
+          where: { categoryId: id },
+          select: { id: true },
+        });
+        await purgeCompetitions(tx, competitions.map((c) => c.id));
+        await tx.category.delete({ where: { id } });
+        return { id, deleted: true };
+      },
+      CASCADE_TX,
+    );
   },
 };

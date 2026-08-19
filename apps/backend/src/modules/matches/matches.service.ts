@@ -189,5 +189,11 @@ export const matchesService = {
       data: { mvpPlayerId: null, mvpPhotoUrl: null, mvpNote: null },
     }),
 
-  remove: (id: string) => prisma.match.delete({ where: { id } }),
+  /** Borrado definitivo: los goles y tarjetas del partido se van con él. */
+  remove: (id: string) =>
+    prisma.$transaction(async (tx) => {
+      await tx.matchEvent.deleteMany({ where: { matchId: id } });
+      await tx.match.delete({ where: { id } });
+      return { id };
+    }),
 };

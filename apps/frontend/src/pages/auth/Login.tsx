@@ -52,7 +52,7 @@ const Login: React.FC = () => {
 
   return (
     <Box sx={{ minHeight: '100vh', display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' } }}>
-      {/* Panel izquierdo (escena 3D de futsal) */}
+      {/* Panel izquierdo (marca sobre la cancha en fuga) */}
       <Box
         sx={{
           position: 'relative',
@@ -83,10 +83,10 @@ const Login: React.FC = () => {
           transition={{ duration: 0.3 }}
           sx={{ position: 'relative', zIndex: 1 }}
         >
-          <Typography variant="h2" sx={{ fontWeight: 800, mb: 2, textShadow: '0 6px 24px rgba(1,17,45,0.45)' }}>
+          <Typography variant="h2" sx={{ fontWeight: 800, mb: 2, textShadow: '0 4px 18px rgba(1,17,45,0.28)' }}>
             La liga, en vivo y sin fricción.
           </Typography>
-          <Typography sx={{ opacity: 0.85, maxWidth: 460, textShadow: '0 2px 12px rgba(1,17,45,0.35)' }}>
+          <Typography sx={{ opacity: 0.85, maxWidth: 460, textShadow: '0 2px 10px rgba(1,17,45,0.22)' }}>
             Programa partidos, gestiona plantillas, sigue a tus equipos favoritos y vive cada gol en tiempo real.
           </Typography>
         </Box>

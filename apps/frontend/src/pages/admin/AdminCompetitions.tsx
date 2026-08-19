@@ -534,7 +534,7 @@ const AdminCompetitions: React.FC = () => {
           }
         }}
         title="¿Eliminar definitivamente?"
-        message={`Se borrará "${purgingComp?.name}" sin posibilidad de recuperarla. Si ya tiene equipos inscritos o partidos, la operación se rechaza: en ese caso finalizala para conservar la temporada.`}
+        message={`Se borrará "${purgingComp?.name}" junto con sus equipos inscritos, partidos, goles, tarjetas, grupos y llaves. No hay vuelta atrás: si querés conservar la temporada, finalizala en vez de borrarla.`}
         confirmLabel="Eliminar definitivamente"
         loading={deleteComp.isPending}
       />

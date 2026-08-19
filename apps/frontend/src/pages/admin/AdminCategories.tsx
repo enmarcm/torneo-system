@@ -155,7 +155,7 @@ const AdminCategories: React.FC = () => {
           toast.success('Categoría eliminada');
         }}
         title="¿Eliminar categoría?"
-        message={`Se eliminará o desactivará "${deleting?.name}". Si tiene competiciones asociadas, se desactivará.`}
+        message={`Se eliminará "${deleting?.name}" y, con ella, las competiciones que la usen y todo lo que cuelgue de esas competiciones. No hay vuelta atrás.`}
         loading={remove.isPending}
       />
     </Box>

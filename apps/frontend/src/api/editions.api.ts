@@ -27,7 +27,7 @@ export const editionsApi = {
     id: string,
     data: { transfersOpen: boolean; transferWindowStart?: string; transferWindowEnd?: string },
   ): Promise<Edition> => (await api.patch(`/editions/${id}/transfers`, data)).data.data,
-  /** Borrado definitivo. El backend lo rechaza si tiene historial. */
+  /** Borrado definitivo en cascada: se lleva las competiciones de la edición enteras. */
   remove: async (id: string): Promise<{ id: string }> =>
     (await api.delete(`/editions/${id}`)).data.data,
 };

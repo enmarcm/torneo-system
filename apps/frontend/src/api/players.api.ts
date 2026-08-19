@@ -29,7 +29,7 @@ export const playersApi = {
   setDegree: async (id: string, data: { universityDegreeVerified: boolean; degreeDocUrl?: string }): Promise<Player> =>
     (await api.patch(`/players/${id}/degree`, data)).data.data,
   competitions: async (id: string) => (await api.get(`/players/${id}/competitions`)).data.data,
-  /** Borrado definitivo. El backend lo rechaza si tiene historial. */
+  /** Borrado definitivo en cascada: se lleva plantillas, goles, tarjetas y traspasos. */
   remove: async (id: string): Promise<{ id: string }> =>
     (await api.delete(`/players/${id}`)).data.data,
 };

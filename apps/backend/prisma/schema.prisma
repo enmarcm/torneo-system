@@ -225,8 +225,8 @@ model Team {
   id            String             @id @default(uuid())
   name          String
   logoUrl       String?
-  /// Los equipos NUNCA se eliminan: se desactivan y conservan todo su historial
-  /// para poder reincorporarlos en una edición futura.
+  /// Desactivar conserva el historial y permite reincorporar al equipo en una
+  /// edición futura. Eliminarlo desde administración sí lo borra en cascada.
   status        EntityStatus       @default(ACTIVE)
   leader        User?              @relation("TeamLeader")
   registrations TeamRegistration[]

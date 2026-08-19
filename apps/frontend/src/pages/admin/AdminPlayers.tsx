@@ -153,7 +153,7 @@ const AdminPlayers: React.FC = () => {
         confirmLabel="Desactivar"
         loading={setStatus.isPending}
       />
-      {/* Borrado definitivo: el backend lo rechaza si el jugador ya jugó. */}
+      {/* Borrado definitivo: arrastra todo lo que el jugador dejó registrado. */}
       <ConfirmDialog
         open={!!purgingPlayer}
         onClose={() => setPurgingPlayer(null)}
@@ -168,7 +168,7 @@ const AdminPlayers: React.FC = () => {
           }
         }}
         title="¿Eliminar definitivamente?"
-        message={`Se borrará a "${purgingPlayer?.firstName ?? ''} ${purgingPlayer?.lastName ?? ''}" sin posibilidad de recuperarlo. Si ya integró una plantilla o marcó goles, la operación se rechaza: en ese caso desactivalo.`}
+        message={`Se borrará a "${purgingPlayer?.firstName ?? ''} ${purgingPlayer?.lastName ?? ''}" junto con sus plantillas, goles, tarjetas y traspasos. No hay vuelta atrás: si solo querés que deje de jugar, desactivalo.`}
         confirmLabel="Eliminar definitivamente"
         loading={deletePlayer.isPending}
       />

@@ -45,19 +45,13 @@ const normalize = (v: string) =>
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '');
 
-/** Rango de edad de la categoría, redactado sin inventar el nombre del "Sub-". */
-export const getAgeLabel = (c: CompetitionLike): string | null => {
-  const { ageMin, ageMax } = c;
-  if (ageMin == null && ageMax == null) return null;
-  if (ageMin == null) return `Hasta ${ageMax} años`;
-  if (ageMax == null) return `Desde ${ageMin} años`;
-  return `${ageMin} a ${ageMax} años`;
-};
-
 /**
  * Etiquetas con las que se identifica un torneo en la parte pública: si es una
  * división de la liga (y cuál), si es la copa, si es de menores o un torneo
- * especial como el gremial, más la categoría y el rango de edad cuando aportan.
+ * especial como el gremial, más la categoría cuando aporta.
+ *
+ * El rango de edad queda fuera a propósito: es una regla de inscripción que le
+ * sirve al administrador, no algo que el visitante necesite leer en cada tarjeta.
  */
 export const getCompetitionTags = (c: CompetitionLike): CompetitionTag[] => {
   const tags: CompetitionTag[] = [];
@@ -74,9 +68,6 @@ export const getCompetitionTags = (c: CompetitionLike): CompetitionTag[] => {
   if (category && normalize(category) !== normalize(c.name)) {
     tags.push({ label: category, color: 'default' });
   }
-
-  const age = getAgeLabel(c);
-  if (age) tags.push({ label: age, color: 'default' });
 
   // Solo se aclara el formato cuando no se deduce del tipo de torneo.
   if (c.format === 'GROUPS_KNOCKOUT' && c.kind !== 'CUP') {

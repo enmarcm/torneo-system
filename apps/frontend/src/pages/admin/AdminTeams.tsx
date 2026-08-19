@@ -273,12 +273,11 @@ const AdminTeams: React.FC = () => {
             toast.success('Equipo eliminado definitivamente');
             setPurgingTeam(null);
           } catch (e) {
-            // Si tiene historial el backend lo rechaza y explica el motivo.
             toast.error(extractErrorMessage(e));
           }
         }}
         title="¿Eliminar definitivamente?"
-        message={`Se borrará "${purgingTeam?.name}" y su usuario de líder, sin posibilidad de recuperarlo. Si el equipo ya se inscribió o jugó, la operación se rechaza: en ese caso desactivalo para conservar el historial.`}
+        message={`Se borrará "${purgingTeam?.name}", su usuario de líder y todo su historial: inscripciones, partidos jugados, plantillas y sanciones. Los partidos contra sus rivales también desaparecen de las tablas. Si solo querés que deje de participar, desactivalo.`}
         confirmLabel="Eliminar definitivamente"
         loading={deleteTeam.isPending}
       />

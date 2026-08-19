@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/utils/app-error';
 import { MESSAGES } from '@/config/constants';
-import { assertDeletable } from '@/utils/deletion.util';
+import { purgePlayer, CASCADE_TX } from '@/utils/cascade.util';
 import type { CreatePlayerDto } from './players.schema';
 
 export const playersService = {
@@ -63,27 +63,19 @@ export const playersService = {
     }),
 
   /**
-   * Borrado definitivo. Solo si el jugador nunca entró a una plantilla ni
-   * generó eventos: sus goles y tarjetas forman parte de partidos ya jugados.
+   * Borrado definitivo y en cascada: se lleva sus plantillas, estadísticas,
+   * traspasos y los goles y tarjetas que registró en partidos ya jugados.
    */
   remove: async (id: string) => {
     const player = await prisma.player.findUnique({ where: { id } });
     if (!player) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
 
-    const [roster, events, transfers, mvp] = await Promise.all([
-      prisma.rosterEntry.count({ where: { playerId: id } }),
-      prisma.matchEvent.count({ where: { playerId: id } }),
-      prisma.transfer.count({ where: { playerId: id } }),
-      prisma.match.count({ where: { mvpPlayerId: id } }),
-    ]);
-    assertDeletable('el jugador', [
-      { label: 'inscripciones en plantillas', count: roster },
-      { label: 'eventos en partidos (goles o tarjetas)', count: events },
-      { label: 'traspasos', count: transfers },
-      { label: 'designaciones como MVP', count: mvp },
-    ]);
-
-    await prisma.player.delete({ where: { id } });
-    return { id };
+    return prisma.$transaction(
+      async (tx) => {
+        await purgePlayer(tx, id);
+        return { id };
+      },
+      CASCADE_TX,
+    );
   },
 };

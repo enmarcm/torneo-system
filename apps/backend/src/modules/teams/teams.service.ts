@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { AppError } from '@/utils/app-error';
 import { MESSAGES } from '@/config/constants';
 import { hashPassword } from '@/utils/password.util';
-import { assertDeletable } from '@/utils/deletion.util';
+import { purgeTeam, CASCADE_TX } from '@/utils/cascade.util';
 import { Prisma } from '@prisma/client';
 
 export const teamsService = {
@@ -63,29 +63,21 @@ export const teamsService = {
     prisma.team.update({ where: { id }, data: { status } }),
 
   /**
-   * Borrado definitivo. Solo procede si el equipo nunca se inscribió ni tuvo
-   * sanciones: con historial se conserva y se desactiva, porque borrarlo se
-   * llevaría puestos partidos y tablas de sus rivales.
+   * Borrado definitivo y en cascada: inscripciones, partidos jugados, plantillas,
+   * sanciones y el usuario del líder, que existe solo para este equipo. Los
+   * partidos contra sus rivales también desaparecen, y con ellos sus tablas.
    */
   remove: async (id: string) => {
     const team = await prisma.team.findUnique({ where: { id }, include: { leader: true } });
     if (!team) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
 
-    const [registrations, blocks] = await Promise.all([
-      prisma.teamRegistration.count({ where: { teamId: id } }),
-      prisma.teamBlock.count({ where: { teamId: id } }),
-    ]);
-    assertDeletable('el equipo', [
-      { label: 'inscripciones en competiciones', count: registrations },
-      { label: 'registros de bloqueo', count: blocks },
-    ]);
-
-    return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      // El usuario del líder existe solo para este equipo, así que se va con él.
-      if (team.leader) await tx.user.delete({ where: { id: team.leader.id } });
-      await tx.team.delete({ where: { id } });
-      return { id };
-    });
+    return prisma.$transaction(
+      async (tx: Prisma.TransactionClient) => {
+        await purgeTeam(tx, id, team.leader?.id ?? null);
+        return { id };
+      },
+      CASCADE_TX,
+    );
   },
 
   register: (teamId: string, competitionId: string) =>
