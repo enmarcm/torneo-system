@@ -12,11 +12,14 @@ interface Props {
   label?: string | null;
   /** Tope de piezas a mostrar en las ranuras que apilan (lateral y logos). */
   max?: number;
-  /**
-   * Para la ranura que cae arriba del pliegue: se carga con prioridad y se le
-   * reserva el alto, en vez de aparecer tarde y correr el contenido.
-   */
+  /** Para la ranura que cae arriba del pliegue: se carga con prioridad. */
   priority?: boolean;
+  /**
+   * Fuerza el panel en blanco con borde, independiente del tema. Es para las
+   * ranuras que caen sobre una superficie oscura, como el pie de página: ahí la
+   * tarjeta del tema se confunde con el fondo.
+   */
+  onDark?: boolean;
   sx?: object;
 }
 
@@ -57,10 +60,18 @@ const AdImage: React.FC<{ ad: Ad; sx?: object; priority?: boolean }> = ({ ad, sx
  * espacio en lugar de apilarlos, salvo en las ranuras que existen justamente
  * para mostrar varios juntos (la columna lateral y la tira de logos del pie).
  */
-export const AdSlot: React.FC<Props> = ({ placement, variant, label, max, priority, sx }) => {
+export const AdSlot: React.FC<Props> = ({ placement, variant, label, max, priority, onDark, sx }) => {
   const { data: ads = [] } = usePublicAdsQuery(placement);
   const meta = getPlacementMeta(placement);
   const shape = variant ?? meta?.variant ?? 'panel';
+  /*
+    Caja de medida fija por ubicación: la imagen se recorta para llenarla en vez
+    de dejar el panel a medio pintar. Todas las piezas de una misma ranura miden
+    igual, suba lo que suba el administrador.
+  */
+  const box = meta?.ratio
+    ? { aspectRatio: meta.ratio, height: '100%', objectFit: 'cover' as const }
+    : {};
   const stacked = shape === 'logos' || shape === 'sidebar';
   const list = max ? ads.slice(0, max) : ads;
 
@@ -117,21 +128,24 @@ export const AdSlot: React.FC<Props> = ({ placement, variant, label, max, priori
       <Stack spacing={2} sx={sx}>
         {list.map((ad) => (
           <Card key={ad.id} sx={{ overflow: 'hidden' }}>
-            <AdImage ad={ad} />
+            <AdImage ad={ad} sx={box} />
           </Card>
         ))}
       </Stack>
     );
   }
 
-  const reserved = priority && meta?.ratio ? { aspectRatio: meta.ratio, objectFit: 'contain' as const } : {};
+  /*
+    La pieza se dibuja con la proporción real del archivo: forzarle una caja fija
+    dejaba la mitad del panel en blanco alrededor de una imagen chica.
+  */
   const rotating = (
     <Fade in key={current.id} timeout={400}>
       <Box>
         <AdImage
           ad={current}
           priority={priority}
-          sx={{ borderRadius: shape === 'bare' ? 2 : 1.5, ...reserved }}
+          sx={{ borderRadius: shape === 'bare' ? 2 : 1.5, maxHeight: 220, ...box }}
         />
       </Box>
     </Fade>
@@ -140,15 +154,21 @@ export const AdSlot: React.FC<Props> = ({ placement, variant, label, max, priori
   if (shape === 'bare') return <Box sx={sx}>{rotating}</Box>;
 
   return (
-    <Card sx={{ p: { xs: 1, md: 1.25 }, ...sx }}>
+    <Card
+      sx={{
+        p: { xs: 0.75, md: 1 },
+        ...(onDark ? { bgcolor: '#FFFFFF', border: '1px solid #E6E9F2' } : {}),
+        ...sx,
+      }}
+    >
       {label !== null && (
         <Typography
           variant="caption"
           sx={{
             display: 'block',
-            mb: 0.75,
+            mb: 0.5,
             ml: 0.5,
-            color: 'text.secondary',
+            color: onDark ? '#6B7494' : 'text.secondary',
             fontSize: 10,
             fontWeight: 700,
             letterSpacing: 1,

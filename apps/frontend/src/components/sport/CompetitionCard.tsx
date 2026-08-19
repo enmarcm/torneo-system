@@ -10,6 +10,8 @@ interface Props {
     _count?: { registrations: number };
   };
   onClick?: () => void;
+  /** Versión chica, para la fila de la portada. */
+  compact?: boolean;
 }
 
 /**
@@ -17,15 +19,14 @@ interface Props {
  * nombre con sus etiquetas. Es la pieza con la que el visitante elige a dónde
  * entrar, así que pesa la imagen, no la ficha técnica.
  *
- * La tarjeta se adapta a la foto y no al revés: la imagen entra completa, con su
- * propia proporción, en lugar de recortarse para llenar un alto fijo. Un banner
- * ancho da una tarjeta baja y una foto vertical una alta, con topes para que
- * ningún extremo rompa la grilla.
+ * Todas las portadas miden lo mismo y la foto se recorta para llenar su caja.
+ * Dejar que cada imagen impusiera su alto dejaba la fila despareja y con franjas
+ * vacías alrededor de las fotos que no venían en la proporción sugerida.
  *
  * Sin foto cargada no queda un hueco gris: se pinta el degradado de la marca
  * con el balón de fondo.
  */
-export const CompetitionCard: React.FC<Props> = ({ competition, onClick }) => {
+export const CompetitionCard: React.FC<Props> = ({ competition, onClick, compact = false }) => {
   const teams = competition._count?.registrations ?? 0;
 
   return (
@@ -48,8 +49,7 @@ export const CompetitionCard: React.FC<Props> = ({ competition, onClick }) => {
       sx={{
         position: 'relative',
         overflow: 'hidden',
-        // Piso para que el título y las etiquetas siempre tengan dónde apoyarse.
-        minHeight: { xs: 150, md: 170 },
+        height: compact ? { xs: 130, md: 148 } : { xs: 200, md: 240 },
         color: '#fff',
         background: 'var(--heroGradient)',
         cursor: onClick ? 'pointer' : 'default',
@@ -63,18 +63,16 @@ export const CompetitionCard: React.FC<Props> = ({ competition, onClick }) => {
           src={competition.imageUrl}
           alt=""
           sx={{
-            display: 'block',
+            position: 'absolute',
+            inset: 0,
             width: '100%',
-            // El alto lo pone la proporción real de la foto, no la tarjeta.
-            height: 'auto',
-            maxHeight: { xs: 320, md: 420 },
-            // Solo entra en juego al topar el máximo: la foto se centra, no se recorta.
-            objectFit: 'contain',
+            height: '100%',
+            objectFit: 'cover',
             transition: 'transform 0.5s ease',
           }}
         />
       ) : (
-        <Box sx={{ width: '100%', height: { xs: 200, md: 240 } }}>
+        <Box sx={{ width: '100%', height: '100%' }}>
           <SportsSoccerRounded
             className="competition-card__bg"
             sx={{
@@ -100,20 +98,20 @@ export const CompetitionCard: React.FC<Props> = ({ competition, onClick }) => {
       />
 
       <Stack
-        spacing={1.25}
+        spacing={compact ? 0.75 : 1.25}
         sx={{
           position: 'absolute',
           left: 0,
           right: 0,
           bottom: 0,
-          p: { xs: 2, md: 2.5 },
+          p: compact ? 1.5 : { xs: 2, md: 2.5 },
         }}
       >
         <Typography
           sx={{
             fontFamily: '"Plus Jakarta Sans", sans-serif',
             fontWeight: 800,
-            fontSize: { xs: 20, md: 26 },
+            fontSize: compact ? { xs: 16, md: 18 } : { xs: 20, md: 26 },
             lineHeight: 1.15,
             textShadow: '0 1px 12px rgba(0,0,0,0.45)',
           }}

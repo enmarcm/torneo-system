@@ -1,6 +1,6 @@
 import { Box, AppBar, Toolbar, Typography, Stack, Button, IconButton, Tooltip, Container, Drawer, List, ListItemButton, ListItemText, Divider, ListItemIcon } from '@mui/material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { LightModeRounded, DarkModeRounded, MenuRounded, CloseRounded, HomeRounded, EmojiEventsRounded, CalendarMonthRounded, LiveTvRounded, BarChartRounded, GroupsRounded, LoginRounded } from '@mui/icons-material';
+import { LightModeRounded, DarkModeRounded, MenuRounded, CloseRounded, HomeRounded, EmojiEventsRounded, CalendarMonthRounded, LiveTvRounded, BarChartRounded, GroupsRounded, LoginRounded, PlaceRounded, PhoneRounded, MailRounded, ScheduleRounded } from '@mui/icons-material';
 import logoAzul from '@/assets/logo_azul.PNG';
 import logoBlanco from '@/assets/logo.PNG';
 import { useState, Suspense, useMemo } from 'react';
@@ -9,6 +9,17 @@ import { LoadingState } from '@/components/ui/LoadingState';
 import { AdSlot } from '@/components/ui/AdSlot';
 import { useLiveMatchSync } from '@/hooks/common/useLiveMatchSync';
 import { ROUTES } from '@/routes/routes';
+
+/*
+  DATOS DE MUESTRA. Están puestos para poder ver el pie terminado; ninguno fue
+  confirmado por la liga. Reemplazar por los reales antes de publicar.
+*/
+const CONTACTO = {
+  sede: 'Colegio de Abogados del Estado Zulia · Maracaibo',
+  telefono: '+58 261 000 0000',
+  email: 'contacto@ligalagofutsal.com',
+  horario: 'Partidos: viernes y sábados, 18:00 a 23:00',
+};
 
 export const PublicLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -125,17 +136,133 @@ export const PublicLayout: React.FC = () => {
         </Suspense>
       </Box>
 
-      <Box component="footer" sx={{ borderTop: '1px solid', borderColor: 'divider', py: 3, mt: 4 }}>
+      <Box
+        component="footer"
+        sx={{
+          mt: 5,
+          py: { xs: 4, md: 5 },
+          background: 'var(--heroGradient)',
+          color: '#fff',
+        }}
+      >
         <Container maxWidth="xl">
-          <Stack spacing={3}>
-            {/* Publicidad del pie: primero el panel ancho, después la tira de logos. */}
-            <AdSlot placement="FOOTER" />
-            <AdSlot placement="FOOTER_LOGOS" />
-            <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" justifyContent="space-between" spacing={1}>
-              <Typography variant="caption" color="text.secondary">
+          <Stack spacing={4}>
+            {/* Publicidad del pie: sobre fondo oscuro va en blanco, con borde. */}
+            <AdSlot placement="FOOTER" onDark />
+
+            <Stack
+              direction={{ xs: 'column', md: 'row' }}
+              spacing={{ xs: 3.5, md: 6 }}
+              alignItems={{ xs: 'flex-start', md: 'flex-start' }}
+            >
+              <Box sx={{ maxWidth: 320 }}>
+                {/* El logotipo va tal cual, sin recorte circular ni fondo. */}
+                <Box
+                  component="img"
+                  src={logoBlanco}
+                  alt="Liga Lago Futsal"
+                  sx={{ height: 52, width: 'auto', display: 'block', mb: 1.5 }}
+                />
+                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.65)' }}>
+                  Resultados, posiciones y calendario de la liga, al minuto y en un
+                  solo lugar.
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    display: 'block',
+                    mb: 1.5,
+                    fontWeight: 700,
+                    letterSpacing: 1,
+                    textTransform: 'uppercase',
+                    color: 'rgba(255,255,255,0.5)',
+                  }}
+                >
+                  Contacto
+                </Typography>
+                <Stack spacing={1}>
+                  {[
+                    { icon: <PlaceRounded sx={{ fontSize: 17 }} />, text: CONTACTO.sede },
+                    { icon: <PhoneRounded sx={{ fontSize: 17 }} />, text: CONTACTO.telefono },
+                    { icon: <MailRounded sx={{ fontSize: 17 }} />, text: CONTACTO.email },
+                    { icon: <ScheduleRounded sx={{ fontSize: 17 }} />, text: CONTACTO.horario },
+                  ].map((item) => (
+                    <Stack key={item.text} direction="row" spacing={1} alignItems="center">
+                      <Box sx={{ color: 'rgba(255,255,255,0.5)', display: 'flex' }}>{item.icon}</Box>
+                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                        {item.text}
+                      </Typography>
+                    </Stack>
+                  ))}
+                </Stack>
+              </Box>
+
+              <Box>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    display: 'block',
+                    mb: 1.5,
+                    fontWeight: 700,
+                    letterSpacing: 1,
+                    textTransform: 'uppercase',
+                    color: 'rgba(255,255,255,0.5)',
+                  }}
+                >
+                  La liga
+                </Typography>
+                <Stack spacing={0.75}>
+                  {NAV.map((n) => (
+                    <Typography
+                      key={n.to}
+                      component="button"
+                      onClick={() => navigate(n.to)}
+                      variant="body2"
+                      sx={{
+                        background: 'none',
+                        border: 'none',
+                        p: 0,
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        font: 'inherit',
+                        color: 'rgba(255,255,255,0.8)',
+                        '&:hover': { color: '#fff' },
+                      }}
+                    >
+                      {n.label}
+                    </Typography>
+                  ))}
+                </Stack>
+              </Box>
+            </Stack>
+
+            {/* Tira de patrocinadores: en blanco, para que los logos se lean. */}
+            <Box
+              sx={{
+                bgcolor: '#FFFFFF',
+                border: '1px solid #E6E9F2',
+                borderRadius: 2,
+                px: 2,
+                py: 1.5,
+              }}
+            >
+              <AdSlot placement="FOOTER_LOGOS" />
+            </Box>
+
+            <Stack
+              direction={{ xs: 'column', md: 'row' }}
+              alignItems="center"
+              justifyContent="space-between"
+              spacing={1}
+              sx={{ pt: 2, borderTop: '1px solid rgba(255,255,255,0.12)' }}
+            >
+              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.55)' }}>
                 © {new Date().getFullYear()} LLF — Liga Lago Futsal
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.55)' }}>
                 Realizado por Enmanuel Colina y Royer Merchan
               </Typography>
             </Stack>

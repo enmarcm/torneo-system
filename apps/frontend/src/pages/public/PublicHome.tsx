@@ -38,13 +38,13 @@ const PublicHome: React.FC = () => {
     desaparecía del sitio en el momento de mayor tráfico.
   */
   const finishedQuery = usePublicMatchesQuery(undefined, 'FINISHED', active?.id, {
-    limit: 6,
+    limit: 4,
     order: 'desc',
   });
   const finished: Match[] = finishedQuery.data ?? [];
   // `upcoming: true` deja fuera los partidos con fecha vencida que nadie cerró.
   const upcomingQuery = usePublicMatchesQuery(undefined, 'SCHEDULED', active?.id, {
-    limit: 6,
+    limit: 4,
     upcoming: true,
   });
   const upcoming: Match[] = upcomingQuery.data ?? [];
@@ -90,7 +90,7 @@ const PublicHome: React.FC = () => {
 
   return (
     <Box>
-      <Container maxWidth="xl" sx={{ pt: { xs: 3, md: 3.5 }, pb: { xs: 4, md: 6 } }}>
+      <Container maxWidth="xl" sx={{ pt: { xs: 2, md: 2.5 }, pb: { xs: 3, md: 4 } }}>
         {failed ? (
           <ErrorState
             title="No pudimos cargar la jornada"
@@ -107,13 +107,13 @@ const PublicHome: React.FC = () => {
           />
         ) : null}
 
-        <AdSlot placement="HOME_BANNER" priority sx={{ mt: 3 }} />
+        <AdSlot placement="HOME_BANNER" priority sx={{ mt: 2 }} />
 
         {liveMatches.length > 0 && (
-          <Box sx={{ mt: 4 }}>
-            <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
-              <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'var(--live)', animation: 'pulse 1.4s infinite' }} />
-              <Typography variant="h3" component="h2">En vivo ahora</Typography>
+          <Box sx={{ mt: 3 }}>
+            <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 1.5 }}>
+              <Box sx={{ width: 9, height: 9, borderRadius: '50%', bgcolor: 'var(--live)', animation: 'pulse 1.4s infinite' }} />
+              <Typography variant="h4" component="h2">En vivo ahora</Typography>
               <Box sx={{ flex: 1 }} />
               <Button size="small" onClick={() => navigate(ROUTES.public.live)}>
                 Ver todos
@@ -133,77 +133,88 @@ const PublicHome: React.FC = () => {
           </Box>
         )}
 
-        <Box sx={{ mt: 5 }}>
-          <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
-            <Typography variant="h3" component="h2">Última jornada</Typography>
-            <Box sx={{ flex: 1 }} />
-            <Button size="small" onClick={() => navigate(ROUTES.public.schedule)}>
-              Ver todos
-            </Button>
-          </Stack>
-          {finishedQuery.isLoading ? (
-            <LoadingState rows={3} height={132} />
-          ) : finished.length === 0 ? (
-            <Card sx={{ p: 4, textAlign: 'center' }}>
-              <Typography color="text.secondary">
-                Todavía no se jugó ningún partido de esta edición.
-              </Typography>
-            </Card>
-          ) : (
-            <Grid container spacing={2}>
-              {finished.map((m: Match) => (
-                <Grid size={{ xs: 12, md: 6, lg: 4 }} key={m.id}>
+        {/*
+          Lo jugado y lo que viene, uno al lado del otro: son las dos preguntas
+          que trae el visitante y apiladas empujaban todo fuera de la pantalla.
+        */}
+        <Grid container spacing={2.5} sx={{ mt: 0.5 }}>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 1.5 }}>
+              <Typography variant="h4" component="h2">Última jornada</Typography>
+              <Box sx={{ flex: 1 }} />
+              <Button size="small" onClick={() => navigate(ROUTES.public.schedule)}>
+                Ver todos
+              </Button>
+            </Stack>
+            {finishedQuery.isLoading ? (
+              <LoadingState rows={3} height={96} />
+            ) : finished.length === 0 ? (
+              <Card sx={{ p: 3, textAlign: 'center' }}>
+                <Typography variant="body2" color="text.secondary">
+                  Todavía no se jugó ningún partido de esta edición.
+                </Typography>
+              </Card>
+            ) : (
+              <Stack spacing={1.5}>
+                {finished.map((m: Match) => (
                   <MatchCard
+                    key={m.id}
                     match={m}
+                    compact
                     competitionLabel={competitionLabel(m)}
                     onClick={() => setSelectedMatch(m)}
                   />
-                </Grid>
-              ))}
-            </Grid>
-          )}
-        </Box>
+                ))}
+              </Stack>
+            )}
+          </Grid>
 
-        <Box sx={{ mt: 5 }}>
-          <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
-            <Typography variant="h3" component="h2">Próximos partidos</Typography>
-            <Box sx={{ flex: 1 }} />
-            <Button size="small" onClick={() => navigate(ROUTES.public.schedule)}>
-              Ver calendario
-            </Button>
-          </Stack>
-          {upcomingQuery.isLoading ? (
-            <LoadingState rows={3} height={132} />
-          ) : upcoming.length === 0 ? (
-            <Card sx={{ p: 4, textAlign: 'center' }}>
-              <Typography color="text.secondary">No hay partidos programados.</Typography>
-            </Card>
-          ) : (
-            <Grid container spacing={2}>
-              {upcoming.map((m: Match) => (
-                <Grid size={{ xs: 12, md: 6, lg: 4 }} key={m.id}>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 1.5 }}>
+              <Typography variant="h4" component="h2">Próximos partidos</Typography>
+              <Box sx={{ flex: 1 }} />
+              <Button size="small" onClick={() => navigate(ROUTES.public.schedule)}>
+                Ver calendario
+              </Button>
+            </Stack>
+            {upcomingQuery.isLoading ? (
+              <LoadingState rows={3} height={96} />
+            ) : upcoming.length === 0 ? (
+              <Card sx={{ p: 3, textAlign: 'center' }}>
+                <Typography variant="body2" color="text.secondary">
+                  No hay partidos programados.
+                </Typography>
+              </Card>
+            ) : (
+              <Stack spacing={1.5}>
+                {upcoming.map((m: Match) => (
                   <MatchCard
+                    key={m.id}
                     match={m}
+                    compact
                     competitionLabel={competitionLabel(m)}
                     showStatus={false}
                     onClick={() => setSelectedMatch(m)}
                   />
-                </Grid>
-              ))}
-            </Grid>
-          )}
-        </Box>
+                ))}
+              </Stack>
+            )}
+          </Grid>
+        </Grid>
 
-        <AdSlot placement="HOME_INLINE" sx={{ mt: 5 }} />
+        <AdSlot placement="HOME_INLINE" sx={{ mt: 3 }} />
 
         {topDivision && standings.length > 0 && (
-          <Box sx={{ mt: 5 }}>
-            <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
-              <Typography variant="h3" component="h2">
+          <Box sx={{ mt: 3 }}>
+            <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 1.5 }}>
+              <Typography variant="h4" component="h2">
                 {getCompetitionShortLabel(topDivision)}
               </Typography>
               <Box sx={{ flex: 1 }} />
-              <Button size="small" onClick={() => navigate(ROUTES.public.competitions)}>
+              <Button
+                size="small"
+                onClick={() => navigate(`${ROUTES.public.competitions}?c=${topDivision.id}`)}
+              >
                 Tabla completa
               </Button>
             </Stack>
@@ -211,16 +222,16 @@ const PublicHome: React.FC = () => {
           </Box>
         )}
 
-        <Box sx={{ mt: 5 }}>
-          <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
-            <Typography variant="h3" component="h2">Competiciones</Typography>
-          </Stack>
-          {compsQuery.isLoading && <LoadingState rows={2} height={200} />}
-          <Grid container spacing={2.5}>
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="h4" component="h2" sx={{ mb: 1.5 }}>Competiciones</Typography>
+          {compsQuery.isLoading && <LoadingState rows={1} height={130} />}
+          {/* En fila: con tres o cuatro torneos entran todos de una pasada. */}
+          <Grid container spacing={2}>
             {comps.slice(0, 6).map((c: Competition) => (
-              <Grid size={{ xs: 12, md: 6 }} key={c.id}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={c.id}>
                 <CompetitionCard
                   competition={c}
+                  compact
                   // Antes las seis tarjetas caían en la misma pantalla, que
                   // arrancaba siempre en la primera división: tocabas "Tercera"
                   // y aterrizabas en "Primera".

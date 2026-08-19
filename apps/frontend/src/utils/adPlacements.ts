@@ -12,9 +12,9 @@ export interface AdPlacementMeta {
   /** Medida recomendada de la imagen, para que el que la sube sepa qué mandar. */
   hint: string;
   /**
-   * Proporción con la que se reserva el espacio antes de que la imagen llegue.
-   * Sin esto, un banner arriba del pliegue empuja el contenido hacia abajo justo
-   * cuando el visitante ya apuntó el dedo a un partido.
+   * Proporción fija de la ranura. La imagen la llena recortándose, así todas las
+   * piezas de una misma ubicación miden igual sin importar qué subió el
+   * administrador: es lo que evita el panel a medio llenar de blanco.
    */
   ratio?: string;
 }
@@ -40,6 +40,7 @@ export const AD_PLACEMENTS: AdPlacementMeta[] = [
     where: 'En la portada, entre los próximos partidos y las competiciones.',
     variant: 'panel',
     hint: 'Horizontal, tipo 1200 × 200 px',
+    ratio: '6 / 1',
   },
   {
     value: 'MATCH_LIST',
@@ -47,6 +48,7 @@ export const AD_PLACEMENTS: AdPlacementMeta[] = [
     where: 'Dentro del listado de partidos, después de los primeros días.',
     variant: 'panel',
     hint: 'Horizontal, tipo 1200 × 200 px',
+    ratio: '6 / 1',
   },
   {
     value: 'MATCH_DETAIL',
@@ -54,6 +56,7 @@ export const AD_PLACEMENTS: AdPlacementMeta[] = [
     where: 'Al pie del detalle que se abre al tocar un partido.',
     variant: 'bare',
     hint: 'Horizontal y chato, tipo 600 × 120 px',
+    ratio: '5 / 1',
   },
   {
     value: 'STANDINGS',
@@ -61,6 +64,7 @@ export const AD_PLACEMENTS: AdPlacementMeta[] = [
     where: 'Debajo de la tabla, en la pantalla de competiciones.',
     variant: 'panel',
     hint: 'Horizontal, tipo 1200 × 200 px',
+    ratio: '6 / 1',
   },
   {
     value: 'LIVE',
@@ -68,6 +72,7 @@ export const AD_PLACEMENTS: AdPlacementMeta[] = [
     where: 'En la pantalla de partidos en vivo.',
     variant: 'panel',
     hint: 'Horizontal, tipo 1200 × 200 px',
+    ratio: '6 / 1',
   },
   {
     value: 'STATS',
@@ -75,6 +80,7 @@ export const AD_PLACEMENTS: AdPlacementMeta[] = [
     where: 'En la pantalla de goleadores y estadísticas.',
     variant: 'panel',
     hint: 'Horizontal, tipo 1200 × 200 px',
+    ratio: '6 / 1',
   },
   {
     value: 'TEAMS',
@@ -82,6 +88,7 @@ export const AD_PLACEMENTS: AdPlacementMeta[] = [
     where: 'En el listado público de equipos.',
     variant: 'panel',
     hint: 'Horizontal, tipo 1200 × 200 px',
+    ratio: '6 / 1',
   },
   {
     value: 'SIDEBAR',
@@ -89,6 +96,7 @@ export const AD_PLACEMENTS: AdPlacementMeta[] = [
     where: 'Al costado del contenido, apilados uno debajo del otro.',
     variant: 'sidebar',
     hint: 'Vertical o cuadrado, tipo 400 × 400 px',
+    ratio: '1 / 1',
   },
   {
     value: 'FOOTER',
@@ -96,6 +104,7 @@ export const AD_PLACEMENTS: AdPlacementMeta[] = [
     where: 'Panel ancho dentro del pie, en todas las pantallas públicas.',
     variant: 'panel',
     hint: 'Horizontal, tipo 1200 × 160 px',
+    ratio: '15 / 2',
   },
   {
     value: 'FOOTER_LOGOS',

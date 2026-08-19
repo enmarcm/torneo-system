@@ -21,7 +21,7 @@ import {
 } from '@/hooks/queries';
 import { usePublicScope } from '@/hooks/common/usePublicScope';
 import { PublicScopeFilters } from '@/components/sport/PublicScopeFilters';
-import { CompetitionTags } from '@/components/sport/CompetitionTags';
+import { CompetitionCard } from '@/components/sport/CompetitionCard';
 import { StandingsTable } from '@/components/sport/StandingsTable';
 import { BracketView } from '@/components/sport/BracketView';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -63,20 +63,20 @@ const PublicCompetitions: React.FC = () => {
   );
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Container maxWidth="xl" sx={{ pt: 2, pb: 4 }}>
+      {/*
+        El encabezado se comía media pantalla antes de mostrar un solo dato: un
+        "Volver", un título, un subtítulo y recién después los filtros. El nombre
+        del torneo lo dice su propia portada, con la foto que cargó el admin.
+      */}
       <Button
         startIcon={<ArrowBackRounded />}
         onClick={() => navigate(ROUTES.public.home)}
-        sx={{ mb: 1, color: 'text.secondary' }}
+        size="small"
+        sx={{ mb: 1.5, color: 'text.secondary' }}
       >
         Volver
       </Button>
-      <Typography variant="h2" sx={{ mb: 0.5 }}>
-        Competiciones
-      </Typography>
-      <Typography color="text.secondary" sx={{ mb: 3 }}>
-        Tablas de posiciones, grupos y llaves de cada torneo de la edición.
-      </Typography>
 
       <PublicScopeFilters
         editions={scope.editions}
@@ -101,21 +101,15 @@ const PublicCompetitions: React.FC = () => {
         />
       ) : (
         <>
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            alignItems={{ xs: 'flex-start', sm: 'center' }}
-            spacing={1.5}
-            sx={{ mb: 3 }}
-          >
-            <Typography variant="h3">{competition.name}</Typography>
-            <CompetitionTags competition={competition} />
-          </Stack>
+          <Box sx={{ mb: 2.5 }}>
+            <CompetitionCard competition={competition} compact />
+          </Box>
 
           {isCup && (
             <Tabs
               value={activeView}
               onChange={(_, v: View) => setView(v)}
-              sx={{ mb: 3, '& .MuiTab-root': { textTransform: 'none' } }}
+              sx={{ mb: 2, minHeight: 40, '& .MuiTab-root': { minHeight: 40, textTransform: 'none' } }}
             >
               <Tab value="table" label="Tabla general" />
               <Tab value="groups" label="Grupos" />

@@ -26,6 +26,8 @@ interface Props {
    * no distinguen nada, solo repiten.
    */
   showStatus?: boolean;
+  /** Versión chica: menos aire, escudos y marcador más contenidos. */
+  compact?: boolean;
 }
 
 /** Franja de color a la izquierda, según en qué estado está el partido. */
@@ -51,6 +53,7 @@ export const MatchCard: React.FC<Props> = ({
   showStage = true,
   competitionLabel,
   showStatus = true,
+  compact = false,
 }) => {
   /*
     El bloque CSS de prefers-reduced-motion no alcanza acá: framer-motion anima
@@ -85,8 +88,8 @@ export const MatchCard: React.FC<Props> = ({
       }
       sx={{
         position: 'relative',
-        p: { xs: 2, md: 2.5 },
-        pl: { xs: 2.5, md: 3 },
+        p: compact ? 1.5 : { xs: 2, md: 2.5 },
+        pl: compact ? 2 : { xs: 2.5, md: 3 },
         cursor: onClick ? 'pointer' : 'default',
         overflow: 'hidden',
         '&::before': {
@@ -105,7 +108,7 @@ export const MatchCard: React.FC<Props> = ({
         justifyContent="space-between"
         alignItems="center"
         spacing={1}
-        sx={{ mb: 2 }}
+        sx={{ mb: compact ? 1.25 : 2 }}
       >
         {(showStage || competitionLabel) && (
           <Box sx={{ minWidth: 0 }}>
@@ -167,7 +170,7 @@ export const MatchCard: React.FC<Props> = ({
           <Avatar
             alt={match.homeRegistration.team.name}
             src={match.homeRegistration.team.logoUrl ?? undefined}
-            sx={{ width: 48, height: 48, opacity: awayWon ? 0.55 : 1 }}
+            sx={{ width: compact ? 34 : 48, height: compact ? 34 : 48, opacity: awayWon ? 0.55 : 1 }}
           >
             {match.homeRegistration.team.name[0]}
           </Avatar>
@@ -193,7 +196,7 @@ export const MatchCard: React.FC<Props> = ({
               sx={{
                 fontFamily: '"Plus Jakarta Sans", sans-serif',
                 fontWeight: 800,
-                fontSize: { xs: 26, md: 30 },
+                fontSize: compact ? 22 : { xs: 26, md: 30 },
                 fontVariantNumeric: 'tabular-nums',
                 lineHeight: 1.1,
                 color: isLive ? 'var(--live)' : 'text.primary',
@@ -208,7 +211,7 @@ export const MatchCard: React.FC<Props> = ({
           <Avatar
             alt={match.awayRegistration.team.name}
             src={match.awayRegistration.team.logoUrl ?? undefined}
-            sx={{ width: 48, height: 48, opacity: homeWon ? 0.55 : 1 }}
+            sx={{ width: compact ? 34 : 48, height: compact ? 34 : 48, opacity: homeWon ? 0.55 : 1 }}
           >
             {match.awayRegistration.team.name[0]}
           </Avatar>
@@ -229,8 +232,8 @@ export const MatchCard: React.FC<Props> = ({
         justifyContent="space-between"
         spacing={1}
         sx={{
-          mt: 2,
-          pt: 1.5,
+          mt: compact ? 1.25 : 2,
+          pt: compact ? 1 : 1.5,
           borderTop: '1px solid',
           borderColor: 'divider',
           color: 'text.secondary',
