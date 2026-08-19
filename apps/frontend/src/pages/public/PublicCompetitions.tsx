@@ -25,6 +25,7 @@ import { CompetitionTags } from '@/components/sport/CompetitionTags';
 import { StandingsTable } from '@/components/sport/StandingsTable';
 import { BracketView } from '@/components/sport/BracketView';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { AdSlot } from '@/components/ui/AdSlot';
 import { ROUTES } from '@/routes/routes';
 
 type View = 'table' | 'groups' | 'bracket';
@@ -190,6 +191,8 @@ const PublicCompetitions: React.FC = () => {
           )}
         </>
       )}
+
+      <AdSlot placement="STANDINGS" sx={{ mt: 4 }} />
     </Container>
   );
 };

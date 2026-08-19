@@ -87,10 +87,21 @@ enum TransferStatus {
   REJECTED
 }
 
+/// Dónde se muestra un anuncio. Cada valor es una ranura concreta del sitio
+/// público, con su propio formato: los banners son piezas anchas dentro de un
+/// panel y FOOTER_LOGOS es la tira de logos del pie, sin fondo y todos al mismo alto.
 enum AdPlacement {
-  HOME_BANNER
-  SIDEBAR
-  FOOTER
+  HOME_BANNER // franja ancha arriba de la portada
+  HOME_INLINE // entre secciones de la portada
+  SIDEBAR // columna lateral
+  FOOTER // panel dentro del pie de página
+  FOOTER_LOGOS // tira de logos del pie, sin fondo
+  MATCH_LIST // listado de partidos del calendario
+  MATCH_DETAIL // ficha de un partido
+  STANDINGS // tabla de posiciones
+  LIVE // pantalla de partidos en vivo
+  STATS // estadísticas y goleadores
+  TEAMS // listado de equipos
 }
 
 model User {
@@ -440,16 +451,20 @@ model Transfer {
 }
 
 model Advertisement {
-  id        String      @id @default(uuid())
-  imageUrl  String
-  linkUrl   String?
-  placement AdPlacement
-  sortOrder Int         @default(0)
-  active    Boolean     @default(true)
-  startDate DateTime?
-  endDate   DateTime?
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id         String        @id @default(uuid())
+  /// Nombre interno del anuncio: es lo que el administrador lee en el panel.
+  title      String        @default("")
+  imageUrl   String
+  linkUrl    String?
+  /// Un mismo anuncio puede ocupar varias ranuras a la vez.
+  placements AdPlacement[] @default([])
+  sortOrder  Int           @default(0)
+  active     Boolean       @default(true)
+  /// Ventana de publicación. Vacías = se muestra siempre que esté activo.
+  startDate  DateTime?
+  endDate    DateTime?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
 }
 
 model AuditLog {

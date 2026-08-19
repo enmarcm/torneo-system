@@ -53,7 +53,7 @@ publicRouter.get('/stats', asyncHandler(async (req, res) =>
   })),
 ));
 publicRouter.get('/ads', asyncHandler(async (req, res) =>
-  ok(res, await adsService.list(req.query.placement as string | undefined)),
+  ok(res, await adsService.listPublic(req.query.placement as string | undefined)),
 ));
 publicRouter.get('/competitions/:competitionId/groups', asyncHandler(async (req, res) =>
   ok(res, await groupsService.list(req.params.competitionId)),

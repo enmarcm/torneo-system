@@ -4,8 +4,10 @@ import { adsService } from './ads.service';
 
 export const adsController = {
   list: asyncHandler(async (req, res) =>
-    ok(res, await adsService.list(req.query.placement as string | undefined)),
+    ok(res, await adsService.listPublic(req.query.placement as string | undefined)),
   ),
+  /** Panel de administración: hace falta ver también lo apagado y lo vencido. */
+  listAll: asyncHandler(async (_req, res) => ok(res, await adsService.listAll())),
   create: asyncHandler(async (req, res) => created(res, await adsService.create(req.body))),
   update: asyncHandler(async (req, res) =>
     ok(res, await adsService.update(req.params.id, req.body)),

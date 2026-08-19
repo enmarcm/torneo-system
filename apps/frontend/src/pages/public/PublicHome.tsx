@@ -7,6 +7,7 @@ import { LiveScoreboard } from '@/components/sport/LiveScoreboard';
 import { EditionBar } from '@/components/sport/EditionBar';
 import { CompetitionCard } from '@/components/sport/CompetitionCard';
 import { AppModal } from '@/components/ui/AppModal';
+import { AdSlot } from '@/components/ui/AdSlot';
 import { ROUTES } from '@/routes/routes';
 import { sortCompetitions, getCompetitionShortLabel } from '@/utils/competitionMeta';
 import type { Edition, Competition, Match } from '@/api/public.api';
@@ -34,6 +35,8 @@ const PublicHome: React.FC = () => {
             liveCount={liveMatches.length}
           />
         ) : null}
+
+        <AdSlot placement="HOME_BANNER" sx={{ mt: 3 }} />
 
         {liveMatches.length > 0 && (
           <Box sx={{ mt: 4 }}>
@@ -76,6 +79,8 @@ const PublicHome: React.FC = () => {
           )}
         </Box>
 
+        <AdSlot placement="HOME_INLINE" sx={{ mt: 5 }} />
+
         <Box sx={{ mt: 5 }}>
           <Typography variant="h3" sx={{ mb: 2 }}>Competiciones</Typography>
           <Grid container spacing={2.5}>
@@ -104,7 +109,12 @@ const PublicHome: React.FC = () => {
         }
         maxWidth={640}
       >
-        {selectedMatch && <LiveScoreboard match={selectedMatch} size="lg" />}
+        {selectedMatch && (
+          <Stack spacing={2}>
+            <LiveScoreboard match={selectedMatch} size="lg" />
+            <AdSlot placement="MATCH_DETAIL" />
+          </Stack>
+        )}
       </AppModal>
     </Box>
   );

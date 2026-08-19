@@ -3,6 +3,7 @@ import { ArrowBackRounded } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { usePublicMatchesQuery } from '@/hooks/queries';
 import { LiveScoreboard } from '@/components/sport/LiveScoreboard';
+import { AdSlot } from '@/components/ui/AdSlot';
 import { ROUTES } from '@/routes/routes';
 import type { Match } from '@/api/public.api';
 
@@ -26,6 +27,8 @@ const PublicLive: React.FC = () => {
           ))}
         </Grid>
       )}
+
+      <AdSlot placement="LIVE" sx={{ mt: 4 }} />
     </Container>
   );
 };

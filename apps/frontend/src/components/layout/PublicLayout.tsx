@@ -6,6 +6,7 @@ import logoBlanco from '@/assets/logo.PNG';
 import { useState, Suspense, useMemo } from 'react';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import { LoadingState } from '@/components/ui/LoadingState';
+import { AdSlot } from '@/components/ui/AdSlot';
 import { ROUTES } from '@/routes/routes';
 
 export const PublicLayout: React.FC = () => {
@@ -122,13 +123,18 @@ export const PublicLayout: React.FC = () => {
 
       <Box component="footer" sx={{ borderTop: '1px solid', borderColor: 'divider', py: 3, mt: 4 }}>
         <Container maxWidth="xl">
-          <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" justifyContent="space-between" spacing={1}>
-            <Typography variant="caption" color="text.secondary">
-              © {new Date().getFullYear()} LLF — Liga Lago Futsal
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Realizado por Enmanuel Colina y Royer Merchan
-            </Typography>
+          <Stack spacing={3}>
+            {/* Publicidad del pie: primero el panel ancho, después la tira de logos. */}
+            <AdSlot placement="FOOTER" />
+            <AdSlot placement="FOOTER_LOGOS" />
+            <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" justifyContent="space-between" spacing={1}>
+              <Typography variant="caption" color="text.secondary">
+                © {new Date().getFullYear()} LLF — Liga Lago Futsal
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Realizado por Enmanuel Colina y Royer Merchan
+              </Typography>
+            </Stack>
           </Stack>
         </Container>
       </Box>

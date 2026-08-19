@@ -24,6 +24,7 @@ import { MatchCard } from '@/components/sport/MatchCard';
 import { MvpCard } from '@/components/sport/MvpCard';
 import { LiveScoreboard } from '@/components/sport/LiveScoreboard';
 import { AppModal } from '@/components/ui/AppModal';
+import { AdSlot } from '@/components/ui/AdSlot';
 import { ROUTES } from '@/routes/routes';
 import { formatDate, UNSCHEDULED_LABEL } from '@/utils/formatDate';
 import { getCompetitionShortLabel } from '@/utils/competitionMeta';
@@ -215,6 +216,8 @@ const PublicSchedule: React.FC = () => {
             </Box>
           ))}
 
+          <AdSlot placement="MATCH_LIST" />
+
           {groups.pending.length > 0 && (
             <Box>
               <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1.5 }}>
@@ -276,6 +279,7 @@ const PublicSchedule: React.FC = () => {
             )}
             <LiveScoreboard match={selectedMatch} size="lg" />
             <MvpCard match={selectedMatch} />
+            <AdSlot placement="MATCH_DETAIL" />
           </Stack>
         )}
       </AppModal>

@@ -7,6 +7,7 @@ import { usePublicScope } from '@/hooks/common/usePublicScope';
 import { PublicScopeFilters } from '@/components/sport/PublicScopeFilters';
 import { CompetitionHeading } from '@/components/sport/CompetitionHeading';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { AdSlot } from '@/components/ui/AdSlot';
 import { ROUTES } from '@/routes/routes';
 import type { PlayerStatRow } from '@/api/stats.api';
 
@@ -169,6 +170,8 @@ const PublicStats: React.FC = () => {
           ))}
         </Stack>
       )}
+
+      <AdSlot placement="STATS" sx={{ mt: 4 }} />
     </Container>
   );
 };

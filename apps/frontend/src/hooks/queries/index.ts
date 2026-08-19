@@ -110,8 +110,9 @@ export const usePlayerStatsQuery = (params?: { competitionId?: string; teamId?: 
 export const useTransfersQuery = (editionId?: string) =>
   useQuery({ queryKey: ['transfers', editionId], queryFn: () => transfersApi.list(editionId), staleTime: MID_STALE });
 
-export const useAdsQuery = (placement?: string) =>
-  useQuery({ queryKey: ['ads', placement], queryFn: () => adsApi.list(placement), staleTime: REF_STALE });
+/** Panel de administración: todos los anuncios, también los apagados y vencidos. */
+export const useAdsQuery = () =>
+  useQuery({ queryKey: ['ads', 'manage'], queryFn: adsApi.listAll, staleTime: REF_STALE });
 
 export const useDashboardMetricsQuery = (editionId: string) =>
   useQuery({

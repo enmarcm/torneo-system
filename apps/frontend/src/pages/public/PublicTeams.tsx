@@ -20,6 +20,7 @@ import { CompetitionHeading } from '@/components/sport/CompetitionHeading';
 import { CompetitionTags } from '@/components/sport/CompetitionTags';
 import { AppModal } from '@/components/ui/AppModal';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { AdSlot } from '@/components/ui/AdSlot';
 import { getCompetitionSubtitle } from '@/utils/competitionMeta';
 import { ROUTES } from '@/routes/routes';
 import type { PublicRegistration } from '@/api/public.api';
@@ -211,6 +212,8 @@ const PublicTeams: React.FC = () => {
           </Stack>
         )}
       </AppModal>
+
+      <AdSlot placement="TEAMS" sx={{ mt: 4 }} />
     </Container>
   );
 };
