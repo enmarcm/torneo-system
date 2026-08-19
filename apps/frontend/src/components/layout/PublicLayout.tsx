@@ -1,13 +1,26 @@
-import { Box, AppBar, Toolbar, Typography, Stack, Button, IconButton, Tooltip, Container, Drawer, List, ListItemButton, ListItemText, Divider, ListItemIcon } from '@mui/material';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { LightModeRounded, DarkModeRounded, MenuRounded, CloseRounded, HomeRounded, EmojiEventsRounded, CalendarMonthRounded, LiveTvRounded, BarChartRounded, GroupsRounded, LoginRounded, PlaceRounded, PhoneRounded, MailRounded, ScheduleRounded } from '@mui/icons-material';
+import {
+  Box,
+  AppBar,
+  Toolbar,
+  Typography,
+  Stack,
+  IconButton,
+  Container,
+  Drawer,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { MenuRounded, PlaceRounded, PhoneRounded, MailRounded, ScheduleRounded } from '@mui/icons-material';
 import logoAzul from '@/assets/logo_azul.PNG';
 import logoBlanco from '@/assets/logo.PNG';
 import { useState, Suspense, useMemo } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { AdSlot } from '@/components/ui/AdSlot';
 import { useLiveMatchSync } from '@/hooks/common/useLiveMatchSync';
+import { PublicSidebar, PUBLIC_NAV, PUBLIC_SIDEBAR_WIDTH } from './PublicSidebar';
 import { ROUTES } from '@/routes/routes';
 
 /*
@@ -23,261 +36,241 @@ const CONTACTO = {
 
 export const PublicLayout: React.FC = () => {
   const navigate = useNavigate();
-  const { pathname } = useLocation();
-  const { mode, toggleMode } = useGlobalStore();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { mode } = useGlobalStore();
+  const logoSrc = useMemo(() => (mode === 'dark' ? logoBlanco : logoAzul), [mode]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const reduceMotion = useReducedMotion();
+
   // Un solo oyente para todo el sitio público: sin esto los marcadores de las
   // listas quedan congelados en el valor con el que cargó la página.
   useLiveMatchSync();
-  const logoSrc = useMemo(() => mode === 'dark' ? logoBlanco : logoAzul, [mode]);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-
-  const NAV = [
-    { label: 'Inicio', to: ROUTES.public.home, icon: <HomeRounded /> },
-    { label: 'Competiciones', to: ROUTES.public.competitions, icon: <EmojiEventsRounded /> },
-    { label: 'Calendario', to: ROUTES.public.schedule, icon: <CalendarMonthRounded /> },
-    { label: 'En vivo', to: ROUTES.public.live, icon: <LiveTvRounded /> },
-    { label: 'Estadísticas', to: ROUTES.public.stats, icon: <BarChartRounded /> },
-    { label: 'Equipos', to: ROUTES.public.teams, icon: <GroupsRounded /> },
-  ];
-
-  const handleNav = (to: string) => {
-    navigate(to);
-    setDrawerOpen(false);
-  };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', flexDirection: 'column' }}>
-      <AppBar
-        position="sticky"
-        elevation={0}
-        sx={{ bgcolor: 'background.paper', color: 'text.primary', borderBottom: '1px solid', borderColor: 'divider' }}
-      >
-        <Container maxWidth="xl">
-          <Toolbar disableGutters sx={{ gap: 2, minHeight: 72 }}>
-            <Stack direction="row" alignItems="center" spacing={1.5} sx={{ cursor: 'pointer' }} onClick={() => navigate(ROUTES.public.home)}>
-              <Box component="img" src={logoSrc} alt="Liga Lago Futsal" sx={{ width: 36, height: 36, borderRadius: '50%' }} />
-              <Typography variant="h4" sx={{ fontFamily: '"Plus Jakarta Sans"', fontWeight: 800, display: { xs: 'none', sm: 'block' } }}>Liga Lago Futsal</Typography>
-            </Stack>
-
-            {/* Desktop nav */}
-            <Stack direction="row" spacing={0.5} sx={{ ml: 1, display: { xs: 'none', md: 'flex' } }}>
-              {NAV.map((n) => (
-                <Button
-                  key={n.to}
-                  onClick={() => navigate(n.to)}
-                  color={pathname === n.to ? 'primary' : 'inherit'}
-                  startIcon={n.icon}
-                  sx={{ fontWeight: 600 }}
-                >
-                  {n.label}
-                </Button>
-              ))}
-            </Stack>
-
-            <Box sx={{ flex: 1 }} />
-
-            {/* Mobile hamburger */}
-            <IconButton onClick={() => setDrawerOpen(true)} sx={{ display: { md: 'none' } }} aria-label="Abrir menú">
-              <MenuRounded />
-            </IconButton>
-
-            <Tooltip title={mode === 'dark' ? 'Modo claro' : 'Modo oscuro'}>
-              <IconButton onClick={toggleMode} aria-label="Cambiar tema">
-                {mode === 'dark' ? <LightModeRounded /> : <DarkModeRounded />}
-              </IconButton>
-            </Tooltip>
-            <Button variant="contained" startIcon={<LoginRounded />} onClick={() => navigate(ROUTES.login)}>
-              Iniciar sesión
-            </Button>
-          </Toolbar>
-        </Container>
-      </AppBar>
-
-      {/* Mobile Drawer */}
-      <Drawer
-        anchor="left"
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        PaperProps={{ sx: { width: 280, bgcolor: 'background.paper', borderRadius: 0 } }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 2, minHeight: 72 }}>
-          <Stack direction="row" alignItems="center" spacing={1.5}>
-            <Box component="img" src={logoSrc} alt="" sx={{ width: 32, height: 32, borderRadius: '50%' }} />
-            <Typography sx={{ fontWeight: 800 }}>Liga Lago Futsal</Typography>
-          </Stack>
-          <IconButton onClick={() => setDrawerOpen(false)} aria-label="Cerrar menú">
-            <CloseRounded />
-          </IconButton>
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
+      {/* En escritorio la navegación es una columna fija; en teléfono, un cajón. */}
+      {!isMobile && (
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            bottom: 0,
+            width: PUBLIC_SIDEBAR_WIDTH,
+            zIndex: theme.zIndex.appBar,
+          }}
+        >
+          <PublicSidebar />
         </Box>
-        <Divider />
-        <List sx={{ px: 1, pt: 1 }}>
-          {NAV.map((n) => (
-            <ListItemButton
-              key={n.to}
-              onClick={() => handleNav(n.to)}
-              selected={pathname === n.to}
-              sx={{ borderRadius: 1.5, mb: 0.25, '&.Mui-selected': { bgcolor: 'primary.soft', color: 'primary.main' } }}
-            >
-              <ListItemIcon sx={{ minWidth: 36, color: pathname === n.to ? 'primary.main' : 'inherit' }}>
-                {n.icon}
-              </ListItemIcon>
-              <ListItemText
-                primary={n.label}
-                primaryTypographyProps={{ fontWeight: pathname === n.to ? 700 : 500, fontSize: 15 }}
-              />
-            </ListItemButton>
-          ))}
-        </List>
-      </Drawer>
-
-      <Box component="main" sx={{ flex: 1 }}>
-        <Suspense fallback={<LoadingState rows={4} />}>
-          <Outlet />
-        </Suspense>
-      </Box>
-
-      {/* Los patrocinadores van sobre el fondo de la página, justo antes del pie. */}
-      <Container maxWidth="xl" sx={{ pt: 2, pb: 3 }}>
-        <AdSlot placement="FOOTER_LOGOS" />
-      </Container>
+      )}
+      {isMobile && (
+        <Drawer
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          PaperProps={{ sx: { borderRadius: 0 } }}
+        >
+          <PublicSidebar onNavigate={() => setDrawerOpen(false)} />
+        </Drawer>
+      )}
 
       <Box
-        component="footer"
         sx={{
-          mt: 0,
-          py: { xs: 4, md: 5 },
-          background: 'var(--heroGradient)',
-          color: '#fff',
+          flex: 1,
+          minWidth: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          ml: { xs: 0, md: `${PUBLIC_SIDEBAR_WIDTH}px` },
         }}
       >
-        <Container maxWidth="xl">
-          <Stack spacing={4}>
-            {/* Publicidad del pie: sobre fondo oscuro va en blanco, con borde. */}
-            <AdSlot placement="FOOTER" onDark />
+        {/* La barra superior queda solo en teléfono, para poder abrir el cajón. */}
+        {isMobile && (
+          <AppBar
+            position="sticky"
+            elevation={0}
+            sx={{
+              bgcolor: 'background.paper',
+              color: 'text.primary',
+              borderBottom: '1px solid',
+              borderColor: 'divider',
+            }}
+          >
+            <Toolbar sx={{ gap: 1.5, minHeight: 60 }}>
+              <IconButton onClick={() => setDrawerOpen(true)} aria-label="Abrir menú" edge="start">
+                <MenuRounded />
+              </IconButton>
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={1.25}
+                sx={{ cursor: 'pointer' }}
+                onClick={() => navigate(ROUTES.public.home)}
+              >
+                <Box
+                  component="img"
+                  src={logoSrc}
+                  alt="Liga Lago Futsal"
+                  sx={{ width: 30, height: 30, borderRadius: '50%' }}
+                />
+                <Typography sx={{ fontFamily: '"Plus Jakarta Sans"', fontWeight: 800, fontSize: 15 }}>
+                  Liga Lago Futsal
+                </Typography>
+              </Stack>
+            </Toolbar>
+          </AppBar>
+        )}
 
-            <Stack
-              direction={{ xs: 'column', md: 'row' }}
-              spacing={{ xs: 3.5, md: 6 }}
-              alignItems={{ xs: 'flex-start', md: 'flex-start' }}
-            >
-              <Box sx={{ maxWidth: 320 }}>
-                {/*
-                  El monograma va sin fondo ni recorte, apoyado directo sobre el
-                  navy. Como es solo la sigla, el nombre completo lo pone el texto
-                  de al lado: el logotipo suelto no dice de qué liga se trata.
-                */}
-                <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1.5 }}>
+        <Box component="main" sx={{ flex: 1 }}>
+          <Suspense fallback={<LoadingState rows={4} />}>
+            <Outlet />
+          </Suspense>
+        </Box>
+
+        {/* Los patrocinadores van sobre el fondo de la página, justo antes del pie. */}
+        <Container maxWidth="xl" sx={{ pt: 2, pb: 3 }}>
+          <AdSlot placement="FOOTER_LOGOS" />
+        </Container>
+
+        <Box
+          component="footer"
+          sx={{
+            py: { xs: 4, md: 5 },
+            background: 'var(--heroGradient)',
+            color: '#fff',
+          }}
+        >
+          <Container maxWidth="xl">
+            <Stack spacing={4}>
+              {/* Publicidad del pie: sobre fondo oscuro va en blanco, con borde. */}
+              <AdSlot placement="FOOTER" onDark />
+
+              <Stack
+                direction={{ xs: 'column', md: 'row' }}
+                spacing={{ xs: 3.5, md: 6 }}
+                alignItems="flex-start"
+              >
+                <Stack alignItems="center" spacing={1.5} sx={{ maxWidth: 320, mx: { xs: 'auto', md: 0 } }}>
+                  {/*
+                    El monograma va sin fondo ni recorte, apoyado directo sobre el
+                    navy, y late despacio: es lo único con vida propia del pie.
+                  */}
                   <Box
-                    component="img"
+                    component={motion.img}
                     src="/llf-removebg-preview.png"
                     alt=""
-                    sx={{ height: 56, width: 'auto', display: 'block' }}
+                    animate={reduceMotion ? undefined : { scale: [1, 1.07, 1], y: [0, -5, 0] }}
+                    transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
+                    sx={{ height: 104, width: 'auto', display: 'block' }}
                   />
+                  {/*
+                    El nombre va derecho y centrado bajo el monograma: la sigla es
+                    itálica y el texto no la acompaña, la sostiene.
+                  */}
                   <Typography
+                    align="center"
                     sx={{
                       fontFamily: '"Plus Jakarta Sans", sans-serif',
                       fontWeight: 800,
-                      fontSize: 18,
-                      lineHeight: 1.15,
+                      fontSize: 22,
+                      letterSpacing: 0.2,
+                      lineHeight: 1.1,
                     }}
                   >
-                    Liga Lago
-                    <br />
-                    Futsal
+                    Liga Lago Futsal
+                  </Typography>
+                  <Typography variant="body2" align="center" sx={{ color: 'rgba(255,255,255,0.65)' }}>
+                    Resultados, posiciones y calendario de la liga, al minuto y en un
+                    solo lugar.
                   </Typography>
                 </Stack>
-                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.65)' }}>
-                  Resultados, posiciones y calendario de la liga, al minuto y en un
-                  solo lugar.
-                </Typography>
-              </Box>
 
-              <Box>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    display: 'block',
-                    mb: 1.5,
-                    fontWeight: 700,
-                    letterSpacing: 1,
-                    textTransform: 'uppercase',
-                    color: 'rgba(255,255,255,0.5)',
-                  }}
-                >
-                  Contacto
-                </Typography>
-                <Stack spacing={1}>
-                  {[
-                    { icon: <PlaceRounded sx={{ fontSize: 17 }} />, text: CONTACTO.sede },
-                    { icon: <PhoneRounded sx={{ fontSize: 17 }} />, text: CONTACTO.telefono },
-                    { icon: <MailRounded sx={{ fontSize: 17 }} />, text: CONTACTO.email },
-                    { icon: <ScheduleRounded sx={{ fontSize: 17 }} />, text: CONTACTO.horario },
-                  ].map((item) => (
-                    <Stack key={item.text} direction="row" spacing={1} alignItems="center">
-                      <Box sx={{ color: 'rgba(255,255,255,0.5)', display: 'flex' }}>{item.icon}</Box>
-                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                        {item.text}
+                <Box>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      display: 'block',
+                      mb: 1.5,
+                      fontWeight: 700,
+                      letterSpacing: 1,
+                      textTransform: 'uppercase',
+                      color: 'rgba(255,255,255,0.5)',
+                    }}
+                  >
+                    Contacto
+                  </Typography>
+                  <Stack spacing={1}>
+                    {[
+                      { icon: <PlaceRounded sx={{ fontSize: 17 }} />, text: CONTACTO.sede },
+                      { icon: <PhoneRounded sx={{ fontSize: 17 }} />, text: CONTACTO.telefono },
+                      { icon: <MailRounded sx={{ fontSize: 17 }} />, text: CONTACTO.email },
+                      { icon: <ScheduleRounded sx={{ fontSize: 17 }} />, text: CONTACTO.horario },
+                    ].map((item) => (
+                      <Stack key={item.text} direction="row" spacing={1} alignItems="center">
+                        <Box sx={{ color: 'rgba(255,255,255,0.5)', display: 'flex' }}>{item.icon}</Box>
+                        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                          {item.text}
+                        </Typography>
+                      </Stack>
+                    ))}
+                  </Stack>
+                </Box>
+
+                <Box>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      display: 'block',
+                      mb: 1.5,
+                      fontWeight: 700,
+                      letterSpacing: 1,
+                      textTransform: 'uppercase',
+                      color: 'rgba(255,255,255,0.5)',
+                    }}
+                  >
+                    La liga
+                  </Typography>
+                  <Stack spacing={0.75}>
+                    {PUBLIC_NAV.map((n) => (
+                      <Typography
+                        key={n.to}
+                        component="button"
+                        onClick={() => navigate(n.to)}
+                        variant="body2"
+                        sx={{
+                          background: 'none',
+                          border: 'none',
+                          p: 0,
+                          textAlign: 'left',
+                          cursor: 'pointer',
+                          font: 'inherit',
+                          color: 'rgba(255,255,255,0.8)',
+                          '&:hover': { color: '#fff' },
+                        }}
+                      >
+                        {n.label}
                       </Typography>
-                    </Stack>
-                  ))}
-                </Stack>
-              </Box>
+                    ))}
+                  </Stack>
+                </Box>
+              </Stack>
 
-              <Box>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    display: 'block',
-                    mb: 1.5,
-                    fontWeight: 700,
-                    letterSpacing: 1,
-                    textTransform: 'uppercase',
-                    color: 'rgba(255,255,255,0.5)',
-                  }}
-                >
-                  La liga
+              <Stack
+                direction={{ xs: 'column', md: 'row' }}
+                alignItems="center"
+                justifyContent="space-between"
+                spacing={1}
+                sx={{ pt: 2, borderTop: '1px solid rgba(255,255,255,0.12)' }}
+              >
+                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.55)' }}>
+                  © {new Date().getFullYear()} LLF — Liga Lago Futsal
                 </Typography>
-                <Stack spacing={0.75}>
-                  {NAV.map((n) => (
-                    <Typography
-                      key={n.to}
-                      component="button"
-                      onClick={() => navigate(n.to)}
-                      variant="body2"
-                      sx={{
-                        background: 'none',
-                        border: 'none',
-                        p: 0,
-                        textAlign: 'left',
-                        cursor: 'pointer',
-                        font: 'inherit',
-                        color: 'rgba(255,255,255,0.8)',
-                        '&:hover': { color: '#fff' },
-                      }}
-                    >
-                      {n.label}
-                    </Typography>
-                  ))}
-                </Stack>
-              </Box>
+                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.55)' }}>
+                  Realizado por Enmanuel Colina y Royer Merchan
+                </Typography>
+              </Stack>
             </Stack>
-
-            <Stack
-              direction={{ xs: 'column', md: 'row' }}
-              alignItems="center"
-              justifyContent="space-between"
-              spacing={1}
-              sx={{ pt: 2, borderTop: '1px solid rgba(255,255,255,0.12)' }}
-            >
-              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.55)' }}>
-                © {new Date().getFullYear()} LLF — Liga Lago Futsal
-              </Typography>
-              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.55)' }}>
-                Realizado por Enmanuel Colina y Royer Merchan
-              </Typography>
-            </Stack>
-          </Stack>
-        </Container>
+          </Container>
+        </Box>
       </Box>
     </Box>
   );
