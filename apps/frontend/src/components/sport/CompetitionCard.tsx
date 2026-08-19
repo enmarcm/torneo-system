@@ -17,6 +17,11 @@ interface Props {
  * nombre con sus etiquetas. Es la pieza con la que el visitante elige a dónde
  * entrar, así que pesa la imagen, no la ficha técnica.
  *
+ * La tarjeta se adapta a la foto y no al revés: la imagen entra completa, con su
+ * propia proporción, en lugar de recortarse para llenar un alto fijo. Un banner
+ * ancho da una tarjeta baja y una foto vertical una alta, con topes para que
+ * ningún extremo rompa la grilla.
+ *
  * Sin foto cargada no queda un hueco gris: se pinta el degradado de la marca
  * con el balón de fondo.
  */
@@ -31,13 +36,12 @@ export const CompetitionCard: React.FC<Props> = ({ competition, onClick }) => {
       sx={{
         position: 'relative',
         overflow: 'hidden',
-        height: { xs: 200, md: 240 },
-        display: 'flex',
-        alignItems: 'flex-end',
+        // Piso para que el título y las etiquetas siempre tengan dónde apoyarse.
+        minHeight: { xs: 150, md: 170 },
         color: '#fff',
         background: 'var(--heroGradient)',
         cursor: onClick ? 'pointer' : 'default',
-        '&:hover .competition-card__bg': { transform: 'scale(1.06)' },
+        '&:hover .competition-card__bg': { transform: 'scale(1.04)' },
       }}
     >
       {competition.imageUrl ? (
@@ -47,26 +51,30 @@ export const CompetitionCard: React.FC<Props> = ({ competition, onClick }) => {
           src={competition.imageUrl}
           alt=""
           sx={{
-            position: 'absolute',
-            inset: 0,
+            display: 'block',
             width: '100%',
-            height: '100%',
-            objectFit: 'cover',
+            // El alto lo pone la proporción real de la foto, no la tarjeta.
+            height: 'auto',
+            maxHeight: { xs: 320, md: 420 },
+            // Solo entra en juego al topar el máximo: la foto se centra, no se recorta.
+            objectFit: 'contain',
             transition: 'transform 0.5s ease',
           }}
         />
       ) : (
-        <SportsSoccerRounded
-          className="competition-card__bg"
-          sx={{
-            position: 'absolute',
-            right: -28,
-            bottom: -28,
-            fontSize: 210,
-            opacity: 0.14,
-            transition: 'transform 0.5s ease',
-          }}
-        />
+        <Box sx={{ width: '100%', height: { xs: 200, md: 240 } }}>
+          <SportsSoccerRounded
+            className="competition-card__bg"
+            sx={{
+              position: 'absolute',
+              right: -28,
+              bottom: -28,
+              fontSize: 210,
+              opacity: 0.14,
+              transition: 'transform 0.5s ease',
+            }}
+          />
+        </Box>
       )}
 
       {/* La foto no manda sobre el texto: se oscurece de abajo hacia arriba. */}
@@ -79,7 +87,16 @@ export const CompetitionCard: React.FC<Props> = ({ competition, onClick }) => {
         }}
       />
 
-      <Stack spacing={1.25} sx={{ position: 'relative', width: '100%', p: { xs: 2, md: 2.5 } }}>
+      <Stack
+        spacing={1.25}
+        sx={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          p: { xs: 2, md: 2.5 },
+        }}
+      >
         <Typography
           sx={{
             fontFamily: '"Plus Jakarta Sans", sans-serif',

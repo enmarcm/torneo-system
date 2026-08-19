@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { usePublicEditionsQuery, usePublicCompetitionsQuery, usePublicMatchesQuery } from '@/hooks/queries';
 import { MatchCard } from '@/components/sport/MatchCard';
 import { LiveScoreboard } from '@/components/sport/LiveScoreboard';
-import { EntityHeroCard } from '@/components/sport/EntityHeroCard';
+import { EditionBar } from '@/components/sport/EditionBar';
 import { CompetitionCard } from '@/components/sport/CompetitionCard';
 import { AppModal } from '@/components/ui/AppModal';
 import { ROUTES } from '@/routes/routes';
@@ -26,21 +26,12 @@ const PublicHome: React.FC = () => {
 
   return (
     <Box>
-      <Container maxWidth="xl" sx={{ py: { xs: 4, md: 6 } }}>
+      <Container maxWidth="xl" sx={{ pt: { xs: 3, md: 3.5 }, pb: { xs: 4, md: 6 } }}>
         {active ? (
-          <EntityHeroCard
-            title={active.name}
-            subtitle="La liga está en marcha. Sigue cada partido en vivo."
-            chips={
-              <Stack direction="row" spacing={1}>
-                <Box sx={{ px: 1.5, py: 0.5, borderRadius: 999, bgcolor: 'rgba(255,255,255,0.12)', fontSize: 12, fontWeight: 700 }}>
-                  Temporada {active.seasonNumber}
-                </Box>
-                <Box sx={{ px: 1.5, py: 0.5, borderRadius: 999, bgcolor: 'var(--live)', color: '#fff', fontSize: 12, fontWeight: 700 }}>
-                  ● {liveMatches.length} EN VIVO
-                </Box>
-              </Stack>
-            }
+          <EditionBar
+            name={active.name}
+            seasonNumber={active.seasonNumber}
+            liveCount={liveMatches.length}
           />
         ) : null}
 
