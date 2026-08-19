@@ -26,6 +26,10 @@ export interface MatchListOpts {
   limit?: number;
   order?: 'asc' | 'desc';
   upcoming?: boolean;
+  /** Solo los partidos marcados como destacados por el administrador. */
+  featured?: boolean;
+  /** `today` acota a la jornada de hoy, en hora de Venezuela. */
+  day?: 'today';
 }
 
 export const publicApi = {

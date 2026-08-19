@@ -12,3 +12,12 @@ export const calcAge = (birthDate: Date | string): number =>
 
 export const formatDate = (d: Date | string): string =>
   dayjs(d).tz(TZ).format('DD-MM-YYYY hh:mm A');
+
+/**
+ * Comienzo y fin del día de hoy en hora de Venezuela, expresados en UTC para
+ * poder compararlos contra lo guardado en la base.
+ */
+export const dayRange = (day: Date | string = new Date()) => ({
+  start: dayjs(day).tz(TZ).startOf('day').toDate(),
+  end: dayjs(day).tz(TZ).endOf('day').toDate(),
+});

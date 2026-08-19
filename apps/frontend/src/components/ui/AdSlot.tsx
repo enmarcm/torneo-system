@@ -8,7 +8,7 @@ interface Props {
   placement: AdPlacement;
   /** Por defecto, la forma que define el catálogo de ubicaciones. */
   variant?: AdVariant;
-  /** Rótulo del panel. `null` lo saca. */
+  /** Rótulo del panel. Por defecto no se muestra ninguno. */
   label?: string | null;
   /** Tope de piezas a mostrar en las ranuras que apilan (lateral y logos). */
   max?: number;
@@ -161,7 +161,7 @@ export const AdSlot: React.FC<Props> = ({ placement, variant, label, max, priori
         ...sx,
       }}
     >
-      {label !== null && (
+      {label ? (
         <Typography
           variant="caption"
           sx={{
@@ -175,9 +175,9 @@ export const AdSlot: React.FC<Props> = ({ placement, variant, label, max, priori
             textTransform: 'uppercase',
           }}
         >
-          {label ?? 'Publicidad'}
+          {label}
         </Typography>
-      )}
+      ) : null}
       {rotating}
     </Card>
   );

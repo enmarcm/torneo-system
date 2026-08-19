@@ -52,6 +52,8 @@ publicRouter.get('/matches', asyncHandler(async (req, res) =>
     limit: resolveLimit(req.query.limit),
     order: req.query.order === 'desc' ? 'desc' : 'asc',
     upcoming: req.query.upcoming === 'true',
+    featured: req.query.featured === 'true',
+    day: req.query.day as string | undefined,
   })),
 ));
 publicRouter.get('/standings', asyncHandler(async (req, res) =>

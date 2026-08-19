@@ -4,6 +4,7 @@ import {
   PlaceRounded,
   MilitaryTechRounded,
   PendingActionsRounded,
+  StarRounded,
 } from '@mui/icons-material';
 import { motion, useReducedMotion } from 'framer-motion';
 import { formatDateTimeOrPending } from '@/utils/formatDate';
@@ -131,6 +132,11 @@ export const MatchCard: React.FC<Props> = ({
               </Typography>
             )}
           </Box>
+        )}
+        {match.featured && (
+          <Tooltip title="Partido destacado de la jornada" arrow>
+            <StarRounded sx={{ fontSize: 18, color: 'var(--accent)', flexShrink: 0 }} />
+          </Tooltip>
         )}
         {isLive ? (
           <Box

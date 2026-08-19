@@ -188,10 +188,19 @@ export const fixturesService = {
   },
 
   /** Asigna día, hora y sede a un partido ya sorteado. */
-  schedule: async (matchId: string, scheduledAt: Date | null, venue?: string | null) =>
+  schedule: async (
+    matchId: string,
+    scheduledAt: Date | null,
+    venue?: string | null,
+    featured?: boolean,
+  ) =>
     prisma.match.update({
       where: { id: matchId },
-      data: { scheduledAt, ...(venue !== undefined ? { venue } : {}) },
+      data: {
+        scheduledAt,
+        ...(venue !== undefined ? { venue } : {}),
+        ...(featured !== undefined ? { featured } : {}),
+      },
     }),
 
   /** Asignación masiva: varios partidos con su fecha en una sola llamada. */

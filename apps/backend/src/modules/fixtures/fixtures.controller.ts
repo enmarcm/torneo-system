@@ -27,6 +27,7 @@ export const fixturesController = {
         req.params.matchId,
         req.body.scheduledAt ? new Date(req.body.scheduledAt) : null,
         req.body.venue,
+        req.body.featured,
       ),
       'Partido programado',
     ),

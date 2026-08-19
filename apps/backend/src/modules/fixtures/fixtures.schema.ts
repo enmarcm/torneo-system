@@ -7,6 +7,7 @@ export const clearFixtureSchema = z.object({
 export const scheduleMatchSchema = z.object({
   scheduledAt: z.string().datetime().nullable(),
   venue: z.string().nullable().optional(),
+  featured: z.boolean().optional(),
 });
 
 export const scheduleBulkSchema = z.object({

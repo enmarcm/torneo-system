@@ -1,4 +1,5 @@
-import { Box, Container, Grid2 as Grid, Card, Stack, Typography, Button } from '@mui/material';
+import { Box, Container, Grid2 as Grid, Card, Chip, Stack, Typography, Button } from '@mui/material';
+import { TodayRounded, StarRounded } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import {
@@ -37,6 +38,28 @@ const PublicHome: React.FC = () => {
     consultaba solo LIVE y SCHEDULED: el partido que acababa de terminar
     desaparecía del sitio en el momento de mayor tráfico.
   */
+  /*
+    Los de hoy van sin filtro de estado y en orden de hora: el que está por
+    empezar, el que se está jugando y el que ya terminó son la misma jornada y
+    el visitante los lee de corrido.
+  */
+  const todayQuery = usePublicMatchesQuery(undefined, undefined, active?.id, {
+    day: 'today',
+    limit: 8,
+  });
+  const todayMatches: Match[] = todayQuery.data ?? [];
+
+  /*
+    Destacados: los que el administrador marcó con el check al ponerles día y
+    hora. Es la curaduría de la liga sobre su propio fixture.
+  */
+  const featuredQuery = usePublicMatchesQuery(undefined, 'SCHEDULED', active?.id, {
+    featured: true,
+    upcoming: true,
+    limit: 3,
+  });
+  const featuredMatches: Match[] = featuredQuery.data ?? [];
+
   const finishedQuery = usePublicMatchesQuery(undefined, 'FINISHED', active?.id, {
     limit: 4,
     order: 'desc',
@@ -44,10 +67,14 @@ const PublicHome: React.FC = () => {
   const finished: Match[] = finishedQuery.data ?? [];
   // `upcoming: true` deja fuera los partidos con fecha vencida que nadie cerró.
   const upcomingQuery = usePublicMatchesQuery(undefined, 'SCHEDULED', active?.id, {
-    limit: 4,
+    limit: 6,
     upcoming: true,
   });
-  const upcoming: Match[] = upcomingQuery.data ?? [];
+  // Lo que ya se mostró arriba no se repite abajo.
+  const shownIds = new Set([...todayMatches, ...featuredMatches].map((m) => m.id));
+  const upcoming: Match[] = (upcomingQuery.data ?? [])
+    .filter((m: Match) => !shownIds.has(m.id))
+    .slice(0, 4);
 
   /*
     La tabla es una de las tres preguntas que trae el visitante y hoy exige tres
@@ -69,13 +96,15 @@ const PublicHome: React.FC = () => {
     compsQuery.isError ||
     liveQuery.isError ||
     upcomingQuery.isError ||
-    finishedQuery.isError;
+    finishedQuery.isError ||
+    todayQuery.isError;
   const retryAll = () => {
     void editionsQuery.refetch();
     void compsQuery.refetch();
     void liveQuery.refetch();
     void upcomingQuery.refetch();
     void finishedQuery.refetch();
+    void todayQuery.refetch();
   };
 
   /*
@@ -125,6 +154,63 @@ const PublicHome: React.FC = () => {
                   <MatchCard
                     match={m}
                     competitionLabel={competitionLabel(m)}
+                    onClick={() => setSelectedMatch(m)}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        )}
+
+        {todayMatches.length > 0 && (
+          <Box sx={{ mt: 3 }}>
+            <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 1.5 }}>
+              <TodayRounded sx={{ fontSize: 20, color: 'primary.main' }} />
+              <Typography variant="h4" component="h2">Partidos de hoy</Typography>
+              <Chip
+                size="small"
+                label={todayMatches.length}
+                color="primary"
+                sx={{ height: 20, fontSize: 11, fontWeight: 700 }}
+              />
+              <Box sx={{ flex: 1 }} />
+              <Button size="small" onClick={() => navigate(ROUTES.public.schedule)}>
+                Ver calendario
+              </Button>
+            </Stack>
+            <Grid container spacing={2}>
+              {todayMatches.map((m: Match) => (
+                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={m.id}>
+                  <MatchCard
+                    match={m}
+                    compact
+                    competitionLabel={competitionLabel(m)}
+                    onClick={() => setSelectedMatch(m)}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        )}
+
+        {featuredMatches.length > 0 && (
+          <Box sx={{ mt: 3 }}>
+            <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 1.5 }}>
+              <StarRounded sx={{ fontSize: 20, color: 'var(--accent)' }} />
+              <Typography variant="h4" component="h2">Destacados</Typography>
+              <Box sx={{ flex: 1 }} />
+              <Button size="small" onClick={() => navigate(ROUTES.public.schedule)}>
+                Ver calendario
+              </Button>
+            </Stack>
+            <Grid container spacing={2}>
+              {featuredMatches.map((m: Match) => (
+                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={m.id}>
+                  <MatchCard
+                    match={m}
+                    compact
+                    competitionLabel={competitionLabel(m)}
+                    showStatus={false}
                     onClick={() => setSelectedMatch(m)}
                   />
                 </Grid>

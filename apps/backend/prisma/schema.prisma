@@ -404,6 +404,9 @@ model Match {
   awayRegistrationId String
   /// Null hasta que el admin le asigna día y hora. El sorteo genera solo los cruces.
   scheduledAt        DateTime?
+  /// Partido destacado de la jornada. Lo marca el admin al programarlo y es lo
+  /// que la portada muestra como "lo que viene" antes que el resto del fixture.
+  featured           Boolean           @default(false)
   status             MatchStatus       @default(SCHEDULED)
   homeScore          Int               @default(0)
   awayScore          Int               @default(0)

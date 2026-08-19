@@ -35,6 +35,8 @@ export interface Match {
   awayRegistrationId: string;
   /** Null mientras el partido está sorteado pero sin día ni hora asignados. */
   scheduledAt: string | null;
+  /** Destacado de la jornada, marcado por el admin al programar. */
+  featured: boolean;
   status: 'SCHEDULED' | 'LIVE' | 'FINISHED' | 'POSTPONED';
   homeScore: number;
   awayScore: number;
@@ -62,7 +64,7 @@ export const matchesApi = {
   /** Asigna día, hora y sede a un partido que salió del sorteo sin fecha. */
   schedule: async (
     id: string,
-    data: { scheduledAt: string | null; venue?: string | null },
+    data: { scheduledAt: string | null; venue?: string | null; featured?: boolean },
   ): Promise<Match> => (await api.patch(`/matches/${id}/schedule`, data)).data.data,
   setMvp: async (
     id: string,

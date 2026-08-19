@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid, Card, Stack, Typography, Button, FormControl, InputLabel, Select, MenuItem, IconButton, TextField, Menu, Tooltip, Tabs, Tab, Chip } from '@mui/material';
+import { Box, Grid2 as Grid, Card, Stack, Typography, Button, FormControl, InputLabel, Select, MenuItem, IconButton, TextField, Menu, Tooltip, Tabs, Tab, Chip, FormControlLabel, Checkbox } from '@mui/material';
 import { AddRounded, PlayArrowRounded, StopRounded, FiberManualRecordRounded, ChevronLeftRounded, ChevronRightRounded, MoreVertRounded, CasinoRounded } from '@mui/icons-material';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
@@ -37,8 +37,8 @@ const AdminSchedule: React.FC = () => {
   const [anchor, setAnchor] = useState<{ el: HTMLElement; m: Match } | null>(null);
   const [editingMatch, setEditingMatch] = useState<Match | null>(null);
   const [deletingMatch, setDeletingMatch] = useState<Match | null>(null);
-  const [form, setForm] = useState({ homeRegistrationId: '', awayRegistrationId: '', scheduledAt: '', matchday: 1, venue: '' });
-  const [editForm, setEditForm] = useState({ scheduledAt: '', matchday: 1, venue: '', status: 'SCHEDULED' as Match['status'] });
+  const [form, setForm] = useState({ homeRegistrationId: '', awayRegistrationId: '', scheduledAt: '', matchday: 1, venue: '', featured: false });
+  const [editForm, setEditForm] = useState({ scheduledAt: '', matchday: 1, venue: '', status: 'SCHEDULED' as Match['status'], featured: false });
 
   const filteredMatches = matches.filter(
     (m) => m.scheduledAt && dayjs(m.scheduledAt).format('YYYY-MM-DD') === selectedDate,
@@ -57,6 +57,7 @@ const AdminSchedule: React.FC = () => {
         : `${selectedDate}T15:00`,
       matchday: m.matchday,
       venue: m.venue ?? '',
+      featured: m.featured ?? false,
       status: m.status,
     });
     setOpen('edit');
@@ -93,6 +94,7 @@ const AdminSchedule: React.FC = () => {
             matchday: editForm.matchday,
             venue: editForm.venue || null,
             status: editForm.status,
+            featured: editForm.featured,
           } as Partial<Match>,
         });
         setOpen(null);
@@ -106,6 +108,7 @@ const AdminSchedule: React.FC = () => {
           scheduledAt: new Date(form.scheduledAt).toISOString(),
           matchday: form.matchday,
           venue: form.venue || undefined,
+          featured: form.featured,
         } as Partial<Match>);
         setOpen(null);
         toast.success('Partido creado');
@@ -343,6 +346,25 @@ const AdminSchedule: React.FC = () => {
                 <MenuItem value="POSTPONED">Aplazado</MenuItem>
               </Select>
             </FormControl>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={editForm.featured}
+                  onChange={(e) => setEditForm({ ...editForm, featured: e.target.checked })}
+                />
+              }
+              label={
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    Destacar este partido
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Aparece en "Destacados" de la portada, arriba del resto del fixture.
+                  </Typography>
+                </Box>
+              }
+              sx={{ alignItems: 'flex-start', m: 0 }}
+            />
             <Stack direction="row" spacing={1.5} justifyContent="flex-end">
               <Button onClick={() => { setOpen(null); setEditingMatch(null); }}>Cancelar</Button>
               <Button variant="contained" onClick={submit} disabled={!editForm.scheduledAt || update.isPending}>
@@ -357,6 +379,25 @@ const AdminSchedule: React.FC = () => {
             <TextField label="Sede" fullWidth value={form.venue} onChange={(e) => setForm({ ...form, venue: e.target.value })} />
             <TextField label="Home Registration ID" fullWidth value={form.homeRegistrationId} onChange={(e) => setForm({ ...form, homeRegistrationId: e.target.value })} />
             <TextField label="Away Registration ID" fullWidth value={form.awayRegistrationId} onChange={(e) => setForm({ ...form, awayRegistrationId: e.target.value })} />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={form.featured}
+                  onChange={(e) => setForm({ ...form, featured: e.target.checked })}
+                />
+              }
+              label={
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    Destacar este partido
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Aparece en "Destacados" de la portada, arriba del resto del fixture.
+                  </Typography>
+                </Box>
+              }
+              sx={{ alignItems: 'flex-start', m: 0 }}
+            />
             <Stack direction="row" spacing={1.5} justifyContent="flex-end">
               <Button onClick={() => setOpen(null)}>Cancelar</Button>
               <Button variant="contained" onClick={submit} disabled={!form.scheduledAt || !form.homeRegistrationId || !form.awayRegistrationId || create.isPending}>

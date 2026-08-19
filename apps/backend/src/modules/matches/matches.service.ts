@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { AppError } from '@/utils/app-error';
 import { MESSAGES } from '@/config/constants';
 import { emitMatchUpdate } from '@/lib/socket';
+import { dayRange } from '@/utils/date.util';
 import { Prisma } from '@prisma/client';
 import type { CreateMatchDto } from './matches.schema';
 
@@ -42,14 +43,39 @@ export interface MatchListFilters {
    * programado que nunca se cerró sigue apareciendo entre "los que vienen".
    */
   upcoming?: boolean;
+  /** Solo los que el administrador marcó como destacados. */
+  featured?: boolean;
+  /** `today` acota a la jornada de hoy, en hora de Venezuela. */
+  day?: string;
 }
 
-const matchWhere = ({ competitionId, status, editionId, upcoming }: MatchListFilters) => ({
-  ...(competitionId ? { competitionId } : {}),
-  ...(editionId ? { competition: { editionId } } : {}),
-  ...(status ? { status: status as 'SCHEDULED' | 'LIVE' | 'FINISHED' | 'POSTPONED' } : {}),
-  ...(upcoming ? { scheduledAt: { gte: new Date() } } : {}),
-});
+const matchWhere = ({
+  competitionId,
+  status,
+  editionId,
+  upcoming,
+  featured,
+  day,
+}: MatchListFilters) => {
+  /*
+    "Hoy" se calcula en hora de Venezuela y no en la del servidor: un partido de
+    las 21:00 en Maracaibo no puede aparecer como el de mañana porque la máquina
+    esté en otro huso.
+  */
+  const today = day === 'today' ? dayRange() : null;
+
+  return {
+    ...(competitionId ? { competitionId } : {}),
+    ...(editionId ? { competition: { editionId } } : {}),
+    ...(status ? { status: status as 'SCHEDULED' | 'LIVE' | 'FINISHED' | 'POSTPONED' } : {}),
+    ...(featured ? { featured: true } : {}),
+    ...(today
+      ? { scheduledAt: { gte: today.start, lte: today.end } }
+      : upcoming
+        ? { scheduledAt: { gte: new Date() } }
+        : {}),
+  };
+};
 
 export const matchesService = {
   list: (filters: MatchListFilters = {}) => {
