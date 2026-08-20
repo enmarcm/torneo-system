@@ -61,6 +61,12 @@ Confirmado en el código:
   `GROUPS_KNOCKOUT`; tipo división de liga, copa, menores o especial.
 - Las divisiones de una edición se entrelazan en un sistema de liga, que es lo
   que le da sentido al **ascenso y descenso**; la copa puede nutrirse de él.
+- **Una división por edición.** Un equipo no puede estar inscrito en dos
+  divisiones de liga de la misma edición: el sistema de liga las entrelaza y de
+  ahí salen el ascenso y el descenso, que dejan de significar algo si un club
+  aparece en dos escalones a la vez. Copa, menores y especiales no cuentan para
+  la regla — ahí sí puede jugar en paralelo. La salida es explícita: marcar la
+  inscripción actual como "No participa" libera al equipo.
 - **Elegibilidad al rostear**: rango de edad (calculado en zona horaria de
   Caracas) y, cuando la competición lo exige, habilitación explícita del
   administrador. Cupos mínimo y máximo de plantilla.

@@ -5,6 +5,17 @@ import { hashPassword } from '@/utils/password.util';
 import { purgeTeam, CASCADE_TX } from '@/utils/cascade.util';
 import { Prisma } from '@prisma/client';
 
+/** Nombre del escalón dentro del sistema de liga. El 1 está por encima del 2. */
+const DIVISION_NAMES: Record<number, string> = {
+  1: 'Primera División',
+  2: 'Segunda División',
+  3: 'Tercera División',
+  4: 'Cuarta División',
+};
+
+const divisionName = (level: number | null) =>
+  level == null ? null : (DIVISION_NAMES[level] ?? `División ${level}`);
+
 export const teamsService = {
   list: (page = 1, limit = 50) =>
     prisma.team.findMany({
@@ -80,8 +91,58 @@ export const teamsService = {
     );
   },
 
-  register: (teamId: string, competitionId: string) =>
-    prisma.teamRegistration.create({ data: { teamId, competitionId } }),
+  /**
+   * Inscribe un equipo en una competición.
+   *
+   * Un equipo juega **una sola división por edición**. No es una preferencia de
+   * formato: el sistema de liga entrelaza las divisiones de una edición y de ahí
+   * salen el ascenso y el descenso, que dejan de significar algo si el mismo
+   * club aparece en dos escalones a la vez. La copa y los torneos de menores o
+   * especiales no entran en la cuenta: ahí sí puede jugar en paralelo.
+   *
+   * La regla se aplica sobre las inscripciones vivas. Si el administrador marcó
+   * la anterior como "No participa" o la desactivó, el equipo queda libre para
+   * entrar a otra división: la puerta de salida existe y es explícita.
+   */
+  register: async (teamId: string, competitionId: string) => {
+    const competition = await prisma.competition.findUnique({
+      where: { id: competitionId },
+      select: { id: true, editionId: true, kind: true },
+    });
+    if (!competition) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
+
+    const already = await prisma.teamRegistration.findFirst({
+      where: { teamId, competitionId },
+      select: { id: true },
+    });
+    if (already) throw new AppError(409, MESSAGES.alreadyRegistered, 'ALREADY_REGISTERED');
+
+    if (competition.kind === 'LEAGUE_DIVISION') {
+      const inDivision = await prisma.teamRegistration.findFirst({
+        where: {
+          teamId,
+          status: 'ACTIVE',
+          outcome: { not: 'WITHDRAWN' },
+          competition: { editionId: competition.editionId, kind: 'LEAGUE_DIVISION' },
+        },
+        select: {
+          competition: { select: { name: true, division: true, divisionLevel: true } },
+        },
+      });
+      if (inDivision) {
+        const c = inDivision.competition;
+        // Se nombra la división ocupada: "ya está en una" no dice dónde buscarla.
+        const where = divisionName(c.divisionLevel) ?? c.division ?? c.name;
+        throw new AppError(
+          409,
+          `El equipo ya está en ${where}. ${MESSAGES.alreadyInDivision}`,
+          'ALREADY_IN_DIVISION',
+        );
+      }
+    }
+
+    return prisma.teamRegistration.create({ data: { teamId, competitionId } });
+  },
 
   registrations: (teamId: string) =>
     prisma.teamRegistration.findMany({

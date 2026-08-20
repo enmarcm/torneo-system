@@ -1,4 +1,4 @@
-import { Box, Card, Stack, Typography, Button, Avatar, TextField, FormControl, InputLabel, Select, MenuItem, Chip, InputAdornment } from '@mui/material';
+import { Box, Card, Stack, Typography, Button, Avatar, TextField, FormControl, InputLabel, Select, MenuItem, Chip, InputAdornment, FormHelperText } from '@mui/material';
 import {
   AddRounded,
   SearchRounded,
@@ -18,7 +18,7 @@ import { DataTable, type DataTableColumn, type DataTableAction } from '@/compone
 import { AppDrawer } from '@/components/ui/AppDrawer';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { useTeamsQuery, useCompetitionsQuery, useCategoriesQuery } from '@/hooks/queries';
+import { useTeamsQuery, useCompetitionsQuery, useCategoriesQuery, useTeamRegistrationsQuery } from '@/hooks/queries';
 import { useCreateTeam, useUpdateTeam, useSetTeamStatus, useRegisterTeam, useDeleteTeam } from '@/hooks/mutations';
 import type { Team } from '@/api/teams.api';
 import type { Competition } from '@/api/competitions.api';
@@ -132,6 +132,46 @@ const AdminTeams: React.FC = () => {
     liga por división, después copa, menores y especiales.
   */
   const regCompetitions = useMemo(() => sortCompetitions(competitions), [competitions]);
+
+  /*
+    Inscripciones vivas del equipo. Con esto el selector puede decir de antemano
+    a qué no puede entrar, en vez de dejar que el administrador elija y se coma
+    un error del servidor recién al apretar "Inscribir".
+  */
+  const { data: teamRegs = [] } = useTeamRegistrationsQuery(regOpen?.team.id);
+  const registeredIds = useMemo(
+    () => new Set(teamRegs.map((r) => r.competitionId)),
+    [teamRegs],
+  );
+  /*
+    Ediciones donde el equipo ya ocupa una división. Un equipo juega una sola
+    división por edición: el sistema de liga entrelaza las divisiones y de ahí
+    salen el ascenso y el descenso, que no significan nada si el mismo club está
+    en dos escalones a la vez. Copa, menores y especiales no cuentan.
+  */
+  const takenDivisionEditions = useMemo(
+    () =>
+      new Set(
+        teamRegs
+          .filter(
+            (r) =>
+              r.competition.kind === 'LEAGUE_DIVISION' &&
+              r.status === 'ACTIVE' &&
+              r.outcome !== 'WITHDRAWN',
+          )
+          .map((r) => r.competition.editionId),
+      ),
+    [teamRegs],
+  );
+
+  /** Por qué no se puede inscribir en esta competición, o null si sí se puede. */
+  const blockedReason = (c: (typeof competitions)[number]): string | null => {
+    if (registeredIds.has(c.id)) return 'Ya inscrito';
+    if (c.kind === 'LEAGUE_DIVISION' && takenDivisionEditions.has(c.editionId)) {
+      return 'Ya tiene división en esta edición';
+    }
+    return null;
+  };
   const regCompetition = useMemo(
     () => competitions.find((c) => c.id === regOpen?.competitionId) ?? null,
     [competitions, regOpen?.competitionId],
@@ -296,8 +336,15 @@ const AdminTeams: React.FC = () => {
                   return subtitle ? `${c.name} · ${subtitle}` : c.name;
                 }}
               >
-                {regCompetitions.map((c) => (
-                  <MenuItem key={c.id} value={c.id} sx={{ display: 'block', py: 1.25 }}>
+                {regCompetitions.map((c) => {
+                  const blocked = blockedReason(c);
+                  return (
+                  <MenuItem
+                    key={c.id}
+                    value={c.id}
+                    disabled={!!blocked}
+                    sx={{ display: 'block', py: 1.25 }}
+                  >
                     <Typography sx={{ fontWeight: 600, fontSize: 14, lineHeight: 1.3 }}>
                       {c.name}
                     </Typography>
@@ -321,10 +368,29 @@ const AdminTeams: React.FC = () => {
                           sx={{ height: 20, fontSize: 11, fontWeight: 700 }}
                         />
                       )}
+                      {/*
+                        Una opción apagada sin motivo se lee como una falla del
+                        sistema; con el motivo, se lee como una regla.
+                      */}
+                      {blocked && (
+                        <Chip
+                          size="small"
+                          label={blocked}
+                          variant="outlined"
+                          sx={{ height: 20, fontSize: 11, fontWeight: 700 }}
+                        />
+                      )}
                     </Stack>
                   </MenuItem>
-                ))}
+                  );
+                })}
               </Select>
+              {takenDivisionEditions.size > 0 && (
+                <FormHelperText>
+                  Un equipo juega una sola división por edición. Para moverlo, marcá su
+                  inscripción actual como &quot;No participa&quot;.
+                </FormHelperText>
+              )}
             </FormControl>
 
             {/*

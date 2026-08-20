@@ -16,6 +16,9 @@ export const MESSAGES = {
   teamInactive: 'El equipo está desactivado. Contacta al administrador del torneo',
   teamBlockedInCompetition: 'El equipo está bloqueado en esta competición',
   alreadyBlocked: 'El equipo ya tiene un bloqueo activo con ese alcance',
+  alreadyRegistered: 'El equipo ya está inscrito en esta competición',
+  alreadyInDivision:
+    'Un equipo juega una sola división por edición. Para moverlo, marcá su inscripción actual como "No participa"',
   fixtureNeedsTeams: 'Se necesitan al menos 2 equipos inscritos para generar el calendario',
   fixtureExists: 'Ya hay partidos generados. Borra el calendario antes de volver a sortear',
   bracketNeedsTeams: 'La cantidad de clasificados debe ser potencia de 2 (4, 8, 16, 32…)',

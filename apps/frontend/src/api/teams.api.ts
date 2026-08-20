@@ -17,6 +17,8 @@ export interface TeamRegistrationWithRoster {
   competitionId: string;
   groupId: string | null;
   status: string;
+  /** Ascenso / descenso / no participa. "No participa" libera al equipo de su división. */
+  outcome: 'NONE' | 'PROMOTED' | 'RELEGATED' | 'WITHDRAWN';
   /*
     El backend hace `include` de la competición entera, así que estos campos ya
     viajaban; el tipo los recortaba y por eso los selectores del panel de equipo
@@ -25,6 +27,7 @@ export interface TeamRegistrationWithRoster {
   competition: {
     id: string;
     name: string;
+    editionId: string;
     kind: Competition['kind'] | null;
     format: Competition['format'] | null;
     division: string | null;
