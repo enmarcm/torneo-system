@@ -93,12 +93,23 @@ export const PublicSidebar: React.FC<Props> = ({ collapsed = false, onNavigate }
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        bgcolor: 'var(--sidebar)',
-        borderRight: '1px solid',
-        borderColor: 'var(--sidebarBorder)',
         overflowX: 'hidden',
+        /*
+          Plegada no es un panel angosto: es un velo. El contenido corre por
+          debajo a ancho completo y se ve a través del riel; al abrirse, la
+          columna recupera su superficie y empuja al contenido.
+        */
+        bgcolor: collapsed ? 'var(--railScrim)' : 'var(--sidebar)',
+        backdropFilter: collapsed ? 'blur(14px) saturate(140%)' : 'none',
+        WebkitBackdropFilter: collapsed ? 'blur(14px) saturate(140%)' : 'none',
+        borderRight: collapsed ? 'none' : '1px solid',
+        borderColor: 'var(--sidebarBorder)',
+        '@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)))':
+          {
+            bgcolor: collapsed ? 'var(--railScrimSolid)' : 'var(--sidebar)',
+          },
         transition: (t) =>
-          t.transitions.create('width', {
+          t.transitions.create(['width', 'background-color'], {
             duration: t.transitions.duration.shortest,
             easing: t.transitions.easing.easeOut,
           }),
@@ -149,7 +160,8 @@ export const PublicSidebar: React.FC<Props> = ({ collapsed = false, onNavigate }
                       height: 8,
                       borderRadius: '50%',
                       bgcolor: 'var(--live)',
-                      boxShadow: '0 0 0 2px var(--sidebar)',
+                      /* El aro despega el punto del glifo; sigue el tono del riel. */
+                      boxShadow: '0 0 0 2px var(--railScrimSolid)',
                       animation: 'pulse 1.4s infinite',
                     }}
                   />

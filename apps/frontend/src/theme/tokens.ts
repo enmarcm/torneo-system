@@ -51,6 +51,15 @@ export const lightTokens = {
   scrollThumb: '#CBD2E4',
   selectionBg: '#CFE0FA',
   selectionText: '#08183A',
+  /*
+    Riel plegado: no pinta un panel, pone un velo. El contenido pasa por debajo
+    y se ve a través, pero los iconos quedan legibles igual sobre lo que toque
+    — tarjeta blanca, panel héroe oscuro o la foto de una competición. Es el
+    caso para el que existe `backdrop-filter`, no decoración.
+  */
+  railScrim: 'rgba(255,255,255,0.55)',
+  /* Sin soporte de desenfoque el velo tiene que tapar más para seguir sirviendo. */
+  railScrimSolid: 'rgba(255,255,255,0.88)',
 };
 
 /*
@@ -111,6 +120,8 @@ export const darkTokens = {
   scrollThumb: '#26314C',
   selectionBg: 'rgba(77,147,255,0.32)',
   selectionText: '#F2F5FC',
+  railScrim: 'rgba(9,13,26,0.55)',
+  railScrimSolid: 'rgba(9,13,26,0.88)',
 };
 
 export type Tokens = typeof lightTokens;

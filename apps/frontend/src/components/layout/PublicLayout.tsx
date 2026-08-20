@@ -15,12 +15,7 @@ import { useGlobalStore } from '@/store/useGlobalStore';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { AdSlot } from '@/components/ui/AdSlot';
 import { useLiveMatchSync } from '@/hooks/common/useLiveMatchSync';
-import {
-  PublicSidebar,
-  PUBLIC_NAV,
-  PUBLIC_SIDEBAR_WIDTH,
-  PUBLIC_SIDEBAR_RAIL,
-} from './PublicSidebar';
+import { PublicSidebar, PUBLIC_NAV, PUBLIC_SIDEBAR_WIDTH } from './PublicSidebar';
 import { PublicTopbar, PUBLIC_TOPBAR_H } from './PublicTopbar';
 
 /*
@@ -52,7 +47,12 @@ export const PublicLayout: React.FC = () => {
     —"mostrame el menú"— con la respuesta que cabe en cada pantalla.
   */
   const navExpanded = isMobile ? drawerOpen : !publicNavCollapsed;
-  const navWidth = publicNavCollapsed ? PUBLIC_SIDEBAR_RAIL : PUBLIC_SIDEBAR_WIDTH;
+  /*
+    Plegada, la columna es un velo que flota: el contenido gana los 76px y corre
+    por debajo, que es lo que hace que valga la pena verla transparente. Abierta
+    vuelve a ser superficie y empuja.
+  */
+  const contentOffset = publicNavCollapsed ? 0 : PUBLIC_SIDEBAR_WIDTH;
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
@@ -105,7 +105,7 @@ export const PublicLayout: React.FC = () => {
             minWidth: 0,
             display: 'flex',
             flexDirection: 'column',
-            ml: { xs: 0, md: `${navWidth}px` },
+            ml: { xs: 0, md: `${contentOffset}px` },
             transition: (t) =>
               t.transitions.create('margin-left', {
                 duration: t.transitions.duration.shortest,

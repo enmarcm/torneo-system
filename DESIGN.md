@@ -337,6 +337,13 @@ nítido sobrevive donde una sombra suave desaparece.
 el borde, se marca el borde. La única excepción permitida es el botón primario,
 que se despega a propósito porque invita a la acción.
 
+**El desenfoque se gana su lugar una sola vez.** El sistema no usa vidrio como
+decoración: la única pieza con `backdrop-filter` es el riel plegado de la
+navegación pública, y está ahí por una razón concreta — flota sobre contenido
+que puede ser una tarjeta blanca, el panel héroe oscuro o la foto de una
+competición, y sin el velo los iconos se pierden sobre la mitad de esos fondos.
+Cualquier otra superficie que quiera vidrio tiene que justificar lo mismo.
+
 ## Shapes
 
 Lenguaje de esquina blanda pero contenida. Tres radios cargan el 90% del sistema:
@@ -406,6 +413,10 @@ tarjeta con forma de píldora o un chip con esquina cuadrada rompen la lectura.
     vivo" lleva el contador de partidos en curso — píldora en Rojo Directo
     desplegada, punto latiente en el riel. En teléfono la columna es un cajón que
     entra por debajo de la barra superior.
+  - *El riel plegado no es superficie, es velo.* Pierde el fondo y el borde y
+    pasa a un velo traslúcido con `backdrop-filter: blur(14px) saturate(140%)`;
+    el contenido recupera los `76px` y corre por debajo, visible a través. Al
+    abrirse, la columna vuelve a ser superficie sólida y empuja al contenido.
   - Es lo que le permite plegarse sin esconder nada: al mudar marca, tema y
     sesión a la barra, la columna queda siendo pura navegación.
 - **Con sesión:** barra lateral colapsable; item activo con fondo Azul Nocturno
