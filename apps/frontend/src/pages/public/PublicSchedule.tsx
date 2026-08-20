@@ -1,7 +1,6 @@
 import {
   Box,
   Container,
-  Grid2 as Grid,
   Card,
   Typography,
   Button,
@@ -189,7 +188,15 @@ const PublicSchedule: React.FC = () => {
           <Typography color="text.secondary">No hay partidos para mostrar.</Typography>
         </Card>
       ) : (
-        <Stack spacing={4}>
+        /*
+          Una columna por día en vez de una rejilla de tres. El calendario se
+          lee de arriba abajo siguiendo la hora, y en tres columnas el orden
+          cronológico se rompía: el cuarto partido del día quedaba debajo del
+          primero y no al lado del tercero. El ancho se acota al de lectura;
+          estirado a toda la pantalla, el nombre local y el visitante quedan a
+          medio metro uno del otro.
+        */
+        <Stack spacing={4} sx={{ maxWidth: 860, mx: 'auto' }}>
           {groups.days.map(([day, dayMatches]) => (
             <Box key={day}>
               <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1.5 }}>
@@ -199,24 +206,24 @@ const PublicSchedule: React.FC = () => {
                 <Chip size="small" label={`${dayMatches.length} partidos`} variant="outlined" />
                 <Divider sx={{ flex: 1 }} />
               </Stack>
-              <Grid container spacing={2}>
+              <Stack spacing={1.5}>
                 {dayMatches.map((m: Match, i: number) => (
-                  <Grid size={{ xs: 12, md: 6, lg: 4 }} key={m.id}>
-                    <Box
-                      component={motion.div}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.2, delay: Math.min(i * 0.03, 0.24) }}
-                    >
-                      <MatchCard
-                        match={m}
-                        competitionLabel={competitionLabel(m)}
-                        onClick={() => setSelectedMatch(m)}
-                      />
-                    </Box>
-                  </Grid>
+                  <Box
+                    key={m.id}
+                    component={motion.div}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2, delay: Math.min(i * 0.03, 0.24) }}
+                  >
+                    <MatchCard
+                      match={m}
+                      compact
+                      competitionLabel={competitionLabel(m)}
+                      onClick={() => setSelectedMatch(m)}
+                    />
+                  </Box>
                 ))}
-              </Grid>
+              </Stack>
             </Box>
           ))}
 
@@ -240,17 +247,17 @@ const PublicSchedule: React.FC = () => {
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
                 Ya está definido el cruce; falta confirmar día y hora.
               </Typography>
-              <Grid container spacing={2}>
+              <Stack spacing={1.5}>
                 {groups.pending.map((m: Match) => (
-                  <Grid size={{ xs: 12, md: 6, lg: 4 }} key={m.id}>
-                    <MatchCard
-                      match={m}
-                      competitionLabel={competitionLabel(m)}
-                      onClick={() => setSelectedMatch(m)}
-                    />
-                  </Grid>
+                  <MatchCard
+                    key={m.id}
+                    match={m}
+                    compact
+                    competitionLabel={competitionLabel(m)}
+                    onClick={() => setSelectedMatch(m)}
+                  />
                 ))}
-              </Grid>
+              </Stack>
             </Box>
           )}
         </Stack>

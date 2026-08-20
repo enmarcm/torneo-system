@@ -24,6 +24,7 @@ export const matchEventsService = {
         teamRegistrationId: data.teamRegistrationId,
         playerId: data.playerId ?? null,
       },
+      include: { player: { select: { firstName: true, lastName: true } } },
     });
 
     let { homeScore, awayScore } = match;
@@ -38,6 +39,9 @@ export const matchEventsService = {
       type: data.type,
       minute: data.minute,
       playerId: data.playerId,
+      playerName: event.player
+        ? `${event.player.firstName} ${event.player.lastName}`
+        : null,
       teamRegistrationId: data.teamRegistrationId,
     });
     emitMatchUpdate({ matchId, homeScore, awayScore, status: match.status });

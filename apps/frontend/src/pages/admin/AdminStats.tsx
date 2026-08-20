@@ -7,7 +7,7 @@ import { StatCard } from '@/components/ui/StatCard';
 import { DataTable } from '@/components/ui/DataTable';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { usePlayerStatsQuery, useCompetitionsQuery } from '@/hooks/queries';
-import { GroupsRounded, SportsSoccerRounded, AssistantRounded, SquareRounded, FlagRounded } from '@mui/icons-material';
+import { GroupsRounded, SportsSoccerRounded, SquareRounded, FlagRounded } from '@mui/icons-material';
 import { getCompetitionShortLabel } from '@/utils/competitionMeta';
 
 const AdminStats: React.FC = () => {
@@ -25,16 +25,12 @@ const AdminStats: React.FC = () => {
   const summary = useMemo(() => ({
     totalPlayers: filtered.length,
     totalGoals: filtered.reduce((s: number, p: any) => s + (p.goals ?? 0), 0),
-    totalAssists: filtered.reduce((s: number, p: any) => s + (p.assists ?? 0), 0),
     totalYellow: filtered.reduce((s: number, p: any) => s + (p.yellowCards ?? 0), 0),
     totalRed: filtered.reduce((s: number, p: any) => s + (p.redCards ?? 0), 0),
   }), [filtered]);
 
   const topScorers = useMemo(() =>
     [...filtered].sort((a: any, b: any) => (b.goals ?? 0) - (a.goals ?? 0)).slice(0, 10), [filtered]);
-
-  const topAssists = useMemo(() =>
-    [...filtered].sort((a: any, b: any) => (b.assists ?? 0) - (a.assists ?? 0)).slice(0, 10), [filtered]);
 
   const topCards = useMemo(() =>
     [...filtered].sort((a: any, b: any) => ((b.yellowCards ?? 0) + (b.redCards ?? 0)) - ((a.yellowCards ?? 0) + (a.redCards ?? 0))).slice(0, 10), [filtered]);
@@ -81,19 +77,16 @@ const AdminStats: React.FC = () => {
       )}
 
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 6, md: 2.4 }}>
+        <Grid size={{ xs: 6, md: 3 }}>
           <StatCard label="Jugadores" value={summary.totalPlayers} icon={<GroupsRounded />} tint="primary" />
         </Grid>
-        <Grid size={{ xs: 6, md: 2.4 }}>
+        <Grid size={{ xs: 6, md: 3 }}>
           <StatCard label="Goles" value={summary.totalGoals} icon={<SportsSoccerRounded />} tint="success" />
         </Grid>
-        <Grid size={{ xs: 6, md: 2.4 }}>
-          <StatCard label="Asistencias" value={summary.totalAssists} icon={<AssistantRounded />} tint="info" />
-        </Grid>
-        <Grid size={{ xs: 6, md: 2.4 }}>
+        <Grid size={{ xs: 6, md: 3 }}>
           <StatCard label="Tarjetas Amarillas" value={summary.totalYellow} icon={<SquareRounded />} tint="warning" />
         </Grid>
-        <Grid size={{ xs: 6, md: 2.4 }}>
+        <Grid size={{ xs: 6, md: 3 }}>
           <StatCard label="Tarjetas Rojas" value={summary.totalRed} icon={<FlagRounded />} tint="danger" />
         </Grid>
       </Grid>
@@ -123,27 +116,6 @@ const AdminStats: React.FC = () => {
         <Grid size={{ xs: 12, md: 6 }}>
           <Card sx={{ p: { xs: 2, md: 3 } }}>
             <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
-              <AssistantRounded color="info" />
-              <Typography variant="h3">Mayores Asistentes</Typography>
-            </Stack>
-            {topAssists.length === 0 || topAssists.every((s: any) => !s.assists) ? (
-              <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>Aún no hay asistencias registradas.</Typography>
-            ) : (
-              <Box sx={{ width: '100%', height: 300 }}>
-                <BarChart
-                  yAxis={[{ scaleType: 'band', data: topAssists.map((s: any) => `${s.rosterEntry?.player?.firstName ?? ''} ${s.rosterEntry?.player?.lastName ?? ''}`.split(' ')[0]) }]}
-                  series={[{ data: topAssists.map((s: any) => s.assists ?? 0), label: 'Asistencias', color: '#3B82F6' }]}
-                  layout="horizontal"
-                  margin={{ left: 80, right: 20, top: 10, bottom: 30 }}
-                  slotProps={{ legend: { hidden: true } }}
-                />
-              </Box>
-            )}
-          </Card>
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Card sx={{ p: { xs: 2, md: 3 } }}>
-            <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
               <SquareRounded color="warning" />
               <Typography variant="h3">Tarjetas</Typography>
             </Stack>
@@ -160,27 +132,6 @@ const AdminStats: React.FC = () => {
                   layout="horizontal"
                   margin={{ left: 80, right: 20, top: 20, bottom: 30 }}
                   slotProps={{ legend: { position: { vertical: 'top', horizontal: 'left' } } }}
-                />
-              </Box>
-            )}
-          </Card>
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Card sx={{ p: { xs: 2, md: 3 } }}>
-            <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
-              <SportsSoccerRounded color="primary" />
-              <Typography variant="h3">Minutos Jugados</Typography>
-            </Stack>
-            {topScorers.length === 0 || topScorers.every((s: any) => !s.minutesPlayed) ? (
-              <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>Aún no hay minutos registrados.</Typography>
-            ) : (
-              <Box sx={{ width: '100%', height: 300 }}>
-                <BarChart
-                  yAxis={[{ scaleType: 'band', data: [...filtered].sort((a: any, b: any) => (b.minutesPlayed ?? 0) - (a.minutesPlayed ?? 0)).slice(0, 10).map((s: any) => `${s.rosterEntry?.player?.firstName ?? ''} ${s.rosterEntry?.player?.lastName ?? ''}`.split(' ')[0]) }]}
-                  series={[{ data: [...filtered].sort((a: any, b: any) => (b.minutesPlayed ?? 0) - (a.minutesPlayed ?? 0)).slice(0, 10).map((s: any) => s.minutesPlayed ?? 0), label: 'Minutos', color: '#8B5CF6' }]}
-                  layout="horizontal"
-                  margin={{ left: 80, right: 20, top: 10, bottom: 30 }}
-                  slotProps={{ legend: { hidden: true } }}
                 />
               </Box>
             )}
@@ -240,13 +191,6 @@ const AdminStats: React.FC = () => {
                 width: 50,
               },
               {
-                key: 'assists',
-                label: 'A',
-                render: (row: any) => <Typography sx={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{row.assists ?? 0}</Typography>,
-                align: 'right',
-                width: 50,
-              },
-              {
                 key: 'yellow',
                 label: 'TA',
                 render: (row: any) => (
@@ -263,14 +207,6 @@ const AdminStats: React.FC = () => {
                 ),
                 align: 'right',
                 width: 50,
-              },
-              {
-                key: 'min',
-                label: 'Min',
-                render: (row: any) => <Typography sx={{ fontVariantNumeric: 'tabular-nums' }}>{row.minutesPlayed ?? 0}</Typography>,
-                align: 'right',
-                width: 50,
-                hideInMobile: true,
               },
             ]}
             rows={[...filtered].sort((a: any, b: any) => (b.goals ?? 0) - (a.goals ?? 0))}

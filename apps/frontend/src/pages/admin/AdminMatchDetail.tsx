@@ -62,12 +62,9 @@ const AdminMatchDetail: React.FC = () => {
           {match.events.map((ev) => (
             <Card key={ev.id} sx={{ p: 2 }}>
               <Stack direction="row" alignItems="center" spacing={2}>
-                <Typography sx={{ fontWeight: 700, fontFamily: '"Plus Jakarta Sans"', fontVariantNumeric: 'tabular-nums', minWidth: 32 }}>
-                  {ev.minute}&apos;
-                </Typography>
                 <Chip size="small" label={getStatusLabel(ev.type)} variant="outlined" />
-                <Typography variant="body2">
-                  {ev.player ? `${ev.player.firstName} ${ev.player.lastName}` : '—'}
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {ev.player ? `${ev.player.firstName} ${ev.player.lastName}` : 'Autor sin definir'}
                 </Typography>
               </Stack>
             </Card>

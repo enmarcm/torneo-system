@@ -1,4 +1,5 @@
 import { Card, Box, Typography, Avatar, Stack } from '@mui/material';
+import { SportsSoccerRounded, StyleRounded, SwapHorizRounded } from '@mui/icons-material';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -33,10 +34,24 @@ export const LiveScoreboard: React.FC<Props> = ({ match, showFeed = true, size =
       setScore((cur) => ({ home: p.homeScore ?? cur.home, away: p.awayScore ?? cur.away }));
       if (p.status) setStatus(p.status as Match['status']);
     };
-    const onEvent = (p: { matchId: string; type: string; minute: number; playerId?: string }) => {
+    const onEvent = (p: {
+      matchId: string;
+      type: string;
+      minute: number;
+      playerId?: string;
+      playerName?: string | null;
+    }) => {
       if (p.matchId !== match.id) return;
+      const [firstName, ...rest] = (p.playerName ?? '').split(' ');
       setEvents((cur) => [
-        { id: `tmp-${Date.now()}`, type: p.type as MatchEvent['type'], minute: p.minute, playerId: p.playerId ?? null, teamRegistrationId: '' } as MatchEvent,
+        {
+          id: `tmp-${Date.now()}`,
+          type: p.type as MatchEvent['type'],
+          minute: p.minute,
+          playerId: p.playerId ?? null,
+          teamRegistrationId: '',
+          player: p.playerName ? { id: p.playerId ?? '', firstName, lastName: rest.join(' ') } : null,
+        } as MatchEvent,
         ...cur,
       ]);
     };
@@ -175,27 +190,51 @@ export const LiveScoreboard: React.FC<Props> = ({ match, showFeed = true, size =
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ duration: 0.18 }}
                 >
-                  <Stack direction="row" spacing={1.5} alignItems="center" sx={{ py: 0.5 }}>
-                    <Typography variant="caption" sx={{ width: 36, fontWeight: 700 }}>
-                      {e.minute}&apos;
-                    </Typography>
+                  <Stack direction="row" spacing={1.25} alignItems="center" sx={{ py: 0.5 }}>
                     <Box
                       sx={{
-                        width: 22,
-                        height: 22,
+                        width: 24,
+                        height: 24,
                         borderRadius: '50%',
                         display: 'grid',
                         placeItems: 'center',
-                        bgcolor: e.type === 'GOAL' ? 'success.light' : e.type === 'RED' ? 'error.light' : 'warning.light',
-                        color: e.type === 'GOAL' ? 'success.dark' : e.type === 'RED' ? 'error.dark' : 'warning.dark',
-                        fontSize: 12,
+                        flexShrink: 0,
+                        bgcolor:
+                          e.type === 'GOAL'
+                            ? 'var(--successSoft)'
+                            : e.type === 'RED'
+                              ? 'var(--dangerSoft)'
+                              : 'var(--warningSoft)',
+                        color:
+                          e.type === 'GOAL'
+                            ? 'var(--success)'
+                            : e.type === 'RED'
+                              ? 'var(--danger)'
+                              : 'var(--warning)',
+                        '& svg': { fontSize: 14 },
                       }}
                     >
-                      {e.type === 'GOAL' ? '⚽' : e.type === 'YELLOW' ? '🟨' : e.type === 'RED' ? '🟥' : '•'}
+                      {/* Iconos dibujados, no emoji: el emoji lo pinta cada sistema a su manera. */}
+                      {e.type === 'GOAL' ? (
+                        <SportsSoccerRounded />
+                      ) : e.type === 'SUB' ? (
+                        <SwapHorizRounded />
+                      ) : (
+                        <StyleRounded />
+                      )}
                     </Box>
-                    <Typography variant="body2">
-                      {getStatusLabel(e.type)}{e.player ? ` · ${e.player.firstName} ${e.player.lastName}` : ''}
+                    {/*
+                      El nombre manda y el tipo lo acompaña: la pregunta de quien
+                      mira es quien lo hizo, no de que clase de jugada se trata.
+                    */}
+                    <Typography variant="body2" sx={{ fontWeight: 600, minWidth: 0 }} noWrap>
+                      {e.player ? `${e.player.firstName} ${e.player.lastName}` : getStatusLabel(e.type)}
                     </Typography>
+                    {e.player && (
+                      <Typography variant="caption" color="text.secondary" noWrap>
+                        {getStatusLabel(e.type)}
+                      </Typography>
+                    )}
                   </Stack>
                 </motion.div>
               ))}

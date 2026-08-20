@@ -1,5 +1,5 @@
 import { Box, Grid2 as Grid, Card, Stack, Typography, Button, FormControl, InputLabel, Select, MenuItem, IconButton, TextField, Menu, Tooltip, Tabs, Tab, Chip, FormControlLabel, Checkbox, Avatar, FormHelperText } from '@mui/material';
-import { AddRounded, PlayArrowRounded, StopRounded, FiberManualRecordRounded, ChevronLeftRounded, ChevronRightRounded, MoreVertRounded, CasinoRounded } from '@mui/icons-material';
+import { AddRounded, PlayArrowRounded, StopRounded, SportsSoccerRounded, StyleRounded, ChevronLeftRounded, ChevronRightRounded, MoreVertRounded, CasinoRounded } from '@mui/icons-material';
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
@@ -7,7 +7,8 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { LiveScoreboard } from '@/components/sport/LiveScoreboard';
 import { AppDrawer } from '@/components/ui/AppDrawer';
-import { useCompetitionsQuery, useMatchesQuery, usePublicRegistrationsQuery } from '@/hooks/queries';
+import { AppModal } from '@/components/ui/AppModal';
+import { useCompetitionsQuery, useMatchesQuery, usePublicRegistrationsQuery, useRosterQuery } from '@/hooks/queries';
 import { useCreateMatch, useUpdateMatch, useDeleteMatch, useStartMatch, useFinishMatch, useCreateMatchEvent, useDrawLeagueFixture, useDrawGroupStage } from '@/hooks/mutations';
 import { MatchCard } from '@/components/sport/MatchCard';
 import { formatDateTime } from '@/utils/formatDate';
@@ -42,6 +43,16 @@ const AdminSchedule: React.FC = () => {
   const [view, setView] = useState<'day' | 'pending'>('day');
   const [open, setOpen] = useState<'create' | 'edit' | null>(null);
   const [liveMatch, setLiveMatch] = useState<Match | null>(null);
+  /*
+    Qué se está por cargar y a qué equipo. El jugador se elige después, en el
+    diálogo: un gol sin autor no alimenta la tabla de goleadores, que junto con
+    la de tarjetas es la única estadística que la liga lleva.
+  */
+  const [eventFor, setEventFor] = useState<{
+    type: 'GOAL' | 'YELLOW' | 'RED';
+    regId: string;
+    teamName: string;
+  } | null>(null);
   const [anchor, setAnchor] = useState<{ el: HTMLElement; m: Match } | null>(null);
   const [editingMatch, setEditingMatch] = useState<Match | null>(null);
   const [deletingMatch, setDeletingMatch] = useState<Match | null>(null);
@@ -91,6 +102,9 @@ const AdminSchedule: React.FC = () => {
     if (!home) return registrations;
     return registrations.filter((r) => r.id !== home && !rivalTaken(home, r.id));
   }, [registrations, form.homeRegistrationId, existingPairs, allowsReturnLeg]);
+
+  const { data: eventRoster = [] } = useRosterQuery(eventFor?.regId ?? '');
+  const eventRosterActive = eventRoster.filter((r) => r.status === 'ACTIVE');
 
   const hiddenRivals =
     form.homeRegistrationId > '' ? registrations.length - 1 - awayOptions.length : 0;
@@ -190,10 +204,29 @@ const AdminSchedule: React.FC = () => {
     }
   };
 
-  const addGoal = async (match: Match, teamRegId: string) => {
-    await createEvent.mutateAsync({ matchId: match.id, data: { type: 'GOAL', minute: 1, teamRegistrationId: teamRegId } });
-    const fresh = await import('@/api/matches.api').then((m) => m.matchesApi.get(match.id));
-    setLiveMatch(fresh);
+  /*
+    Se manda `minute: 0` porque el esquema lo exige, pero la liga no lleva el
+    minuto de cada jugada y no se muestra en ningún lado: inventar un número
+    sería peor que no tenerlo.
+  */
+  const registerEvent = async (playerId?: string) => {
+    if (!liveMatch || !eventFor) return;
+    try {
+      await createEvent.mutateAsync({
+        matchId: liveMatch.id,
+        data: {
+          type: eventFor.type,
+          minute: 0,
+          teamRegistrationId: eventFor.regId,
+          ...(playerId ? { playerId } : {}),
+        },
+      });
+      const fresh = await import('@/api/matches.api').then((m) => m.matchesApi.get(liveMatch.id));
+      setLiveMatch(fresh);
+      setEventFor(null);
+    } catch (e) {
+      toast.error(extractErrorMessage(e));
+    }
   };
 
   return (
@@ -258,15 +291,66 @@ const AdminSchedule: React.FC = () => {
       {liveMatch && (
         <Box sx={{ mb: 3 }}>
           <LiveScoreboard match={liveMatch} size="lg" />
-          <Stack direction="row" spacing={1.5} sx={{ mt: 2, justifyContent: 'center' }} flexWrap="wrap">
-            <Button variant="outlined" startIcon={<FiberManualRecordRounded />} onClick={() => addGoal(liveMatch, liveMatch.homeRegistrationId)}>
-              Gol local
-            </Button>
-            <Button variant="outlined" startIcon={<FiberManualRecordRounded />} onClick={() => addGoal(liveMatch, liveMatch.awayRegistrationId)}>
-              Gol visitante
-            </Button>
-            <Button variant="contained" color="success" startIcon={<StopRounded />} onClick={async () => { await finish.mutateAsync(liveMatch.id); setLiveMatch(null); }}>
-              Finalizar
+          {/*
+            Un renglón por equipo. Antes eran dos botones sueltos de "gol local"
+            y "gol visitante", sin jugador y sin manera de cargar una tarjeta:
+            la tabla de goleadores y la de tarjetas no podían llenarse nunca.
+          */}
+          <Stack spacing={1} sx={{ mt: 2, maxWidth: 520, mx: 'auto' }}>
+            {[
+              { regId: liveMatch.homeRegistrationId, name: liveMatch.homeRegistration.team.name },
+              { regId: liveMatch.awayRegistrationId, name: liveMatch.awayRegistration.team.name },
+            ].map((side) => (
+              <Stack
+                key={side.regId}
+                direction="row"
+                spacing={1}
+                alignItems="center"
+                sx={{ p: 1, borderRadius: 2, bgcolor: 'var(--surface2)' }}
+              >
+                <Typography sx={{ flex: 1, fontWeight: 700, fontSize: 14, minWidth: 0 }} noWrap>
+                  {side.name}
+                </Typography>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<SportsSoccerRounded />}
+                  onClick={() => setEventFor({ type: 'GOAL', regId: side.regId, teamName: side.name })}
+                >
+                  Gol
+                </Button>
+                <Tooltip title="Tarjeta amarilla">
+                  <IconButton
+                    size="small"
+                    aria-label={`Tarjeta amarilla para ${side.name}`}
+                    onClick={() => setEventFor({ type: 'YELLOW', regId: side.regId, teamName: side.name })}
+                    sx={{ color: 'var(--warning)' }}
+                  >
+                    <StyleRounded fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Tarjeta roja">
+                  <IconButton
+                    size="small"
+                    aria-label={`Tarjeta roja para ${side.name}`}
+                    onClick={() => setEventFor({ type: 'RED', regId: side.regId, teamName: side.name })}
+                    sx={{ color: 'var(--danger)' }}
+                  >
+                    <StyleRounded fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </Stack>
+            ))}
+            <Button
+              variant="contained"
+              color="success"
+              startIcon={<StopRounded />}
+              onClick={async () => {
+                await finish.mutateAsync(liveMatch.id);
+                setLiveMatch(null);
+              }}
+            >
+              Finalizar partido
             </Button>
           </Stack>
         </Box>
@@ -391,6 +475,68 @@ const AdminSchedule: React.FC = () => {
           )}
         </Box>
       )}
+
+      <AppModal
+        open={!!eventFor}
+        onClose={() => setEventFor(null)}
+        title={
+          eventFor?.type === 'GOAL'
+            ? '¿Quién marcó?'
+            : eventFor?.type === 'YELLOW'
+              ? '¿Quién vio la amarilla?'
+              : '¿Quién vio la roja?'
+        }
+        subtitle={eventFor?.teamName}
+        maxWidth={460}
+      >
+        <Stack spacing={0.5}>
+          {eventRosterActive.length === 0 ? (
+            <Typography color="text.secondary" sx={{ py: 3, textAlign: 'center' }}>
+              Este equipo todavía no tiene plantilla cargada para esta competición.
+            </Typography>
+          ) : (
+            eventRosterActive.map((r) => (
+              <Button
+                key={r.id}
+                onClick={() => registerEvent(r.playerId)}
+                disabled={createEvent.isPending}
+                sx={{ justifyContent: 'flex-start', px: 1.25, py: 1, color: 'text.primary' }}
+              >
+                <Stack direction="row" alignItems="center" spacing={1.5} sx={{ width: '100%', minWidth: 0 }}>
+                  <Avatar src={r.player.photoUrl ?? undefined} sx={{ width: 32, height: 32, fontSize: 13 }}>
+                    {r.player.firstName[0]}
+                  </Avatar>
+                  <Typography sx={{ flex: 1, textAlign: 'left', fontWeight: 600, fontSize: 14 }} noWrap>
+                    {r.player.firstName} {r.player.lastName}
+                  </Typography>
+                  {r.jerseyNumber != null && (
+                    <Chip
+                      size="small"
+                      label={r.jerseyNumber}
+                      sx={{ height: 20, minWidth: 28, fontSize: 11, fontWeight: 800, fontVariantNumeric: 'tabular-nums' }}
+                    />
+                  )}
+                </Stack>
+              </Button>
+            ))
+          )}
+
+          {/*
+            Solo para el gol: el marcador tiene que poder moverse aunque nadie
+            sepa todavía quién lo hizo. Una tarjeta siempre es de alguien, y sin
+            jugador no suma a la tabla, así que ahí no se ofrece la salida.
+          */}
+          {eventFor?.type === 'GOAL' && (
+            <Button
+              onClick={() => registerEvent()}
+              disabled={createEvent.isPending}
+              sx={{ mt: 1, color: 'text.secondary' }}
+            >
+              Sumar el gol sin definir el autor
+            </Button>
+          )}
+        </Stack>
+      </AppModal>
 
       <Menu anchorEl={anchor?.el ?? null} open={!!anchor} onClose={() => setAnchor(null)}>
         <MenuItem onClick={() => { if (anchor) { onOpenEdit(anchor.m); } setAnchor(null); }}>Editar</MenuItem>

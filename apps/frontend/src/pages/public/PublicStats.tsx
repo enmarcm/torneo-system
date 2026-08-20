@@ -64,7 +64,6 @@ const StatRow: React.FC<{ row: PlayerStatRow; position: number }> = ({ row, posi
       <Stack direction="row" spacing={{ xs: 1.5, sm: 3 }} sx={{ flexShrink: 0 }}>
         {[
           { value: row.goals, label: 'Goles', strong: true },
-          { value: row.assists, label: 'Asist.' },
           { value: row.matchesPlayed, label: 'PJ' },
         ].map((s) => (
           <Box key={s.label} sx={{ textAlign: 'center', minWidth: 40 }}>

@@ -61,12 +61,19 @@ export const emitMatchListChanged = () => {
   io.to(MATCHES_ROOM).emit('match:list');
 };
 
-/** Gol o tarjeta. Mismo doble destino que el marcador. */
+/**
+ * Gol o tarjeta. Mismo doble destino que el marcador.
+ *
+ * Viaja el nombre del jugador y no solo su id: quien mira el partido en vivo
+ * ve el gol en el momento en que se carga, y con el id suelto la línea decía
+ * "Gol" a secas hasta que la pantalla volviera a pedir el detalle.
+ */
 export const emitMatchEvent = (payload: {
   matchId: string;
   type: string;
   minute: number;
   playerId?: string | null;
+  playerName?: string | null;
   teamRegistrationId: string;
 }) => {
   const server = getIo();

@@ -25,10 +25,8 @@ interface PlayerStatItem {
   competitionName: string;
   matchesPlayed: number;
   goals: number;
-  assists: number;
   yellowCards: number;
   redCards: number;
-  minutesPlayed: number;
 }
 
 const TeamStats: React.FC = () => {
@@ -60,10 +58,8 @@ const TeamStats: React.FC = () => {
         competitionName: reg.competition.name,
         matchesPlayed: entry.stats?.matchesPlayed ?? 0,
         goals: entry.stats?.goals ?? 0,
-        assists: entry.stats?.assists ?? 0,
         yellowCards: entry.stats?.yellowCards ?? 0,
         redCards: entry.stats?.redCards ?? 0,
-        minutesPlayed: entry.stats?.minutesPlayed ?? 0,
       }))
     );
   }, [registrations, filterCompetition]);
@@ -71,7 +67,6 @@ const TeamStats: React.FC = () => {
   const summary = useMemo(() => ({
     totalPlayers: players.length,
     totalGoals: players.reduce((s, p) => s + p.goals, 0),
-    totalAssists: players.reduce((s, p) => s + p.assists, 0),
     totalYellow: players.reduce((s, p) => s + p.yellowCards, 0),
     totalRed: players.reduce((s, p) => s + p.redCards, 0),
   }), [players]);
@@ -149,19 +144,16 @@ const TeamStats: React.FC = () => {
       )}
 
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 6, md: 2.4 }}>
+        <Grid size={{ xs: 6, md: 3 }}>
           <StatCard label="Jugadores" value={summary.totalPlayers} icon={<GroupRounded />} tint="primary" />
         </Grid>
-        <Grid size={{ xs: 6, md: 2.4 }}>
+        <Grid size={{ xs: 6, md: 3 }}>
           <StatCard label="Goles" value={summary.totalGoals} icon={<SportsSoccerRounded />} tint="success" />
         </Grid>
-        <Grid size={{ xs: 6, md: 2.4 }}>
-          <StatCard label="Asistencias" value={summary.totalAssists} icon={<AssistantRounded />} tint="info" />
-        </Grid>
-        <Grid size={{ xs: 6, md: 2.4 }}>
+        <Grid size={{ xs: 6, md: 3 }}>
           <StatCard label="Tarjetas Amarillas" value={summary.totalYellow} icon={<SquareRounded />} tint="warning" />
         </Grid>
-        <Grid size={{ xs: 6, md: 2.4 }}>
+        <Grid size={{ xs: 6, md: 3 }}>
           <StatCard label="Tarjetas Rojas" value={summary.totalRed} icon={<FlagRounded />} tint="danger" />
         </Grid>
       </Grid>
@@ -272,46 +264,6 @@ const TeamStats: React.FC = () => {
             )}
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Card sx={{ p: { xs: 2, md: 3 } }}>
-            <Typography variant="h3" sx={{ mb: 2 }}>Asistencias</Typography>
-            {topScorers.length === 0 || topScorers.every((p) => p.assists === 0) ? (
-              <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
-                Aún no hay asistencias registradas.
-              </Typography>
-            ) : (
-              <Box sx={{ width: '100%', height: 300 }}>
-                <BarChart
-                  yAxis={[{ scaleType: 'band', data: [...players].sort((a, b) => b.assists - a.assists).slice(0, 10).map((p) => p.name.split(' ')[0]) }]}
-                  series={[{ data: [...players].sort((a, b) => b.assists - a.assists).slice(0, 10).map((p) => p.assists), label: 'Asistencias', color: '#3B82F6' }]}
-                  layout="horizontal"
-                  margin={{ left: 80, right: 20, top: 10, bottom: 30 }}
-                  slotProps={{ legend: { hidden: true } }}
-                />
-              </Box>
-            )}
-          </Card>
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Card sx={{ p: { xs: 2, md: 3 } }}>
-            <Typography variant="h3" sx={{ mb: 2 }}>Minutos Jugados</Typography>
-            {topScorers.length === 0 || topScorers.every((p) => p.minutesPlayed === 0) ? (
-              <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
-                Aún no hay minutos registrados.
-              </Typography>
-            ) : (
-              <Box sx={{ width: '100%', height: 300 }}>
-                <BarChart
-                  yAxis={[{ scaleType: 'band', data: [...players].sort((a, b) => b.minutesPlayed - a.minutesPlayed).slice(0, 10).map((p) => p.name.split(' ')[0]) }]}
-                  series={[{ data: [...players].sort((a, b) => b.minutesPlayed - a.minutesPlayed).slice(0, 10).map((p) => p.minutesPlayed), label: 'Min', color: '#8B5CF6' }]}
-                  layout="horizontal"
-                  margin={{ left: 80, right: 20, top: 10, bottom: 30 }}
-                  slotProps={{ legend: { hidden: true } }}
-                />
-              </Box>
-            )}
-          </Card>
-        </Grid>
       </Grid>
 
       <Card sx={{ p: { xs: 2, md: 3 } }}>
@@ -367,15 +319,6 @@ const TeamStats: React.FC = () => {
                 width: 50,
               },
               {
-                key: 'assists',
-                label: 'A',
-                render: (row: PlayerStatItem) => (
-                  <Typography sx={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{row.assists}</Typography>
-                ),
-                align: 'right',
-                width: 50,
-              },
-              {
                 key: 'yellowCards',
                 label: 'TA',
                 render: (row: PlayerStatItem) => (
@@ -392,16 +335,6 @@ const TeamStats: React.FC = () => {
                 ),
                 align: 'right',
                 width: 50,
-              },
-              {
-                key: 'minutesPlayed',
-                label: 'Min',
-                render: (row: PlayerStatItem) => (
-                  <Typography sx={{ fontVariantNumeric: 'tabular-nums' }}>{row.minutesPlayed}</Typography>
-                ),
-                align: 'right',
-                width: 50,
-                hideInMobile: true,
               },
             ]}
             rows={sortedPlayers}
