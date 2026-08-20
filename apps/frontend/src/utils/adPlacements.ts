@@ -20,17 +20,18 @@ export interface AdPlacementMeta {
 }
 
 /**
- * Medida única de toda la publicidad del sitio: 2880 x 1440 px, proporcion 2:1.
+ * Medida única de toda la publicidad del sitio: 1200 × 240 px, proporción 5:1.
  *
- * Antes cada ubicacion pedia una medida distinta (5:1, 6:1, 1:1, 15:2) y el
- * mismo arte no servia en dos lugares: el que lo subia tenia que exportarlo
- * cinco veces o aceptar que se recortara. Con una sola proporcion se disena una
- * pieza y entra completa en cualquier ranura.
+ * Dos decisiones juntas. Una sola medida, porque antes cada ubicación pedía algo
+ * distinto (5:1, 6:1, 1:1, 15:2) y el mismo arte no servía en dos lugares. Y que
+ * esa medida sea chata: una pieza cuadrada o 2:1 a ancho completo pasa los 500px
+ * de alto y empuja el resultado del partido fuera de la primera pantalla, que es
+ * justo lo que el visitante vino a buscar.
  */
-export const AD_SIZE_HINT = '2880 × 1440 px (2:1)';
-export const AD_RATIO = '2 / 1';
-/** La tira de logos no lleva caja: se pide el mismo lienzo pero recortado al logo. */
-export const AD_LOGO_HINT = '2880 × 1440 px (2:1), PNG con fondo transparente';
+export const AD_SIZE_HINT = '1200 × 240 px (5:1)';
+export const AD_RATIO = '5 / 1';
+/** La tira de logos no lleva caja: mismo lienzo, recortado al logo. */
+export const AD_LOGO_HINT = '1200 × 240 px (5:1), PNG con fondo transparente';
 
 /**
  * Catálogo único de ubicaciones publicitarias: lo usa el panel de administración
