@@ -1,5 +1,6 @@
 import { api } from './axios';
 import type { Match } from './matches.api';
+import type { Competition } from './competitions.api';
 
 export interface Team {
   id: string;
@@ -16,9 +17,18 @@ export interface TeamRegistrationWithRoster {
   competitionId: string;
   groupId: string | null;
   status: string;
+  /*
+    El backend hace `include` de la competición entera, así que estos campos ya
+    viajaban; el tipo los recortaba y por eso los selectores del panel de equipo
+    no podían decir de qué división era cada torneo.
+  */
   competition: {
     id: string;
     name: string;
+    kind: Competition['kind'] | null;
+    format: Competition['format'] | null;
+    division: string | null;
+    divisionLevel: number | null;
     category: { id: string; name: string } | null;
   };
   roster: Array<{

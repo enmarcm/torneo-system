@@ -241,7 +241,7 @@ export const PublicLayout: React.FC = () => {
                   © {new Date().getFullYear()} LLF — Liga Lago Futsal
                 </Typography>
                 <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.55)' }}>
-                  Realizado por Enmanuel Colina y Royer Merchan
+                  Developed with Colina and Merchan
                 </Typography>
               </Stack>
             </Stack>

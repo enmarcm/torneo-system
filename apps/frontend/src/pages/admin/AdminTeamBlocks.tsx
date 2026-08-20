@@ -37,6 +37,7 @@ import { useBlockTeam, useLiftTeamBlock } from '@/hooks/mutations';
 import { extractErrorMessage } from '@/api/axios';
 import { formatDateTime } from '@/utils/formatDate';
 import { getStatusLabel } from '@/utils/statusLabels';
+import { getCompetitionShortLabel } from '@/utils/competitionMeta';
 
 const AdminTeamBlocks: React.FC = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -251,7 +252,7 @@ const AdminTeamBlocks: React.FC = () => {
             >
               {competitions.map((c: Competition) => (
                 <MenuItem key={c.id} value={c.id}>
-                  {c.name}
+                  {getCompetitionShortLabel(c)}
                 </MenuItem>
               ))}
             </TextField>

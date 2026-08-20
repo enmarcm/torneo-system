@@ -8,6 +8,7 @@ import { DataTable } from '@/components/ui/DataTable';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { usePlayerStatsQuery, useCompetitionsQuery } from '@/hooks/queries';
 import { GroupsRounded, SportsSoccerRounded, AssistantRounded, SquareRounded, FlagRounded } from '@mui/icons-material';
+import { getCompetitionShortLabel } from '@/utils/competitionMeta';
 
 const AdminStats: React.FC = () => {
   const { data: stats = [], isLoading, error, refetch } = usePlayerStatsQuery();
@@ -72,7 +73,7 @@ const AdminStats: React.FC = () => {
             >
               <MenuItem value="">Todas las competiciones</MenuItem>
               {comps.map((c) => (
-                <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
+                <MenuItem key={c.id} value={c.id}>{getCompetitionShortLabel(c)}</MenuItem>
               ))}
             </Select>
           </FormControl>

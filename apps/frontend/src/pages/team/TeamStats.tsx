@@ -13,6 +13,7 @@ import { DataTable } from '@/components/ui/DataTable';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useTeamRegistrationsQuery } from '@/hooks/queries';
 import type { TeamRegistrationWithRoster } from '@/api/teams.api';
+import { getCompetitionShortLabel } from '@/utils/competitionMeta';
 
 interface PlayerStatItem {
   playerId: string;
@@ -39,7 +40,8 @@ const TeamStats: React.FC = () => {
   const competitionOptions = useMemo(() => {
     const seen = new Set<string>();
     return registrations
-      .map((r) => ({ id: r.competitionId, name: r.competition.name }))
+      // Se lleva la competición entera y no solo el nombre: la división vive ahí.
+      .map((r) => ({ ...r.competition, id: r.competitionId }))
       .filter((c) => { if (seen.has(c.id)) return false; seen.add(c.id); return true; });
   }, [registrations]);
 
@@ -139,7 +141,7 @@ const TeamStats: React.FC = () => {
             >
               <MenuItem value="">Todas las competiciones</MenuItem>
               {competitionOptions.map((c) => (
-                <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
+                <MenuItem key={c.id} value={c.id}>{getCompetitionShortLabel(c)}</MenuItem>
               ))}
             </Select>
           </FormControl>

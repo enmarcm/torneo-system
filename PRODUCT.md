@@ -90,7 +90,7 @@ Decisión abierta:
 - **Una sola liga.** El sistema no se plantea como producto reutilizable para
   otros torneos: la marca, el escudo y la sede pueden ir fijos en el código y el
   diseño puede comprometerse con esa identidad en lugar de mantenerse neutral.
-- Créditos de autoría visibles en el pie: Enmanuel Colina y Royer Merchan.
+- Créditos de autoría visibles en el pie: "Developed with Colina and Merchan".
 
 ## Evidence on Hand
 
