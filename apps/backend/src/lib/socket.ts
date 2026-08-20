@@ -45,6 +45,22 @@ export const emitMatchUpdate = (payload: MatchUpdate) => {
   server.to(MATCHES_ROOM).emit('match:update', payload);
 };
 
+/**
+ * El fixture cambió: se creó, se borró, se programó o se sorteó un partido.
+ *
+ * No lleva datos porque la novedad no es de un partido concreto sino de qué
+ * partidos existen y en qué lista cae cada uno — de hoy, destacados, próximos.
+ * Parchear filas no alcanza: quien escucha tiene que volver a preguntar.
+ *
+ * Sin esto, cargar un partido desde administración no se veía en la portada
+ * hasta que alguien recargaba la página.
+ */
+export const emitMatchListChanged = () => {
+  // Silencioso si todavía no hay socket: es aviso, no parte del resultado.
+  if (!io) return;
+  io.to(MATCHES_ROOM).emit('match:list');
+};
+
 /** Gol o tarjeta. Mismo doble destino que el marcador. */
 export const emitMatchEvent = (payload: {
   matchId: string;

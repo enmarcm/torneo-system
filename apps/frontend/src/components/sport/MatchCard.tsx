@@ -39,9 +39,17 @@ const accentFor = (status: Match['status']) => {
   return 'var(--border)';
 };
 
-const stageLabel = (match: Match) => {
-  if (match.stage === 'LEAGUE') return `Jornada ${match.matchday}`;
-  if (match.stage === 'GROUP') return `Grupos · J${match.matchday}`;
+/**
+ * Ronda del partido, cuando decir cuál es agrega algo.
+ *
+ * En una liga no agrega: "Jornada 7" es contabilidad interna del fixture y no
+ * cambia lo que el visitante lee —quién juega contra quién y cuándo—, así que
+ * ocupaba un renglón entero de cada ficha para nada. En una eliminatoria sí:
+ * "Semifinal · Vuelta" es la mitad de la noticia.
+ */
+const stageLabel = (match: Match): string | null => {
+  if (match.stage === 'LEAGUE') return null;
+  if (match.stage === 'GROUP') return 'Fase de grupos';
   const base = getStatusLabel(match.stage);
   if (match.leg === 1) return `${base} · Ida`;
   if (match.leg === 2) return `${base} · Vuelta`;
@@ -66,6 +74,7 @@ export const MatchCard: React.FC<Props> = ({
   const isPending = !match.scheduledAt;
   const homeWon = isFinished && match.homeScore > match.awayScore;
   const awayWon = isFinished && match.awayScore > match.homeScore;
+  const stage = stageLabel(match);
 
   return (
     <Card
@@ -89,8 +98,8 @@ export const MatchCard: React.FC<Props> = ({
       }
       sx={{
         position: 'relative',
-        p: compact ? 1.5 : { xs: 2, md: 2.5 },
-        pl: compact ? 2 : { xs: 2.5, md: 3 },
+        p: compact ? 1.25 : { xs: 2, md: 2.5 },
+        pl: compact ? 1.75 : { xs: 2.5, md: 3 },
         cursor: onClick ? 'pointer' : 'default',
         overflow: 'hidden',
         '&::before': {
@@ -109,9 +118,9 @@ export const MatchCard: React.FC<Props> = ({
         justifyContent="space-between"
         alignItems="center"
         spacing={1}
-        sx={{ mb: compact ? 1.25 : 2 }}
+        sx={{ mb: compact ? 0.875 : 2 }}
       >
-        {(showStage || competitionLabel) && (
+        {(competitionLabel || (showStage && stage)) && (
           <Box sx={{ minWidth: 0 }}>
             {competitionLabel && (
               <Typography
@@ -120,15 +129,22 @@ export const MatchCard: React.FC<Props> = ({
                 noWrap
               >
                 {competitionLabel}
+                {/* Compacta van juntas: dos renglones de rótulo estiran la ficha. */}
+                {compact && showStage && stage ? (
+                  <Box component="span" sx={{ color: 'text.secondary', fontWeight: 700 }}>
+                    {' · '}
+                    {stage}
+                  </Box>
+                ) : null}
               </Typography>
             )}
-            {showStage && (
+            {showStage && stage && !(compact && competitionLabel) && (
               <Typography
                 variant="caption"
                 sx={{ display: 'block', fontWeight: 700, color: 'text.secondary', letterSpacing: 0.3 }}
                 noWrap
               >
-                {stageLabel(match)}
+                {stage}
               </Typography>
             )}
           </Box>
@@ -171,29 +187,56 @@ export const MatchCard: React.FC<Props> = ({
         ) : null}
       </Stack>
 
-      <Stack direction="row" alignItems="center" spacing={1.5}>
-        <Stack alignItems="center" spacing={0.75} sx={{ flex: 1, minWidth: 0 }}>
+      {/*
+        Compacta, el escudo se pone al lado del nombre en vez de encima: es la
+        misma información en la mitad del alto, que es lo que hace que entren
+        cuatro partidos en la pantalla de un teléfono en vez de dos.
+      */}
+      <Stack direction="row" alignItems="center" spacing={compact ? 1 : 1.5}>
+        <Stack
+          direction={compact ? 'row' : 'column'}
+          alignItems="center"
+          spacing={compact ? 1 : 0.75}
+          sx={{ flex: 1, minWidth: 0 }}
+        >
           <Avatar
             alt={match.homeRegistration.team.name}
             src={match.homeRegistration.team.logoUrl ?? undefined}
-            sx={{ width: compact ? 34 : 48, height: compact ? 34 : 48, opacity: awayWon ? 0.55 : 1 }}
+            sx={{
+              width: compact ? 28 : 48,
+              height: compact ? 28 : 48,
+              fontSize: compact ? 12 : undefined,
+              flexShrink: 0,
+              opacity: awayWon ? 0.55 : 1,
+            }}
           >
             {match.homeRegistration.team.name[0]}
           </Avatar>
           <Typography
             variant="body2"
-            align="center"
-            sx={{ fontWeight: homeWon ? 800 : 600, width: '100%' }}
+            align={compact ? 'left' : 'center'}
+            sx={{ fontWeight: homeWon ? 800 : 600, width: '100%', fontSize: compact ? 13 : undefined }}
             noWrap
           >
             {match.homeRegistration.team.name}
           </Typography>
         </Stack>
 
-        <Box sx={{ textAlign: 'center', minWidth: { xs: 68, md: 88 }, flexShrink: 0 }}>
+        <Box
+          sx={{
+            textAlign: 'center',
+            minWidth: compact ? 48 : { xs: 68, md: 88 },
+            flexShrink: 0,
+          }}
+        >
           {match.status === 'SCHEDULED' || match.status === 'POSTPONED' ? (
             <Typography
-              sx={{ fontWeight: 800, fontSize: 18, color: 'text.disabled', letterSpacing: 1 }}
+              sx={{
+                fontWeight: 800,
+                fontSize: compact ? 14 : 18,
+                color: 'text.disabled',
+                letterSpacing: 1,
+              }}
             >
               VS
             </Typography>
@@ -202,7 +245,7 @@ export const MatchCard: React.FC<Props> = ({
               sx={{
                 fontFamily: '"Plus Jakarta Sans", sans-serif',
                 fontWeight: 800,
-                fontSize: compact ? 22 : { xs: 26, md: 30 },
+                fontSize: compact ? 19 : { xs: 26, md: 30 },
                 fontVariantNumeric: 'tabular-nums',
                 lineHeight: 1.1,
                 color: isLive ? 'var(--live)' : 'text.primary',
@@ -213,18 +256,29 @@ export const MatchCard: React.FC<Props> = ({
           )}
         </Box>
 
-        <Stack alignItems="center" spacing={0.75} sx={{ flex: 1, minWidth: 0 }}>
+        <Stack
+          direction={compact ? 'row-reverse' : 'column'}
+          alignItems="center"
+          spacing={compact ? 1 : 0.75}
+          sx={{ flex: 1, minWidth: 0 }}
+        >
           <Avatar
             alt={match.awayRegistration.team.name}
             src={match.awayRegistration.team.logoUrl ?? undefined}
-            sx={{ width: compact ? 34 : 48, height: compact ? 34 : 48, opacity: homeWon ? 0.55 : 1 }}
+            sx={{
+              width: compact ? 28 : 48,
+              height: compact ? 28 : 48,
+              fontSize: compact ? 12 : undefined,
+              flexShrink: 0,
+              opacity: homeWon ? 0.55 : 1,
+            }}
           >
             {match.awayRegistration.team.name[0]}
           </Avatar>
           <Typography
             variant="body2"
-            align="center"
-            sx={{ fontWeight: awayWon ? 800 : 600, width: '100%' }}
+            align={compact ? 'right' : 'center'}
+            sx={{ fontWeight: awayWon ? 800 : 600, width: '100%', fontSize: compact ? 13 : undefined }}
             noWrap
           >
             {match.awayRegistration.team.name}
@@ -238,8 +292,8 @@ export const MatchCard: React.FC<Props> = ({
         justifyContent="space-between"
         spacing={1}
         sx={{
-          mt: compact ? 1.25 : 2,
-          pt: compact ? 1 : 1.5,
+          mt: compact ? 0.875 : 2,
+          pt: compact ? 0.75 : 1.5,
           borderTop: '1px solid',
           borderColor: 'divider',
           color: 'text.secondary',

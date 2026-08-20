@@ -1,10 +1,9 @@
 import { Box, Grid2 as Grid, Card, Stack, Typography, Button, FormControl, InputLabel, Select, MenuItem, IconButton, TextField, Menu, Tooltip, Tabs, Tab, Chip, FormControlLabel, Checkbox, Avatar, FormHelperText } from '@mui/material';
 import { AddRounded, PlayArrowRounded, StopRounded, FiberManualRecordRounded, ChevronLeftRounded, ChevronRightRounded, MoreVertRounded, CasinoRounded } from '@mui/icons-material';
 import { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { StatusBadge } from '@/components/ui/StatusBadge';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { LiveScoreboard } from '@/components/sport/LiveScoreboard';
 import { AppDrawer } from '@/components/ui/AppDrawer';
@@ -17,7 +16,15 @@ import { extractErrorMessage } from '@/api/axios';
 import { useToast } from '@/hooks/common/useToast';
 import { getCompetitionShortLabel } from '@/utils/competitionMeta';
 
+/*
+  La liga juega siempre en la misma cancha, así que la sede se escribía a mano
+  igual en cada partido. Va precargada; el campo sigue siendo editable porque
+  una fecha puede mudarse y el administrador manda sobre el dato.
+*/
+const DEFAULT_VENUE = 'Colegio de Abogados';
+
 const AdminSchedule: React.FC = () => {
+  const navigate = useNavigate();
   const today = dayjs().format('YYYY-MM-DD');
   const [competitionId, setCompetitionId] = useState('');
   const [selectedDate, setSelectedDate] = useState(today);
@@ -38,7 +45,7 @@ const AdminSchedule: React.FC = () => {
   const [anchor, setAnchor] = useState<{ el: HTMLElement; m: Match } | null>(null);
   const [editingMatch, setEditingMatch] = useState<Match | null>(null);
   const [deletingMatch, setDeletingMatch] = useState<Match | null>(null);
-  const [form, setForm] = useState({ homeRegistrationId: '', awayRegistrationId: '', scheduledAt: '', matchday: 1, venue: '', featured: false });
+  const [form, setForm] = useState({ homeRegistrationId: '', awayRegistrationId: '', scheduledAt: '', matchday: 1, venue: DEFAULT_VENUE, featured: false });
   const [editForm, setEditForm] = useState({ scheduledAt: '', matchday: 1, venue: '', status: 'SCHEDULED' as Match['status'], featured: false });
 
   /* Equipos inscritos en la competición elegida: es lo que se puede cruzar. */
@@ -97,7 +104,8 @@ const AdminSchedule: React.FC = () => {
         ? dayjs(m.scheduledAt).format('YYYY-MM-DDTHH:mm')
         : `${selectedDate}T15:00`,
       matchday: m.matchday,
-      venue: m.venue ?? '',
+      // Un partido salido del sorteo viene sin sede: se precarga la de siempre.
+      venue: m.venue || DEFAULT_VENUE,
       featured: m.featured ?? false,
       status: m.status,
     });
@@ -109,7 +117,11 @@ const AdminSchedule: React.FC = () => {
     try {
       if (kind === 'league') {
         const res = await drawLeague.mutateAsync(competitionId);
-        toast.success(`Sorteo listo: ${res.matches} partidos en ${res.matchdays} jornadas`);
+        toast.success(
+          res.kept > 0
+            ? `Sorteo listo: ${res.matches} partidos nuevos. Se respetaron ${res.kept} que ya tenían fecha.`
+            : `Sorteo listo: ${res.matches} partidos`,
+        );
       } else {
         const res = await drawGroups.mutateAsync(competitionId);
         toast.success(`Sorteo listo: ${res.groups} grupos y ${res.matches} partidos`);
@@ -121,6 +133,18 @@ const AdminSchedule: React.FC = () => {
   };
   const onOpenCreate = () => {
     setEditingMatch(null);
+    /*
+      El cruce anterior no sirve para el siguiente partido —y encima puede haber
+      quedado oculto por existir ya—, pero la fecha, la jornada y la sede sí: se
+      programa una jornada entera de corrido.
+    */
+    setForm((f) => ({
+      ...f,
+      homeRegistrationId: '',
+      awayRegistrationId: '',
+      featured: false,
+      venue: f.venue || DEFAULT_VENUE,
+    }));
     setOpen('create');
   };
 
@@ -152,6 +176,13 @@ const AdminSchedule: React.FC = () => {
           featured: form.featured,
         } as Partial<Match>);
         setOpen(null);
+        // Listo para el siguiente de la misma jornada, sin el cruce ya usado.
+        setForm((f) => ({
+          ...f,
+          homeRegistrationId: '',
+          awayRegistrationId: '',
+          featured: false,
+        }));
         toast.success('Partido creado');
       }
     } catch (e) {
@@ -310,33 +341,30 @@ const AdminSchedule: React.FC = () => {
           ) : (
             <Grid container spacing={2}>
               {filteredMatches.map((m) => (
-                <Grid size={{ xs: 12, md: 6 }} key={m.id}>
-                  <Card component={motion.div} whileHover={{ y: -2 }} sx={{ p: { xs: 2, md: 2.5 } }}>
-                    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-                      <Typography variant="caption" color="text.secondary">Jornada {m.matchday}</Typography>
-                      <Stack direction="row" spacing={0.5} alignItems="center">
-                        <StatusBadge status={m.status} />
-                        <Tooltip title="Más opciones">
-                          <IconButton size="small" onClick={(e) => setAnchor({ el: e.currentTarget, m })}>
-                            <MoreVertRounded fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      </Stack>
-                    </Stack>
-                    <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ my: 2 }}>
-                      <Typography sx={{ fontWeight: 600, flex: 1, textAlign: 'center', cursor: 'pointer', fontSize: { xs: 13, md: 14 } }} onClick={() => window.open(`/admin/partidos/${m.id}`, '_self')}>
-                        {m.homeRegistration.team.name}
-                      </Typography>
-                      <Typography sx={{ fontWeight: 800, fontFamily: '"Plus Jakarta Sans"', fontSize: { xs: 22, md: 28 }, mx: { xs: 1, md: 2 }, fontVariantNumeric: 'tabular-nums' }}>
-                        {m.status === 'SCHEDULED' ? 'vs' : `${m.homeScore} - ${m.awayScore}`}
-                      </Typography>
-                    <Typography sx={{ fontWeight: 600, flex: 1, textAlign: 'center', cursor: 'pointer', fontSize: { xs: 13, md: 14 } }} onClick={() => window.open(`/admin/partidos/${m.id}`, '_self')}>
-                        {m.awayRegistration.team.name}
-                      </Typography>
-                    </Stack>
-                    <Stack direction="row" spacing={1} justifyContent="flex-end">
+                <Grid size={{ xs: 12, md: 6, lg: 4 }} key={m.id}>
+                  {/*
+                    La misma ficha que ve el público: escudos, hora, sede y
+                    jornada. La de antes era propia de esta pantalla y mostraba
+                    solo los nombres, así que programar era trabajar a ciegas
+                    sobre el dato que uno mismo acababa de cargar.
+                  */}
+                  <Stack spacing={1}>
+                    <MatchCard match={m} onClick={() => navigate(`/admin/partidos/${m.id}`)} />
+                    {/*
+                      Las acciones van fuera de la ficha: meterlas adentro
+                      obligaba a anidar una tarjeta dentro de otra.
+                    */}
+                    <Stack direction="row" spacing={1} alignItems="center" justifyContent="flex-end">
                       {m.status === 'SCHEDULED' && (
-                        <Button size="small" variant="outlined" startIcon={<PlayArrowRounded />} onClick={async () => { const fresh = await start.mutateAsync(m.id); setLiveMatch(fresh); }}>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          startIcon={<PlayArrowRounded />}
+                          onClick={async () => {
+                            const fresh = await start.mutateAsync(m.id);
+                            setLiveMatch(fresh);
+                          }}
+                        >
                           Iniciar
                         </Button>
                       )}
@@ -346,12 +374,17 @@ const AdminSchedule: React.FC = () => {
                         </Button>
                       )}
                       {m.status === 'FINISHED' && (
-                        <Button size="small" variant="outlined" onClick={() => window.open(`/admin/partidos/${m.id}`, '_self')}>
+                        <Button size="small" variant="outlined" onClick={() => navigate(`/admin/partidos/${m.id}`)}>
                           Ver detalle
                         </Button>
                       )}
+                      <Tooltip title="Más opciones">
+                        <IconButton size="small" onClick={(e) => setAnchor({ el: e.currentTarget, m })}>
+                          <MoreVertRounded fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
                     </Stack>
-                  </Card>
+                  </Stack>
                 </Grid>
               ))}
             </Grid>
@@ -424,9 +457,9 @@ const AdminSchedule: React.FC = () => {
             <TextField label="Jornada" type="number" fullWidth value={form.matchday} onChange={(e) => setForm({ ...form, matchday: Number(e.target.value) })} />
             <TextField label="Sede" fullWidth value={form.venue} onChange={(e) => setForm({ ...form, venue: e.target.value })} />
             <FormControl fullWidth>
-              <InputLabel>Local</InputLabel>
+              <InputLabel>Equipo 1</InputLabel>
               <Select
-                label="Local"
+                label="Equipo 1"
                 value={form.homeRegistrationId}
                 /* Cambiar de local invalida al visitante elegido: se limpia. */
                 onChange={(e) =>
@@ -454,9 +487,9 @@ const AdminSchedule: React.FC = () => {
             </FormControl>
 
             <FormControl fullWidth disabled={!form.homeRegistrationId}>
-              <InputLabel>Visitante</InputLabel>
+              <InputLabel>Equipo 2</InputLabel>
               <Select
-                label="Visitante"
+                label="Equipo 2"
                 value={form.awayRegistrationId}
                 onChange={(e) => setForm({ ...form, awayRegistrationId: e.target.value as string })}
               >
@@ -477,7 +510,7 @@ const AdminSchedule: React.FC = () => {
                 que ya existe.
               */}
               {!form.homeRegistrationId ? (
-                <FormHelperText>Elegí primero el local.</FormHelperText>
+                <FormHelperText>Elegí primero el equipo 1.</FormHelperText>
               ) : awayOptions.length === 0 ? (
                 <FormHelperText>
                   Ese equipo ya tiene armado el cruce con todos los demás.

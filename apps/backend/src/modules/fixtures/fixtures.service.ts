@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { AppError } from '@/utils/app-error';
 import { MESSAGES } from '@/config/constants';
 import { Prisma } from '@prisma/client';
+import { emitMatchListChanged } from '@/lib/socket';
 
 const BYE = '__BYE__';
 const LETTERS = 'ABCDEFGHIJKLMNOP';
@@ -68,8 +69,15 @@ const assertNoPlayedMatches = async (
 
 export const fixturesService = {
   /**
-   * Sorteo de liga: genera todos los cruces del todos contra todos sin fecha.
-   * El admin asigna después día y hora partido por partido.
+   * Sorteo de liga: genera los cruces del todos contra todos sin fecha. El
+   * admin asigna después día y hora partido por partido.
+   *
+   * Respeta lo que ya está decidido. Un partido con día y hora —creado a mano
+   * o programado a partir de un sorteo anterior— no se toca y su cruce no se
+   * vuelve a generar; antes el sorteo borraba todos los partidos programados y
+   * los rehacía, así que se llevaba puesto el que el admin acababa de cargar
+   * con su fecha, su sede y su marca de destacado. Lo que sí se rehace es lo
+   * que quedó sin programar, que es justamente el sobrante del sorteo previo.
    */
   generateLeague: async (competitionId: string) => {
     const competition = await prisma.competition.findUnique({ where: { id: competitionId } });
@@ -79,6 +87,22 @@ export const fixturesService = {
     if (regs.length < 2) throw new AppError(422, MESSAGES.fixtureNeedsTeams, 'NEED_TEAMS');
 
     await assertNoPlayedMatches(competitionId, ['LEAGUE']);
+
+    /*
+      Cruces ya comprometidos. A dos rondas la vuelta es un partido distinto de
+      la ida, así que la pareja se compara con dirección; a una sola ronda el
+      cruce es el mismo se juegue de local o de visitante.
+    */
+    const pairKey = (a: string, b: string) =>
+      competition.rounds > 1 ? `${a}>${b}` : [a, b].sort().join('|');
+
+    const kept = await prisma.match.findMany({
+      where: { competitionId, stage: 'LEAGUE', scheduledAt: { not: null } },
+      select: { homeRegistrationId: true, awayRegistrationId: true },
+    });
+    const taken = new Set(
+      kept.map((m) => pairKey(m.homeRegistrationId, m.awayRegistrationId)),
+    );
 
     const firstLeg = roundRobin(regs.map((r) => r.id));
     const days = [...firstLeg];
@@ -92,6 +116,8 @@ export const fixturesService = {
     const data: Prisma.MatchCreateManyInput[] = [];
     days.forEach((day, idx) => {
       for (const pair of day) {
+        // Ese cruce ya existe con fecha: se deja como está y no se duplica.
+        if (taken.has(pairKey(pair.home, pair.away))) continue;
         data.push({
           competitionId,
           stage: 'LEAGUE',
@@ -104,11 +130,17 @@ export const fixturesService = {
     });
 
     return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      /*
+        Solo el sobrante del sorteo anterior: sin día ni hora nadie lo dio por
+        decidido. Sin el filtro por `scheduledAt`, esto borraba también los
+        partidos que el admin ya había programado.
+      */
       await tx.match.deleteMany({
-        where: { competitionId, stage: 'LEAGUE', status: 'SCHEDULED' },
+        where: { competitionId, stage: 'LEAGUE', status: 'SCHEDULED', scheduledAt: null },
       });
       await tx.match.createMany({ data });
-      return { matchdays: days.length, matches: data.length };
+      emitMatchListChanged();
+      return { matchdays: days.length, matches: data.length, kept: kept.length };
     });
   },
 
@@ -175,6 +207,7 @@ export const fixturesService = {
           created += data.length;
         }
       }
+      emitMatchListChanged();
       return { groups: numGroups, matches: created };
     });
   },
@@ -184,6 +217,7 @@ export const fixturesService = {
     const res = await prisma.match.deleteMany({
       where: { competitionId, stage, status: 'SCHEDULED' },
     });
+    emitMatchListChanged();
     return { deleted: res.count };
   },
 
@@ -193,15 +227,19 @@ export const fixturesService = {
     scheduledAt: Date | null,
     venue?: string | null,
     featured?: boolean,
-  ) =>
-    prisma.match.update({
+  ) => {
+    const m = await prisma.match.update({
       where: { id: matchId },
       data: {
         scheduledAt,
         ...(venue !== undefined ? { venue } : {}),
         ...(featured !== undefined ? { featured } : {}),
       },
-    }),
+    });
+    // Ponerle fecha lo mueve de "sin programar" a la jornada que le toque.
+    emitMatchListChanged();
+    return m;
+  },
 
   /** Asignación masiva: varios partidos con su fecha en una sola llamada. */
   scheduleBulk: async (items: Array<{ matchId: string; scheduledAt: string; venue?: string }>) =>
@@ -215,5 +253,8 @@ export const fixturesService = {
           },
         }),
       ),
-    ),
+    ).then((res) => {
+      emitMatchListChanged();
+      return res;
+    }),
 };

@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/utils/app-error';
 import { MESSAGES } from '@/config/constants';
-import { emitMatchUpdate } from '@/lib/socket';
+import { emitMatchUpdate, emitMatchListChanged } from '@/lib/socket';
 import { dayRange } from '@/utils/date.util';
 import { Prisma } from '@prisma/client';
 import type { CreateMatchDto } from './matches.schema';
@@ -112,7 +112,11 @@ export const matchesService = {
     return m;
   },
 
-  create: (data: CreateMatchDto) => prisma.match.create({ data }),
+  create: async (data: CreateMatchDto) => {
+    const m = await prisma.match.create({ data });
+    emitMatchListChanged();
+    return m;
+  },
 
   update: async (id: string, data: Partial<CreateMatchDto>) => {
     const m = await prisma.match.update({ where: { id }, data });
@@ -122,6 +126,11 @@ export const matchesService = {
       homeScore: m.homeScore,
       awayScore: m.awayScore,
     });
+    /*
+      Editar puede mover el partido de lista: cambiarle el día lo saca de "hoy",
+      destacarlo lo mete en "destacados". El parche de marcador no alcanza.
+    */
+    emitMatchListChanged();
     return m;
   },
 
@@ -221,10 +230,13 @@ export const matchesService = {
     }),
 
   /** Borrado definitivo: los goles y tarjetas del partido se van con él. */
-  remove: (id: string) =>
-    prisma.$transaction(async (tx) => {
+  remove: async (id: string) => {
+    const res = await prisma.$transaction(async (tx) => {
       await tx.matchEvent.deleteMany({ where: { matchId: id } });
       await tx.match.delete({ where: { id } });
       return { id };
-    }),
+    });
+    emitMatchListChanged();
+    return res;
+  },
 };

@@ -76,7 +76,10 @@ export const competitionsApi = {
 
 export const fixturesApi = {
   /** Sortea el todos contra todos. Genera solo los cruces, sin día ni hora. */
-  drawLeague: async (competitionId: string): Promise<{ matchdays: number; matches: number }> =>
+  /** `kept`: partidos con fecha que el sorteo respetó en lugar de rehacer. */
+  drawLeague: async (
+    competitionId: string,
+  ): Promise<{ matchdays: number; matches: number; kept: number }> =>
     (await api.post(`/competitions/${competitionId}/fixture/league`)).data.data,
   /** Sortea los grupos y el todos contra todos dentro de cada uno. */
   drawGroups: async (competitionId: string): Promise<{ groups: number; matches: number }> =>

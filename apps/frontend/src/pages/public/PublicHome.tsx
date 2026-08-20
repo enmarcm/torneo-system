@@ -55,21 +55,30 @@ const PublicHome: React.FC = () => {
     Destacados: los que el administrador marcó con el check al ponerles día y
     hora. Es la curaduría de la liga sobre su propio fixture.
   */
-  const featuredQuery = usePublicMatchesQuery(undefined, 'SCHEDULED', active?.id, {
+  const featuredQuery = usePublicMatchesQuery(undefined, undefined, active?.id, {
     featured: true,
-    upcoming: true,
-    limit: 12,
+    limit: 20,
   });
   /*
-    "De la semana" se resuelve acá: la API no sabe acotar por semana, y un
+    "De la semana" se resuelve acá porque la API no sabe acotar por semana: un
     destacado dentro de tres meses no es la respuesta que alguien vino a buscar
-    hoy. Lo que ya está en la columna de hoy tampoco se repite al lado.
+    hoy. La ventana arranca al comienzo de HOY, no en este instante: un
+    destacado de esta tarde cuya hora ya pasó sigue siendo el partido de la
+    semana, y con `upcoming` se caía de la lista al dar la hora.
+
+    Tampoco se descarta por estar en la columna de hoy. Que aparezca en las dos
+    es correcto: una dice qué se juega hoy y la otra cuál eligió destacar la
+    liga, y esconderlo de la segunda hacía que destacar un partido de hoy no
+    tuviera ningún efecto visible.
   */
-  const weekEnd = dayjs().add(7, 'day');
+  const weekStart = dayjs().startOf('day');
+  const weekEnd = dayjs().add(7, 'day').endOf('day');
   const featuredWeek: Match[] = (featuredQuery.data ?? [])
-    .filter(
-      (m: Match) => !todayIds.has(m.id) && m.scheduledAt && dayjs(m.scheduledAt).isBefore(weekEnd),
-    )
+    .filter((m: Match) => {
+      if (!m.scheduledAt) return false;
+      const at = dayjs(m.scheduledAt);
+      return !at.isBefore(weekStart) && !at.isAfter(weekEnd);
+    })
     .slice(0, 6);
 
   const finishedQuery = usePublicMatchesQuery(undefined, 'FINISHED', active?.id, {

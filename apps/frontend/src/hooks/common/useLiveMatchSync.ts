@@ -64,10 +64,24 @@ export const useLiveMatchSync = () => {
       }
     };
 
+    /*
+      El fixture cambió: se creó, se borró, se programó o se sorteó un partido.
+      Acá no hay fila que parchear —lo que cambió es qué partidos existen y en
+      qué lista cae cada uno— así que se vuelve a preguntar. Sin esto, cargar un
+      partido desde administración no se veía en la portada hasta que alguien
+      recargaba la página.
+    */
+    const onListChanged = () => {
+      void qc.invalidateQueries({ queryKey: ['public', 'matches'] });
+      void qc.invalidateQueries({ queryKey: ['matches'] });
+    };
+
     socket.on('match:update', onUpdate);
+    socket.on('match:list', onListChanged);
     return () => {
       socket.emit('leave', MATCHES_ROOM);
       socket.off('match:update', onUpdate);
+      socket.off('match:list', onListChanged);
     };
   }, [qc]);
 };
