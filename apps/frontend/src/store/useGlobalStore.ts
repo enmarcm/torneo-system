@@ -4,13 +4,10 @@ import { persist } from 'zustand/middleware';
 type State = {
   mode: 'light' | 'dark';
   sidebarCollapsed: boolean;
-  /** Plegado de la barra lateral del sitio público, aparte del de los paneles con sesión. */
-  publicNavCollapsed: boolean;
   selectedEditionId: string | null;
   toggleMode: () => void;
   setMode: (m: 'light' | 'dark') => void;
   toggleSidebar: () => void;
-  togglePublicNav: () => void;
   setSelectedEditionId: (id: string | null) => void;
 };
 
@@ -28,12 +25,10 @@ export const useGlobalStore = create<State>()(
           ? 'dark'
           : 'light',
       sidebarCollapsed: false,
-      publicNavCollapsed: false,
       selectedEditionId: null,
       toggleMode: () => set((s) => ({ mode: s.mode === 'light' ? 'dark' : 'light' })),
       setMode: (mode) => set({ mode }),
       toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
-      togglePublicNav: () => set((s) => ({ publicNavCollapsed: !s.publicNavCollapsed })),
       setSelectedEditionId: (selectedEditionId) => set({ selectedEditionId }),
     }),
     { name: 'torneo-global' },

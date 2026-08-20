@@ -26,9 +26,9 @@ import { useGlobalStore } from '@/store/useGlobalStore';
 export const PUBLIC_TOPBAR_H = { xs: 60, md: 72 };
 
 interface Props {
-  /** Plegar la columna en escritorio, abrir el cajón en teléfono. */
+  /** Abre o cierra el panel de navegación, que vive escondido. */
   onToggleNav: () => void;
-  /** Solo para el icono y el rótulo: en teléfono siempre es "abrir". */
+  /** Solo para el icono y el rótulo del botón. */
   navExpanded: boolean;
 }
 
@@ -72,10 +72,10 @@ export const PublicTopbar: React.FC<Props> = ({ onToggleNav, navExpanded }) => {
           gap: { xs: 0.5, md: 1 },
         }}
       >
-        <Tooltip title={navExpanded ? 'Plegar menú' : 'Desplegar menú'}>
+        <Tooltip title={navExpanded ? 'Cerrar menú' : 'Abrir menú'}>
           <IconButton
             onClick={onToggleNav}
-            aria-label={navExpanded ? 'Plegar menú' : 'Desplegar menú'}
+            aria-label={navExpanded ? 'Cerrar menú' : 'Abrir menú'}
             aria-expanded={navExpanded}
             sx={{ color: 'var(--sidebarText)' }}
           >

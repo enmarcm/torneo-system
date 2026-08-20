@@ -1,26 +1,12 @@
-import {
-  Box,
-  Typography,
-  Stack,
-  Container,
-  Drawer,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
+import { Box, Typography, Stack, Container, Drawer } from '@mui/material';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { PlaceRounded, PhoneRounded, MailRounded, ScheduleRounded } from '@mui/icons-material';
 import { useState, Suspense } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { useGlobalStore } from '@/store/useGlobalStore';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { AdSlot } from '@/components/ui/AdSlot';
 import { useLiveMatchSync } from '@/hooks/common/useLiveMatchSync';
-import {
-  PublicSidebar,
-  PUBLIC_NAV,
-  PUBLIC_SIDEBAR_WIDTH,
-  PUBLIC_SIDEBAR_RAIL,
-} from './PublicSidebar';
+import { PublicSidebar, PUBLIC_NAV } from './PublicSidebar';
 import { PublicTopbar, PUBLIC_TOPBAR_H } from './PublicTopbar';
 
 /*
@@ -36,90 +22,65 @@ const CONTACTO = {
 
 export const PublicLayout: React.FC = () => {
   const navigate = useNavigate();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const { publicNavCollapsed, togglePublicNav } = useGlobalStore();
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
   const reduceMotion = useReducedMotion();
 
   // Un solo oyente para todo el sitio público: sin esto los marcadores de las
   // listas quedan congelados en el valor con el que cargó la página.
   useLiveMatchSync();
 
-  /*
-    El mismo botón hace dos cosas según el ancho: en escritorio pliega la
-    columna a un riel de iconos, en teléfono abre el cajón. Es el mismo gesto
-    —"mostrame el menú"— con la respuesta que cabe en cada pantalla.
-  */
-  const navExpanded = isMobile ? drawerOpen : !publicNavCollapsed;
-  /*
-    El riel es traslúcido pero no se superpone: el contenido siempre arranca
-    después de él. Dejándolo correr por debajo, las tarjetas se metían bajo los
-    iconos en todo ancho donde el contenedor llega al borde — el velo dejaba ver
-    justo lo que estaba tapando. Se ve a través del fondo de la página, no del
-    contenido.
-  */
-  const contentOffset = publicNavCollapsed ? PUBLIC_SIDEBAR_RAIL : PUBLIC_SIDEBAR_WIDTH;
-
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-      <PublicTopbar
-        onToggleNav={() => (isMobile ? setDrawerOpen((o) => !o) : togglePublicNav())}
-        navExpanded={navExpanded}
-      />
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        bgcolor: 'background.default',
+      }}
+    >
+      <PublicTopbar onToggleNav={() => setNavOpen((o) => !o)} navExpanded={navOpen} />
+
+      {/*
+        La navegación no ocupa lugar: está escondida y sale por encima del
+        contenido con el botón de la barra. Igual en teléfono y en escritorio —
+        con seis destinos no hay razón para gastarle una columna permanente a la
+        pantalla, y lo que el visitante vino a leer se queda con todo el ancho.
+      */}
+      <Drawer
+        open={navOpen}
+        onClose={() => setNavOpen(false)}
+        /* Un velo suave: el panel ya es traslúcido, un fondo negro lo enturbia. */
+        slotProps={{ backdrop: { sx: { bgcolor: 'rgba(8,12,24,0.32)' } } }}
+        /* El papel no pinta nada: la superficie es la del panel, que va con desenfoque. */
+        PaperProps={{
+          sx: {
+            borderRadius: 0,
+            border: 'none',
+            boxShadow: 'none',
+            bgcolor: 'transparent',
+            backgroundImage: 'none',
+            // Entra por debajo de la barra: la marca no parpadea al abrirlo.
+            top: { xs: `${PUBLIC_TOPBAR_H.xs}px`, md: `${PUBLIC_TOPBAR_H.md}px` },
+            height: {
+              xs: `calc(100% - ${PUBLIC_TOPBAR_H.xs}px)`,
+              md: `calc(100% - ${PUBLIC_TOPBAR_H.md}px)`,
+            },
+          },
+        }}
+      >
+        <PublicSidebar onNavigate={() => setNavOpen(false)} />
+      </Drawer>
 
       <Box
         sx={{
+          flex: 1,
+          minWidth: 0,
           display: 'flex',
+          flexDirection: 'column',
           // La barra es fija y cruza la pantalla: el contenido arranca debajo.
           pt: { xs: `${PUBLIC_TOPBAR_H.xs}px`, md: `${PUBLIC_TOPBAR_H.md}px` },
         }}
       >
-        {/* En escritorio la navegación es una columna fija; en teléfono, un cajón. */}
-        {!isMobile && (
-          <Box
-            sx={{
-              position: 'fixed',
-              top: `${PUBLIC_TOPBAR_H.md}px`,
-              left: 0,
-              bottom: 0,
-              zIndex: theme.zIndex.drawer,
-            }}
-          >
-            <PublicSidebar collapsed={publicNavCollapsed} />
-          </Box>
-        )}
-        {isMobile && (
-          <Drawer
-            open={drawerOpen}
-            onClose={() => setDrawerOpen(false)}
-            /* Entra por debajo de la barra: la marca no parpadea al abrirlo. */
-            PaperProps={{
-              sx: {
-                borderRadius: 0,
-                top: `${PUBLIC_TOPBAR_H.xs}px`,
-                height: `calc(100% - ${PUBLIC_TOPBAR_H.xs}px)`,
-              },
-            }}
-          >
-            <PublicSidebar onNavigate={() => setDrawerOpen(false)} />
-          </Drawer>
-        )}
-
-        <Box
-          sx={{
-            flex: 1,
-            minWidth: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            ml: { xs: 0, md: `${contentOffset}px` },
-            transition: (t) =>
-              t.transitions.create('margin-left', {
-                duration: t.transitions.duration.shortest,
-                easing: t.transitions.easing.easeOut,
-              }),
-          }}
-        >
           <Box component="main" sx={{ flex: 1 }}>
           <Suspense fallback={<LoadingState rows={4} />}>
             <Outlet />
@@ -144,12 +105,25 @@ export const PublicLayout: React.FC = () => {
               {/* Publicidad del pie: sobre fondo oscuro va en blanco, con borde. */}
               <AdSlot placement="FOOTER" onDark />
 
-              <Stack
-                direction={{ xs: 'column', md: 'row' }}
-                spacing={{ xs: 3.5, md: 6 }}
-                alignItems="flex-start"
-                justifyContent="space-between"
-                sx={{ width: '100%' }}
+              {/*
+                Rejilla, no fila. Repartidas con `space-between` las columnas
+                dejaban un vacío enorme entre la marca y el contacto, porque su
+                ancho natural es mucho menor que el del pie; empacadas a la
+                izquierda, el vacío se iba entero a la derecha. Con fracciones
+                el aire se reparte parejo y nadie queda flotando.
+              */}
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: {
+                    xs: '1fr',
+                    sm: 'repeat(2, minmax(0, 1fr))',
+                    md: 'minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 0.75fr)',
+                  },
+                  columnGap: { sm: 4, md: 6 },
+                  rowGap: { xs: 3.5, sm: 4 },
+                  alignItems: 'start',
+                }}
               >
                 <Stack alignItems="center" spacing={1.5} sx={{ maxWidth: 320, mx: { xs: 'auto', md: 0 } }}>
                   {/*
@@ -186,88 +160,75 @@ export const PublicLayout: React.FC = () => {
                   </Typography>
                 </Stack>
 
-                {/*
-                  Las dos columnas de enlaces van juntas y ancladas a la derecha.
-                  Sueltas en la fila se amontonaban a la izquierda y dejaban un
-                  tercio del pie vacío; así el borde derecho coincide con el de
-                  los créditos de abajo.
-                */}
-                <Stack
-                  direction={{ xs: 'column', sm: 'row' }}
-                  spacing={{ xs: 3.5, sm: 6, md: 8 }}
-                  alignItems="flex-start"
-                  sx={{ mx: { xs: 'auto', md: 0 } }}
-                >
-                  <Box>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        display: 'block',
-                        mb: 1.5,
-                        fontWeight: 700,
-                        letterSpacing: 1,
-                        textTransform: 'uppercase',
-                        color: 'rgba(255,255,255,0.5)',
-                      }}
-                    >
-                      Contacto
-                    </Typography>
-                    <Stack spacing={1}>
-                      {[
-                        { icon: <PlaceRounded sx={{ fontSize: 17 }} />, text: CONTACTO.sede },
-                        { icon: <PhoneRounded sx={{ fontSize: 17 }} />, text: CONTACTO.telefono },
-                        { icon: <MailRounded sx={{ fontSize: 17 }} />, text: CONTACTO.email },
-                        { icon: <ScheduleRounded sx={{ fontSize: 17 }} />, text: CONTACTO.horario },
-                      ].map((item) => (
-                        <Stack key={item.text} direction="row" spacing={1} alignItems="center">
-                          <Box sx={{ color: 'rgba(255,255,255,0.5)', display: 'flex' }}>{item.icon}</Box>
-                          <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                            {item.text}
-                          </Typography>
-                        </Stack>
-                      ))}
-                    </Stack>
-                  </Box>
-
-                  <Box>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        display: 'block',
-                        mb: 1.5,
-                        fontWeight: 700,
-                        letterSpacing: 1,
-                        textTransform: 'uppercase',
-                        color: 'rgba(255,255,255,0.5)',
-                      }}
-                    >
-                      La liga
-                    </Typography>
-                    <Stack spacing={0.75}>
-                      {PUBLIC_NAV.map((n) => (
-                        <Typography
-                          key={n.to}
-                          component="button"
-                          onClick={() => navigate(n.to)}
-                          variant="body2"
-                          sx={{
-                            background: 'none',
-                            border: 'none',
-                            p: 0,
-                            textAlign: 'left',
-                            cursor: 'pointer',
-                            font: 'inherit',
-                            color: 'rgba(255,255,255,0.8)',
-                            '&:hover': { color: '#fff' },
-                          }}
-                        >
-                          {n.label}
+                <Box>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      display: 'block',
+                      mb: 1.5,
+                      fontWeight: 700,
+                      letterSpacing: 1,
+                      textTransform: 'uppercase',
+                      color: 'rgba(255,255,255,0.5)',
+                    }}
+                  >
+                    Contacto
+                  </Typography>
+                  <Stack spacing={1}>
+                    {[
+                      { icon: <PlaceRounded sx={{ fontSize: 17 }} />, text: CONTACTO.sede },
+                      { icon: <PhoneRounded sx={{ fontSize: 17 }} />, text: CONTACTO.telefono },
+                      { icon: <MailRounded sx={{ fontSize: 17 }} />, text: CONTACTO.email },
+                      { icon: <ScheduleRounded sx={{ fontSize: 17 }} />, text: CONTACTO.horario },
+                    ].map((item) => (
+                      <Stack key={item.text} direction="row" spacing={1} alignItems="center">
+                        <Box sx={{ color: 'rgba(255,255,255,0.5)', display: 'flex' }}>{item.icon}</Box>
+                        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                          {item.text}
                         </Typography>
-                      ))}
-                    </Stack>
-                  </Box>
-                </Stack>
-              </Stack>
+                      </Stack>
+                    ))}
+                  </Stack>
+                </Box>
+
+                <Box>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      display: 'block',
+                      mb: 1.5,
+                      fontWeight: 700,
+                      letterSpacing: 1,
+                      textTransform: 'uppercase',
+                      color: 'rgba(255,255,255,0.5)',
+                    }}
+                  >
+                    La liga
+                  </Typography>
+                  <Stack spacing={0.75}>
+                    {PUBLIC_NAV.map((n) => (
+                      <Typography
+                        key={n.to}
+                        component="button"
+                        onClick={() => navigate(n.to)}
+                        variant="body2"
+                        sx={{
+                          background: 'none',
+                          border: 'none',
+                          p: 0,
+                          textAlign: 'left',
+                          cursor: 'pointer',
+                          font: 'inherit',
+                          color: 'rgba(255,255,255,0.8)',
+                          '&:hover': { color: '#fff' },
+                        }}
+                      >
+                        {n.label}
+                      </Typography>
+                    ))}
+                  </Stack>
+                </Box>
+              </Box>
 
               <Stack
                 direction={{ xs: 'column', md: 'row' }}
@@ -285,7 +246,6 @@ export const PublicLayout: React.FC = () => {
               </Stack>
             </Stack>
           </Container>
-        </Box>
         </Box>
       </Box>
     </Box>

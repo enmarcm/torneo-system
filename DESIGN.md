@@ -303,10 +303,11 @@ Los patrones de columnas que se repiten:
   tercios, apiladas en móvil.
 
 La navegación pública se reparte en dos piezas: una barra superior fija de `72px`
-(`60px` en teléfono) que cruza la pantalla entera, y debajo una columna lateral
-plegable de `244px` (o `76px` en riel de iconos). Los paneles con sesión usan
-barra lateral colapsable de `264px` (o `64px` plegada) con la pastilla activa en
-Azul Nocturno Suave.
+(`60px` en teléfono) que cruza la pantalla entera, y un panel de `260px` que no
+ocupa lugar — sale por encima del contenido al pedirlo y se va al elegir destino.
+Los paneles con sesión sí usan barra lateral permanente y colapsable de `264px`
+(o `64px` plegada) con la pastilla activa en Azul Nocturno Suave: ahí se navega
+todo el día y la columna es herramienta, no interrupción.
 
 ### Named Rules
 
@@ -338,11 +339,11 @@ el borde, se marca el borde. La única excepción permitida es el botón primari
 que se despega a propósito porque invita a la acción.
 
 **El desenfoque se gana su lugar una sola vez.** El sistema no usa vidrio como
-decoración: la única pieza con `backdrop-filter` es el riel plegado de la
-navegación pública, y está ahí por una razón concreta — flota sobre contenido
-que puede ser una tarjeta blanca, el panel héroe oscuro o la foto de una
-competición, y sin el velo los iconos se pierden sobre la mitad de esos fondos.
-Cualquier otra superficie que quiera vidrio tiene que justificar lo mismo.
+decoración: la única pieza con `backdrop-filter` es el panel de navegación
+pública, y está ahí por una razón concreta — sale sobre contenido que puede ser
+una tarjeta blanca, el panel héroe oscuro o la foto de una competición, y sin el
+velo los rótulos se pierden sobre la mitad de esos fondos. Cualquier otra
+superficie que quiera vidrio tiene que justificar lo mismo.
 
 ## Shapes
 
@@ -403,24 +404,23 @@ tarjeta con forma de píldora o un chip con esquina cuadrada rompen la lectura.
 ### Navigation
 
 - **Público:** dos piezas con trabajos distintos.
-  - *Barra superior* (`72px`, `60px` en teléfono): lo que es del sitio entero y no
-    del recorrido — botón de plegado, logo circular de `38px` con el nombre de la
-    liga en Jakarta 800, interruptor de tema y botón de sesión. En teléfono el
-    nombre cae a la sigla **LLF** para que el botón de sesión siga entrando.
-  - *Columna lateral* (`244px`, riel de `76px`): solo destinos. Item activo con
-    fondo Azul Nocturno Suave, radio de `12px` y peso 700; en reposo, Tinta Suave.
-    Plegada muestra solo iconos con el rótulo en tooltip a la derecha. En "En
-    vivo" lleva el contador de partidos en curso — píldora en Rojo Directo
-    desplegada, punto latiente en el riel. En teléfono la columna es un cajón que
-    entra por debajo de la barra superior.
-  - *El riel plegado no es superficie, es velo.* Pierde el fondo y el borde y
-    pasa a un velo traslúcido con `backdrop-filter: blur(14px) saturate(140%)`.
-    Lo que se ve a través es el fondo de la página, no el contenido: el contenido
-    siempre arranca después del riel. Dejándolo correr por debajo, las tarjetas
-    se metían bajo los iconos — el velo terminaba dejando ver justo lo que
-    estaba tapando. Al abrirse, la columna vuelve a superficie sólida.
-  - Es lo que le permite plegarse sin esconder nada: al mudar marca, tema y
-    sesión a la barra, la columna queda siendo pura navegación.
+  - *Barra superior* (`72px`, `60px` en teléfono): lo único siempre a la vista.
+    Botón de menú, logo circular de `38px` con el nombre de la liga en Jakarta
+    800, interruptor de tema y botón de sesión. En teléfono el nombre cae a la
+    sigla **LLF** para que el botón de sesión siga entrando.
+  - *Panel de navegación* (`260px`): no ocupa lugar. Vive escondido y sale por
+    encima del contenido al tocar el botón de la barra, igual en teléfono que en
+    escritorio. Con seis destinos no hay razón para gastarle una columna
+    permanente a la pantalla, y lo que el visitante vino a leer se queda con
+    todo el ancho. Item activo con fondo Azul Nocturno Suave, radio de `12px` y
+    peso 700; en reposo, Tinta Suave. En "En vivo" lleva el contador de
+    partidos en curso en píldora de Rojo Directo.
+  - *El panel no es superficie, es velo.* Sale sobre el contenido con
+    `backdrop-filter: blur(20px) saturate(150%)` sobre un fondo al 55%, y la
+    página detrás se atenúa apenas (`rgba(8,12,24,0.32)`): se sigue viendo
+    dónde estabas mientras elegís adónde ir.
+  - Es lo que le permite esconderse sin esconder nada: al mudar marca, tema y
+    sesión a la barra superior, el panel queda siendo pura navegación.
 - **Con sesión:** barra lateral colapsable; item activo con fondo Azul Nocturno
   Suave, radio de `12px` y peso 700; en reposo, texto en Tinta Suave.
 
