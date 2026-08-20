@@ -6,7 +6,7 @@ export const buildTheme = (mode: 'light' | 'dark') => {
   return createTheme({
     palette: {
       mode,
-      primary: { main: t.primary, dark: t.primaryHover, contrastText: '#fff' },
+      primary: { main: t.primary, dark: t.primaryHover, contrastText: t.primaryOn },
       secondary: { main: t.accent, contrastText: '#fff' },
       success: { main: t.success, contrastText: '#fff' },
       warning: { main: t.warning, contrastText: '#fff' },
@@ -33,6 +33,35 @@ export const buildTheme = (mode: 'light' | 'dark') => {
     components: {
       MuiCssBaseline: {
         styleOverrides: {
+          /*
+            Sin esto, los controles nativos (barras de scroll, autocompletado,
+            selectores de fecha) siguen pintándose en claro con el sitio en
+            oscuro. Es una línea y arregla todo lo que el navegador dibuja solo.
+          */
+          ':root': { colorScheme: mode },
+          '::selection': { backgroundColor: t.selectionBg, color: t.selectionText },
+          // La caret y el foco también son parte del sistema, no del navegador.
+          'input, textarea': { caretColor: t.primary },
+          ':focus-visible': {
+            outline: `2px solid ${t.primary}`,
+            outlineOffset: 2,
+            borderRadius: 6,
+          },
+          '*::-webkit-scrollbar': { width: 10, height: 10 },
+          '*::-webkit-scrollbar-track': { background: 'transparent' },
+          '*::-webkit-scrollbar-thumb': {
+            background: t.scrollThumb,
+            borderRadius: 999,
+            border: `2px solid ${t.bg}`,
+          },
+          '*::-webkit-scrollbar-thumb:hover': { background: t.textDisabled },
+          '*': { scrollbarWidth: 'thin', scrollbarColor: `${t.scrollThumb} transparent` },
+          /*
+            Regla del Número Tabular del sistema: los marcadores y puntajes se
+            comparan entre filas, y un dígito que cambia de ancho al actualizarse
+            hace bailar la columna entera.
+          */
+          '.tabular': { fontVariantNumeric: 'tabular-nums' },
           /*
             El punto de "en vivo" late con esta animación. Estaba usada en dos
             componentes pero el keyframe no existía en ningún lado, así que el
@@ -64,7 +93,7 @@ export const buildTheme = (mode: 'light' | 'dark') => {
           root: {
             borderRadius: 12,
             border: `1px solid ${t.border}`,
-            boxShadow: '0 4px 16px rgba(27,34,55,0.06)',
+            boxShadow: t.shadowSurface,
             backgroundImage: 'none',
           },
         },
@@ -74,8 +103,8 @@ export const buildTheme = (mode: 'light' | 'dark') => {
         styleOverrides: {
           root: { borderRadius: 10, padding: '9px 18px', fontWeight: 600 },
           containedPrimary: {
-            boxShadow: '0 6px 16px rgba(3,66,146,0.25)',
-            '&:hover': { boxShadow: '0 8px 22px rgba(3,66,146,0.35)' },
+            boxShadow: t.shadowPrimary,
+            '&:hover': { boxShadow: t.shadowPrimaryHover },
           },
         },
       },

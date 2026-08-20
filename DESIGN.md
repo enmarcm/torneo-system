@@ -19,6 +19,14 @@ colors:
   ambar-atencion: "#F59E0B"
   rojo-error: "#EF4444"
   azul-info: "#3B82F6"
+  noche-lienzo: "#070B16"
+  noche-superficie: "#101828"
+  noche-hundida: "#0B1220"
+  noche-barra: "#0A0F1E"
+  azul-nocturno-claro: "#4D93FF"
+  rojo-directo-noche: "#FF4D63"
+  tinta-del-vivo: "#2B0710"
+  tinta-del-vivo-noche: "#160309"
 typography:
   display:
     fontFamily: '"Plus Jakarta Sans", sans-serif'
@@ -161,8 +169,9 @@ no se usa a propósito.
 
 - **Azul Nocturno** (`#034292`): la voz institucional. Botones primarios, enlaces
   activos, iconografía de acento, pastilla de navegación activa y todo lo que
-  representa a la liga como entidad. En modo oscuro se aclara a `#3B82F6` para
-  sobrevivir sobre fondo `#0F1525`.
+  representa a la liga como entidad. En modo oscuro se aclara a `#4D93FF` para
+  sobrevivir sobre el fondo `#070B16`, y el rótulo del botón primario pasa a
+  tinta `#08122A`: el blanco sobre ese azul da 3.0:1, por debajo de AA.
 - **Azul Nocturno Suave** (`#E0E8F4`): fondo de estado activo — chips
   seleccionados, item activo de la barra lateral, contenedor de icono en las
   tarjetas de métrica.
@@ -218,6 +227,33 @@ tiene que poder confiar en que el rojo brillante siempre quiere decir *ahora*.
 tarjetas son blancas y el lienzo es `#F4F6FB`; esa diferencia de un punto de
 luminosidad es lo que hace que las superficies existan sin necesidad de sombra.
 
+**La Regla de la Tinta del Vivo.** El relleno rojo del vivo nunca lleva texto
+blanco: da 3.5:1 en claro y 3.2:1 en oscuro, y el rótulo "EN VIVO" es de 11px.
+Encima del rojo va tinta (`#2B0710` en claro, `#160309` en oscuro), que sube a
+5.3:1 y 6.2:1 y deja la bengala a saturación completa. Bajar el rojo para que
+entre el blanco es la solución equivocada: apaga justo lo que tiene que gritar.
+
+### Modo oscuro
+
+El oscuro no es el claro con los valores invertidos: es el norte creativo dicho
+literal. El lienzo (`#070B16`) es la tribuna apagada —un negro con azul adentro,
+nunca un gris— y cada superficie (`#101828`) es una zona bajo los reflectores,
+recortada por un filo de `1px` de blanco al 10%. La barra lateral y la superior
+bajan aún más (`#0A0F1E`) para que el contenido quede siendo lo iluminado.
+
+El contraste no es preferencia estética sino requisito de producto: se lee
+parado en la cancha con reflectores pegando en la pantalla. El texto va a 16:1
+sobre la tarjeta y el secundario (`#98A3BE`) a 7:1.
+
+**La superficie hundida sigue hundida.** `surface2` es más oscuro que la tarjeta
+(`#0B1220` bajo `#101828`), igual que `#F8FAFD` bajo `#FFFFFF` en claro: el campo
+de formulario y la cabecera de tabla se hunden, no flotan. Aclararlos invierte la
+lectura de profundidad del sistema entero.
+
+**Las sombras cambian de trabajo.** En claro despegan del papel y son casi
+invisibles; en oscuro tienen que ser negro real (`0 10px 28px rgba(0,0,0,0.55)`),
+porque una sombra teñida de navy sobre un fondo casi negro no existe.
+
 ## Typography
 
 **Display Font:** Plus Jakarta Sans (fallback `sans-serif`), pesos 400–800.
@@ -266,9 +302,11 @@ Los patrones de columnas que se repiten:
 - Tabla de posiciones y grupos: barra lateral de grupos a un tercio, tabla a dos
   tercios, apiladas en móvil.
 
-La navegación pública es una barra superior fija de `72px`; los paneles con sesión
-usan barra lateral colapsable de `260px` (o `76px` plegada) con la pastilla activa
-en Azul Nocturno Suave.
+La navegación pública se reparte en dos piezas: una barra superior fija de `72px`
+(`60px` en teléfono) que cruza la pantalla entera, y debajo una columna lateral
+plegable de `244px` (o `76px` en riel de iconos). Los paneles con sesión usan
+barra lateral colapsable de `264px` (o `64px` plegada) con la pastilla activa en
+Azul Nocturno Suave.
 
 ### Named Rules
 
@@ -357,10 +395,19 @@ tarjeta con forma de píldora o un chip con esquina cuadrada rompen la lectura.
 
 ### Navigation
 
-- **Público:** barra superior fija de `72px`, fondo Superficie con borde inferior;
-  logo circular de `36px` más el nombre de la liga en Jakarta 800; enlaces en peso
-  600 que pasan a Azul Nocturno cuando están activos. En móvil, cajón lateral de
-  `280px`.
+- **Público:** dos piezas con trabajos distintos.
+  - *Barra superior* (`72px`, `60px` en teléfono): lo que es del sitio entero y no
+    del recorrido — botón de plegado, logo circular de `38px` con el nombre de la
+    liga en Jakarta 800, interruptor de tema y botón de sesión. En teléfono el
+    nombre cae a la sigla **LLF** para que el botón de sesión siga entrando.
+  - *Columna lateral* (`244px`, riel de `76px`): solo destinos. Item activo con
+    fondo Azul Nocturno Suave, radio de `12px` y peso 700; en reposo, Tinta Suave.
+    Plegada muestra solo iconos con el rótulo en tooltip a la derecha. En "En
+    vivo" lleva el contador de partidos en curso — píldora en Rojo Directo
+    desplegada, punto latiente en el riel. En teléfono la columna es un cajón que
+    entra por debajo de la barra superior.
+  - Es lo que le permite plegarse sin esconder nada: al mudar marca, tema y
+    sesión a la barra, la columna queda siendo pura navegación.
 - **Con sesión:** barra lateral colapsable; item activo con fondo Azul Nocturno
   Suave, radio de `12px` y peso 700; en reposo, texto en Tinta Suave.
 

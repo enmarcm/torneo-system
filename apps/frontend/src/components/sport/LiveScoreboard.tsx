@@ -88,9 +88,9 @@ export const LiveScoreboard: React.FC<Props> = ({ match, showFeed = true, size =
             component={motion.div}
             animate={reduceMotion ? undefined : { opacity: [1, 0.4, 1] }}
             transition={{ duration: 1.4, repeat: Infinity }}
-            sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75, px: 1.25, py: 0.5, borderRadius: 999, bgcolor: 'var(--live)', color: '#fff', fontSize: 12, fontWeight: 700 }}
+            sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75, px: 1.25, py: 0.5, borderRadius: 999, bgcolor: 'var(--live)', color: 'var(--liveOn)', fontSize: 12, fontWeight: 700 }}
           >
-            <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: '#fff' }} />
+            <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'currentColor' }} />
             EN VIVO
           </Box>
         ) : (

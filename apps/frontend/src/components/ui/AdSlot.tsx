@@ -136,8 +136,10 @@ export const AdSlot: React.FC<Props> = ({ placement, variant, label, max, priori
   }
 
   /*
-    La pieza se dibuja con la proporción real del archivo: forzarle una caja fija
-    dejaba la mitad del panel en blanco alrededor de una imagen chica.
+    Todas las ranuras piden el mismo lienzo 2:1, así que la caja de la ubicación
+    y el archivo coinciden y la pieza entra entera, sin recorte ni relleno. El
+    tope de alto de antes existía para las ranuras chatas; con una proporción
+    única recortaba justo lo que se acaba de estandarizar.
   */
   const rotating = (
     <Fade in key={current.id} timeout={400}>
@@ -145,7 +147,7 @@ export const AdSlot: React.FC<Props> = ({ placement, variant, label, max, priori
         <AdImage
           ad={current}
           priority={priority}
-          sx={{ borderRadius: shape === 'bare' ? 2 : 1.5, maxHeight: 220, ...box }}
+          sx={{ borderRadius: shape === 'bare' ? 2 : 1.5, ...(meta?.ratio ? {} : { maxHeight: 220 }), ...box }}
         />
       </Box>
     </Fade>

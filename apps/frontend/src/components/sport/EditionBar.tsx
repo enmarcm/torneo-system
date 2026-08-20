@@ -72,6 +72,8 @@ export const EditionBar: React.FC<Props> = ({ name, seasonNumber, liveCount }) =
           fontWeight: 700,
           flexShrink: 0,
           bgcolor: isLive ? 'var(--live)' : 'rgba(255,255,255,0.12)',
+          // Sobre el relleno rojo el blanco no llega a AA; fuera de vivo hereda el blanco del panel.
+          color: isLive ? 'var(--liveOn)' : 'inherit',
         }}
       >
         <Box
@@ -79,7 +81,7 @@ export const EditionBar: React.FC<Props> = ({ name, seasonNumber, liveCount }) =
             width: 7,
             height: 7,
             borderRadius: '50%',
-            bgcolor: '#fff',
+            bgcolor: 'currentColor',
             ...(isLive ? { animation: 'pulse 1.4s infinite' } : { opacity: 0.5 }),
           }}
         />

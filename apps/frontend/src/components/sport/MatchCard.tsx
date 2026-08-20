@@ -151,14 +151,14 @@ export const MatchCard: React.FC<Props> = ({
               py: 0.35,
               borderRadius: 999,
               bgcolor: 'var(--live)',
-              color: '#fff',
+              color: 'var(--liveOn)',
               fontSize: 11,
               fontWeight: 800,
               letterSpacing: 0.4,
               flexShrink: 0,
             }}
           >
-            <Box sx={{ width: 5, height: 5, borderRadius: '50%', bgcolor: '#fff' }} />
+            <Box sx={{ width: 5, height: 5, borderRadius: '50%', bgcolor: 'currentColor' }} />
             EN VIVO
           </Box>
         ) : showStatus ? (

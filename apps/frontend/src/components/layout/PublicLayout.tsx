@@ -1,27 +1,27 @@
 import {
   Box,
-  AppBar,
-  Toolbar,
   Typography,
   Stack,
-  IconButton,
   Container,
   Drawer,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { MenuRounded, PlaceRounded, PhoneRounded, MailRounded, ScheduleRounded } from '@mui/icons-material';
-import logoAzul from '@/assets/logo_azul.PNG';
-import logoBlanco from '@/assets/logo.PNG';
-import { useState, Suspense, useMemo } from 'react';
+import { PlaceRounded, PhoneRounded, MailRounded, ScheduleRounded } from '@mui/icons-material';
+import { useState, Suspense } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { AdSlot } from '@/components/ui/AdSlot';
 import { useLiveMatchSync } from '@/hooks/common/useLiveMatchSync';
-import { PublicSidebar, PUBLIC_NAV, PUBLIC_SIDEBAR_WIDTH } from './PublicSidebar';
-import { ROUTES } from '@/routes/routes';
+import {
+  PublicSidebar,
+  PUBLIC_NAV,
+  PUBLIC_SIDEBAR_WIDTH,
+  PUBLIC_SIDEBAR_RAIL,
+} from './PublicSidebar';
+import { PublicTopbar, PUBLIC_TOPBAR_H } from './PublicTopbar';
 
 /*
   DATOS DE MUESTRA. Están puestos para poder ver el pie terminado; ninguno fue
@@ -38,8 +38,7 @@ export const PublicLayout: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const { mode } = useGlobalStore();
-  const logoSrc = useMemo(() => (mode === 'dark' ? logoBlanco : logoAzul), [mode]);
+  const { publicNavCollapsed, togglePublicNav } = useGlobalStore();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const reduceMotion = useReducedMotion();
 
@@ -47,80 +46,74 @@ export const PublicLayout: React.FC = () => {
   // listas quedan congelados en el valor con el que cargó la página.
   useLiveMatchSync();
 
+  /*
+    El mismo botón hace dos cosas según el ancho: en escritorio pliega la
+    columna a un riel de iconos, en teléfono abre el cajón. Es el mismo gesto
+    —"mostrame el menú"— con la respuesta que cabe en cada pantalla.
+  */
+  const navExpanded = isMobile ? drawerOpen : !publicNavCollapsed;
+  const navWidth = publicNavCollapsed ? PUBLIC_SIDEBAR_RAIL : PUBLIC_SIDEBAR_WIDTH;
+
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
-      {/* En escritorio la navegación es una columna fija; en teléfono, un cajón. */}
-      {!isMobile && (
-        <Box
-          sx={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            bottom: 0,
-            width: PUBLIC_SIDEBAR_WIDTH,
-            zIndex: theme.zIndex.appBar,
-          }}
-        >
-          <PublicSidebar />
-        </Box>
-      )}
-      {isMobile && (
-        <Drawer
-          open={drawerOpen}
-          onClose={() => setDrawerOpen(false)}
-          PaperProps={{ sx: { borderRadius: 0 } }}
-        >
-          <PublicSidebar onNavigate={() => setDrawerOpen(false)} />
-        </Drawer>
-      )}
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+      <PublicTopbar
+        onToggleNav={() => (isMobile ? setDrawerOpen((o) => !o) : togglePublicNav())}
+        navExpanded={navExpanded}
+      />
 
       <Box
         sx={{
-          flex: 1,
-          minWidth: 0,
           display: 'flex',
-          flexDirection: 'column',
-          ml: { xs: 0, md: `${PUBLIC_SIDEBAR_WIDTH}px` },
+          // La barra es fija y cruza la pantalla: el contenido arranca debajo.
+          pt: { xs: `${PUBLIC_TOPBAR_H.xs}px`, md: `${PUBLIC_TOPBAR_H.md}px` },
         }}
       >
-        {/* La barra superior queda solo en teléfono, para poder abrir el cajón. */}
-        {isMobile && (
-          <AppBar
-            position="sticky"
-            elevation={0}
+        {/* En escritorio la navegación es una columna fija; en teléfono, un cajón. */}
+        {!isMobile && (
+          <Box
             sx={{
-              bgcolor: 'background.paper',
-              color: 'text.primary',
-              borderBottom: '1px solid',
-              borderColor: 'divider',
+              position: 'fixed',
+              top: `${PUBLIC_TOPBAR_H.md}px`,
+              left: 0,
+              bottom: 0,
+              zIndex: theme.zIndex.drawer,
             }}
           >
-            <Toolbar sx={{ gap: 1.5, minHeight: 60 }}>
-              <IconButton onClick={() => setDrawerOpen(true)} aria-label="Abrir menú" edge="start">
-                <MenuRounded />
-              </IconButton>
-              <Stack
-                direction="row"
-                alignItems="center"
-                spacing={1.25}
-                sx={{ cursor: 'pointer' }}
-                onClick={() => navigate(ROUTES.public.home)}
-              >
-                <Box
-                  component="img"
-                  src={logoSrc}
-                  alt="Liga Lago Futsal"
-                  sx={{ width: 30, height: 30, borderRadius: '50%' }}
-                />
-                <Typography sx={{ fontFamily: '"Plus Jakarta Sans"', fontWeight: 800, fontSize: 15 }}>
-                  Liga Lago Futsal
-                </Typography>
-              </Stack>
-            </Toolbar>
-          </AppBar>
+            <PublicSidebar collapsed={publicNavCollapsed} />
+          </Box>
+        )}
+        {isMobile && (
+          <Drawer
+            open={drawerOpen}
+            onClose={() => setDrawerOpen(false)}
+            /* Entra por debajo de la barra: la marca no parpadea al abrirlo. */
+            PaperProps={{
+              sx: {
+                borderRadius: 0,
+                top: `${PUBLIC_TOPBAR_H.xs}px`,
+                height: `calc(100% - ${PUBLIC_TOPBAR_H.xs}px)`,
+              },
+            }}
+          >
+            <PublicSidebar onNavigate={() => setDrawerOpen(false)} />
+          </Drawer>
         )}
 
-        <Box component="main" sx={{ flex: 1 }}>
+        <Box
+          sx={{
+            flex: 1,
+            minWidth: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            ml: { xs: 0, md: `${navWidth}px` },
+            transition: (t) =>
+              t.transitions.create('margin-left', {
+                duration: t.transitions.duration.shortest,
+                easing: t.transitions.easing.easeOut,
+              }),
+          }}
+        >
+          <Box component="main" sx={{ flex: 1 }}>
           <Suspense fallback={<LoadingState rows={4} />}>
             <Outlet />
           </Suspense>
@@ -270,6 +263,7 @@ export const PublicLayout: React.FC = () => {
               </Stack>
             </Stack>
           </Container>
+        </Box>
         </Box>
       </Box>
     </Box>

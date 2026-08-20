@@ -29,7 +29,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { useAdsQuery } from '@/hooks/queries';
 import { useCreateAd, useUpdateAd, useDeleteAd } from '@/hooks/mutations';
-import { AD_PLACEMENTS, getPlacementLabel } from '@/utils/adPlacements';
+import { AD_PLACEMENTS, AD_SIZE_HINT, getPlacementLabel } from '@/utils/adPlacements';
 import type { Ad, AdPlacement } from '@/api/ads.api';
 import { extractErrorMessage } from '@/api/axios';
 import { useToast } from '@/hooks/common/useToast';
@@ -167,12 +167,14 @@ const AdminAds: React.FC = () => {
   const canSubmit = !!form.imageUrl && !!form.title.trim() && form.placements.length > 0;
 
   /*
-    La medida sugerida depende de dónde se va a mostrar, así que se arma con lo
-    que el administrador ya eligió en vez de repetir un número fijo.
+    Hoy todas las ranuras con caja piden el mismo lienzo, así que esto casi
+    siempre devuelve una sola medida. Se deja armado a partir de lo elegido
+    igual: la tira de logos pide transparencia, y si alguna ubicación vuelve a
+    tener forma propia, el aviso aparece solo.
   */
   const uploadHint = useMemo(() => {
     const chosen = AD_PLACEMENTS.filter((m) => form.placements.includes(m.value));
-    if (chosen.length === 0) return '1200 × 240 px (horizontal)';
+    if (chosen.length === 0) return AD_SIZE_HINT;
     const sizes = [...new Set(chosen.map((m) => m.hint))];
     if (sizes.length === 1) return sizes[0];
     return `${sizes[0]} — ojo, las otras ubicaciones elegidas piden ${sizes.slice(1).join(' y ')}`;

@@ -20,6 +20,19 @@ export interface AdPlacementMeta {
 }
 
 /**
+ * Medida única de toda la publicidad del sitio: 2880 x 1440 px, proporcion 2:1.
+ *
+ * Antes cada ubicacion pedia una medida distinta (5:1, 6:1, 1:1, 15:2) y el
+ * mismo arte no servia en dos lugares: el que lo subia tenia que exportarlo
+ * cinco veces o aceptar que se recortara. Con una sola proporcion se disena una
+ * pieza y entra completa en cualquier ranura.
+ */
+export const AD_SIZE_HINT = '2880 × 1440 px (2:1)';
+export const AD_RATIO = '2 / 1';
+/** La tira de logos no lleva caja: se pide el mismo lienzo pero recortado al logo. */
+export const AD_LOGO_HINT = '2880 × 1440 px (2:1), PNG con fondo transparente';
+
+/**
  * Catálogo único de ubicaciones publicitarias: lo usa el panel de administración
  * para explicar cada ranura y el sitio público para saber con qué forma pintarla.
  *
@@ -31,87 +44,87 @@ export const AD_PLACEMENTS: AdPlacementMeta[] = [
     label: 'Banner principal',
     where: 'Arriba de la portada, debajo de la barra de la edición.',
     variant: 'panel',
-    hint: '1200 × 240 px (horizontal)',
-    ratio: '5 / 1',
+    hint: AD_SIZE_HINT,
+    ratio: AD_RATIO,
   },
   {
     value: 'HOME_INLINE',
     label: 'Portada, entre secciones',
     where: 'En la portada, entre los próximos partidos y las competiciones.',
     variant: 'panel',
-    hint: '1200 × 200 px (horizontal)',
-    ratio: '6 / 1',
+    hint: AD_SIZE_HINT,
+    ratio: AD_RATIO,
   },
   {
     value: 'MATCH_LIST',
     label: 'Calendario',
     where: 'Dentro del listado de partidos, después de los primeros días.',
     variant: 'panel',
-    hint: '1200 × 200 px (horizontal)',
-    ratio: '6 / 1',
+    hint: AD_SIZE_HINT,
+    ratio: AD_RATIO,
   },
   {
     value: 'MATCH_DETAIL',
     label: 'Ficha de partido',
     where: 'Al pie del detalle que se abre al tocar un partido.',
     variant: 'bare',
-    hint: '600 × 120 px (horizontal y chato)',
-    ratio: '5 / 1',
+    hint: AD_SIZE_HINT,
+    ratio: AD_RATIO,
   },
   {
     value: 'STANDINGS',
     label: 'Tabla de posiciones',
     where: 'Debajo de la tabla, en la pantalla de competiciones.',
     variant: 'panel',
-    hint: '1200 × 200 px (horizontal)',
-    ratio: '6 / 1',
+    hint: AD_SIZE_HINT,
+    ratio: AD_RATIO,
   },
   {
     value: 'LIVE',
     label: 'En vivo',
     where: 'En la pantalla de partidos en vivo.',
     variant: 'panel',
-    hint: '1200 × 200 px (horizontal)',
-    ratio: '6 / 1',
+    hint: AD_SIZE_HINT,
+    ratio: AD_RATIO,
   },
   {
     value: 'STATS',
     label: 'Estadísticas',
     where: 'En la pantalla de goleadores y estadísticas.',
     variant: 'panel',
-    hint: '1200 × 200 px (horizontal)',
-    ratio: '6 / 1',
+    hint: AD_SIZE_HINT,
+    ratio: AD_RATIO,
   },
   {
     value: 'TEAMS',
     label: 'Equipos',
     where: 'En el listado público de equipos.',
     variant: 'panel',
-    hint: '1200 × 200 px (horizontal)',
-    ratio: '6 / 1',
+    hint: AD_SIZE_HINT,
+    ratio: AD_RATIO,
   },
   {
     value: 'SIDEBAR',
     label: 'Columna lateral',
     where: 'Al costado del contenido, apilados uno debajo del otro.',
     variant: 'sidebar',
-    hint: '400 × 400 px (cuadrado)',
-    ratio: '1 / 1',
+    hint: AD_SIZE_HINT,
+    ratio: AD_RATIO,
   },
   {
     value: 'FOOTER',
     label: 'Pie de página',
     where: 'Panel ancho dentro del pie, en todas las pantallas públicas.',
     variant: 'panel',
-    hint: '1200 × 160 px (horizontal)',
-    ratio: '15 / 2',
+    hint: AD_SIZE_HINT,
+    ratio: AD_RATIO,
   },
   {
     value: 'FOOTER_LOGOS',
     label: 'Tira de logos del pie',
     where: 'Fila de logos al pie, sin fondo y todos al mismo alto.',
     variant: 'logos',
-    hint: 'PNG con fondo transparente, alto ≥ 120 px',
+    hint: AD_LOGO_HINT,
   },
 ];
 
