@@ -414,9 +414,11 @@ tarjeta con forma de píldora o un chip con esquina cuadrada rompen la lectura.
     desplegada, punto latiente en el riel. En teléfono la columna es un cajón que
     entra por debajo de la barra superior.
   - *El riel plegado no es superficie, es velo.* Pierde el fondo y el borde y
-    pasa a un velo traslúcido con `backdrop-filter: blur(14px) saturate(140%)`;
-    el contenido recupera los `76px` y corre por debajo, visible a través. Al
-    abrirse, la columna vuelve a ser superficie sólida y empuja al contenido.
+    pasa a un velo traslúcido con `backdrop-filter: blur(14px) saturate(140%)`.
+    Lo que se ve a través es el fondo de la página, no el contenido: el contenido
+    siempre arranca después del riel. Dejándolo correr por debajo, las tarjetas
+    se metían bajo los iconos — el velo terminaba dejando ver justo lo que
+    estaba tapando. Al abrirse, la columna vuelve a superficie sólida.
   - Es lo que le permite plegarse sin esconder nada: al mudar marca, tema y
     sesión a la barra, la columna queda siendo pura navegación.
 - **Con sesión:** barra lateral colapsable; item activo con fondo Azul Nocturno

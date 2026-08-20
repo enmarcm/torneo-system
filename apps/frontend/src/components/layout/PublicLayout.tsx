@@ -15,7 +15,12 @@ import { useGlobalStore } from '@/store/useGlobalStore';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { AdSlot } from '@/components/ui/AdSlot';
 import { useLiveMatchSync } from '@/hooks/common/useLiveMatchSync';
-import { PublicSidebar, PUBLIC_NAV, PUBLIC_SIDEBAR_WIDTH } from './PublicSidebar';
+import {
+  PublicSidebar,
+  PUBLIC_NAV,
+  PUBLIC_SIDEBAR_WIDTH,
+  PUBLIC_SIDEBAR_RAIL,
+} from './PublicSidebar';
 import { PublicTopbar, PUBLIC_TOPBAR_H } from './PublicTopbar';
 
 /*
@@ -48,11 +53,13 @@ export const PublicLayout: React.FC = () => {
   */
   const navExpanded = isMobile ? drawerOpen : !publicNavCollapsed;
   /*
-    Plegada, la columna es un velo que flota: el contenido gana los 76px y corre
-    por debajo, que es lo que hace que valga la pena verla transparente. Abierta
-    vuelve a ser superficie y empuja.
+    El riel es traslúcido pero no se superpone: el contenido siempre arranca
+    después de él. Dejándolo correr por debajo, las tarjetas se metían bajo los
+    iconos en todo ancho donde el contenedor llega al borde — el velo dejaba ver
+    justo lo que estaba tapando. Se ve a través del fondo de la página, no del
+    contenido.
   */
-  const contentOffset = publicNavCollapsed ? 0 : PUBLIC_SIDEBAR_WIDTH;
+  const contentOffset = publicNavCollapsed ? PUBLIC_SIDEBAR_RAIL : PUBLIC_SIDEBAR_WIDTH;
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
@@ -141,6 +148,8 @@ export const PublicLayout: React.FC = () => {
                 direction={{ xs: 'column', md: 'row' }}
                 spacing={{ xs: 3.5, md: 6 }}
                 alignItems="flex-start"
+                justifyContent="space-between"
+                sx={{ width: '100%' }}
               >
                 <Stack alignItems="center" spacing={1.5} sx={{ maxWidth: 320, mx: { xs: 'auto', md: 0 } }}>
                   {/*
@@ -177,74 +186,87 @@ export const PublicLayout: React.FC = () => {
                   </Typography>
                 </Stack>
 
-                <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      display: 'block',
-                      mb: 1.5,
-                      fontWeight: 700,
-                      letterSpacing: 1,
-                      textTransform: 'uppercase',
-                      color: 'rgba(255,255,255,0.5)',
-                    }}
-                  >
-                    Contacto
-                  </Typography>
-                  <Stack spacing={1}>
-                    {[
-                      { icon: <PlaceRounded sx={{ fontSize: 17 }} />, text: CONTACTO.sede },
-                      { icon: <PhoneRounded sx={{ fontSize: 17 }} />, text: CONTACTO.telefono },
-                      { icon: <MailRounded sx={{ fontSize: 17 }} />, text: CONTACTO.email },
-                      { icon: <ScheduleRounded sx={{ fontSize: 17 }} />, text: CONTACTO.horario },
-                    ].map((item) => (
-                      <Stack key={item.text} direction="row" spacing={1} alignItems="center">
-                        <Box sx={{ color: 'rgba(255,255,255,0.5)', display: 'flex' }}>{item.icon}</Box>
-                        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                          {item.text}
-                        </Typography>
-                      </Stack>
-                    ))}
-                  </Stack>
-                </Box>
+                {/*
+                  Las dos columnas de enlaces van juntas y ancladas a la derecha.
+                  Sueltas en la fila se amontonaban a la izquierda y dejaban un
+                  tercio del pie vacío; así el borde derecho coincide con el de
+                  los créditos de abajo.
+                */}
+                <Stack
+                  direction={{ xs: 'column', sm: 'row' }}
+                  spacing={{ xs: 3.5, sm: 6, md: 8 }}
+                  alignItems="flex-start"
+                  sx={{ mx: { xs: 'auto', md: 0 } }}
+                >
+                  <Box>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        display: 'block',
+                        mb: 1.5,
+                        fontWeight: 700,
+                        letterSpacing: 1,
+                        textTransform: 'uppercase',
+                        color: 'rgba(255,255,255,0.5)',
+                      }}
+                    >
+                      Contacto
+                    </Typography>
+                    <Stack spacing={1}>
+                      {[
+                        { icon: <PlaceRounded sx={{ fontSize: 17 }} />, text: CONTACTO.sede },
+                        { icon: <PhoneRounded sx={{ fontSize: 17 }} />, text: CONTACTO.telefono },
+                        { icon: <MailRounded sx={{ fontSize: 17 }} />, text: CONTACTO.email },
+                        { icon: <ScheduleRounded sx={{ fontSize: 17 }} />, text: CONTACTO.horario },
+                      ].map((item) => (
+                        <Stack key={item.text} direction="row" spacing={1} alignItems="center">
+                          <Box sx={{ color: 'rgba(255,255,255,0.5)', display: 'flex' }}>{item.icon}</Box>
+                          <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                            {item.text}
+                          </Typography>
+                        </Stack>
+                      ))}
+                    </Stack>
+                  </Box>
 
-                <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      display: 'block',
-                      mb: 1.5,
-                      fontWeight: 700,
-                      letterSpacing: 1,
-                      textTransform: 'uppercase',
-                      color: 'rgba(255,255,255,0.5)',
-                    }}
-                  >
-                    La liga
-                  </Typography>
-                  <Stack spacing={0.75}>
-                    {PUBLIC_NAV.map((n) => (
-                      <Typography
-                        key={n.to}
-                        component="button"
-                        onClick={() => navigate(n.to)}
-                        variant="body2"
-                        sx={{
-                          background: 'none',
-                          border: 'none',
-                          p: 0,
-                          textAlign: 'left',
-                          cursor: 'pointer',
-                          font: 'inherit',
-                          color: 'rgba(255,255,255,0.8)',
-                          '&:hover': { color: '#fff' },
-                        }}
-                      >
-                        {n.label}
-                      </Typography>
-                    ))}
-                  </Stack>
-                </Box>
+                  <Box>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        display: 'block',
+                        mb: 1.5,
+                        fontWeight: 700,
+                        letterSpacing: 1,
+                        textTransform: 'uppercase',
+                        color: 'rgba(255,255,255,0.5)',
+                      }}
+                    >
+                      La liga
+                    </Typography>
+                    <Stack spacing={0.75}>
+                      {PUBLIC_NAV.map((n) => (
+                        <Typography
+                          key={n.to}
+                          component="button"
+                          onClick={() => navigate(n.to)}
+                          variant="body2"
+                          sx={{
+                            background: 'none',
+                            border: 'none',
+                            p: 0,
+                            textAlign: 'left',
+                            cursor: 'pointer',
+                            font: 'inherit',
+                            color: 'rgba(255,255,255,0.8)',
+                            '&:hover': { color: '#fff' },
+                          }}
+                        >
+                          {n.label}
+                        </Typography>
+                      ))}
+                    </Stack>
+                  </Box>
+                </Stack>
               </Stack>
 
               <Stack
