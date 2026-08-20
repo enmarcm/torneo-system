@@ -2,6 +2,7 @@ import { Box, Container, Grid2 as Grid, Card, Chip, Stack, Typography, Button } 
 import { TodayRounded, StarRounded } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import dayjs from 'dayjs';
 import {
   usePublicEditionsQuery,
   usePublicCompetitionsQuery,
@@ -48,6 +49,7 @@ const PublicHome: React.FC = () => {
     limit: 8,
   });
   const todayMatches: Match[] = todayQuery.data ?? [];
+  const todayIds = new Set(todayMatches.map((m: Match) => m.id));
 
   /*
     Destacados: los que el administrador marcó con el check al ponerles día y
@@ -56,24 +58,27 @@ const PublicHome: React.FC = () => {
   const featuredQuery = usePublicMatchesQuery(undefined, 'SCHEDULED', active?.id, {
     featured: true,
     upcoming: true,
-    limit: 3,
+    limit: 12,
   });
-  const featuredMatches: Match[] = featuredQuery.data ?? [];
+  /*
+    "De la semana" se resuelve acá: la API no sabe acotar por semana, y un
+    destacado dentro de tres meses no es la respuesta que alguien vino a buscar
+    hoy. Lo que ya está en la columna de hoy tampoco se repite al lado.
+  */
+  const weekEnd = dayjs().add(7, 'day');
+  const featuredWeek: Match[] = (featuredQuery.data ?? [])
+    .filter(
+      (m: Match) => !todayIds.has(m.id) && m.scheduledAt && dayjs(m.scheduledAt).isBefore(weekEnd),
+    )
+    .slice(0, 6);
 
   const finishedQuery = usePublicMatchesQuery(undefined, 'FINISHED', active?.id, {
-    limit: 4,
+    limit: 8,
     order: 'desc',
   });
-  const finished: Match[] = finishedQuery.data ?? [];
-  // `upcoming: true` deja fuera los partidos con fecha vencida que nadie cerró.
-  const upcomingQuery = usePublicMatchesQuery(undefined, 'SCHEDULED', active?.id, {
-    limit: 6,
-    upcoming: true,
-  });
-  // Lo que ya se mostró arriba no se repite abajo.
-  const shownIds = new Set([...todayMatches, ...featuredMatches].map((m) => m.id));
-  const upcoming: Match[] = (upcomingQuery.data ?? [])
-    .filter((m: Match) => !shownIds.has(m.id))
+  // Lo de hoy ya tiene su columna: la última jornada muestra lo anterior.
+  const finished: Match[] = (finishedQuery.data ?? [])
+    .filter((m: Match) => !todayIds.has(m.id))
     .slice(0, 4);
 
   /*
@@ -95,14 +100,14 @@ const PublicHome: React.FC = () => {
     editionsQuery.isError ||
     compsQuery.isError ||
     liveQuery.isError ||
-    upcomingQuery.isError ||
+    featuredQuery.isError ||
     finishedQuery.isError ||
     todayQuery.isError;
   const retryAll = () => {
     void editionsQuery.refetch();
     void compsQuery.refetch();
     void liveQuery.refetch();
-    void upcomingQuery.refetch();
+    void featuredQuery.refetch();
     void finishedQuery.refetch();
     void todayQuery.refetch();
   };
@@ -162,87 +167,40 @@ const PublicHome: React.FC = () => {
           </Box>
         )}
 
-        {todayMatches.length > 0 && (
-          <Box sx={{ mt: 3 }}>
-            <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 1.5 }}>
-              <TodayRounded sx={{ fontSize: 20, color: 'primary.main' }} />
-              <Typography variant="h4" component="h2">Partidos de hoy</Typography>
-              <Chip
-                size="small"
-                label={todayMatches.length}
-                color="primary"
-                sx={{ height: 20, fontSize: 11, fontWeight: 700 }}
-              />
-              <Box sx={{ flex: 1 }} />
-              <Button size="small" onClick={() => navigate(ROUTES.public.schedule)}>
-                Ver calendario
-              </Button>
-            </Stack>
-            <Grid container spacing={2}>
-              {todayMatches.map((m: Match) => (
-                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={m.id}>
-                  <MatchCard
-                    match={m}
-                    compact
-                    competitionLabel={competitionLabel(m)}
-                    onClick={() => setSelectedMatch(m)}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-        )}
-
-        {featuredMatches.length > 0 && (
-          <Box sx={{ mt: 3 }}>
-            <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 1.5 }}>
-              <StarRounded sx={{ fontSize: 20, color: 'var(--accent)' }} />
-              <Typography variant="h4" component="h2">Destacados</Typography>
-              <Box sx={{ flex: 1 }} />
-              <Button size="small" onClick={() => navigate(ROUTES.public.schedule)}>
-                Ver calendario
-              </Button>
-            </Stack>
-            <Grid container spacing={2}>
-              {featuredMatches.map((m: Match) => (
-                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={m.id}>
-                  <MatchCard
-                    match={m}
-                    compact
-                    competitionLabel={competitionLabel(m)}
-                    showStatus={false}
-                    onClick={() => setSelectedMatch(m)}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-        )}
-
         {/*
-          Lo jugado y lo que viene, uno al lado del otro: son las dos preguntas
-          que trae el visitante y apiladas empujaban todo fuera de la pantalla.
+          Las dos preguntas del día, una al lado de la otra: qué se juega hoy y
+          cuáles son los partidos que la liga eligió destacar esta semana.
+          Apiladas empujaban todo fuera de la primera pantalla del teléfono.
         */}
         <Grid container spacing={2.5} sx={{ mt: 0.5 }}>
           <Grid size={{ xs: 12, md: 6 }}>
             <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 1.5 }}>
-              <Typography variant="h4" component="h2">Última jornada</Typography>
+              <TodayRounded sx={{ fontSize: 20, color: 'primary.main' }} />
+              <Typography variant="h4" component="h2">Partidos de hoy</Typography>
+              {todayMatches.length > 0 && (
+                <Chip
+                  size="small"
+                  label={todayMatches.length}
+                  color="primary"
+                  sx={{ height: 20, fontSize: 11, fontWeight: 700 }}
+                />
+              )}
               <Box sx={{ flex: 1 }} />
               <Button size="small" onClick={() => navigate(ROUTES.public.schedule)}>
-                Ver todos
+                Ver calendario
               </Button>
             </Stack>
-            {finishedQuery.isLoading ? (
+            {todayQuery.isLoading ? (
               <LoadingState rows={3} height={96} />
-            ) : finished.length === 0 ? (
+            ) : todayMatches.length === 0 ? (
               <Card sx={{ p: 3, textAlign: 'center' }}>
                 <Typography variant="body2" color="text.secondary">
-                  Todavía no se jugó ningún partido de esta edición.
+                  Hoy no se juega. El calendario tiene la próxima jornada.
                 </Typography>
               </Card>
             ) : (
               <Stack spacing={1.5}>
-                {finished.map((m: Match) => (
+                {todayMatches.map((m: Match) => (
                   <MatchCard
                     key={m.id}
                     match={m}
@@ -257,23 +215,24 @@ const PublicHome: React.FC = () => {
 
           <Grid size={{ xs: 12, md: 6 }}>
             <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 1.5 }}>
-              <Typography variant="h4" component="h2">Próximos partidos</Typography>
+              <StarRounded sx={{ fontSize: 20, color: 'var(--accent)' }} />
+              <Typography variant="h4" component="h2">Destacados de la semana</Typography>
               <Box sx={{ flex: 1 }} />
               <Button size="small" onClick={() => navigate(ROUTES.public.schedule)}>
                 Ver calendario
               </Button>
             </Stack>
-            {upcomingQuery.isLoading ? (
+            {featuredQuery.isLoading ? (
               <LoadingState rows={3} height={96} />
-            ) : upcoming.length === 0 ? (
+            ) : featuredWeek.length === 0 ? (
               <Card sx={{ p: 3, textAlign: 'center' }}>
                 <Typography variant="body2" color="text.secondary">
-                  No hay partidos programados.
+                  La liga todavía no destacó partidos para esta semana.
                 </Typography>
               </Card>
             ) : (
               <Stack spacing={1.5}>
-                {upcoming.map((m: Match) => (
+                {featuredWeek.map((m: Match) => (
                   <MatchCard
                     key={m.id}
                     match={m}
@@ -287,6 +246,35 @@ const PublicHome: React.FC = () => {
             )}
           </Grid>
         </Grid>
+
+        {/*
+          Los resultados no se van de la portada: el visitante llega "justo
+          después del pitazo final" a preguntar cómo quedó. Lo de hoy ya está
+          arriba, así que acá queda lo anterior.
+        */}
+        {finished.length > 0 && (
+          <Box sx={{ mt: 3 }}>
+            <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 1.5 }}>
+              <Typography variant="h4" component="h2">Última jornada</Typography>
+              <Box sx={{ flex: 1 }} />
+              <Button size="small" onClick={() => navigate(ROUTES.public.schedule)}>
+                Ver todos
+              </Button>
+            </Stack>
+            <Grid container spacing={2}>
+              {finished.map((m: Match) => (
+                <Grid size={{ xs: 12, sm: 6, md: 3 }} key={m.id}>
+                  <MatchCard
+                    match={m}
+                    compact
+                    competitionLabel={competitionLabel(m)}
+                    onClick={() => setSelectedMatch(m)}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        )}
 
         <AdSlot placement="HOME_INLINE" sx={{ mt: 3 }} />
 

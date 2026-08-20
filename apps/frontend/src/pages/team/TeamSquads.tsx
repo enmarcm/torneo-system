@@ -8,6 +8,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { calcAge } from '@/utils/formatDate';
 import { extractErrorMessage } from '@/api/axios';
 import { useToast } from '@/hooks/common/useToast';
+import { getCompetitionShortLabel } from '@/utils/competitionMeta';
 
 const TeamSquads: React.FC = () => {
   const user = useAuthStore((s) => s.user);
@@ -59,7 +60,12 @@ const TeamSquads: React.FC = () => {
               <FormControl fullWidth>
                 <InputLabel>Competición</InputLabel>
                 <Select label="Competición" value={form.registrationId} onChange={(e) => setForm({ ...form, registrationId: e.target.value as string })}>
-                  {comps.map((c) => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
+                  {/* Las divisiones comparten nombre: sin la división, todas dicen lo mismo. */}
+              {comps.map((c) => (
+                <MenuItem key={c.id} value={c.id}>
+                  {getCompetitionShortLabel(c)}
+                </MenuItem>
+              ))}
                 </Select>
               </FormControl>
               <FormControl fullWidth>

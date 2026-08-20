@@ -7,6 +7,7 @@ import { LoadingState } from '@/components/ui/LoadingState';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useMatchesQuery, useCompetitionsQuery } from '@/hooks/queries';
+import { getCompetitionShortLabel } from '@/utils/competitionMeta';
 
 const STATUS_OPTIONS = [
   { value: '', label: 'Todos los estados' },
@@ -39,7 +40,12 @@ const TeamMatches: React.FC = () => {
             <InputLabel>Competición</InputLabel>
             <Select label="Competición" value={filterCompetition} onChange={(e) => setFilterCompetition(e.target.value)}>
               <MenuItem value="">Todas las competiciones</MenuItem>
-              {comps.map((c) => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
+              {/* Las divisiones comparten nombre: sin la división, todas dicen lo mismo. */}
+              {comps.map((c) => (
+                <MenuItem key={c.id} value={c.id}>
+                  {getCompetitionShortLabel(c)}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
           <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 160 } }}>

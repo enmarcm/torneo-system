@@ -21,8 +21,41 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useTeamsQuery, useCompetitionsQuery, useCategoriesQuery } from '@/hooks/queries';
 import { useCreateTeam, useUpdateTeam, useSetTeamStatus, useRegisterTeam, useDeleteTeam } from '@/hooks/mutations';
 import type { Team } from '@/api/teams.api';
+import type { Competition } from '@/api/competitions.api';
+import {
+  getCompetitionTags,
+  getCompetitionSubtitle,
+  sortCompetitions,
+} from '@/utils/competitionMeta';
+import { getStatusLabel, getStatusColor } from '@/utils/statusLabels';
 import { extractErrorMessage } from '@/api/axios';
 import { useToast } from '@/hooks/common/useToast';
+
+/** Rango de edad de la competición, dicho como lo diría el reglamento. */
+const getAgeRule = (c: Competition): string => {
+  if (c.ageMin != null && c.ageMax != null) return `${c.ageMin} a ${c.ageMax} años`;
+  if (c.ageMin != null) return `Desde ${c.ageMin} años`;
+  if (c.ageMax != null) return `Hasta ${c.ageMax} años`;
+  return 'Sin límite de edad';
+};
+
+/**
+ * Lo que decide si un equipo puede entrar a esta competición. Son las reglas
+ * que el sistema va a aplicar al armar la plantilla, así que conviene leerlas
+ * antes de inscribir y no después, cuando el rechazo ya no se explica solo.
+ */
+const getInscriptionRules = (c: Competition): Array<{ label: string; value: string }> => [
+  { label: 'Edad', value: getAgeRule(c) },
+  { label: 'Plantilla', value: `${c.minPlayers} a ${c.maxPlayers} jugadores` },
+  {
+    label: 'Formato',
+    value:
+      c.format === 'LEAGUE'
+        ? `Todos contra todos · ${c.rounds} ${c.rounds === 1 ? 'ronda' : 'rondas'}`
+        : 'Grupos y eliminatoria',
+  },
+  { label: 'Inscritos', value: `${c._count?.registrations ?? 0} equipos` },
+];
 
 const AdminTeams: React.FC = () => {
   const navigate = useNavigate();
@@ -91,6 +124,18 @@ const AdminTeams: React.FC = () => {
     setForm({ name: '', leaderEmail: '', leaderPassword: '', logoUrl: '' });
     setOpen('create');
   };
+
+  /*
+    Varias competiciones se llaman igual —"Torneo de liga" es el nombre de cada
+    división— así que el selector con el puro nombre mostraba tres opciones
+    idénticas y elegir era adivinar. Se ordenan como en el resto del sistema:
+    liga por división, después copa, menores y especiales.
+  */
+  const regCompetitions = useMemo(() => sortCompetitions(competitions), [competitions]);
+  const regCompetition = useMemo(
+    () => competitions.find((c) => c.id === regOpen?.competitionId) ?? null,
+    [competitions, regOpen?.competitionId],
+  );
 
   const columns: DataTableColumn<Team>[] = [
     {
@@ -236,10 +281,103 @@ const AdminTeams: React.FC = () => {
           <Stack spacing={2}>
             <FormControl fullWidth>
               <InputLabel>Competición</InputLabel>
-              <Select label="Competición" value={regOpen.competitionId} onChange={(e) => setRegOpen({ ...regOpen, competitionId: e.target.value as string })}>
-                {competitions.map((c) => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
+              <Select
+                label="Competición"
+                value={regOpen.competitionId}
+                onChange={(e) => setRegOpen({ ...regOpen, competitionId: e.target.value as string })}
+                /*
+                  El campo cerrado no puede dibujar las dos líneas del item: se
+                  descuadra. Va el nombre y su división en un renglón.
+                */
+                renderValue={(value) => {
+                  const c = competitions.find((x) => x.id === value);
+                  if (!c) return '';
+                  const subtitle = getCompetitionSubtitle(c);
+                  return subtitle ? `${c.name} · ${subtitle}` : c.name;
+                }}
+              >
+                {regCompetitions.map((c) => (
+                  <MenuItem key={c.id} value={c.id} sx={{ display: 'block', py: 1.25 }}>
+                    <Typography sx={{ fontWeight: 600, fontSize: 14, lineHeight: 1.3 }}>
+                      {c.name}
+                    </Typography>
+                    <Stack direction="row" useFlexGap sx={{ mt: 0.625, flexWrap: 'wrap', gap: 0.5 }}>
+                      {getCompetitionTags(c).map((t) => (
+                        <Chip
+                          key={t.label}
+                          size="small"
+                          label={t.label}
+                          color={t.color}
+                          variant="outlined"
+                          sx={{ height: 20, fontSize: 11, fontWeight: 600 }}
+                        />
+                      ))}
+                      {/* Una competición en borrador o finalizada no se inscribe sola: hay que verlo. */}
+                      {c.status !== 'ACTIVE' && (
+                        <Chip
+                          size="small"
+                          label={getStatusLabel(c.status)}
+                          color={getStatusColor(c.status)}
+                          sx={{ height: 20, fontSize: 11, fontWeight: 700 }}
+                        />
+                      )}
+                    </Stack>
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
+
+            {/*
+              Las reglas que el sistema va a aplicar cuando se arme la plantilla.
+              Leerlas acá evita inscribir a un equipo en un torneo cuyo rango de
+              edad o cupo no le sirve y descubrirlo recién al rostear.
+            */}
+            {regCompetition && (
+              <Card variant="outlined" sx={{ p: 2, bgcolor: 'var(--surface2)', boxShadow: 'none' }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    display: 'block',
+                    mb: 1.25,
+                    fontWeight: 700,
+                    letterSpacing: 1,
+                    textTransform: 'uppercase',
+                    color: 'text.secondary',
+                  }}
+                >
+                  Reglas de inscripción
+                </Typography>
+
+                <Stack spacing={1}>
+                  {getInscriptionRules(regCompetition).map((r) => (
+                    <Stack key={r.label} direction="row" spacing={2} justifyContent="space-between">
+                      <Typography variant="body2" color="text.secondary">
+                        {r.label}
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, textAlign: 'right' }}>
+                        {r.value}
+                      </Typography>
+                    </Stack>
+                  ))}
+                </Stack>
+
+                {regCompetition.requiresAdminEligibility && (
+                  <Typography variant="body2" sx={{ mt: 1.5, color: 'warning.main', fontWeight: 600 }}>
+                    Cada jugador necesita tu habilitación antes de entrar a la plantilla.
+                  </Typography>
+                )}
+
+                {regCompetition.status !== 'ACTIVE' && (
+                  <Typography variant="body2" sx={{ mt: 1.5, color: 'text.secondary' }}>
+                    Esta competición está en{' '}
+                    <Box component="span" sx={{ fontWeight: 700 }}>
+                      {getStatusLabel(regCompetition.status).toLowerCase()}
+                    </Box>
+                    . La inscripción se registra igual.
+                  </Typography>
+                )}
+              </Card>
+            )}
             <Stack direction="row" spacing={1.5} justifyContent="flex-end">
               <Button onClick={() => setRegOpen(null)}>Cancelar</Button>
               <Button variant="contained" disabled={!regOpen.competitionId || register.isPending} onClick={async () => {

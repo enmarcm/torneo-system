@@ -1,6 +1,6 @@
-import { Box, Grid2 as Grid, Card, Stack, Typography, Button, FormControl, InputLabel, Select, MenuItem, IconButton, TextField, Menu, Tooltip, Tabs, Tab, Chip, FormControlLabel, Checkbox } from '@mui/material';
+import { Box, Grid2 as Grid, Card, Stack, Typography, Button, FormControl, InputLabel, Select, MenuItem, IconButton, TextField, Menu, Tooltip, Tabs, Tab, Chip, FormControlLabel, Checkbox, Avatar, FormHelperText } from '@mui/material';
 import { AddRounded, PlayArrowRounded, StopRounded, FiberManualRecordRounded, ChevronLeftRounded, ChevronRightRounded, MoreVertRounded, CasinoRounded } from '@mui/icons-material';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import dayjs from 'dayjs';
 import { PageHeader } from '@/components/ui/PageHeader';
@@ -8,13 +8,14 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { LiveScoreboard } from '@/components/sport/LiveScoreboard';
 import { AppDrawer } from '@/components/ui/AppDrawer';
-import { useCompetitionsQuery, useMatchesQuery } from '@/hooks/queries';
+import { useCompetitionsQuery, useMatchesQuery, usePublicRegistrationsQuery } from '@/hooks/queries';
 import { useCreateMatch, useUpdateMatch, useDeleteMatch, useStartMatch, useFinishMatch, useCreateMatchEvent, useDrawLeagueFixture, useDrawGroupStage } from '@/hooks/mutations';
 import { MatchCard } from '@/components/sport/MatchCard';
 import { formatDateTime } from '@/utils/formatDate';
 import type { Match } from '@/api/matches.api';
 import { extractErrorMessage } from '@/api/axios';
 import { useToast } from '@/hooks/common/useToast';
+import { getCompetitionShortLabel } from '@/utils/competitionMeta';
 
 const AdminSchedule: React.FC = () => {
   const today = dayjs().format('YYYY-MM-DD');
@@ -40,12 +41,52 @@ const AdminSchedule: React.FC = () => {
   const [form, setForm] = useState({ homeRegistrationId: '', awayRegistrationId: '', scheduledAt: '', matchday: 1, venue: '', featured: false });
   const [editForm, setEditForm] = useState({ scheduledAt: '', matchday: 1, venue: '', status: 'SCHEDULED' as Match['status'], featured: false });
 
+  /* Equipos inscritos en la competición elegida: es lo que se puede cruzar. */
+  const { data: registrations = [] } = usePublicRegistrationsQuery(
+    undefined,
+    competitionId || undefined,
+  );
+
   const filteredMatches = matches.filter(
     (m) => m.scheduledAt && dayjs(m.scheduledAt).format('YYYY-MM-DD') === selectedDate,
   );
   // Salidos del sorteo: el cruce está definido pero falta ponerles día y hora.
   const pendingMatches = matches.filter((m) => !m.scheduledAt);
   const selectedComp = comps.find((c) => c.id === competitionId);
+
+  /*
+    Cruces que ya existen en la competición, guardados con dirección
+    (`local>visitante`). Sirven para no volver a crear un partido que ya está.
+  */
+  const existingPairs = useMemo(() => {
+    const set = new Set<string>();
+    for (const m of matches) set.add(`${m.homeRegistrationId}>${m.awayRegistrationId}`);
+    return set;
+  }, [matches]);
+
+  /*
+    A dos rondas, la vuelta es un partido legítimo y distinto de la ida; a una
+    sola, el cruce es el mismo se juegue donde se juegue y no se repite.
+  */
+  const allowsReturnLeg = (selectedComp?.rounds ?? 1) > 1;
+
+  const rivalTaken = (homeId: string, awayId: string) =>
+    existingPairs.has(`${homeId}>${awayId}`) ||
+    (!allowsReturnLeg && existingPairs.has(`${awayId}>${homeId}`));
+
+  /*
+    El visitante se acota al local elegido: fuera él mismo y fuera todo rival
+    con el que ese cruce ya esté armado. Es lo que evita el partido duplicado
+    sin obligar al administrador a acordarse del fixture entero.
+  */
+  const awayOptions = useMemo(() => {
+    const home = form.homeRegistrationId;
+    if (!home) return registrations;
+    return registrations.filter((r) => r.id !== home && !rivalTaken(home, r.id));
+  }, [registrations, form.homeRegistrationId, existingPairs, allowsReturnLeg]);
+
+  const hiddenRivals =
+    form.homeRegistrationId > '' ? registrations.length - 1 - awayOptions.length : 0;
 
   const onOpenEdit = (m: Match) => {
     setEditingMatch(m);
@@ -154,7 +195,12 @@ const AdminSchedule: React.FC = () => {
         <FormControl sx={{ minWidth: 280 }}>
           <InputLabel>Competición</InputLabel>
           <Select label="Competición" value={competitionId} onChange={(e) => setCompetitionId(e.target.value as string)}>
-            {comps.map((c) => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
+            {/* Las divisiones comparten nombre: sin la división, todas dicen lo mismo. */}
+              {comps.map((c) => (
+                <MenuItem key={c.id} value={c.id}>
+                  {getCompetitionShortLabel(c)}
+                </MenuItem>
+              ))}
           </Select>
         </FormControl>
         <Stack direction="row" spacing={1} alignItems="center">
@@ -377,8 +423,73 @@ const AdminSchedule: React.FC = () => {
             <TextField label="Fecha y hora" type="datetime-local" fullWidth InputLabelProps={{ shrink: true }} value={form.scheduledAt} onChange={(e) => setForm({ ...form, scheduledAt: e.target.value })} />
             <TextField label="Jornada" type="number" fullWidth value={form.matchday} onChange={(e) => setForm({ ...form, matchday: Number(e.target.value) })} />
             <TextField label="Sede" fullWidth value={form.venue} onChange={(e) => setForm({ ...form, venue: e.target.value })} />
-            <TextField label="Home Registration ID" fullWidth value={form.homeRegistrationId} onChange={(e) => setForm({ ...form, homeRegistrationId: e.target.value })} />
-            <TextField label="Away Registration ID" fullWidth value={form.awayRegistrationId} onChange={(e) => setForm({ ...form, awayRegistrationId: e.target.value })} />
+            <FormControl fullWidth>
+              <InputLabel>Local</InputLabel>
+              <Select
+                label="Local"
+                value={form.homeRegistrationId}
+                /* Cambiar de local invalida al visitante elegido: se limpia. */
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    homeRegistrationId: e.target.value as string,
+                    awayRegistrationId: '',
+                  })
+                }
+              >
+                {registrations.map((r) => (
+                  <MenuItem key={r.id} value={r.id}>
+                    <Stack direction="row" alignItems="center" spacing={1.25}>
+                      <Avatar src={r.team.logoUrl ?? undefined} sx={{ width: 24, height: 24, fontSize: 11 }}>
+                        {r.team.name[0]}
+                      </Avatar>
+                      <span>{r.team.name}</span>
+                    </Stack>
+                  </MenuItem>
+                ))}
+              </Select>
+              {registrations.length === 0 && (
+                <FormHelperText>Esta competición todavía no tiene equipos inscritos.</FormHelperText>
+              )}
+            </FormControl>
+
+            <FormControl fullWidth disabled={!form.homeRegistrationId}>
+              <InputLabel>Visitante</InputLabel>
+              <Select
+                label="Visitante"
+                value={form.awayRegistrationId}
+                onChange={(e) => setForm({ ...form, awayRegistrationId: e.target.value as string })}
+              >
+                {awayOptions.map((r) => (
+                  <MenuItem key={r.id} value={r.id}>
+                    <Stack direction="row" alignItems="center" spacing={1.25}>
+                      <Avatar src={r.team.logoUrl ?? undefined} sx={{ width: 24, height: 24, fontSize: 11 }}>
+                        {r.team.name[0]}
+                      </Avatar>
+                      <span>{r.team.name}</span>
+                    </Stack>
+                  </MenuItem>
+                ))}
+              </Select>
+              {/*
+                Si se esconden rivales hay que decirlo: una lista más corta sin
+                explicación se lee como un equipo que falta, no como un cruce
+                que ya existe.
+              */}
+              {!form.homeRegistrationId ? (
+                <FormHelperText>Elegí primero el local.</FormHelperText>
+              ) : awayOptions.length === 0 ? (
+                <FormHelperText>
+                  Ese equipo ya tiene armado el cruce con todos los demás.
+                </FormHelperText>
+              ) : hiddenRivals > 0 ? (
+                <FormHelperText>
+                  {hiddenRivals === 1
+                    ? 'Se ocultó 1 rival: ese cruce ya está programado.'
+                    : `Se ocultaron ${hiddenRivals} rivales: esos cruces ya están programados.`}
+                </FormHelperText>
+              ) : null}
+            </FormControl>
             <FormControlLabel
               control={
                 <Checkbox

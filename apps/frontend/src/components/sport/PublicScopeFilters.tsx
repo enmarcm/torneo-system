@@ -10,7 +10,7 @@ import {
   Typography,
 } from '@mui/material';
 import type { ReactNode } from 'react';
-import { getCompetitionSubtitle } from '@/utils/competitionMeta';
+import { getCompetitionSubtitle, getCompetitionShortLabel } from '@/utils/competitionMeta';
 import { ALL_COMPETITIONS } from '@/hooks/common/usePublicScope';
 import type { Edition } from '@/api/editions.api';
 import type { Competition } from '@/api/competitions.api';
@@ -78,7 +78,8 @@ export const PublicScopeFilters: React.FC<Props> = ({
           onChange={(e) => onCompetitionChange(e.target.value as string)}
           renderValue={(value) => {
             const c = competitions.find((x) => x.id === value);
-            if (c) return c.name;
+            // Cerrado tambien tiene que decir la division, no solo el nombre.
+            if (c) return getCompetitionShortLabel(c);
             return allowAll ? allLabel : '—';
           }}
         >
