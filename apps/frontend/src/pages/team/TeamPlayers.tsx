@@ -35,7 +35,6 @@ interface PlayerRow {
   id: string;
   firstName: string;
   lastName: string;
-  position: string | null;
   photoUrl: string | null;
   registrations: Array<{
     competitionId: string;
@@ -77,7 +76,6 @@ const INITIAL_FORM = {
   firstName: '',
   lastName: '',
   birthDate: '',
-  position: '',
 };
 
 const TeamPlayers: React.FC = () => {
@@ -111,7 +109,6 @@ const TeamPlayers: React.FC = () => {
         firstName: editPlayer.firstName,
         lastName: editPlayer.lastName,
         birthDate: dayjs(editPlayer.birthDate).format('YYYY-MM-DD'),
-        position: editPlayer.position ?? '',
       });
     }
   }, [editPlayer]);
@@ -146,7 +143,6 @@ const TeamPlayers: React.FC = () => {
             id: e.player.id,
             firstName: e.player.firstName,
             lastName: e.player.lastName,
-            position: e.player.position,
             photoUrl: e.player.photoUrl,
             registrations: [],
           });
@@ -222,14 +218,9 @@ const TeamPlayers: React.FC = () => {
           >
             {row.firstName[0]?.toUpperCase()}
           </Avatar>
-          <Box>
-            <Typography sx={{ fontWeight: 600, fontSize: 14 }}>
-              {row.firstName} {row.lastName}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {row.position ?? 'Sin posición'}
-            </Typography>
-          </Box>
+          <Typography sx={{ fontWeight: 600, fontSize: 14 }}>
+            {row.firstName} {row.lastName}
+          </Typography>
         </Box>
       ),
     },
@@ -351,19 +342,12 @@ const TeamPlayers: React.FC = () => {
               onChange={(e) => setCreateForm({ ...createForm, lastName: e.target.value })}
             />
           </Stack>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-            <TextField
-              label="Fecha de nacimiento" type="date" fullWidth
-              InputLabelProps={{ shrink: true }}
-              value={createForm.birthDate}
-              onChange={(e) => setCreateForm({ ...createForm, birthDate: e.target.value })}
-            />
-            <TextField
-              label="Posición" fullWidth
-              value={createForm.position}
-              onChange={(e) => setCreateForm({ ...createForm, position: e.target.value })}
-            />
-          </Stack>
+          <TextField
+            label="Fecha de nacimiento" type="date" fullWidth
+            InputLabelProps={{ shrink: true }}
+            value={createForm.birthDate}
+            onChange={(e) => setCreateForm({ ...createForm, birthDate: e.target.value })}
+          />
           <Stack direction="row" spacing={1.5} justifyContent="flex-end">
             <Button onClick={() => { setCreateOpen(false); setCreateForm(INITIAL_FORM); }}>Cancelar</Button>
             <Button
@@ -415,19 +399,12 @@ const TeamPlayers: React.FC = () => {
                 onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
               />
             </Stack>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-              <TextField
-                label="Fecha de nacimiento" type="date" fullWidth
-                InputLabelProps={{ shrink: true }}
-                value={editForm.birthDate}
-                onChange={(e) => setEditForm({ ...editForm, birthDate: e.target.value })}
-              />
-              <TextField
-                label="Posición" fullWidth
-                value={editForm.position}
-                onChange={(e) => setEditForm({ ...editForm, position: e.target.value })}
-              />
-            </Stack>
+            <TextField
+              label="Fecha de nacimiento" type="date" fullWidth
+              InputLabelProps={{ shrink: true }}
+              value={editForm.birthDate}
+              onChange={(e) => setEditForm({ ...editForm, birthDate: e.target.value })}
+            />
             <Stack direction="row" spacing={1.5} justifyContent="flex-end">
               <Button onClick={() => { setEditOpen(false); setEditId(null); }}>Cancelar</Button>
               <Button
@@ -469,7 +446,7 @@ const TeamPlayers: React.FC = () => {
                       {detailPlayerInfo.firstName} {detailPlayerInfo.lastName}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {detailPlayerInfo.position ?? 'Sin posición'} · {detailPlayerInfo.documentNumber}
+                      {detailPlayerInfo.documentNumber}
                     </Typography>
                   </Box>
                 </Stack>

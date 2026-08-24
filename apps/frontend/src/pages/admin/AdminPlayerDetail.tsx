@@ -42,7 +42,6 @@ const AdminPlayerDetail: React.FC = () => {
         {player.universityDegreeVerified && (
           <Chip size="small" color="success" label="Título verificado" icon={<VerifiedRounded sx={{ fontSize: 14 }} />} variant="outlined" />
         )}
-        {player.position && <Chip size="small" label={player.position} variant="outlined" />}
       </Stack>
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid size={{ xs: 6, md: 3 }}>

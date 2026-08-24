@@ -17,7 +17,15 @@ export const formatDate = (d: Date | string): string =>
  * Comienzo y fin del día de hoy en hora de Venezuela, expresados en UTC para
  * poder compararlos contra lo guardado en la base.
  */
-export const dayRange = (day: Date | string = new Date()) => ({
-  start: dayjs(day).tz(TZ).startOf('day').toDate(),
-  end: dayjs(day).tz(TZ).endOf('day').toDate(),
-});
+export const dayRange = (day: Date | string = new Date()) => {
+  /*
+    Una fecha sin hora ('2026-08-20') es ese día en Venezuela, no la medianoche
+    del servidor: interpretarla en el huso de la máquina corría el rango un día
+    entero cuando el servidor está en UTC.
+  */
+  const base =
+    typeof day === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(day)
+      ? dayjs.tz(day, TZ)
+      : dayjs(day).tz(TZ);
+  return { start: base.startOf('day').toDate(), end: base.endOf('day').toDate() };
+};

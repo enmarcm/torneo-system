@@ -8,14 +8,14 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { LiveScoreboard } from '@/components/sport/LiveScoreboard';
 import { AppDrawer } from '@/components/ui/AppDrawer';
 import { AppModal } from '@/components/ui/AppModal';
-import { useCompetitionsQuery, useMatchesQuery, usePublicRegistrationsQuery, useRosterQuery } from '@/hooks/queries';
+import { useCompetitionsQuery, useMatchesQuery, useMatchesByDayQuery, usePublicRegistrationsQuery, useRosterQuery } from '@/hooks/queries';
 import { useCreateMatch, useUpdateMatch, useDeleteMatch, useStartMatch, useFinishMatch, useCreateMatchEvent, useDrawLeagueFixture, useDrawGroupStage } from '@/hooks/mutations';
 import { MatchCard } from '@/components/sport/MatchCard';
 import { formatDateTime } from '@/utils/formatDate';
 import type { Match } from '@/api/matches.api';
 import { extractErrorMessage } from '@/api/axios';
 import { useToast } from '@/hooks/common/useToast';
-import { getCompetitionShortLabel } from '@/utils/competitionMeta';
+import { getCompetitionShortLabel, sortCompetitions } from '@/utils/competitionMeta';
 
 /*
   La liga juega siempre en la misma cancha, así que la sede se escribía a mano
@@ -31,6 +31,17 @@ const AdminSchedule: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(today);
   const { data: comps = [] } = useCompetitionsQuery();
   const { data: matches = [], isLoading } = useMatchesQuery(competitionId || undefined);
+  /*
+    Sin competición elegida la pantalla muestra la jornada de todas: el día se
+    filtra en el servidor porque el listado general viene paginado y una fecha
+    con muchos torneos no entraba en la primera página.
+  */
+  const allCompetitions = !competitionId;
+  const { data: dayMatches = [], isLoading: loadingDay } = useMatchesByDayQuery(
+    selectedDate,
+    undefined,
+    allCompetitions,
+  );
   const toast = useToast();
   const create = useCreateMatch();
   const update = useUpdateMatch();
@@ -65,12 +76,15 @@ const AdminSchedule: React.FC = () => {
     competitionId || undefined,
   );
 
-  const filteredMatches = matches.filter(
-    (m) => m.scheduledAt && dayjs(m.scheduledAt).format('YYYY-MM-DD') === selectedDate,
-  );
+  const filteredMatches = allCompetitions
+    ? dayMatches
+    : matches.filter(
+        (m) => m.scheduledAt && dayjs(m.scheduledAt).format('YYYY-MM-DD') === selectedDate,
+      );
   // Salidos del sorteo: el cruce está definido pero falta ponerles día y hora.
   const pendingMatches = matches.filter((m) => !m.scheduledAt);
   const selectedComp = comps.find((c) => c.id === competitionId);
+  const sortedComps = useMemo(() => sortCompetitions(comps), [comps]);
 
   /*
     Cruces que ya existen en la competición, guardados con dirección
@@ -258,13 +272,28 @@ const AdminSchedule: React.FC = () => {
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 3 }} alignItems="center">
         <FormControl sx={{ minWidth: 280 }}>
           <InputLabel>Competición</InputLabel>
-          <Select label="Competición" value={competitionId} onChange={(e) => setCompetitionId(e.target.value as string)}>
+          <Select
+            label="Competición"
+            value={competitionId}
+            onChange={(e) => {
+              const id = e.target.value as string;
+              setCompetitionId(id);
+              // "Todas" no tiene fixture propio que programar: sin competición
+              // la única vista que aplica es la del día.
+              if (!id) setView('day');
+            }}
+          >
+            {/*
+              Sin competición se ve la jornada completa: es la forma de saber
+              qué se juega un día sin ir torneo por torneo.
+            */}
+            <MenuItem value="">Todas las competiciones</MenuItem>
             {/* Las divisiones comparten nombre: sin la división, todas dicen lo mismo. */}
-              {comps.map((c) => (
-                <MenuItem key={c.id} value={c.id}>
-                  {getCompetitionShortLabel(c)}
-                </MenuItem>
-              ))}
+            {sortedComps.map((c) => (
+              <MenuItem key={c.id} value={c.id}>
+                {getCompetitionShortLabel(c)}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
         <Stack direction="row" spacing={1} alignItems="center">
@@ -346,8 +375,13 @@ const AdminSchedule: React.FC = () => {
               color="success"
               startIcon={<StopRounded />}
               onClick={async () => {
-                await finish.mutateAsync(liveMatch.id);
-                setLiveMatch(null);
+                try {
+                  await finish.mutateAsync(liveMatch.id);
+                  setLiveMatch(null);
+                  toast.success('Partido finalizado');
+                } catch (e) {
+                  toast.error(extractErrorMessage(e));
+                }
               }}
             >
               Finalizar partido
@@ -379,11 +413,7 @@ const AdminSchedule: React.FC = () => {
         </Tabs>
       )}
 
-      {!competitionId ? (
-        <Card sx={{ p: 4, textAlign: 'center' }}>
-          <Typography color="text.secondary">Selecciona una competición para ver sus partidos.</Typography>
-        </Card>
-      ) : isLoading ? (
+      {(allCompetitions ? loadingDay : isLoading) ? (
         <Typography color="text.secondary">Cargando…</Typography>
       ) : view === 'pending' ? (
         <Box>
@@ -419,8 +449,15 @@ const AdminSchedule: React.FC = () => {
           {filteredMatches.length === 0 ? (
             <Card sx={{ p: 4, textAlign: 'center' }}>
               <Typography variant="h4" sx={{ mb: 1 }}>Sin partidos en esta fecha</Typography>
-              <Typography color="text.secondary" sx={{ mb: 2 }}>No hay partidos programados para este día.</Typography>
-              <Button variant="contained" startIcon={<AddRounded />} onClick={onOpenCreate}>Crear partido</Button>
+              <Typography color="text.secondary" sx={{ mb: 2 }}>
+                {allCompetitions
+                  ? 'Ninguna competición tiene partidos programados para este día.'
+                  : 'No hay partidos programados para este día.'}
+              </Typography>
+              {/* Crear un partido exige saber en qué competición va. */}
+              {!allCompetitions && (
+                <Button variant="contained" startIcon={<AddRounded />} onClick={onOpenCreate}>Crear partido</Button>
+              )}
             </Card>
           ) : (
             <Grid container spacing={2}>
@@ -433,7 +470,17 @@ const AdminSchedule: React.FC = () => {
                     sobre el dato que uno mismo acababa de cargar.
                   */}
                   <Stack spacing={1}>
-                    <MatchCard match={m} onClick={() => navigate(`/admin/partidos/${m.id}`)} />
+                    <MatchCard
+                      match={m}
+                      onClick={() => navigate(`/admin/partidos/${m.id}`)}
+                      // Con todas las competiciones a la vez, el nombre del
+                      // torneo es lo que distingue un cruce de otro.
+                      competitionLabel={
+                        allCompetitions && m.competition
+                          ? getCompetitionShortLabel(m.competition)
+                          : undefined
+                      }
+                    />
                     {/*
                       Las acciones van fuera de la ficha: meterlas adentro
                       obligaba a anidar una tarjeta dentro de otra.
@@ -445,8 +492,19 @@ const AdminSchedule: React.FC = () => {
                           variant="outlined"
                           startIcon={<PlayArrowRounded />}
                           onClick={async () => {
-                            const fresh = await start.mutateAsync(m.id);
-                            setLiveMatch(fresh);
+                            try {
+                              const fresh = await start.mutateAsync(m.id);
+                              /*
+                                El marcador en vivo lee los dos equipos del
+                                partido. Se parte del que ya está en pantalla y
+                                se le encima la respuesta: si esta llegara sin
+                                las inscripciones, la pantalla sigue teniendo
+                                con qué pintarse en vez de quedar en blanco.
+                              */
+                              setLiveMatch({ ...m, ...fresh });
+                            } catch (e) {
+                              toast.error(extractErrorMessage(e));
+                            }
                           }}
                         >
                           Iniciar

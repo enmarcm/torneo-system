@@ -18,7 +18,6 @@ import { getCompetitionShortLabel } from '@/utils/competitionMeta';
 interface PlayerStatItem {
   playerId: string;
   name: string;
-  position: string | null;
   photoUrl: string | null;
   jerseyNumber: number | null;
   competitionId: string;
@@ -51,7 +50,6 @@ const TeamStats: React.FC = () => {
       reg.roster.map((entry) => ({
         playerId: entry.player.id,
         name: `${entry.player.firstName} ${entry.player.lastName}`,
-        position: entry.player.position,
         photoUrl: entry.player.photoUrl,
         jerseyNumber: entry.jerseyNumber,
         competitionId: reg.competitionId,
@@ -285,9 +283,11 @@ const TeamStats: React.FC = () => {
                     </Avatar>
                     <Box>
                       <Typography sx={{ fontWeight: 600, fontSize: 14 }}>{row.name}</Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {row.position ?? 'Sin posición'}{row.jerseyNumber ? ` · #${row.jerseyNumber}` : ''}
-                      </Typography>
+                      {row.jerseyNumber ? (
+                        <Typography variant="caption" color="text.secondary">
+                          #{row.jerseyNumber}
+                        </Typography>
+                      ) : null}
                     </Box>
                   </Box>
                 ),

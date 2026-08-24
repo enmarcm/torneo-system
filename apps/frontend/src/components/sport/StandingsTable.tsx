@@ -1,4 +1,4 @@
-import { Card, Box, Typography, Stack, Tooltip, Collapse, IconButton, Chip, useTheme, useMediaQuery } from '@mui/material';
+import { Card, Box, Typography, Stack, Tooltip, Collapse, IconButton, Chip, Avatar, useTheme, useMediaQuery } from '@mui/material';
 import type { StandingRow } from '@/api/standings.api';
 import { ShieldRounded, ExpandMoreRounded, ExpandLessRounded } from '@mui/icons-material';
 import { useState } from 'react';
@@ -10,15 +10,45 @@ interface Props {
 
 /** Franja lateral que marca en qué zona de la tabla quedó el equipo. */
 const zoneColor = (zone: StandingRow['zone']) => {
-  if (zone === 'PROMOTION') return 'var(--info, #2563eb)';
   if (zone === 'QUALIFY') return 'var(--success)';
   if (zone === 'RELEGATION') return 'var(--danger)';
   return 'transparent';
 };
 
+/**
+ * Escudo del equipo. La tabla dibujaba siempre el mismo icono genérico y el
+ * escudo cargado nunca llegaba a verse, aunque venía en la fila. Cuando el
+ * equipo no tiene escudo se cae a la inicial del nombre, que al menos
+ * distingue una fila de otra.
+ */
+const TeamCrest: React.FC<{ row: StandingRow; size: number }> = ({ row, size }) => (
+  <Avatar
+    src={row.logoUrl ?? undefined}
+    alt={row.teamName}
+    variant="rounded"
+    sx={{
+      width: size,
+      height: size,
+      flexShrink: 0,
+      // Sin escudo hace de placa para la inicial; con escudo no se le pone
+      // fondo, que taparía la transparencia del logo con un cuadro gris.
+      bgcolor: row.logoUrl ? 'transparent' : 'background.default',
+      color: 'text.secondary',
+      fontSize: size * 0.42,
+      fontWeight: 700,
+      // El escudo es más alto que ancho: se muestra entero, sin recortarlo.
+      '& img': { objectFit: 'contain' },
+    }}
+  >
+    {row.teamName.trim().charAt(0).toUpperCase() || <ShieldRounded sx={{ fontSize: size * 0.6 }} />}
+  </Avatar>
+);
+
 export const StandingsTable: React.FC<Props> = ({ rows }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const hasQualify = (rows ?? []).some((r) => r.zone === 'QUALIFY');
+  const hasRelegation = (rows ?? []).some((r) => r.zone === 'RELEGATION');
 
   if (!rows || rows.length === 0) {
     return (
@@ -34,7 +64,7 @@ export const StandingsTable: React.FC<Props> = ({ rows }) => {
         <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
           <Typography variant="h4">Tabla de posiciones</Typography>
           <Tooltip
-            title="Orden: puntos → enfrentamiento directo entre los equipos empatados → diferencia de gol → goles a favor. Azul: ascenso. Verde: clasificación. Rojo: descenso."
+            title="Orden: puntos → enfrentamiento directo entre los equipos empatados → diferencia de gol → goles a favor. Verde: clasificación. Rojo: descenso."
             arrow
           >
             <Box sx={{ width: 18, height: 18, borderRadius: '50%', bgcolor: 'background.default', display: 'grid', placeItems: 'center', cursor: 'help', fontSize: 11, color: 'text.secondary' }}>
@@ -81,7 +111,7 @@ export const StandingsTable: React.FC<Props> = ({ rows }) => {
                     <Box component="td" sx={{ p: 1.5, fontWeight: 700, width: 32 }}>{r.position}</Box>
                     <Box component="td" sx={{ p: 1.5 }}>
                       <Stack direction="row" alignItems="center" spacing={1.5}>
-                        <ShieldRounded sx={{ color: 'text.secondary' }} />
+                        <TeamCrest row={r} size={28} />
                         <Typography sx={{ fontWeight: 600 }}>{r.teamName}</Typography>
                         {r.outcome !== 'NONE' && (
                           <Chip
@@ -111,31 +141,36 @@ export const StandingsTable: React.FC<Props> = ({ rows }) => {
           </Box>
         )}
 
-        <Stack
-          direction="row"
-          spacing={2}
-          flexWrap="wrap"
-          useFlexGap
-          sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}
-        >
-          {rows.some((r) => r.zone === 'PROMOTION') && (
-            <Stack direction="row" alignItems="center" spacing={0.75}>
-              <Box sx={{ width: 14, height: 14, borderRadius: 0.5, bgcolor: 'info.main' }} />
-              <Typography variant="caption">Ascenso</Typography>
-            </Stack>
-          )}
-          <Stack direction="row" alignItems="center" spacing={0.75}>
-            <Box sx={{ width: 14, height: 14, borderRadius: 0.5, bgcolor: 'success.main' }} />
-            <Typography variant="caption">Zona de clasificación</Typography>
+        {/*
+          Solo se explica el color que la tabla realmente está usando: una
+          referencia de una zona que no aparece en ninguna fila hace buscar algo
+          que no está.
+        */}
+        {(hasQualify || hasRelegation) && (
+          <Stack
+            direction="row"
+            spacing={2}
+            flexWrap="wrap"
+            useFlexGap
+            sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}
+          >
+            {hasQualify && (
+              <Stack direction="row" alignItems="center" spacing={0.75}>
+                <Box sx={{ width: 14, height: 14, borderRadius: 0.5, bgcolor: 'success.main' }} />
+                <Typography variant="caption">Zona de clasificación</Typography>
+              </Stack>
+            )}
+            {hasRelegation && (
+              <Stack direction="row" alignItems="center" spacing={0.75}>
+                <Box sx={{ width: 14, height: 14, borderRadius: 0.5, bgcolor: 'error.main' }} />
+                <Typography variant="caption">Descenso</Typography>
+              </Stack>
+            )}
+            <Typography variant="caption" color="text.disabled">
+              El descenso definitivo lo decide el administrador.
+            </Typography>
           </Stack>
-          <Stack direction="row" alignItems="center" spacing={0.75}>
-            <Box sx={{ width: 14, height: 14, borderRadius: 0.5, bgcolor: 'error.main' }} />
-            <Typography variant="caption">Descenso</Typography>
-          </Stack>
-          <Typography variant="caption" color="text.disabled">
-            El ascenso y el descenso definitivos los decide el administrador.
-          </Typography>
-        </Stack>
+        )}
       </Box>
     </Card>
   );
@@ -150,7 +185,7 @@ const MobileStandingRow: React.FC<{ row: StandingRow }> = ({ row }) => {
         onClick={() => setOpen(!open)}
       >
         <Typography sx={{ fontWeight: 700, width: 24, fontSize: 14 }}>{row.position}</Typography>
-        <ShieldRounded sx={{ color: 'text.secondary', fontSize: 20 }} />
+        <TeamCrest row={row} size={24} />
         <Typography sx={{ fontWeight: 600, flex: 1, fontSize: 14 }} noWrap>{row.teamName}</Typography>
         <Stack direction="row" spacing={1.5} alignItems="center">
           <Typography variant="caption" color="text.secondary">{row.pj}PJ</Typography>

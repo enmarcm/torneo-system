@@ -154,19 +154,24 @@ export const standingsService = {
     const withDg = Object.values(table).map((r) => ({ ...r, dg: r.gf - r.gc }));
     const rows = sortRows(withDg, matches);
 
-    // Zonas: primero las plazas configuradas por el admin, luego los clasificados a
-    // eliminatoria. La decisión final de ascenso/descenso la marca el admin en cada
-    // inscripción (outcome) y tiene prioridad sobre la zona calculada.
+    /*
+      La tabla solo pinta dos zonas: quién clasifica a la eliminatoria y quién
+      está en descenso, y cada una únicamente si está configurada. El ascenso no
+      se pinta: es una decisión del administrador sobre la inscripción
+      (`outcome`), no algo que la posición defina por sí sola.
+
+      Clasificación con menos plazas que equipos: si clasifican todos, marcar la
+      tabla entera de verde no distingue nada.
+    */
     const outcomeByReg = new Map(regs.map((r) => [r.id, r.outcome]));
-    const promotion = competition?.promotionSpots ?? 0;
     const relegation = competition?.relegationSpots ?? 0;
-    const qualifiers = competition?.knockoutQualifiers ?? null;
     const total = rows.length;
+    const qualifiers = competition?.knockoutQualifiers ?? null;
+    const cutoff = qualifiers && qualifiers < total ? qualifiers : null;
 
     return rows.map((r, i) => {
-      let zone: 'PROMOTION' | 'QUALIFY' | 'RELEGATION' | 'NORMAL' = 'NORMAL';
-      if (promotion > 0 && i < promotion) zone = 'PROMOTION';
-      else if (qualifiers && i < qualifiers) zone = 'QUALIFY';
+      let zone: 'QUALIFY' | 'RELEGATION' | 'NORMAL' = 'NORMAL';
+      if (cutoff && i < cutoff) zone = 'QUALIFY';
       else if (relegation > 0 && i >= total - relegation) zone = 'RELEGATION';
 
       return {

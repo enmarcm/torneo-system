@@ -196,9 +196,6 @@ const PublicTeams: React.FC = () => {
                         {p.jerseyNumber && (
                           <Chip label={`#${p.jerseyNumber}`} size="small" variant="outlined" />
                         )}
-                        {p.player.position && (
-                          <Chip label={p.player.position} size="small" variant="outlined" />
-                        )}
                       </Stack>
                     </Box>
                     <Stack direction="row" spacing={1} sx={{ color: 'text.secondary' }}>

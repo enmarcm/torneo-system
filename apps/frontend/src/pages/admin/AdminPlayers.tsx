@@ -26,7 +26,7 @@ const AdminPlayers: React.FC = () => {
   const setStatus = useSetPlayerStatus();
   const setDegree = useSetPlayerDegree();
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ documentType: 'CEDULA' as 'CEDULA' | 'PARTIDA', documentNumber: '', firstName: '', lastName: '', birthDate: '', position: '' });
+  const [form, setForm] = useState({ documentType: 'CEDULA' as 'CEDULA' | 'PARTIDA', documentNumber: '', firstName: '', lastName: '', birthDate: '' });
   const [deletingPlayer, setDeletingPlayer] = useState<Player | null>(null);
   const [purgingPlayer, setPurgingPlayer] = useState<Player | null>(null);
   const deletePlayer = useDeletePlayer();
@@ -38,7 +38,7 @@ const AdminPlayers: React.FC = () => {
         birthDate: new Date(form.birthDate).toISOString(),
       } as Partial<Player>);
       setOpen(false);
-      setForm({ documentType: 'CEDULA', documentNumber: '', firstName: '', lastName: '', birthDate: '', position: '' });
+      setForm({ documentType: 'CEDULA', documentNumber: '', firstName: '', lastName: '', birthDate: '' });
       toast.success('Jugador creado correctamente');
     } catch (e) {
       toast.error(extractErrorMessage(e));
@@ -52,10 +52,7 @@ const AdminPlayers: React.FC = () => {
           <Avatar src={r.photoUrl ?? undefined} sx={{ width: 36, height: 36, bgcolor: 'primary.soft', color: 'primary.main' }}>
             {r.firstName[0]}{r.lastName[0]}
           </Avatar>
-          <Box>
-            <Typography sx={{ fontWeight: 600 }}>{r.firstName} {r.lastName}</Typography>
-            <Typography variant="caption" color="text.secondary">{r.position ?? 'Sin posición'}</Typography>
-          </Box>
+          <Typography sx={{ fontWeight: 600 }}>{r.firstName} {r.lastName}</Typography>
         </Stack>
       ),
     },
@@ -127,10 +124,7 @@ const AdminPlayers: React.FC = () => {
             <TextField label="Nombre" fullWidth value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
             <TextField label="Apellido" fullWidth value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
           </Stack>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-            <TextField label="Fecha de nacimiento" type="date" fullWidth InputLabelProps={{ shrink: true }} value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} />
-            <TextField label="Posición" fullWidth value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })} />
-          </Stack>
+          <TextField label="Fecha de nacimiento" type="date" fullWidth InputLabelProps={{ shrink: true }} value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} />
           <Stack direction="row" spacing={1.5} justifyContent="flex-end">
             <Button onClick={() => setOpen(false)}>Cancelar</Button>
             <Button variant="contained" onClick={submit} disabled={!form.firstName || !form.lastName || !form.documentNumber || !form.birthDate || create.isPending}>

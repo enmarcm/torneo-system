@@ -26,6 +26,20 @@ const competitionInclude = {
   },
 } as const;
 
+/*
+  Todo lo que el front necesita para pintar un partido: los dos equipos con su
+  escudo y la competición de la que sale. Las mutaciones (crear, iniciar,
+  finalizar…) devolvían el partido pelado, sin las inscripciones, y la pantalla
+  que lo recibía se caía al leer `homeRegistration.team`. Se responde siempre
+  con la misma forma que en el listado.
+*/
+const matchInclude = {
+  homeRegistration: { include: teamInclude },
+  awayRegistration: { include: teamInclude },
+  competition: competitionInclude,
+  mvpPlayer: true,
+} as const;
+
 export interface MatchListFilters {
   competitionId?: string;
   status?: string;
@@ -45,7 +59,11 @@ export interface MatchListFilters {
   upcoming?: boolean;
   /** Solo los que el administrador marcó como destacados. */
   featured?: boolean;
-  /** `today` acota a la jornada de hoy, en hora de Venezuela. */
+  /**
+   * Acota a un solo día, en hora de Venezuela: `today` o una fecha
+   * `YYYY-MM-DD`. Es lo que permite pedir la programación de una jornada sin
+   * traerse el calendario entero de todas las competiciones.
+   */
   day?: string;
 }
 
@@ -62,15 +80,15 @@ const matchWhere = ({
     las 21:00 en Maracaibo no puede aparecer como el de mañana porque la máquina
     esté en otro huso.
   */
-  const today = day === 'today' ? dayRange() : null;
+  const oneDay = day ? (day === 'today' ? dayRange() : dayRange(day)) : null;
 
   return {
     ...(competitionId ? { competitionId } : {}),
     ...(editionId ? { competition: { editionId } } : {}),
     ...(status ? { status: status as 'SCHEDULED' | 'LIVE' | 'FINISHED' | 'POSTPONED' } : {}),
     ...(featured ? { featured: true } : {}),
-    ...(today
-      ? { scheduledAt: { gte: today.start, lte: today.end } }
+    ...(oneDay
+      ? { scheduledAt: { gte: oneDay.start, lte: oneDay.end } }
       : upcoming
         ? { scheduledAt: { gte: new Date() } }
         : {}),
@@ -79,17 +97,15 @@ const matchWhere = ({
 
 export const matchesService = {
   list: (filters: MatchListFilters = {}) => {
-    const { page = 1, limit = 50 } = filters;
+    const { page = 1 } = filters;
+    // Techo alto pero acotado: una jornada de todas las competiciones entra
+    // holgada y sigue sin poder pedirse la base entera de un saque.
+    const limit = Math.min(Math.max(filters.limit ?? 50, 1), 300);
     return prisma.match.findMany({
       skip: (page - 1) * limit,
       take: limit,
       where: matchWhere(filters),
-      include: {
-        homeRegistration: { include: teamInclude },
-        awayRegistration: { include: teamInclude },
-        competition: competitionInclude,
-        mvpPlayer: true,
-      },
+      include: matchInclude,
       // Postgres deja los NULL al final, así los partidos sin día asignado
       // quedan después de los ya programados.
       orderBy: { scheduledAt: filters.order === 'desc' ? 'desc' : 'asc' },
@@ -101,10 +117,8 @@ export const matchesService = {
     const m = await prisma.match.findUnique({
       where: { id },
       include: {
-        homeRegistration: { include: teamInclude },
-        awayRegistration: { include: teamInclude },
+        ...matchInclude,
         events: { include: { player: true }, orderBy: { minute: 'desc' } },
-        mvpPlayer: true,
         tie: true,
       },
     });
@@ -113,13 +127,13 @@ export const matchesService = {
   },
 
   create: async (data: CreateMatchDto) => {
-    const m = await prisma.match.create({ data });
+    const m = await prisma.match.create({ data, include: matchInclude });
     emitMatchListChanged();
     return m;
   },
 
   update: async (id: string, data: Partial<CreateMatchDto>) => {
-    const m = await prisma.match.update({ where: { id }, data });
+    const m = await prisma.match.update({ where: { id }, data, include: matchInclude });
     emitMatchUpdate({
       matchId: id,
       status: m.status,
@@ -135,7 +149,11 @@ export const matchesService = {
   },
 
   start: async (id: string) => {
-    const m = await prisma.match.update({ where: { id }, data: { status: 'LIVE' } });
+    const m = await prisma.match.update({
+      where: { id },
+      data: { status: 'LIVE' },
+      include: matchInclude,
+    });
     emitMatchUpdate({ matchId: id, status: 'LIVE', homeScore: m.homeScore, awayScore: m.awayScore });
     return m;
   },
@@ -186,7 +204,7 @@ export const matchesService = {
         homeScore: match.homeScore,
         awayScore: match.awayScore,
       });
-      return tx.match.findUnique({ where: { id } });
+      return tx.match.findUnique({ where: { id }, include: matchInclude });
     }),
 
   /**
@@ -219,7 +237,7 @@ export const matchesService = {
         mvpPhotoUrl: data.photoUrl ?? null,
         mvpNote: data.note ?? null,
       },
-      include: { mvpPlayer: true },
+      include: matchInclude,
     });
   },
 
@@ -227,6 +245,7 @@ export const matchesService = {
     prisma.match.update({
       where: { id },
       data: { mvpPlayerId: null, mvpPhotoUrl: null, mvpNote: null },
+      include: matchInclude,
     }),
 
   /** Borrado definitivo: los goles y tarjetas del partido se van con él. */

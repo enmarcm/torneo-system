@@ -52,9 +52,25 @@ export interface Match {
   events?: MatchEvent[];
 }
 
+/** Filtros extra del listado: acotar a un día y subir el techo de resultados. */
+export interface MatchListParams {
+  /** `today` o una fecha `YYYY-MM-DD`, siempre en hora de Venezuela. */
+  day?: string;
+  limit?: number;
+}
+
 export const matchesApi = {
-  list: async (competitionId?: string, status?: string, editionId?: string): Promise<Match[]> =>
-    (await api.get('/matches', { params: { competitionId, status, editionId } })).data.data,
+  list: async (
+    competitionId?: string,
+    status?: string,
+    editionId?: string,
+    opts: MatchListParams = {},
+  ): Promise<Match[]> =>
+    (
+      await api.get('/matches', {
+        params: { competitionId, status, editionId, day: opts.day, limit: opts.limit },
+      })
+    ).data.data,
   get: async (id: string): Promise<Match> => (await api.get(`/matches/${id}`)).data.data,
   create: async (data: Partial<Match>): Promise<Match> => (await api.post('/matches', data)).data.data,
   update: async (id: string, data: Partial<Match>): Promise<Match> =>

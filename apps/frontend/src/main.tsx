@@ -9,6 +9,7 @@ import { lightTokens, darkTokens } from '@/theme/tokens';
 import { queryClient } from '@/lib/queryClient';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import { AppRouter } from '@/routes/AppRouter';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 
 const allTokenKeys = new Set([
   ...Object.keys(lightTokens),
@@ -35,7 +36,13 @@ const Root: React.FC = () => {
         <CssVarsInjector>
           <QueryClientProvider client={queryClient}>
             <BrowserRouter>
-              <AppRouter />
+              {/*
+                Red de contención: un error de render dejaba la aplicación en
+                blanco, sin manera de volver salvo recargar.
+              */}
+              <ErrorBoundary>
+                <AppRouter />
+              </ErrorBoundary>
             </BrowserRouter>
           </QueryClientProvider>
         </CssVarsInjector>

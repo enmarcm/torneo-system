@@ -10,6 +10,10 @@ export const matchesController = {
         competitionId: req.query.competitionId as string | undefined,
         status: req.query.status as string | undefined,
         editionId: req.query.editionId as string | undefined,
+        // Programación de una jornada concreta ('today' o YYYY-MM-DD), que es
+        // como el panel pide el día sin filtrar por competición.
+        day: req.query.day as string | undefined,
+        limit: req.query.limit ? Number(req.query.limit) || undefined : undefined,
       }),
     ),
   ),

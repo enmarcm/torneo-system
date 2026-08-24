@@ -13,8 +13,12 @@ export interface StandingRow {
   gc: number;
   dg: number;
   pts: number;
-  /** Zona calculada: ascenso, clasificación a eliminatoria o descenso. */
-  zone: 'PROMOTION' | 'QUALIFY' | 'RELEGATION' | 'NORMAL';
+  /**
+   * Zona calculada: clasificación a eliminatoria o descenso, y solo cuando la
+   * competición las tiene configuradas. El ascenso no es una zona de la tabla:
+   * lo decide el administrador sobre la inscripción (`outcome`).
+   */
+  zone: 'QUALIFY' | 'RELEGATION' | 'NORMAL';
   /** Decisión explícita del admin, manda por encima de la zona calculada. */
   outcome: 'NONE' | 'PROMOTED' | 'RELEGATED' | 'WITHDRAWN';
 }

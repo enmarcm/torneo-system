@@ -234,40 +234,26 @@ const StructureFields: React.FC<{
       )}
 
       {/*
-        La división más alta no tiene a dónde ascender y la más baja no tiene a
-        dónde descender, así que esas plazas ni se muestran: un campo que no puede
-        tener otro valor que cero solo confunde.
+        Ya no se piden plazas de ascenso: la tabla no pinta esa zona. El ascenso
+        es una decisión que se marca equipo por equipo al cerrar la competición,
+        así que el campo no gobernaba nada. La división más baja tampoco tiene a
+        dónde descender y ahí ni se muestra el de descenso.
       */}
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-        {divisionLevel !== TOP_DIVISION && (
-          <TextField
-            fullWidth
-            size="small"
-            type="number"
-            label="Plazas de ascenso"
-            value={value.promotionSpots}
-            onChange={(e) => set('promotionSpots', Math.max(0, Number(e.target.value)))}
-          />
-        )}
-        {divisionLevel !== BOTTOM_DIVISION && (
-          <TextField
-            fullWidth
-            size="small"
-            type="number"
-            label="Plazas de descenso"
-            value={value.relegationSpots}
-            onChange={(e) => set('relegationSpots', Math.max(0, Number(e.target.value)))}
-          />
-        )}
-      </Stack>
+      {divisionLevel !== BOTTOM_DIVISION && (
+        <TextField
+          fullWidth
+          size="small"
+          type="number"
+          label="Plazas de descenso"
+          value={value.relegationSpots}
+          onChange={(e) => set('relegationSpots', Math.max(0, Number(e.target.value)))}
+        />
+      )}
       <Typography variant="caption" color="text.secondary">
-        {divisionLevel === TOP_DIVISION
-          ? 'Primera es la división más alta: no tiene ascenso. '
-          : divisionLevel === BOTTOM_DIVISION
-            ? 'Tercera es la división más baja: no tiene descenso. '
-            : ''}
-        Estas plazas solo pintan las zonas en la tabla. El ascenso y el descenso definitivos los
-        marcás vos equipo por equipo.
+        {divisionLevel === BOTTOM_DIVISION
+          ? 'Tercera es la división más baja: no tiene descenso. '
+          : 'Estas plazas solo pintan la zona roja de la tabla. '}
+        El ascenso y el descenso definitivos los marcás vos equipo por equipo.
       </Typography>
     </>
   );

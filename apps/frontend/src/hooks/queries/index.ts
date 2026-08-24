@@ -93,6 +93,19 @@ export const useMatchesQuery = (competitionId?: string, status?: string) =>
     staleTime: status === 'LIVE' ? FRESH_STALE : MID_STALE,
   });
 
+/*
+  Programación de un solo día. Sin competición trae la de todas, que es como el
+  panel muestra la jornada completa; el filtro por día lo resuelve el servidor
+  para no depender del techo de resultados del listado general.
+*/
+export const useMatchesByDayQuery = (day: string, competitionId?: string, enabled = true) =>
+  useQuery({
+    queryKey: ['matches', 'day', day, competitionId],
+    queryFn: () => matchesApi.list(competitionId, undefined, undefined, { day, limit: 300 }),
+    enabled: enabled && !!day,
+    staleTime: FRESH_STALE,
+  });
+
 export const useMatchQuery = (id: string) =>
   useQuery({ queryKey: ['matches', id], queryFn: () => matchesApi.get(id), enabled: !!id, staleTime: FRESH_STALE });
 
