@@ -12,7 +12,7 @@ import {
 } from '@/hooks/queries';
 import { MatchCard } from '@/components/sport/MatchCard';
 import { LiveScoreboard } from '@/components/sport/LiveScoreboard';
-import { EditionBar } from '@/components/sport/EditionBar';
+import { PublicHero } from '@/components/sport/PublicHero';
 import { CompetitionCard } from '@/components/sport/CompetitionCard';
 import { AppModal } from '@/components/ui/AppModal';
 import { AdSlot } from '@/components/ui/AdSlot';
@@ -143,8 +143,8 @@ const PublicHome: React.FC = () => {
         ) : null}
 
         {active ? (
-          <EditionBar
-            name={active.name}
+          <PublicHero
+            editionName={active.name}
             seasonNumber={active.seasonNumber}
             liveCount={liveMatches.length}
           />
