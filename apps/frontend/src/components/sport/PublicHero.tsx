@@ -5,8 +5,10 @@ import {
   KeyboardArrowDownRounded,
 } from '@mui/icons-material';
 import { motion, useReducedMotion } from 'framer-motion';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/routes/routes';
+import { useGlobalStore } from '@/store/useGlobalStore';
 import { PUBLIC_TOPBAR_H } from '@/components/layout/PublicTopbar';
 import hero1600 from '@/assets/hero-cancha-1600.jpg';
 import hero900 from '@/assets/hero-cancha-900.jpg';
@@ -34,21 +36,14 @@ const ENCUADRE = '50% 45%';
  */
 const VELO = 0.82;
 
-/** Aire que el contenedor de la portada deja arriba (el `pt` del Container). */
-const AIRE_SUPERIOR = { xs: 16, md: 20 };
-
 /**
- * Alto de la portada: la primera pantalla completa, descontando la barra
- * superior y ese aire para que no aparezca una tira de scroll de más.
+ * Alto de la portada: la primera pantalla, entera.
  *
  * `svh` y no `vh`: en el teléfono, `100vh` se mide con la barra del navegador
  * escondida, así que la portada quedaba más alta que la pantalla y el botón de
  * abajo nacía cortado.
  */
-const ALTO = {
-  xs: `calc(100svh - ${PUBLIC_TOPBAR_H.xs + AIRE_SUPERIOR.xs}px)`,
-  md: `calc(100svh - ${PUBLIC_TOPBAR_H.md + AIRE_SUPERIOR.md}px)`,
-};
+const ALTO = '100svh';
 
 interface Props {
   /** Nombre de la edición en curso, tal como está cargado en el sistema. */
@@ -71,7 +66,18 @@ interface Props {
 export const PublicHero: React.FC<Props> = ({ editionName, seasonNumber, liveCount }) => {
   const navigate = useNavigate();
   const reduceMotion = useReducedMotion();
+  const setHeroActive = useGlobalStore((s) => s.setPublicHeroActive);
   const isLive = liveCount > 0;
+
+  /*
+    Se avisa a la barra superior de que hay portada debajo. Se apaga al salir de
+    la pantalla: si quedara encendido, la barra seguiría transparente sobre el
+    calendario y el texto blanco caería sobre fondo blanco.
+  */
+  useEffect(() => {
+    setHeroActive(true);
+    return () => setHeroActive(false);
+  }, [setHeroActive]);
 
   const bajar = () =>
     window.scrollBy({ top: window.innerHeight * 0.85, behavior: reduceMotion ? 'auto' : 'smooth' });
@@ -82,8 +88,13 @@ export const PublicHero: React.FC<Props> = ({ editionName, seasonNumber, liveCou
         position: 'relative',
         isolation: 'isolate',
         overflow: 'hidden',
-        borderRadius: 3,
         height: ALTO,
+        /*
+          Sube por detrás de la barra superior, que es fija y transparente
+          mientras esté acá. El desplazamiento que el layout deja para no tapar
+          el contenido se cancela: la foto tiene que empezar arriba de todo.
+        */
+        mt: { xs: `-${PUBLIC_TOPBAR_H.xs}px`, md: `-${PUBLIC_TOPBAR_H.md}px` },
         color: '#fff',
         // Se ve mientras la imagen carga, así el texto nunca queda sobre blanco.
         background: 'var(--heroGradient)',

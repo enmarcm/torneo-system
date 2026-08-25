@@ -133,20 +133,24 @@ const PublicHome: React.FC = () => {
 
   return (
     <Box>
+      {/*
+        La portada va fuera del contenedor y sin margen: ocupa el ancho entero y
+        arranca pegada arriba, por detrás de la barra superior.
+      */}
+      {active ? (
+        <PublicHero
+          editionName={active.name}
+          seasonNumber={active.seasonNumber}
+          liveCount={liveMatches.length}
+        />
+      ) : null}
+
       <Container maxWidth="xl" sx={{ pt: { xs: 2, md: 2.5 }, pb: { xs: 3, md: 4 } }}>
         {failed ? (
           <ErrorState
             title="No pudimos cargar la jornada"
             message="El sitio no está pudiendo hablar con el servidor de la liga. Los resultados que veas abajo pueden estar desactualizados."
             onRetry={retryAll}
-          />
-        ) : null}
-
-        {active ? (
-          <PublicHero
-            editionName={active.name}
-            seasonNumber={active.seasonNumber}
-            liveCount={liveMatches.length}
           />
         ) : null}
 

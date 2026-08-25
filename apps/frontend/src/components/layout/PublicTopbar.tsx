@@ -16,6 +16,7 @@ import {
   LoginRounded,
 } from '@mui/icons-material';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logoAzul from '@/assets/logo_azul.PNG';
 import logoBlanco from '@/assets/logo.PNG';
@@ -43,26 +44,61 @@ interface Props {
 export const PublicTopbar: React.FC<Props> = ({ onToggleNav, navExpanded }) => {
   const navigate = useNavigate();
   const { mode, toggleMode } = useGlobalStore();
+  const heroActive = useGlobalStore((s) => s.publicHeroActive);
   const isDark = mode === 'dark';
+
+  /*
+    La barra se apoya sobre la portada mientras esta la esté cubriendo, y recién
+    ahí puede ser transparente. La portada mide una pantalla y arranca pegada
+    arriba, así que deja de taparla en cuanto se baja más de una pantalla menos
+    el alto de la propia barra.
+  */
+  const [pastHero, setPastHero] = useState(false);
+  useEffect(() => {
+    if (!heroActive) return;
+    const alto = () =>
+      window.innerWidth >= 900 ? PUBLIC_TOPBAR_H.md : PUBLIC_TOPBAR_H.xs;
+    const check = () => setPastHero(window.scrollY > window.innerHeight - alto());
+    check();
+    // `passive`: no se cancela el scroll, y así no se le pega al hilo de pintado.
+    window.addEventListener('scroll', check, { passive: true });
+    window.addEventListener('resize', check);
+    return () => {
+      window.removeEventListener('scroll', check);
+      window.removeEventListener('resize', check);
+    };
+  }, [heroActive]);
+
+  /*
+    Transparente solo cuando hay portada debajo sosteniendo el contraste. En
+    cualquier otra pantalla la barra es la de siempre: sin fondo propio, el
+    texto quedaría sobre el contenido que pase por abajo.
+  */
+  const sobreHero = heroActive && !pastHero;
+  // Sobre la portada, oscura y con velo, todo va en blanco.
+  const tinta = sobreHero ? '#fff' : 'var(--sidebarText)';
   /*
     framer-motion no lo apaga la regla CSS de movimiento reducido: es JS. Hay
     que preguntarlo a mano, como en el resto del sitio.
   */
   const reduceMotion = useReducedMotion();
-  // El logotipo tiene que contrastar con la barra, que cambia con el tema.
-  const logoSrc = isDark ? logoBlanco : logoAzul;
+  // El logotipo tiene que contrastar con lo que tenga detrás: el tema, o la
+  // portada oscura cuando la barra se apoya sobre ella.
+  const logoSrc = isDark || sobreHero ? logoBlanco : logoAzul;
 
   return (
     <AppBar
       position="fixed"
       elevation={0}
       sx={{
-        bgcolor: 'var(--sidebar)',
-        color: 'text.primary',
+        bgcolor: sobreHero ? 'transparent' : 'var(--sidebar)',
+        color: sobreHero ? '#fff' : 'text.primary',
         borderBottom: '1px solid',
-        borderColor: 'var(--sidebarBorder)',
+        borderColor: sobreHero ? 'transparent' : 'var(--sidebarBorder)',
         // Por encima de la columna lateral: la barra cruza la pantalla entera.
         zIndex: (t) => t.zIndex.drawer + 2,
+        // El cambio al pasar la portada se acompaña; de golpe se lee como un parpadeo.
+        transition: 'background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease',
       }}
     >
       <Toolbar
@@ -77,7 +113,7 @@ export const PublicTopbar: React.FC<Props> = ({ onToggleNav, navExpanded }) => {
             onClick={onToggleNav}
             aria-label={navExpanded ? 'Cerrar menú' : 'Abrir menú'}
             aria-expanded={navExpanded}
-            sx={{ color: 'var(--sidebarText)' }}
+            sx={{ color: tinta, transition: 'color 0.25s ease' }}
           >
             {navExpanded ? <MenuOpenRounded /> : <MenuRounded />}
           </IconButton>
@@ -125,7 +161,10 @@ export const PublicTopbar: React.FC<Props> = ({ onToggleNav, navExpanded }) => {
               fontWeight: 800,
               fontSize: { xs: 15, md: 17 },
               letterSpacing: '-0.01em',
-              color: 'var(--logo)',
+              color: sobreHero ? '#fff' : 'var(--logo)',
+              transition: 'color 0.25s ease',
+              // Sobre la foto el blanco necesita apoyo para no diluirse.
+              textShadow: sobreHero ? '0 1px 10px rgba(0,0,0,0.45)' : 'none',
             }}
           >
             {/* En teléfono la sigla; el nombre entero empuja al botón de sesión fuera. */}
@@ -144,7 +183,11 @@ export const PublicTopbar: React.FC<Props> = ({ onToggleNav, navExpanded }) => {
           <IconButton
             onClick={toggleMode}
             aria-label={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-            sx={{ color: 'var(--sidebarText)', '&:hover': { color: 'var(--logo)' } }}
+            sx={{
+              color: tinta,
+              transition: 'color 0.25s ease',
+              '&:hover': { color: sobreHero ? '#fff' : 'var(--logo)' },
+            }}
           >
             {/*
               El único momento animado de la barra: el icono gira mientras el
@@ -177,6 +220,16 @@ export const PublicTopbar: React.FC<Props> = ({ onToggleNav, navExpanded }) => {
             fontSize: { xs: 13, md: 14 },
             whiteSpace: 'nowrap',
             '& .MuiButton-startIcon': { mr: { xs: 0, sm: 1 }, ml: 0 },
+            /*
+              Sobre la portada el botón queda navy sobre navy y desaparece: ahí
+              se invierte, igual que el "Ver partidos" que tiene justo debajo.
+            */
+            ...(sobreHero && {
+              bgcolor: '#fff',
+              color: 'var(--primary)',
+              boxShadow: 'none',
+              '&:hover': { bgcolor: 'rgba(255,255,255,0.88)', boxShadow: 'none' },
+            }),
           }}
         >
           Iniciar sesión
