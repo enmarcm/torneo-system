@@ -32,6 +32,40 @@ export interface MatchListOpts {
   day?: 'today';
 }
 
+/**
+ * Ficha pública de un jugador: en qué equipos y torneos jugó, con qué números.
+ * El documento vuelve enmascarado a propósito, para que la ficha no sirva para
+ * cosechar cédulas si alguien comparte el enlace.
+ */
+export interface PublicPlayerProfile {
+  player: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    photoUrl: string | null;
+    documentMasked: string;
+  };
+  totals: { matchesPlayed: number; goals: number; yellowCards: number; redCards: number };
+  teams: Array<{ id: string; name: string; logoUrl: string | null }>;
+  career: Array<{
+    rosterEntryId: string;
+    jerseyNumber: number | null;
+    status: string;
+    team: { id: string; name: string; logoUrl: string | null };
+    competition: {
+      id: string;
+      name: string;
+      kind: Competition['kind'] | null;
+      format: Competition['format'] | null;
+      division: string | null;
+      divisionLevel: number | null;
+      category: { id: string; name: string } | null;
+    };
+    edition: { id: string; name: string; year: number } | null;
+    stats: { matchesPlayed: number; goals: number; yellowCards: number; redCards: number };
+  }>;
+}
+
 export const publicApi = {
   editions: async (): Promise<Edition[]> => (await api.get('/public/editions')).data.data,
   competitions: async (editionId?: string): Promise<Competition[]> =>
@@ -61,4 +95,7 @@ export const publicApi = {
   bracket: async (competitionId: string): Promise<BracketRound[]> =>
     (await api.get(`/public/competitions/${competitionId}/bracket`)).data.data,
   match: async (id: string): Promise<Match> => (await api.get(`/public/matches/${id}`)).data.data,
+  /** Busca la ficha de un jugador por su documento completo. */
+  playerByDocument: async (number: string): Promise<PublicPlayerProfile> =>
+    (await api.get('/public/players/by-document', { params: { number } })).data.data,
 };

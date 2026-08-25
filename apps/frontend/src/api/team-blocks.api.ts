@@ -13,8 +13,8 @@ export interface TeamBlock {
   createdAt: string;
   team: { id: string; name: string; logoUrl: string | null; status: 'ACTIVE' | 'INACTIVE' };
   competition: { id: string; name: string } | null;
-  blockedBy: { id: string; email: string } | null;
-  liftedBy: { id: string; email: string } | null;
+  blockedBy: { id: string; username: string } | null;
+  liftedBy: { id: string; username: string } | null;
 }
 
 export interface TeamBlockSummary {

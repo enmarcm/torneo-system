@@ -14,6 +14,7 @@ import {
   LiveTvRounded,
   BarChartRounded,
   GroupsRounded,
+  BadgeRounded,
 } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/routes/routes';
@@ -34,6 +35,7 @@ export const PUBLIC_NAV: PublicNavItem[] = [
   { label: 'En vivo', to: ROUTES.public.live, icon: <LiveTvRounded /> },
   { label: 'Estadísticas', to: ROUTES.public.stats, icon: <BarChartRounded /> },
   { label: 'Equipos', to: ROUTES.public.teams, icon: <GroupsRounded /> },
+  { label: 'Buscar jugador', to: ROUTES.public.playerSearch, icon: <BadgeRounded /> },
 ];
 
 export const PUBLIC_SIDEBAR_WIDTH = 260;

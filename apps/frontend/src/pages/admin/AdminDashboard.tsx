@@ -36,7 +36,7 @@ const AdminDashboard: React.FC = () => {
         <Box sx={{ mb: 3 }}>
           <EntityHeroCard
             title={activeEdition.name}
-            subtitle={`${activeEdition.startDate ? formatDateTime(activeEdition.startDate) : ''} · ${activeEdition.transfersOpen ? 'Traspasos abiertos' : 'Traspasos cerrados'}`}
+            subtitle={activeEdition.startDate ? formatDateTime(activeEdition.startDate) : ''}
             chips={
               <Stack direction="row" spacing={1}>
                 <Box sx={{ px: 1.5, py: 0.5, borderRadius: 999, bgcolor: 'rgba(255,255,255,0.12)', fontSize: 12, fontWeight: 600 }}>

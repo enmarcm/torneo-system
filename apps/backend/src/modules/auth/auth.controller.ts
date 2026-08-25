@@ -12,8 +12,16 @@ const cookieOpts = {
 
 export const authController = {
   login: asyncHandler(async (req, res) => {
-    const { email, password } = req.body as { email: string; password: string };
-    const { user, accessToken, refreshToken } = await authService.login(email, password);
+    // `email` sigue leyéndose por si entra una petición del panel anterior.
+    const { username, email, password } = req.body as {
+      username?: string;
+      email?: string;
+      password: string;
+    };
+    const { user, accessToken, refreshToken } = await authService.login(
+      (username ?? email)!,
+      password,
+    );
     res.cookie('refreshToken', refreshToken, cookieOpts);
     ok(res, { user, accessToken }, 'Sesión iniciada');
   }),
@@ -34,5 +42,11 @@ export const authController = {
   me: asyncHandler(async (req, res) => {
     const user = await authService.me(req.user!.id);
     ok(res, user);
+  }),
+
+  updateMe: asyncHandler(async (req, res) => {
+    const { email } = req.body as { email?: string | null };
+    const user = await authService.updateMe(req.user!.id, email ? email : null);
+    ok(res, user, 'Datos actualizados');
   }),
 };

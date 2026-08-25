@@ -22,7 +22,7 @@ export const teamsService = {
       skip: (page - 1) * limit,
       take: limit,
       include: {
-        leader: { select: { email: true, status: true } },
+        leader: { select: { username: true, email: true, status: true } },
         _count: { select: { registrations: true } },
       },
       orderBy: { name: 'asc' },
@@ -32,7 +32,7 @@ export const teamsService = {
     const t = await prisma.team.findUnique({
       where: { id },
       include: {
-        leader: { select: { email: true, status: true } },
+        leader: { select: { username: true, email: true, status: true } },
         registrations: {
           include: { competition: { include: { category: true } }, roster: { include: { player: true } } },
         },
@@ -45,11 +45,11 @@ export const teamsService = {
   create: async (data: {
     name: string;
     logoUrl?: string;
-    leaderEmail: string;
+    leaderUsername: string;
     leaderPassword: string;
   }) => {
-    const emailExists = await prisma.user.findUnique({ where: { email: data.leaderEmail } });
-    if (emailExists) throw new AppError(409, 'Ya existe un usuario con ese correo', 'DUPLICATE');
+    const taken = await prisma.user.findUnique({ where: { username: data.leaderUsername } });
+    if (taken) throw new AppError(409, 'Ya existe un usuario con ese nombre', 'DUPLICATE');
     return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const team = await tx.team.create({
         data: { name: data.name, logoUrl: data.logoUrl ?? null },
@@ -57,7 +57,7 @@ export const teamsService = {
       const passwordHash = await hashPassword(data.leaderPassword);
       await tx.user.create({
         data: {
-          email: data.leaderEmail,
+          username: data.leaderUsername,
           passwordHash,
           role: 'TEAM_LEADER',
           teamId: team.id,

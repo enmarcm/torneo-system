@@ -8,7 +8,6 @@ import { rostersApi, type RosterEntry } from '@/api/rosters.api';
 import { matchesApi, type Match } from '@/api/matches.api';
 import { standingsApi, type StandingRow } from '@/api/standings.api';
 import { statsApi } from '@/api/stats.api';
-import { transfersApi, type Transfer } from '@/api/transfers.api';
 import { adsApi, type Ad } from '@/api/ads.api';
 import { dashboardApi, type DashboardMetrics } from '@/api/dashboard.api';
 import { knockoutApi, type BracketRound } from '@/api/knockout.api';
@@ -78,6 +77,16 @@ export const usePlayersQuery = (search?: string) =>
 export const usePlayerQuery = (id: string) =>
   useQuery({ queryKey: ['players', id], queryFn: () => playersApi.get(id), enabled: !!id, staleTime: MID_STALE });
 
+/** Plantilla del torneo anterior del equipo, para ofrecer traerla. */
+export const usePreviousRosterQuery = (registrationId: string, enabled = true) =>
+  useQuery({
+    queryKey: ['roster', registrationId, 'previous'],
+    queryFn: () => rostersApi.previous(registrationId),
+    enabled: enabled && !!registrationId,
+    staleTime: MID_STALE,
+    retry: false,
+  });
+
 export const useRosterQuery = (registrationId: string) =>
   useQuery({
     queryKey: ['roster', registrationId],
@@ -119,9 +128,6 @@ export const useStandingsQuery = (competitionId: string, groupId?: string) =>
 
 export const usePlayerStatsQuery = (params?: { competitionId?: string; teamId?: string }) =>
   useQuery({ queryKey: ['stats', 'players', params], queryFn: () => statsApi.players(params), staleTime: MID_STALE });
-
-export const useTransfersQuery = (editionId?: string) =>
-  useQuery({ queryKey: ['transfers', editionId], queryFn: () => transfersApi.list(editionId), staleTime: MID_STALE });
 
 /** Panel de administración: todos los anuncios, también los apagados y vencidos. */
 export const useAdsQuery = () =>
@@ -232,4 +238,4 @@ export const useTeamBlockSummaryQuery = (teamId: string) =>
   });
 
 // Re-export common types used in pages
-export type { Edition, Category, Competition, Team, Player, RosterEntry, Match, StandingRow, Transfer, Ad, DashboardMetrics, TeamRegistrationWithRoster, TeamStats, TeamRosterEntry, BracketRound, TeamBlock };
+export type { Edition, Category, Competition, Team, Player, RosterEntry, Match, StandingRow, Ad, DashboardMetrics, TeamRegistrationWithRoster, TeamStats, TeamRosterEntry, BracketRound, TeamBlock };

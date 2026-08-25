@@ -6,8 +6,8 @@ import { TeamBlockScope } from '@prisma/client';
 const blockInclude = {
   team: { select: { id: true, name: true, logoUrl: true, status: true } },
   competition: { select: { id: true, name: true } },
-  blockedBy: { select: { id: true, email: true } },
-  liftedBy: { select: { id: true, email: true } },
+  blockedBy: { select: { id: true, username: true } },
+  liftedBy: { select: { id: true, username: true } },
 };
 
 export const teamBlocksService = {

@@ -2,7 +2,7 @@ import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Button, Tabs, Tab, A
 import { AppModal } from '@/components/ui/AppModal';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { ArrowBackRounded, GroupsRounded, SportsSoccerRounded, TableChartRounded } from '@mui/icons-material';
+import { ArrowBackRounded, GroupsRounded, SportsSoccerRounded, TableChartRounded, PeopleAltRounded } from '@mui/icons-material';
 import { useCompetitionQuery, useStandingsQuery, useMatchesQuery } from '@/hooks/queries';
 import { useSetRegistrationOutcome } from '@/hooks/mutations';
 import { useToast } from '@/hooks/common/useToast';
@@ -12,6 +12,8 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { StatCard } from '@/components/ui/StatCard';
 import { StandingsTable } from '@/components/sport/StandingsTable';
 import { MatchCard } from '@/components/sport/MatchCard';
+import { RosterEditor } from '@/components/sport/RosterEditor';
+import { AppDrawer } from '@/components/ui/AppDrawer';
 import { ROUTES } from '@/routes/routes';
 import { getStatusLabel } from '@/utils/statusLabels';
 
@@ -65,6 +67,12 @@ const AdminCompetitionDetail: React.FC = () => {
     outcome: Outcome;
   } | null>(null);
   const [moveNote, setMoveNote] = useState('');
+  /*
+    Plantilla que se está editando. El administrador puede armarla o corregirla
+    sin depender de que el delegado entre: los cierres de inscripción y las
+    sanciones caen sobre la liga, no sobre el equipo.
+  */
+  const [rosterOf, setRosterOf] = useState<{ id: string; teamName: string } | null>(null);
 
   const requestOutcome = (registrationId: string, teamName: string, outcome: Outcome) => {
     // Volver a "sin decisión" no mueve a nadie, así que no necesita confirmación.
@@ -165,6 +173,17 @@ const AdminCompetitionDetail: React.FC = () => {
                       <StatusBadge status={r.status} />
                     </Stack>
 
+                    <Button
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      startIcon={<PeopleAltRounded />}
+                      onClick={() => setRosterOf({ id: r.id, teamName: r.team?.name ?? 'el equipo' })}
+                      sx={{ mt: 1.5 }}
+                    >
+                      Editar plantilla
+                    </Button>
+
                     {/* El ascenso, el descenso y la baja los decidís vos, no la tabla. */}
                     <TextField
                       select
@@ -194,6 +213,17 @@ const AdminCompetitionDetail: React.FC = () => {
           )}
         </Box>
       )}
+
+      <AppDrawer
+        open={!!rosterOf}
+        onClose={() => setRosterOf(null)}
+        title="Plantilla del equipo"
+        subtitle={rosterOf ? `${rosterOf.teamName} · ${comp.name}` : undefined}
+      >
+        {rosterOf && (
+          <RosterEditor registrationId={rosterOf.id} maxPlayers={comp.maxPlayers} />
+        )}
+      </AppDrawer>
 
       <AppModal
         open={!!pendingMove}

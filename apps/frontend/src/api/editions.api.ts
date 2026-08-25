@@ -6,9 +6,6 @@ export interface Edition {
   year: number;
   seasonNumber: number;
   status: 'DRAFT' | 'ACTIVE' | 'FINISHED';
-  transfersOpen: boolean;
-  transferWindowStart: string | null;
-  transferWindowEnd: string | null;
   startDate: string;
   endDate: string;
   createdAt: string;
@@ -23,10 +20,6 @@ export const editionsApi = {
     (await api.patch(`/editions/${id}`, data)).data.data,
   setStatus: async (id: string, status: Edition['status']): Promise<Edition> =>
     (await api.patch(`/editions/${id}/status`, { status })).data.data,
-  setTransfers: async (
-    id: string,
-    data: { transfersOpen: boolean; transferWindowStart?: string; transferWindowEnd?: string },
-  ): Promise<Edition> => (await api.patch(`/editions/${id}/transfers`, data)).data.data,
   /** Borrado definitivo en cascada: se lleva las competiciones de la edición enteras. */
   remove: async (id: string): Promise<{ id: string }> =>
     (await api.delete(`/editions/${id}`)).data.data,

@@ -41,14 +41,6 @@ const TeamHistory: React.FC = () => {
                   <StatusBadge status={ed.status} />
                   <Chip size="small" label={`${formatDate(ed.startDate)} → ${formatDate(ed.endDate)}`} variant="outlined" />
                 </Stack>
-                <Stack direction="row" spacing={2} sx={{ pt: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">Traspasos</Typography>
-                    <Typography sx={{ fontWeight: 700, fontFamily: '"Plus Jakarta Sans"' }}>
-                      {ed.transfersOpen ? 'Abiertos' : 'Cerrados'}
-                    </Typography>
-                  </Box>
-                </Stack>
               </Card>
             </Grid>
           ))}

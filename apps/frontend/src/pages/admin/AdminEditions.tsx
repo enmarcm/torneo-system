@@ -1,4 +1,4 @@
-import { Box, Grid2 as Grid, Card, Stack, Typography, Switch, IconButton, Menu, MenuItem, Chip, Button, TextField, Tooltip, Divider } from '@mui/material';
+import { Box, Grid2 as Grid, Card, Stack, Typography, IconButton, Menu, MenuItem, Chip, Button, TextField, Tooltip, Divider } from '@mui/material';
 import { getStatusLabel, getStatusColor } from '@/utils/statusLabels';
 import { AddRounded, MoreVertRounded, EmojiEventsRounded } from '@mui/icons-material';
 import { useState } from 'react';
@@ -11,7 +11,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { AppDrawer } from '@/components/ui/AppDrawer';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useEditionsQuery } from '@/hooks/queries';
-import { useCreateEdition, useSetEditionStatus, useSetTransfers, useDeleteEdition } from '@/hooks/mutations';
+import { useCreateEdition, useSetEditionStatus, useDeleteEdition } from '@/hooks/mutations';
 import { formatDate } from '@/utils/formatDate';
 import type { Edition } from '@/api/editions.api';
 import { extractErrorMessage } from '@/api/axios';
@@ -31,7 +31,6 @@ const AdminEditions: React.FC = () => {
   const toast = useToast();
   const create = useCreateEdition();
   const setStatus = useSetEditionStatus();
-  const setTransfers = useSetTransfers();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Edition | null>(null);
   const [anchor, setAnchor] = useState<{ el: HTMLElement; ed: Edition } | null>(null);
@@ -94,13 +93,6 @@ const AdminEditions: React.FC = () => {
                   <StatusBadge status={ed.status} />
                   <Chip size="small" label={`${formatDate(ed.startDate)} → ${formatDate(ed.endDate)}`} variant="outlined" />
                 </Stack>
-                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ pt: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
-                  <Typography variant="body2" color="text.secondary">Traspasos</Typography>
-                  <Switch
-                    checked={ed.transfersOpen}
-                    onChange={(e) => setTransfers.mutate({ id: ed.id, data: { transfersOpen: e.target.checked } })}
-                  />
-                </Stack>
               </Card>
             </Grid>
           ))}
@@ -143,7 +135,7 @@ const AdminEditions: React.FC = () => {
           }
         }}
         title="¿Eliminar definitivamente?"
-        message={`Se borrará "${purgingEdition?.name ?? ''}" con todas sus competiciones, partidos, tablas, plantillas y traspasos. No hay vuelta atrás: es toda una temporada.`}
+        message={`Se borrará "${purgingEdition?.name ?? ''}" con todas sus competiciones, partidos, tablas y plantillas. No hay vuelta atrás: es toda una temporada.`}
         confirmLabel="Eliminar definitivamente"
         loading={deleteEdition.isPending}
       />

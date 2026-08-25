@@ -8,7 +8,6 @@ import { teamsApi, type Team } from '@/api/teams.api';
 import { playersApi, type Player } from '@/api/players.api';
 import { rostersApi, type RosterEntry } from '@/api/rosters.api';
 import { matchesApi, matchEventsApi, type Match } from '@/api/matches.api';
-import { transfersApi, type Transfer } from '@/api/transfers.api';
 import { adsApi, type Ad } from '@/api/ads.api';
 import { authApi } from '@/api/auth.api';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -20,8 +19,18 @@ const invalidate = (qc: ReturnType<typeof useQueryClient>, keys: string[][]) => 
 export const useLoginMutation = () => {
   const setSession = useAuthStore((s) => s.setSession);
   return useMutation({
-    mutationFn: ({ email, password }: { email: string; password: string }) => authApi.login(email, password),
+    mutationFn: ({ username, password }: { username: string; password: string }) =>
+      authApi.login(username, password),
     onSuccess: (data) => setSession(data.user, data.accessToken),
+  });
+};
+
+/** El propio usuario carga o cambia su correo de contacto. */
+export const useUpdateMe = () => {
+  const setUser = useAuthStore((s) => s.setUser);
+  return useMutation({
+    mutationFn: (data: { email: string | null }) => authApi.updateMe(data),
+    onSuccess: (user) => setUser(user),
   });
 };
 
@@ -46,20 +55,6 @@ export const useSetEditionStatus = () => {
     onSuccess: () => invalidate(qc, [['editions'], ['public', 'editions']]),
   });
 };
-export const useSetTransfers = () => {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: { transfersOpen: boolean; transferWindowStart?: string; transferWindowEnd?: string };
-    }) => editionsApi.setTransfers(id, data),
-    onSuccess: () => invalidate(qc, [['editions'], ['public', 'editions']]),
-  });
-};
-
 export const useCreateCategory = () => {
   const qc = useQueryClient();
   return useMutation({
@@ -169,6 +164,15 @@ export const useAddRoster = () => {
     mutationFn: ({ registrationId, data }: { registrationId: string; data: { playerId: string; jerseyNumber?: number } }) =>
       rostersApi.add(registrationId, data),
     onSuccess: (_d, vars) => invalidate(qc, [['roster', vars.registrationId], ['teams']]),
+  });
+};
+/** Copia la plantilla del torneo anterior a esta inscripción. */
+export const useImportPreviousRoster = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (registrationId: string) => rostersApi.importPrevious(registrationId),
+    onSuccess: (_d, registrationId) =>
+      invalidate(qc, [['roster', registrationId], ['roster'], ['teams']]),
   });
 };
 export const useUpdateRoster = () => {
@@ -409,21 +413,6 @@ export const useCreateMatchEvent = () => {
       data: { type: 'GOAL' | 'YELLOW' | 'RED' | 'SUB' | 'OTHER'; minute: number; teamRegistrationId: string; playerId?: string };
     }) => matchEventsApi.create(matchId, data),
     onSuccess: () => invalidate(qc, [['matches'], ['public', 'matches'], ['standings'], ['stats']]),
-  });
-};
-
-export const useCreateTransfer = () => {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: transfersApi.create,
-    onSuccess: () => invalidate(qc, [['transfers'], ['roster'], ['teams']]),
-  });
-};
-export const useSetTransferStatus = () => {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, status }: { id: string; status: 'APPROVED' | 'REJECTED' }) => transfersApi.setStatus(id, status),
-    onSuccess: () => invalidate(qc, [['transfers'], ['roster'], ['teams']]),
   });
 };
 

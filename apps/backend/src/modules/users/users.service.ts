@@ -8,17 +8,22 @@ export const usersService = {
   list: () =>
     prisma.user.findMany({
       where: { role: 'TEAM_LEADER' },
-      select: { id: true, email: true, status: true, teamId: true, createdAt: true },
+      select: { id: true, username: true, email: true, status: true, teamId: true, createdAt: true },
       orderBy: { createdAt: 'desc' },
     }),
 
-  create: async (data: { email: string; password: string; teamId?: string }) => {
-    const exists = await prisma.user.findUnique({ where: { email: data.email } });
-    if (exists) throw new AppError(409, 'Ya existe un usuario con ese correo', 'DUPLICATE');
+  create: async (data: { username: string; password: string; teamId?: string }) => {
+    const exists = await prisma.user.findUnique({ where: { username: data.username } });
+    if (exists) throw new AppError(409, 'Ya existe un usuario con ese nombre', 'DUPLICATE');
     const passwordHash = await hashPassword(data.password);
     return prisma.user.create({
-      data: { email: data.email, passwordHash, role: 'TEAM_LEADER', teamId: data.teamId ?? null },
-      select: { id: true, email: true, status: true, teamId: true },
+      data: {
+        username: data.username,
+        passwordHash,
+        role: 'TEAM_LEADER',
+        teamId: data.teamId ?? null,
+      },
+      select: { id: true, username: true, email: true, status: true, teamId: true },
     });
   },
 

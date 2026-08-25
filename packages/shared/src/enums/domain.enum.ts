@@ -86,13 +86,6 @@ export const DocumentType = {
 } as const;
 export type DocumentType = (typeof DocumentType)[keyof typeof DocumentType];
 
-export const TransferStatus = {
-  PENDING: 'PENDING',
-  APPROVED: 'APPROVED',
-  REJECTED: 'REJECTED',
-} as const;
-export type TransferStatus = (typeof TransferStatus)[keyof typeof TransferStatus];
-
 export const AdPlacement = {
   HOME_BANNER: 'HOME_BANNER',
   SIDEBAR: 'SIDEBAR',

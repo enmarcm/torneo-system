@@ -23,14 +23,9 @@ export const editionsService = {
   setStatus: (id: string, status: 'DRAFT' | 'ACTIVE' | 'FINISHED') =>
     prisma.edition.update({ where: { id }, data: { status } }),
 
-  setTransfers: (
-    id: string,
-    data: { transfersOpen: boolean; transferWindowStart?: Date; transferWindowEnd?: Date },
-  ) => prisma.edition.update({ where: { id }, data }),
-
   /**
    * Borrado definitivo y en cascada: la edición se lleva sus competiciones
-   * enteras (partidos, tablas, plantillas y estadísticas) y sus traspasos.
+   * enteras (partidos, tablas, plantillas y estadísticas).
    */
   remove: async (id: string) => {
     const edition = await prisma.edition.findUnique({ where: { id } });

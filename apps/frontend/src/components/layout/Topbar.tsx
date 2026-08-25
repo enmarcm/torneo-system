@@ -46,7 +46,7 @@ export const Topbar: React.FC<Props> = ({ onOpenSidebar }) => {
         </IconButton>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="h4" sx={{ lineHeight: 1.1, fontSize: { xs: 16, md: 20 } }} noWrap>
-            Hola, {user?.email?.split('@')[0]?.toUpperCase() ?? 'EQUIPO'}
+            Hola, {user?.username?.toUpperCase() ?? 'EQUIPO'}
           </Typography>
           <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'capitalize' }}>
             {todayLong()}
@@ -85,13 +85,13 @@ export const Topbar: React.FC<Props> = ({ onOpenSidebar }) => {
 
         <IconButton onClick={(e) => setAnchor(e.currentTarget)} aria-label="Menú de usuario" sx={{ p: 0.5 }}>
           <Avatar sx={{ width: 36, height: 36, bgcolor: 'primary.main', fontWeight: 700 }}>
-            {user?.email?.[0]?.toUpperCase()}
+            {user?.username?.[0]?.toUpperCase()}
           </Avatar>
         </IconButton>
         <Menu anchorEl={anchor} open={!!anchor} onClose={() => setAnchor(null)}>
           <MenuItem disabled sx={{ opacity: '1 !important' }}>
             <Stack>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>{user?.email}</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>{user?.username}</Typography>
               <Typography variant="caption" color="text.secondary">
                 {user?.role === 'ADMIN' ? 'Administrador' : 'Líder de equipo'}
               </Typography>

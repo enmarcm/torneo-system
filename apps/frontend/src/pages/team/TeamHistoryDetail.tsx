@@ -57,7 +57,6 @@ const TeamHistoryDetail: React.FC = () => {
               {formatDate(edition.startDate)} → {formatDate(edition.endDate)}
             </Typography>
           </Box>
-          <Chip label={edition.transfersOpen ? 'Traspasos abiertos' : 'Traspasos cerrados'} size="small" sx={{ bgcolor: 'rgba(255,255,255,0.15)', color: '#fff', fontWeight: 600 }} />
         </Stack>
       </Card>
 

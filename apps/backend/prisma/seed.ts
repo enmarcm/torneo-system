@@ -50,14 +50,23 @@ const CATEGORIES: Prisma.CategoryCreateInput[] = [
 ];
 
 async function main() {
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@torneo.com';
+  // Se entra por nombre de usuario; el correo del admin queda como dato de
+  // contacto, opcional como el de cualquier otro usuario.
+  const adminUsername = (process.env.ADMIN_USERNAME || 'admin').toLowerCase();
+  const adminEmail = process.env.ADMIN_EMAIL || null;
   const adminPassword = process.env.ADMIN_PASSWORD || 'Admin1234';
   const adminHash = await argon2.hash(adminPassword);
 
   await prisma.user.upsert({
-    where: { email: adminEmail },
+    where: { username: adminUsername },
     update: { passwordHash: adminHash, role: 'ADMIN', status: 'ACTIVE' },
-    create: { email: adminEmail, passwordHash: adminHash, role: 'ADMIN', status: 'ACTIVE' },
+    create: {
+      username: adminUsername,
+      email: adminEmail,
+      passwordHash: adminHash,
+      role: 'ADMIN',
+      status: 'ACTIVE',
+    },
   });
 
   for (const c of CATEGORIES) {
@@ -138,8 +147,8 @@ async function main() {
   }
 
   const teamData = [
-    { name: 'Águilas FC', email: 'aguilas@torneo.com' },
-    { name: 'Tigres United', email: 'tigres@torneo.com' },
+    { name: 'Águilas FC', username: 'aguilas' },
+    { name: 'Tigres United', username: 'tigres' },
   ];
 
   const regs: string[] = [];
@@ -147,7 +156,7 @@ async function main() {
     const team = await prisma.team.create({ data: { name: td.name } });
     await prisma.user.create({
       data: {
-        email: td.email,
+        username: td.username,
         passwordHash: await argon2.hash('Team1234'),
         role: 'TEAM_LEADER',
         teamId: team.id,

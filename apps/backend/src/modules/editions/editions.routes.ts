@@ -8,7 +8,6 @@ import {
   createEditionSchema,
   updateEditionSchema,
   editionStatusSchema,
-  transfersSchema,
 } from './editions.schema';
 
 export const editionsRouter = Router();
@@ -38,14 +37,6 @@ editionsRouter.patch(
   validate(editionStatusSchema),
   audit('STATUS', 'Edition'),
   editionsController.setStatus,
-);
-editionsRouter.patch(
-  '/:id/transfers',
-  authMiddleware,
-  requireRole('ADMIN'),
-  validate(transfersSchema),
-  audit('TRANSFERS', 'Edition'),
-  editionsController.setTransfers,
 );
 editionsRouter.delete(
   '/:id',

@@ -155,11 +155,11 @@ export const Sidebar: React.FC = () => {
             {user && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.5, py: 1.25 }}>
                 <Avatar sx={{ width: 30, height: 30, bgcolor: 'primary.main', fontWeight: 700, fontSize: 12, flexShrink: 0 }}>
-                  {user.email?.[0]?.toUpperCase()}
+                  {user.username?.[0]?.toUpperCase()}
                 </Avatar>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography sx={{ color: 'var(--logo)', fontSize: 12, fontWeight: 600, fontFamily: '"Inter", system-ui, sans-serif' }} noWrap>
-                    {user.email.toUpperCase()}
+                    {user.username.toUpperCase()}
                   </Typography>
                   <Typography sx={{ fontSize: 10, color: 'var(--sidebarText)' }}>
                     {user.role === 'ADMIN' ? 'Administrador' : 'Líder de equipo'}

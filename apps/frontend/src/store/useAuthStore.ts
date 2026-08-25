@@ -3,7 +3,10 @@ import { persist } from 'zustand/middleware';
 
 export type AuthUser = {
   id: string;
-  email: string;
+  /** Con lo que se entra al sistema. */
+  username: string;
+  /** Dato de contacto, lo carga el propio usuario desde su panel. */
+  email: string | null;
   role: 'ADMIN' | 'TEAM_LEADER';
   teamId: string | null;
 };

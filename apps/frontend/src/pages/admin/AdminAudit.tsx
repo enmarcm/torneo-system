@@ -20,7 +20,7 @@ const AdminAudit: React.FC = () => {
         <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
           <TextField select size="small" label="Entidad" value={entity} onChange={(e) => setEntity(e.target.value)} sx={{ minWidth: 200 }}>
             <MenuItem value="">Todas</MenuItem>
-            {['User', 'Edition', 'Category', 'Competition', 'Team', 'Player', 'RosterEntry', 'Match', 'Transfer'].map((e) => (
+            {['User', 'Edition', 'Category', 'Competition', 'Team', 'Player', 'RosterEntry', 'Match'].map((e) => (
               <MenuItem key={e} value={e}>{e}</MenuItem>
             ))}
           </TextField>

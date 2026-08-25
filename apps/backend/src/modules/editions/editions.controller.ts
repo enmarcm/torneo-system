@@ -12,9 +12,6 @@ export const editionsController = {
   setStatus: asyncHandler(async (req, res) =>
     ok(res, await editionsService.setStatus(req.params.id, req.body.status)),
   ),
-  setTransfers: asyncHandler(async (req, res) =>
-    ok(res, await editionsService.setTransfers(req.params.id, req.body)),
-  ),
   remove: asyncHandler(async (req, res) =>
     ok(res, await editionsService.remove(req.params.id), 'Eliminado definitivamente'),
   ),

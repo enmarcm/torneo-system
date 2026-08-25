@@ -72,7 +72,7 @@ const AdminTeams: React.FC = () => {
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
   const [anchor, setAnchor] = useState<{ el: HTMLElement; t: Team } | null>(null);
   const [regOpen, setRegOpen] = useState<{ team: Team; competitionId: string } | null>(null);
-  const [form, setForm] = useState({ name: '', leaderEmail: '', leaderPassword: '', logoUrl: '' });
+  const [form, setForm] = useState({ name: '', leaderUsername: '', leaderPassword: '', logoUrl: '' });
   const [editForm, setEditForm] = useState({ name: '', logoUrl: '' });
   const [deletingTeam, setDeletingTeam] = useState<Team | null>(null);
   const [purgingTeam, setPurgingTeam] = useState<Team | null>(null);
@@ -104,9 +104,9 @@ const AdminTeams: React.FC = () => {
         setEditingTeam(null);
         toast.success('Equipo actualizado');
       } else {
-        await create.mutateAsync({ name: form.name, logoUrl: form.logoUrl || null, leaderEmail: form.leaderEmail, leaderPassword: form.leaderPassword } as never);
+        await create.mutateAsync({ name: form.name, logoUrl: form.logoUrl || null, leaderUsername: form.leaderUsername, leaderPassword: form.leaderPassword } as never);
         setOpen(null);
-        setForm({ name: '', leaderEmail: '', leaderPassword: '', logoUrl: '' });
+        setForm({ name: '', leaderUsername: '', leaderPassword: '', logoUrl: '' });
         toast.success('Equipo creado correctamente');
       }
     } catch (e) {
@@ -121,7 +121,7 @@ const AdminTeams: React.FC = () => {
   };
   const onOpenCreate = () => {
     setEditingTeam(null);
-    setForm({ name: '', leaderEmail: '', leaderPassword: '', logoUrl: '' });
+    setForm({ name: '', leaderUsername: '', leaderPassword: '', logoUrl: '' });
     setOpen('create');
   };
 
@@ -190,7 +190,23 @@ const AdminTeams: React.FC = () => {
         </Stack>
       ),
     },
-    { key: 'leader', label: 'Líder', render: (r) => r.leader?.email ?? '—', hideInMobile: true },
+    {
+      key: 'leader',
+      label: 'Delegado',
+      // El usuario es la credencial; el correo, si lo cargó, es dato de contacto.
+      render: (r) =>
+        r.leader ? (
+          <Box>
+            <Typography sx={{ fontWeight: 600, fontSize: 14 }}>{r.leader.username}</Typography>
+            {r.leader.email && (
+              <Typography variant="caption" color="text.secondary">{r.leader.email}</Typography>
+            )}
+          </Box>
+        ) : (
+          '—'
+        ),
+      hideInMobile: true,
+    },
     { key: 'regs', label: 'Inscripciones', render: (r) => r._count?.registrations ?? 0 },
     { key: 'active', label: 'Estado', render: (r) => <StatusBadge status={r.status} /> },
   ];
@@ -278,7 +294,7 @@ const AdminTeams: React.FC = () => {
         emptyDescription="Crea el primer equipo para empezar."
       />
 
-      <AppDrawer open={!!open} onClose={() => { setOpen(null); setEditingTeam(null); }} title={editingTeam ? 'Editar equipo' : 'Nuevo equipo'} subtitle={editingTeam ? 'Actualiza los datos del equipo.' : 'Crea el equipo y su líder (recibirá estas credenciales).'}>
+      <AppDrawer open={!!open} onClose={() => { setOpen(null); setEditingTeam(null); }} title={editingTeam ? 'Editar equipo' : 'Nuevo equipo'} subtitle={editingTeam ? 'Actualiza los datos del equipo.' : 'Crea el equipo y el acceso de su delegado. El correo lo carga él después, desde su panel.'}>
         {open === 'edit' && editingTeam ? (
           <Stack spacing={2}>
             <TextField label="Nombre del equipo" fullWidth value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
@@ -304,11 +320,17 @@ const AdminTeams: React.FC = () => {
               label="Subir logo del equipo"
               hint="512 × 512 px (cuadrado, preferí PNG con fondo transparente)"
             />
-            <TextField label="Correo del líder" type="email" fullWidth value={form.leaderEmail} onChange={(e) => setForm({ ...form, leaderEmail: e.target.value })} />
-            <TextField label="Contraseña del líder" type="text" fullWidth value={form.leaderPassword} onChange={(e) => setForm({ ...form, leaderPassword: e.target.value })} helperText="El líder deberá cambiarla al primer ingreso." />
+            <TextField
+              label="Usuario del delegado"
+              fullWidth
+              value={form.leaderUsername}
+              onChange={(e) => setForm({ ...form, leaderUsername: e.target.value.toLowerCase().replace(/\s+/g, '') })}
+              helperText="Con esto entra al sistema. Letras sin acentos, números, punto, guion y guion bajo."
+            />
+            <TextField label="Contraseña del delegado" type="text" fullWidth value={form.leaderPassword} onChange={(e) => setForm({ ...form, leaderPassword: e.target.value })} helperText="Mínimo 6 caracteres. Entregásela al delegado junto con el usuario." />
             <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
               <Button onClick={() => { setOpen(null); setEditingTeam(null); }}>Cancelar</Button>
-              <Button variant="contained" onClick={submit} disabled={!form.name || !form.leaderEmail || !form.leaderPassword || create.isPending}>
+              <Button variant="contained" onClick={submit} disabled={!form.name || form.leaderUsername.length < 3 || form.leaderPassword.length < 6 || create.isPending}>
                 {create.isPending ? 'Creando…' : 'Crear equipo'}
               </Button>
             </Stack>

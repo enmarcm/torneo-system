@@ -162,7 +162,7 @@ const AdminPlayers: React.FC = () => {
           }
         }}
         title="¿Eliminar definitivamente?"
-        message={`Se borrará a "${purgingPlayer?.firstName ?? ''} ${purgingPlayer?.lastName ?? ''}" junto con sus plantillas, goles, tarjetas y traspasos. No hay vuelta atrás: si solo querés que deje de jugar, desactivalo.`}
+        message={`Se borrará a "${purgingPlayer?.firstName ?? ''} ${purgingPlayer?.lastName ?? ''}" junto con sus plantillas, goles y tarjetas. No hay vuelta atrás: si solo querés que deje de jugar, desactivalo.`}
         confirmLabel="Eliminar definitivamente"
         loading={deletePlayer.isPending}
       />

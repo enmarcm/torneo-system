@@ -7,7 +7,7 @@ export interface Team {
   name: string;
   logoUrl: string | null;
   status: 'ACTIVE' | 'INACTIVE';
-  leader?: { email: string; status: string } | null;
+  leader?: { username: string; email: string | null; status: string } | null;
   _count?: { registrations: number };
 }
 
@@ -32,6 +32,8 @@ export interface TeamRegistrationWithRoster {
     format: Competition['format'] | null;
     division: string | null;
     divisionLevel: number | null;
+    /** Cupo de la competición, para avisar cuando la plantilla se llena. */
+    maxPlayers: number;
     category: { id: string; name: string } | null;
   };
   roster: Array<{
@@ -101,7 +103,7 @@ export interface TeamRosterEntry {
 export const teamsApi = {
   list: async (): Promise<Team[]> => (await api.get('/teams')).data.data,
   get: async (id: string): Promise<Team> => (await api.get(`/teams/${id}`)).data.data,
-  create: async (data: Partial<Team> & { leaderEmail: string; leaderPassword: string }): Promise<Team> =>
+  create: async (data: Partial<Team> & { leaderUsername: string; leaderPassword: string }): Promise<Team> =>
     (await api.post('/teams', data)).data.data,
   update: async (id: string, data: Partial<Team>): Promise<Team> =>
     (await api.patch(`/teams/${id}`, data)).data.data,

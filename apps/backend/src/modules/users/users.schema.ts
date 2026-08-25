@@ -1,7 +1,8 @@
 import { z } from 'zod';
+import { usernameField } from '@/modules/teams/teams.schema';
 
 export const createUserSchema = z.object({
-  email: z.string().email(),
+  username: usernameField,
   password: z.string().min(6),
   teamId: z.string().uuid().optional(),
 });

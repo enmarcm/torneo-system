@@ -26,7 +26,7 @@ export const auditService = {
         where,
         skip: (page - 1) * limit,
         take: limit,
-        include: { user: { select: { id: true, email: true, role: true } } },
+        include: { user: { select: { id: true, username: true, role: true } } },
         orderBy: { createdAt: 'desc' },
       }),
       prisma.auditLog.count({ where }),

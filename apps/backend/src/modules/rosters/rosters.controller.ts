@@ -12,6 +12,16 @@ export const rostersController = {
       await rostersService.add(req.params.registrationId, req.body.playerId, req.body.jerseyNumber),
     ),
   ),
+  previous: asyncHandler(async (req, res) =>
+    ok(res, await rostersService.previous(req.params.registrationId)),
+  ),
+  importPrevious: asyncHandler(async (req, res) =>
+    ok(
+      res,
+      await rostersService.importPrevious(req.params.registrationId),
+      'Plantilla anterior traída',
+    ),
+  ),
   setEligibility: asyncHandler(async (req, res) =>
     ok(res, await rostersService.setEligibility(req.params.id, req.body.eligibilityApproved)),
   ),

@@ -16,7 +16,7 @@ import { extractErrorMessage } from '@/api/axios';
 import { ROUTES } from '@/routes/routes';
 
 const schema = z.object({
-  email: z.string().email('Ingresa un correo válido'),
+  username: z.string().trim().min(1, 'Ingresa tu usuario'),
   password: z.string().min(1, 'Ingresa tu contraseña'),
 });
 type FormData = z.infer<typeof schema>;
@@ -105,7 +105,7 @@ const Login: React.FC = () => {
           </Stack>
           <Typography variant="h2" sx={{ mb: 0.5 }}>Bienvenido</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Ingresa tus credenciales para continuar.
+            Ingresa con el usuario y la contraseña que te dio la liga.
           </Typography>
 
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -113,14 +113,13 @@ const Login: React.FC = () => {
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
             <Stack spacing={2}>
               <TextField
-                label="Correo electrónico"
-                type="email"
+                label="Usuario"
                 fullWidth
-                autoComplete="email"
+                autoComplete="username"
                 autoFocus
-                {...register('email')}
-                error={!!errors.email}
-                helperText={errors.email?.message}
+                {...register('username')}
+                error={!!errors.username}
+                helperText={errors.username?.message}
               />
               <TextField
                 label="Contraseña"

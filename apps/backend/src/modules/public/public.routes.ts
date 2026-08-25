@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { asyncHandler } from '@/utils/async-handler';
-import { ok } from '@/utils/http.util';
+import { ok, fail } from '@/utils/http.util';
 import { editionsService } from '@/modules/editions/editions.service';
 import { competitionsService } from '@/modules/competitions/competitions.service';
 import { teamsService } from '@/modules/teams/teams.service';
@@ -23,6 +23,19 @@ publicRouter.get('/teams', asyncHandler(async (_req, res) => ok(res, await teams
 publicRouter.get('/players', asyncHandler(async (req, res) =>
   ok(res, await playersService.list(req.query.search as string | undefined)),
 ));
+/*
+  Ficha de un jugador buscada por documento. Se responde 404 cuando no aparece
+  para no distinguir entre "no existe" y "no está activo": la búsqueda no debe
+  servir para averiguar si una cédula está registrada.
+*/
+publicRouter.get('/players/by-document', asyncHandler(async (req, res) => {
+  const profile = await playersService.publicProfile(String(req.query.number ?? ''));
+  if (!profile) {
+    fail(res, 'No encontramos un jugador con ese documento', 404);
+    return;
+  }
+  ok(res, profile);
+}));
 publicRouter.get('/registrations', asyncHandler(async (req, res) =>
   ok(res, await competitionsService.registrations({
     editionId: req.query.editionId as string | undefined,

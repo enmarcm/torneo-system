@@ -167,10 +167,10 @@ const AdminTeamBlocks: React.FC = () => {
                   </Typography>
                   <Typography variant="caption" color="text.disabled">
                     Bloqueado el {formatDateTime(b.createdAt)}
-                    {b.blockedBy ? ` por ${b.blockedBy.email}` : ''}
+                    {b.blockedBy ? ` por ${b.blockedBy.username}` : ''}
                     {b.liftedAt
                       ? ` · Levantado el ${formatDateTime(b.liftedAt)}${
-                          b.liftedBy ? ` por ${b.liftedBy.email}` : ''
+                          b.liftedBy ? ` por ${b.liftedBy.username}` : ''
                         }`
                       : ''}
                   </Typography>

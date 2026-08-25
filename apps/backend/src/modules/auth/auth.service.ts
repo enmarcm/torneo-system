@@ -21,16 +21,32 @@ const sign = (user: SignUser) => ({
   ),
 });
 
-const publicUser = (u: { id: string; email: string; role: string; teamId: string | null }) => ({
+const publicUser = (u: {
+  id: string;
+  username: string;
+  email: string | null;
+  role: string;
+  teamId: string | null;
+}) => ({
   id: u.id,
+  username: u.username,
   email: u.email,
   role: u.role,
   teamId: u.teamId,
 });
 
 export const authService = {
-  login: async (email: string, password: string) => {
-    const user = await prisma.user.findUnique({ where: { email }, include: { team: true } });
+  /**
+   * `identifier` es el nombre de usuario. También se acepta el correo para no
+   * dejar afuera a quien ya lo tenía cargado y lo escribe por costumbre; el
+   * correo no es obligatorio, así que no puede ser la única vía de entrada.
+   */
+  login: async (identifier: string, password: string) => {
+    const value = identifier.trim().toLowerCase();
+    const user = await prisma.user.findFirst({
+      where: { OR: [{ username: value }, { email: value }] },
+      include: { team: true },
+    });
     if (!user || user.status !== 'ACTIVE') {
       throw new AppError(401, MESSAGES.badCredentials, 'BAD_CREDENTIALS');
     }
@@ -78,6 +94,26 @@ export const authService = {
   me: (id: string) =>
     prisma.user.findUnique({
       where: { id },
-      select: { id: true, email: true, role: true, teamId: true },
+      select: { id: true, username: true, email: true, role: true, teamId: true },
     }),
+
+  /**
+   * El propio usuario carga o cambia su correo. Es el paso que reemplaza al
+   * correo que antes escribía el administrador al crear el equipo.
+   */
+  updateMe: async (id: string, email: string | null) => {
+    const value = email ? email.trim().toLowerCase() : null;
+    if (value) {
+      const taken = await prisma.user.findFirst({
+        where: { email: value, NOT: { id } },
+        select: { id: true },
+      });
+      if (taken) throw new AppError(409, 'Ese correo ya está en uso', 'DUPLICATE');
+    }
+    return prisma.user.update({
+      where: { id },
+      data: { email: value },
+      select: { id: true, username: true, email: true, role: true, teamId: true },
+    });
+  },
 };

@@ -19,6 +19,7 @@ const PublicCompetitions = lazy(() => import('@/pages/public/PublicCompetitions'
 const PublicSchedule = lazy(() => import('@/pages/public/PublicSchedule'));
 const PublicLive = lazy(() => import('@/pages/public/PublicLive'));
 const PublicStats = lazy(() => import('@/pages/public/PublicStats'));
+const PublicPlayerSearch = lazy(() => import('@/pages/public/PublicPlayerSearch'));
 const PublicTeams = lazy(() => import('@/pages/public/PublicTeams'));
 
 // Auth
@@ -50,7 +51,6 @@ const TeamMatches = lazy(() => import('@/pages/team/TeamMatches'));
 const TeamStats = lazy(() => import('@/pages/team/TeamStats'));
 const TeamHistory = lazy(() => import('@/pages/team/TeamHistory'));
 const TeamHistoryDetail = lazy(() => import('@/pages/team/TeamHistoryDetail'));
-const TeamTransfers = lazy(() => import('@/pages/team/TeamTransfers'));
 
 export const AppRouter: React.FC = () => (
   <Suspense fallback={<Loading />}>
@@ -92,7 +92,6 @@ export const AppRouter: React.FC = () => (
           <Route path={ROUTES.team.stats} element={<TeamStats />} />
           <Route path={ROUTES.team.history} element={<TeamHistory />} />
           <Route path={ROUTES.team.historyDetail} element={<TeamHistoryDetail />} />
-          <Route path={ROUTES.team.transfers} element={<TeamTransfers />} />
         </Route>
       </Route>
 
@@ -104,6 +103,7 @@ export const AppRouter: React.FC = () => (
         <Route path={ROUTES.public.live} element={<PublicLive />} />
         <Route path={ROUTES.public.stats} element={<PublicStats />} />
         <Route path={ROUTES.public.teams} element={<PublicTeams />} />
+        <Route path={ROUTES.public.playerSearch} element={<PublicPlayerSearch />} />
       </Route>
 
       <Route path="*" element={<Navigate to={ROUTES.public.home} replace />} />

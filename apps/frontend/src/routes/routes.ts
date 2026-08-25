@@ -26,7 +26,6 @@ export const ROUTES = {
     stats: '/equipo/estadisticas',
     history: '/equipo/historial',
     historyDetail: '/equipo/historial/:id',
-    transfers: '/equipo/traspasos',
   },
   public: {
     home: '/',
@@ -35,5 +34,7 @@ export const ROUTES = {
     teams: '/equipos',
     schedule: '/calendario',
     live: '/en-vivo',
+    /** Ficha de un jugador, buscada por su cédula. */
+    playerSearch: '/jugador',
   },
 } as const;

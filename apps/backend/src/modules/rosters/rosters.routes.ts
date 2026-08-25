@@ -20,6 +20,18 @@ rostersRouter.post(
   audit('ADD', 'RosterEntry'),
   rostersController.add,
 );
+/* Traer la plantilla del torneo anterior: primero se mira qué entraría, después se importa. */
+rostersRouter.get(
+  '/registrations/:registrationId/roster/previous',
+  ...staff,
+  rostersController.previous,
+);
+rostersRouter.post(
+  '/registrations/:registrationId/roster/import-previous',
+  ...staff,
+  audit('IMPORT', 'RosterEntry'),
+  rostersController.importPrevious,
+);
 rostersRouter.patch('/roster/:id', ...staff, validate(updateRosterSchema), rostersController.update);
 rostersRouter.patch(
   '/roster/:id/eligibility',
