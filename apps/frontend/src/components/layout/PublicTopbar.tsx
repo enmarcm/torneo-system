@@ -211,6 +211,7 @@ export const PublicTopbar: React.FC<Props> = ({ onToggleNav, navExpanded }) => {
         <Button
           variant="contained"
           onClick={() => navigate(ROUTES.login)}
+          aria-label="Apartado administrativo"
           startIcon={<LoginRounded sx={{ display: { xs: 'none', sm: 'inline-flex' } }} />}
           sx={{
             flexShrink: 0,
@@ -232,7 +233,18 @@ export const PublicTopbar: React.FC<Props> = ({ onToggleNav, navExpanded }) => {
             }),
           }}
         >
-          Iniciar sesión
+          {/*
+            En teléfono el rótulo entero no entra: entre el menú, la marca y el
+            interruptor de tema empujaba al botón fuera de la barra. Se acorta,
+            como ya se acorta el nombre de la liga; el rótulo completo sigue
+            estando para quien navega con lector de pantalla.
+          */}
+          <Box component="span" sx={{ display: { xs: 'inline', md: 'none' } }}>
+            Admin
+          </Box>
+          <Box component="span" sx={{ display: { xs: 'none', md: 'inline' } }}>
+            Apartado administrativo
+          </Box>
         </Button>
       </Toolbar>
     </AppBar>

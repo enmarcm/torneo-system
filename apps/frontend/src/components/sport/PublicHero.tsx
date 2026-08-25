@@ -50,6 +50,12 @@ interface Props {
   editionName: string;
   seasonNumber: number;
   liveCount: number;
+  /**
+   * Va al pie del bloque central, debajo de los botones. Es donde entra la
+   * publicidad de la portada: la marca y los accesos van primero, el anuncio
+   * abajo, dentro de la misma pantalla.
+   */
+  children?: React.ReactNode;
 }
 
 /**
@@ -63,7 +69,12 @@ interface Props {
  * que hay más: sin ella, una portada a pantalla llena parece el sitio entero y
  * los partidos, que son el contenido, no existen para quien no baja.
  */
-export const PublicHero: React.FC<Props> = ({ editionName, seasonNumber, liveCount }) => {
+export const PublicHero: React.FC<Props> = ({
+  editionName,
+  seasonNumber,
+  liveCount,
+  children,
+}) => {
   const navigate = useNavigate();
   const reduceMotion = useReducedMotion();
   const setHeroActive = useGlobalStore((s) => s.setPublicHeroActive);
@@ -143,7 +154,11 @@ export const PublicHero: React.FC<Props> = ({ editionName, seasonNumber, liveCou
         }}
       />
 
-      <Stack alignItems="center" spacing={{ xs: 2, md: 2.5 }} sx={{ px: 3, maxWidth: 640 }}>
+      <Stack
+        alignItems="center"
+        spacing={{ xs: 2, md: 2.5 }}
+        sx={{ px: { xs: 2, md: 3 }, width: '100%', maxWidth: 720 }}
+      >
         {/*
           El monograma respira: crece y flota despacio, el mismo pulso que tiene
           en el pie. Con `prefers-reduced-motion` se queda quieto — el bucle
@@ -165,7 +180,7 @@ export const PublicHero: React.FC<Props> = ({ editionName, seasonNumber, liveCou
             y: { duration: 3.2, repeat: Infinity, ease: 'easeInOut' },
           }}
           sx={{
-            height: { xs: 120, sm: 150, md: 190 },
+            height: { xs: 100, sm: 140, md: 170 },
             width: 'auto',
             display: 'block',
             filter: 'drop-shadow(0 12px 32px rgba(0,0,0,0.45))',
@@ -287,6 +302,9 @@ export const PublicHero: React.FC<Props> = ({ editionName, seasonNumber, liveCou
             Ver tablas
           </Button>
         </Stack>
+
+        {/* La publicidad cierra el bloque: debajo de la marca y de los accesos. */}
+        {children ? <Box sx={{ width: '100%', pt: { xs: 0.5, md: 1 } }}>{children}</Box> : null}
       </Stack>
 
       {/*

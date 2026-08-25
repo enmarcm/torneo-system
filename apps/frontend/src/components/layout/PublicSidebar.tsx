@@ -1,10 +1,12 @@
 import {
   Box,
+  IconButton,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
   Stack,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import {
@@ -15,8 +17,13 @@ import {
   BarChartRounded,
   GroupsRounded,
   BadgeRounded,
+  MenuOpenRounded,
 } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { PUBLIC_TOPBAR_H } from './PublicTopbar';
+import { useGlobalStore } from '@/store/useGlobalStore';
+import logoAzul from '@/assets/logo_azul.PNG';
+import logoBlanco from '@/assets/logo.PNG';
 import { ROUTES } from '@/routes/routes';
 import { usePublicEditionsQuery, usePublicMatchesQuery } from '@/hooks/queries';
 import type { ReactNode } from 'react';
@@ -43,6 +50,8 @@ export const PUBLIC_SIDEBAR_WIDTH = 260;
 interface Props {
   /** El panel se cierra al navegar: se abrió para ir a un lado, ya se fue. */
   onNavigate?: () => void;
+  /** Cierra el panel desde su propio botón, sin tocar la barra de atrás. */
+  onClose?: () => void;
 }
 
 /**
@@ -59,9 +68,11 @@ interface Props {
  * El único dato que muestra por su cuenta es cuántos partidos hay en vivo,
  * porque es la respuesta que hace que alguien entre al sitio.
  */
-export const PublicSidebar: React.FC<Props> = ({ onNavigate }) => {
+export const PublicSidebar: React.FC<Props> = ({ onNavigate, onClose }) => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const isDark = useGlobalStore((s) => s.mode) === 'dark';
+  const logoSrc = isDark ? logoBlanco : logoAzul;
 
   /*
     Consultas compartidas con la portada y la pantalla de en vivo: react-query
@@ -99,7 +110,12 @@ export const PublicSidebar: React.FC<Props> = ({ onNavigate }) => {
           panel héroe, la foto de una competición) y sin él los rótulos se
           pierden sobre la mitad de esos fondos.
         */
-        bgcolor: 'var(--railScrim)',
+        /*
+          Opaco casi del todo, no medio velo: el panel sale por encima de la
+          portada a pantalla completa, que es oscura, y con el velo flojo los
+          rótulos quedaban grises sobre azul sin llegar a leerse.
+        */
+        bgcolor: 'var(--railScrimSolid)',
         backdropFilter: 'blur(20px) saturate(150%)',
         WebkitBackdropFilter: 'blur(20px) saturate(150%)',
         borderRight: '1px solid',
@@ -110,6 +126,68 @@ export const PublicSidebar: React.FC<Props> = ({ onNavigate }) => {
           },
       }}
     >
+      {/*
+        La marca del panel, calcada de la barra superior: mismo alto, mismos
+        márgenes y mismo orden. Como el panel entra tapando la barra, el logotipo
+        que había arriba queda reemplazado por este mientras se desliza, en vez
+        de quedar uno al lado del otro.
+      */}
+      <Stack
+        direction="row"
+        alignItems="center"
+        sx={{
+          minHeight: { xs: PUBLIC_TOPBAR_H.xs, md: PUBLIC_TOPBAR_H.md },
+          px: { xs: 1, md: 2 },
+          gap: { xs: 0.5, md: 1 },
+          borderBottom: '1px solid',
+          borderColor: 'var(--sidebarBorder)',
+          flexShrink: 0,
+        }}
+      >
+        <Tooltip title="Cerrar menú">
+          <IconButton
+            onClick={onClose}
+            aria-label="Cerrar menú"
+            sx={{ color: 'var(--sidebarText)' }}
+          >
+            <MenuOpenRounded />
+          </IconButton>
+        </Tooltip>
+
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={{ xs: 1, md: 1.25 }}
+          sx={{ minWidth: 0, px: 0.5, py: 0.5 }}
+        >
+          <Box
+            component="img"
+            src={logoSrc}
+            alt=""
+            sx={{
+              width: { xs: 32, md: 38 },
+              height: { xs: 32, md: 38 },
+              borderRadius: '50%',
+              flexShrink: 0,
+              boxShadow: isDark ? '0 0 0 1px rgba(255,255,255,0.12)' : 'none',
+            }}
+          />
+          <Typography
+            component="span"
+            noWrap
+            sx={{
+              fontFamily: '"Plus Jakarta Sans", sans-serif',
+              fontWeight: 800,
+              fontSize: { xs: 15, md: 17 },
+              letterSpacing: '-0.01em',
+              color: 'var(--logo)',
+            }}
+          >
+            Liga Lago Futsal
+          </Typography>
+        </Stack>
+      </Stack>
+
       <List sx={{ flex: 1, px: 1.25, py: 1.5 }}>
         {PUBLIC_NAV.map((item) => {
           const isActive = pathname === item.to;

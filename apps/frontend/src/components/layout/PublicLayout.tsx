@@ -49,6 +49,13 @@ export const PublicLayout: React.FC = () => {
       <Drawer
         open={navOpen}
         onClose={() => setNavOpen(false)}
+        /*
+          Por encima de la barra superior, no por debajo: el panel entra de
+          arriba del todo y trae su propia marca, que reemplaza a la de la barra
+          mientras se desliza. Antes quedaban las dos a la vez, una encima de la
+          otra.
+        */
+        sx={{ zIndex: (t) => t.zIndex.drawer + 3 }}
         /* Un velo suave: el panel ya es traslúcido, un fondo negro lo enturbia. */
         slotProps={{ backdrop: { sx: { bgcolor: 'rgba(8,12,24,0.32)' } } }}
         /* El papel no pinta nada: la superficie es la del panel, que va con desenfoque. */
@@ -59,16 +66,13 @@ export const PublicLayout: React.FC = () => {
             boxShadow: 'none',
             bgcolor: 'transparent',
             backgroundImage: 'none',
-            // Entra por debajo de la barra: la marca no parpadea al abrirlo.
-            top: { xs: `${PUBLIC_TOPBAR_H.xs}px`, md: `${PUBLIC_TOPBAR_H.md}px` },
-            height: {
-              xs: `calc(100% - ${PUBLIC_TOPBAR_H.xs}px)`,
-              md: `calc(100% - ${PUBLIC_TOPBAR_H.md}px)`,
-            },
           },
         }}
       >
-        <PublicSidebar onNavigate={() => setNavOpen(false)} />
+        <PublicSidebar
+          onNavigate={() => setNavOpen(false)}
+          onClose={() => setNavOpen(false)}
+        />
       </Drawer>
 
       <Box

@@ -142,7 +142,20 @@ const PublicHome: React.FC = () => {
           editionName={active.name}
           seasonNumber={active.seasonNumber}
           liveCount={liveMatches.length}
-        />
+        >
+          {/*
+            El banner vive dentro de la portada, al pie del bloque central.
+            `onDark` le da su panel blanco: sobre la foto oscura, la tarjeta del
+            tema se confundiría con el fondo y la pieza del anunciante quedaría
+            enturbiada.
+          */}
+          <AdSlot
+            placement="HOME_BANNER"
+            priority
+            onDark
+            sx={{ width: '100%', mx: 'auto' }}
+          />
+        </PublicHero>
       ) : null}
 
       <Container maxWidth="xl" sx={{ pt: { xs: 2, md: 2.5 }, pb: { xs: 3, md: 4 } }}>
@@ -153,8 +166,6 @@ const PublicHome: React.FC = () => {
             onRetry={retryAll}
           />
         ) : null}
-
-        <AdSlot placement="HOME_BANNER" priority sx={{ mt: 2 }} />
 
         {liveMatches.length > 0 && (
           <Box sx={{ mt: 3 }}>
