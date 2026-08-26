@@ -1,7 +1,7 @@
 import { Box, Typography, Stack, Container, Drawer } from '@mui/material';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { PlaceRounded, PhoneRounded, MailRounded, ScheduleRounded } from '@mui/icons-material';
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { AdSlot } from '@/components/ui/AdSlot';
@@ -28,6 +28,25 @@ export const PublicLayout: React.FC = () => {
   // Un solo oyente para todo el sitio público: sin esto los marcadores de las
   // listas quedan congelados en el valor con el que cargó la página.
   useLiveMatchSync();
+
+  /*
+    El carril de la barra de desplazamiento lo dibuja el navegador fuera de la
+    caja de contenido: ningún elemento puede pintar ahí, ni con `100vw`. Lo
+    único que se ve por detrás de un carril transparente es el lienzo de la
+    página, así que se le pone el navy de la marca y la franja deja de ser una
+    tira blanca al costado de la portada.
+
+    Es del sitio público nada más, y se deshace al salir: el panel de
+    administración tiene su propio fondo.
+  */
+  useEffect(() => {
+    const html = document.documentElement;
+    const previo = html.style.background;
+    html.style.background = 'var(--heroGradient)';
+    return () => {
+      html.style.background = previo;
+    };
+  }, []);
 
   return (
     <Box

@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-color",
+        "value": "#000",
+        "createdAt": "2026-08-26T14:49:33.153Z",
+        "reason": "No es color de paleta: es el canal opaco de un mask-image (linear-gradient de máscara), donde #000 significa 'se ve'."
+      }
+    ]
+  }
+}
