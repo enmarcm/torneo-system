@@ -31,21 +31,18 @@ export const PublicLayout: React.FC = () => {
 
   /*
     El carril de la barra de desplazamiento lo dibuja el navegador fuera de la
-    caja de contenido: ningún elemento puede pintar ahí, ni con `100vw`. Lo
-    único que se ve por detrás de un carril transparente es el lienzo de la
-    página, así que se le pone el navy de la marca y la franja deja de ser una
-    tira blanca al costado de la portada.
+    caja de contenido: ningún elemento puede pintar ahí, ni con `100vw`. La
+    única manera de que no sea una franja blanca al costado de la portada es
+    pedirle al navegador que lo pinte de otro color, y eso se hace con esta
+    clase, cuyas reglas viven en el tema.
 
-    Es del sitio público nada más, y se deshace al salir: el panel de
-    administración tiene su propio fondo.
+    Es del sitio público nada más, y se saca al salir: en el panel de
+    administración un riel oscuro al borde no tendría con qué combinar.
   */
   useEffect(() => {
     const html = document.documentElement;
-    const previo = html.style.background;
-    html.style.background = 'var(--heroGradient)';
-    return () => {
-      html.style.background = previo;
-    };
+    html.classList.add('llf-publico');
+    return () => html.classList.remove('llf-publico');
   }, []);
 
   return (

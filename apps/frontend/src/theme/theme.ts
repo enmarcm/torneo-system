@@ -63,6 +63,22 @@ export const buildTheme = (mode: 'light' | 'dark') => {
           '*::-webkit-scrollbar-thumb:hover': { background: '#FFFFFF' },
           '*': { scrollbarWidth: 'thin', scrollbarColor: '#FFFFFF transparent' },
           /*
+            El carril del sitio público, en navy.
+
+            Un carril `transparent` no deja ver lo que hay detrás: el navegador
+            lo pinta con el esquema de color de la página, y con `color-scheme:
+            light` eso es una franja blanca al costado de la portada. La única
+            forma de que tome otro color es decírselo, y hay que decirlo en las
+            dos sintaxis: Chrome ya entiende `scrollbar-color` y, cuando la
+            entiende, ignora las reglas `::-webkit-scrollbar-*`.
+
+            Va atado a una clase que solo pone el sitio público: en el panel de
+            administración un riel oscuro al borde no tendría con qué combinar.
+          */
+          'html.llf-publico': { scrollbarColor: `#FFFFFF ${t.publicRail}` },
+          'html.llf-publico::-webkit-scrollbar-track': { background: t.publicRail },
+          'html.llf-publico ::-webkit-scrollbar-track': { background: t.publicRail },
+          /*
             Regla del Número Tabular del sistema: los marcadores y puntajes se
             comparan entre filas, y un dígito que cambia de ancho al actualizarse
             hace bailar la columna entera.

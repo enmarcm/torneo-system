@@ -49,6 +49,12 @@ export const lightTokens = {
   shadowPrimaryHover: '0 8px 22px rgba(3,66,146,0.35)',
   /* Superficies de navegación traslúcidas sobre el lienzo. */
   scrollThumb: '#CBD2E4',
+  /*
+    Carril de la barra de desplazamiento del sitio público. Va del color del
+    pie y de la portada: es la única franja de la ventana que el contenido no
+    puede pintar, así que se la pinta el navegador con el navy de la marca.
+  */
+  publicRail: '#1B2237',
   selectionBg: '#CFE0FA',
   selectionText: '#08183A',
   /*
@@ -118,6 +124,7 @@ export const darkTokens = {
   shadowPrimary: '0 6px 18px rgba(77,147,255,0.30)',
   shadowPrimaryHover: '0 10px 26px rgba(77,147,255,0.42)',
   scrollThumb: '#26314C',
+  publicRail: '#080D1B',
   selectionBg: 'rgba(77,147,255,0.32)',
   selectionText: '#F2F5FC',
   railScrim: 'rgba(9,13,26,0.55)',
