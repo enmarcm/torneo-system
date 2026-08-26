@@ -112,9 +112,12 @@ export const PublicLayout: React.FC = () => {
               {/*
                 Rejilla, no fila. Repartidas con `space-between` las columnas
                 dejaban un vacío enorme entre la marca y el contacto, porque su
-                ancho natural es mucho menor que el del pie; empacadas a la
-                izquierda, el vacío se iba entero a la derecha. Con fracciones
-                el aire se reparte parejo y nadie queda flotando.
+                ancho natural es mucho menor que el del pie.
+
+                Tres columnas iguales: con fracciones distintas, la del medio se
+                llevaba más ancho del que su contenido necesita y quedaba un
+                hueco entre el contacto y los enlaces. Iguales, el aire sobrante
+                se reparte parejo y las tres arrancan en una línea regular.
               */}
               <Box
                 sx={{
@@ -122,14 +125,28 @@ export const PublicLayout: React.FC = () => {
                   gridTemplateColumns: {
                     xs: '1fr',
                     sm: 'repeat(2, minmax(0, 1fr))',
-                    md: 'minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 0.75fr)',
+                    md: 'repeat(3, minmax(0, 1fr))',
                   },
-                  columnGap: { sm: 4, md: 6 },
+                  columnGap: { sm: 4, md: 5 },
                   rowGap: { xs: 3.5, sm: 4 },
                   alignItems: 'start',
                 }}
               >
-                <Stack alignItems="center" spacing={1.5} sx={{ maxWidth: 320, mx: { xs: 'auto', md: 0 } }}>
+                {/*
+                  Alineada a la izquierda como las otras dos: centrada, era la
+                  única columna que no arrancaba en el mismo eje y el pie se leía
+                  desparejo. En teléfono sí se centra, porque ahí las columnas se
+                  apilan y no hay eje común que respetar.
+                */}
+                <Stack
+                  alignItems={{ xs: 'center', sm: 'flex-start' }}
+                  spacing={1.5}
+                  sx={{
+                    maxWidth: 320,
+                    mx: { xs: 'auto', sm: 0 },
+                    textAlign: { xs: 'center', sm: 'left' },
+                  }}
+                >
                   {/*
                     El monograma va sin fondo ni recorte, apoyado directo sobre el
                     navy, y late despacio: es lo único con vida propia del pie.
@@ -143,11 +160,10 @@ export const PublicLayout: React.FC = () => {
                     sx={{ height: 104, width: 'auto', display: 'block' }}
                   />
                   {/*
-                    El nombre va derecho y centrado bajo el monograma: la sigla es
-                    itálica y el texto no la acompaña, la sostiene.
+                    El nombre va derecho bajo el monograma: la sigla es itálica y
+                    el texto no la acompaña, la sostiene.
                   */}
                   <Typography
-                    align="center"
                     sx={{
                       fontFamily: '"Plus Jakarta Sans", sans-serif',
                       fontWeight: 800,
@@ -158,7 +174,7 @@ export const PublicLayout: React.FC = () => {
                   >
                     Liga Lago Futsal
                   </Typography>
-                  <Typography variant="body2" align="center" sx={{ color: 'rgba(255,255,255,0.65)' }}>
+                  <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.65)' }}>
                     Resultados, posiciones y calendario de la liga, al minuto y en un
                     solo lugar.
                   </Typography>

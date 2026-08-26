@@ -8,6 +8,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/routes/routes';
+import { TeamCrestStrip } from './TeamCrestStrip';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import { PUBLIC_TOPBAR_H } from '@/components/layout/PublicTopbar';
 import hero1600 from '@/assets/hero-cancha-1600.jpg';
@@ -153,6 +154,23 @@ export const PublicHero: React.FC<Props> = ({
             rgba(3, 24, 60, ${VELO}) 100%)`,
         }}
       />
+
+      {/*
+        Los escudos de los equipos, justo debajo de la barra superior. Van
+        arriba y sueltos, no dentro del bloque central: son la orla de la
+        portada, no una de las cosas que el visitante vino a hacer.
+      */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: { xs: PUBLIC_TOPBAR_H.xs, md: PUBLIC_TOPBAR_H.md },
+          left: 0,
+          right: 0,
+          py: { xs: 1.25, md: 1.75 },
+        }}
+      >
+        <TeamCrestStrip onDark />
+      </Box>
 
       <Stack
         alignItems="center"

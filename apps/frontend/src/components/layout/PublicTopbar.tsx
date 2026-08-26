@@ -5,7 +5,6 @@ import {
   Typography,
   Stack,
   IconButton,
-  Button,
   Tooltip,
 } from '@mui/material';
 import {
@@ -13,7 +12,6 @@ import {
   MenuOpenRounded,
   LightModeRounded,
   DarkModeRounded,
-  LoginRounded,
 } from '@mui/icons-material';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useEffect, useState } from 'react';
@@ -208,44 +206,11 @@ export const PublicTopbar: React.FC<Props> = ({ onToggleNav, navExpanded }) => {
           </IconButton>
         </Tooltip>
 
-        <Button
-          variant="contained"
-          onClick={() => navigate(ROUTES.login)}
-          aria-label="Apartado administrativo"
-          startIcon={<LoginRounded sx={{ display: { xs: 'none', sm: 'inline-flex' } }} />}
-          sx={{
-            flexShrink: 0,
-            ml: { xs: 0.25, md: 0.5 },
-            px: { xs: 1.5, md: 2.25 },
-            py: { xs: 0.75, md: 1 },
-            fontSize: { xs: 13, md: 14 },
-            whiteSpace: 'nowrap',
-            '& .MuiButton-startIcon': { mr: { xs: 0, sm: 1 }, ml: 0 },
-            /*
-              Sobre la portada el botón queda navy sobre navy y desaparece: ahí
-              se invierte, igual que el "Ver partidos" que tiene justo debajo.
-            */
-            ...(sobreHero && {
-              bgcolor: '#fff',
-              color: 'var(--primary)',
-              boxShadow: 'none',
-              '&:hover': { bgcolor: 'rgba(255,255,255,0.88)', boxShadow: 'none' },
-            }),
-          }}
-        >
-          {/*
-            En teléfono el rótulo entero no entra: entre el menú, la marca y el
-            interruptor de tema empujaba al botón fuera de la barra. Se acorta,
-            como ya se acorta el nombre de la liga; el rótulo completo sigue
-            estando para quien navega con lector de pantalla.
-          */}
-          <Box component="span" sx={{ display: { xs: 'inline', md: 'none' } }}>
-            Admin
-          </Box>
-          <Box component="span" sx={{ display: { xs: 'none', md: 'inline' } }}>
-            Apartado administrativo
-          </Box>
-        </Button>
+        {/*
+          El acceso al panel administrativo vive en el menú lateral. Acá ocupaba
+          el rincón más visible de un sitio que es para el público, y su rótulo
+          entero no entraba en la barra de un teléfono.
+        */}
       </Toolbar>
     </AppBar>
   );

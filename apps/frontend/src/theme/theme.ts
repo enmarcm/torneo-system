@@ -47,15 +47,21 @@ export const buildTheme = (mode: 'light' | 'dark') => {
             outlineOffset: 2,
             borderRadius: 6,
           },
+          /*
+            Carril transparente y pulgar blanco. El borde va transparente y
+            recortado al relleno para afinar el pulgar sin pintar el color de
+            página alrededor: pintado, dejaba un halo claro sobre la portada.
+          */
           '*::-webkit-scrollbar': { width: 10, height: 10 },
           '*::-webkit-scrollbar-track': { background: 'transparent' },
           '*::-webkit-scrollbar-thumb': {
-            background: t.scrollThumb,
+            background: '#FFFFFF',
             borderRadius: 999,
-            border: `2px solid ${t.bg}`,
+            border: '2px solid transparent',
+            backgroundClip: 'padding-box',
           },
-          '*::-webkit-scrollbar-thumb:hover': { background: t.textDisabled },
-          '*': { scrollbarWidth: 'thin', scrollbarColor: `${t.scrollThumb} transparent` },
+          '*::-webkit-scrollbar-thumb:hover': { background: '#FFFFFF' },
+          '*': { scrollbarWidth: 'thin', scrollbarColor: '#FFFFFF transparent' },
           /*
             Regla del Número Tabular del sistema: los marcadores y puntajes se
             comparan entre filas, y un dígito que cambia de ancho al actualizarse

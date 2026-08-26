@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   IconButton,
   List,
   ListItemButton,
@@ -18,6 +19,7 @@ import {
   GroupsRounded,
   BadgeRounded,
   MenuOpenRounded,
+  LoginRounded,
 } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { PUBLIC_TOPBAR_H } from './PublicTopbar';
@@ -265,6 +267,27 @@ export const PublicSidebar: React.FC<Props> = ({ onNavigate, onClose }) => {
           );
         })}
       </List>
+
+      {/*
+        El acceso al panel administrativo cierra el menú, separado de los
+        destinos públicos por una línea: no es un lugar más del recorrido, es la
+        puerta de servicio. Antes ocupaba el rincón más visible de la barra
+        superior, en un sitio que es para el público.
+      */}
+      <Box sx={{ p: 1.5, borderTop: '1px solid', borderColor: 'var(--sidebarBorder)' }}>
+        <Button
+          fullWidth
+          variant="outlined"
+          startIcon={<LoginRounded />}
+          onClick={() => {
+            navigate(ROUTES.login);
+            onNavigate?.();
+          }}
+          sx={{ justifyContent: 'flex-start', px: 1.5, py: 1, fontSize: 14 }}
+        >
+          Apartado administrativo
+        </Button>
+      </Box>
     </Box>
   );
 };
