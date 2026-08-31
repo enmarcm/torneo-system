@@ -13,7 +13,7 @@ import { useLoginMutation } from '@/hooks/mutations';
 import FutsalScene from '@/components/sport/FutsalScene';
 import { useAuthStore } from '@/store/useAuthStore';
 import { extractErrorMessage } from '@/api/axios';
-import { ROUTES } from '@/routes/routes';
+import { homeRouteFor } from '@/routes/RoleGuard';
 
 const schema = z.object({
   username: z.string().trim().min(1, 'Ingresa tu usuario'),
@@ -37,14 +37,14 @@ const Login: React.FC = () => {
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
   if (user) {
-    navigate(user.role === 'ADMIN' ? ROUTES.admin.dashboard : ROUTES.team.home, { replace: true });
+    navigate(homeRouteFor(user.role), { replace: true });
   }
 
   const onSubmit = async (data: FormData) => {
     setError(null);
     try {
       const res = await login.mutateAsync(data);
-      navigate(res.user.role === 'ADMIN' ? ROUTES.admin.dashboard : ROUTES.team.home, { replace: true });
+      navigate(homeRouteFor(res.user.role), { replace: true });
     } catch (e) {
       setError(extractErrorMessage(e, 'No pudimos iniciar sesión. Intenta nuevamente.'));
     }

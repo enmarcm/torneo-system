@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { env } from '@/config/env';
 import { AppError } from '@/utils/app-error';
 import { MESSAGES } from '@/config/constants';
-import { verifyPassword } from '@/utils/password.util';
+import { hashPassword, verifyPassword } from '@/utils/password.util';
 import { teamBlocksService } from '@/modules/team-blocks/team-blocks.service';
 
 type SignUser = { id: string; role: string; teamId: string | null };
@@ -96,6 +96,20 @@ export const authService = {
       where: { id },
       select: { id: true, username: true, email: true, role: true, teamId: true },
     }),
+
+  /** El propio usuario cambia su contraseña, sabiendo la anterior. */
+  changePassword: async (id: string, currentPassword: string, newPassword: string) => {
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
+    if (!(await verifyPassword(user.passwordHash, currentPassword))) {
+      throw new AppError(400, 'La contraseña actual no es correcta', 'BAD_PASSWORD');
+    }
+    await prisma.user.update({
+      where: { id },
+      data: { passwordHash: await hashPassword(newPassword) },
+    });
+    return { id };
+  },
 
   /**
    * El propio usuario carga o cambia su correo. Es el paso que reemplaza al

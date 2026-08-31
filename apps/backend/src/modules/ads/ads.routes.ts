@@ -4,13 +4,15 @@ import { requireRole } from '@/middlewares/role.middleware';
 import { validate } from '@/middlewares/validate.middleware';
 import { adsController } from './ads.controller';
 import { createAdSchema, updateAdSchema } from './ads.schema';
+import { MEDIA_ROLES } from '@/config/roles';
 
 export const adsRouter = Router();
 
 // Lo público va antes del candado: el sitio lee los anuncios sin sesión.
 adsRouter.get('/', adsController.list);
 
-adsRouter.use(authMiddleware, requireRole('ADMIN'));
+// La publicidad es el trabajo del community manager, así que entra igual que el admin.
+adsRouter.use(authMiddleware, requireRole(...MEDIA_ROLES));
 adsRouter.get('/manage', adsController.listAll);
 adsRouter.post('/', validate(createAdSchema), adsController.create);
 adsRouter.patch('/:id', validate(updateAdSchema), adsController.update);

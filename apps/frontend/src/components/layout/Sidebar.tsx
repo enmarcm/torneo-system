@@ -15,6 +15,8 @@ import {
   CampaignRounded,
   BlockRounded,
   FactCheckRounded,
+  ManageAccountsRounded,
+  PhotoLibraryRounded,
   LightModeRounded,
   DarkModeRounded,
   LogoutRounded,
@@ -22,26 +24,35 @@ import {
 import { ROUTES } from '@/routes/routes';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import { useAuthStore } from '@/store/useAuthStore';
-import type { ReactNode } from 'react';
+import { getRoleLabel, type UserRole } from '@/utils/roles';
+import { useMemo, type ReactNode } from 'react';
 
 interface NavItem {
   label: string;
   icon: ReactNode;
   to: string;
+  /** Roles que ven la entrada. Es el mismo reparto que aplica el AppRouter. */
+  roles: UserRole[];
 }
 
+const ADMIN_ONLY: UserRole[] = ['ADMIN'];
+const MEDIA: UserRole[] = ['ADMIN', 'COMMUNITY_MANAGER'];
+const SCORING: UserRole[] = ['ADMIN', 'SCOREKEEPER'];
+
 const NAV: NavItem[] = [
-  { label: 'Dashboard', icon: <GridViewRounded />, to: ROUTES.admin.dashboard },
-  { label: 'Ediciones', icon: <EmojiEventsRounded />, to: ROUTES.admin.editions },
-  { label: 'Categorías', icon: <CategoryRounded />, to: ROUTES.admin.categories },
-  { label: 'Competiciones', icon: <SportsSoccerRounded />, to: ROUTES.admin.competitions },
-  { label: 'Equipos', icon: <GroupsRounded />, to: ROUTES.admin.teams },
-  { label: 'Bloqueos', icon: <BlockRounded />, to: ROUTES.admin.teamBlocks },
-  { label: 'Jugadores', icon: <PersonRounded />, to: ROUTES.admin.players },
-  { label: 'Programación', icon: <CalendarMonthRounded />, to: ROUTES.admin.schedule },
-  { label: 'Estadísticas', icon: <BarChartRounded />, to: ROUTES.admin.stats },
-  { label: 'Publicidad', icon: <CampaignRounded />, to: ROUTES.admin.ads },
-  { label: 'Auditoría', icon: <FactCheckRounded />, to: ROUTES.admin.audit },
+  { label: 'Dashboard', icon: <GridViewRounded />, to: ROUTES.admin.dashboard, roles: ADMIN_ONLY },
+  { label: 'Ediciones', icon: <EmojiEventsRounded />, to: ROUTES.admin.editions, roles: ADMIN_ONLY },
+  { label: 'Categorías', icon: <CategoryRounded />, to: ROUTES.admin.categories, roles: ADMIN_ONLY },
+  { label: 'Competiciones', icon: <SportsSoccerRounded />, to: ROUTES.admin.competitions, roles: ADMIN_ONLY },
+  { label: 'Equipos', icon: <GroupsRounded />, to: ROUTES.admin.teams, roles: ADMIN_ONLY },
+  { label: 'Bloqueos', icon: <BlockRounded />, to: ROUTES.admin.teamBlocks, roles: ADMIN_ONLY },
+  { label: 'Jugadores', icon: <PersonRounded />, to: ROUTES.admin.players, roles: ADMIN_ONLY },
+  { label: 'Programación', icon: <CalendarMonthRounded />, to: ROUTES.admin.schedule, roles: SCORING },
+  { label: 'Estadísticas', icon: <BarChartRounded />, to: ROUTES.admin.stats, roles: ADMIN_ONLY },
+  { label: 'Publicidad', icon: <CampaignRounded />, to: ROUTES.admin.ads, roles: MEDIA },
+  { label: 'Imágenes', icon: <PhotoLibraryRounded />, to: ROUTES.admin.media, roles: MEDIA },
+  { label: 'Usuarios', icon: <ManageAccountsRounded />, to: ROUTES.admin.users, roles: ADMIN_ONLY },
+  { label: 'Auditoría', icon: <FactCheckRounded />, to: ROUTES.admin.audit, roles: ADMIN_ONLY },
 ];
 
 export const Sidebar: React.FC = () => {
@@ -54,6 +65,11 @@ export const Sidebar: React.FC = () => {
   const logout = useAuthStore((s) => s.logout);
   const user = useAuthStore((s) => s.user);
   const expanded = !sidebarCollapsed;
+  /* Sin esto, el community manager veía un menú entero que el guard le rebota. */
+  const nav = useMemo(
+    () => NAV.filter((item) => !!user && item.roles.includes(user.role)),
+    [user],
+  );
 
   const isActive = (item: NavItem) => {
     const isRoot = item.to === '/admin';
@@ -96,7 +112,7 @@ export const Sidebar: React.FC = () => {
         </Box>
 
         <List sx={{ flex: 1, overflow: 'auto', px: expanded ? 1 : 0.5, '&::-webkit-scrollbar': { width: 3 }, '&::-webkit-scrollbar-thumb': { bgcolor: 'var(--sidebarBorder)', borderRadius: 4 } }}>
-          {NAV.map((item) => {
+          {nav.map((item) => {
             const active = isActive(item);
             const btn = (
               <ListItemButton
@@ -162,7 +178,7 @@ export const Sidebar: React.FC = () => {
                     {user.username.toUpperCase()}
                   </Typography>
                   <Typography sx={{ fontSize: 10, color: 'var(--sidebarText)' }}>
-                    {user.role === 'ADMIN' ? 'Administrador' : 'Líder de equipo'}
+                    {getRoleLabel(user.role)}
                   </Typography>
                 </Box>
                 <Tooltip title="Cerrar sesi\u00f3n" placement="right" arrow>

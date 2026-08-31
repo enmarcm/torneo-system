@@ -8,7 +8,13 @@ datasource db {
 }
 
 enum UserRole {
+  /// Administrador general: hace todo y es el único que administra usuarios.
   ADMIN
+  /// Community manager: publicidad e imágenes de categorías, competiciones y equipos.
+  COMMUNITY_MANAGER
+  /// Anotador: resultados de los partidos (iniciar, cargar eventos, finalizar).
+  SCOREKEEPER
+  /// Delegado de un club.
   TEAM_LEADER
 }
 

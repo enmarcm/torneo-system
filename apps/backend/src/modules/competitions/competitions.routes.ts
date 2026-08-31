@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authMiddleware } from '@/middlewares/auth.middleware';
-import { requireRole } from '@/middlewares/role.middleware';
+import { requireRole, restrictFields } from '@/middlewares/role.middleware';
 import { validate } from '@/middlewares/validate.middleware';
 import { audit } from '@/middlewares/audit.middleware';
 import { competitionsController } from './competitions.controller';
@@ -10,6 +10,7 @@ import {
   competitionStatusSchema,
   registrationOutcomeSchema,
 } from './competitions.schema';
+import { MEDIA_FIELDS, MEDIA_ROLES } from '@/config/roles';
 
 export const competitionsRouter = Router();
 
@@ -23,10 +24,12 @@ competitionsRouter.post(
   audit('CREATE', 'Competition'),
   competitionsController.create,
 );
+/* El community manager entra a este PATCH, pero solo con `imageUrl`. */
 competitionsRouter.patch(
   '/:id',
   authMiddleware,
-  requireRole('ADMIN'),
+  requireRole(...MEDIA_ROLES),
+  restrictFields(['COMMUNITY_MANAGER'], MEDIA_FIELDS.competition),
   validate(updateCompetitionSchema),
   audit('UPDATE', 'Competition'),
   competitionsController.update,

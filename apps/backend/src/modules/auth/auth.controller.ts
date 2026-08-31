@@ -44,6 +44,15 @@ export const authController = {
     ok(res, user);
   }),
 
+  changePassword: asyncHandler(async (req, res) => {
+    const { currentPassword, newPassword } = req.body as {
+      currentPassword: string;
+      newPassword: string;
+    };
+    await authService.changePassword(req.user!.id, currentPassword, newPassword);
+    ok(res, null, 'Contraseña actualizada');
+  }),
+
   updateMe: asyncHandler(async (req, res) => {
     const { email } = req.body as { email?: string | null };
     const user = await authService.updateMe(req.user!.id, email ? email : null);

@@ -5,6 +5,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import { useEditionsQuery } from '@/hooks/queries';
 import { todayLong } from '@/utils/formatDate';
+import { getRoleLabel } from '@/utils/roles';
 
 interface Props {
   onOpenSidebar?: () => void;
@@ -93,7 +94,7 @@ export const Topbar: React.FC<Props> = ({ onOpenSidebar }) => {
             <Stack>
               <Typography variant="body2" sx={{ fontWeight: 600 }}>{user?.username}</Typography>
               <Typography variant="caption" color="text.secondary">
-                {user?.role === 'ADMIN' ? 'Administrador' : 'Líder de equipo'}
+                {getRoleLabel(user?.role)}
               </Typography>
             </Stack>
           </MenuItem>

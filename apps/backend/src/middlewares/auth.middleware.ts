@@ -3,10 +3,11 @@ import jwt from 'jsonwebtoken';
 import { env } from '@/config/env';
 import { AppError } from '@/utils/app-error';
 import { MESSAGES } from '@/config/constants';
+import type { UserRole } from '@/config/roles';
 
 export type AuthUser = {
   id: string;
-  role: 'ADMIN' | 'TEAM_LEADER';
+  role: UserRole;
   teamId?: string | null;
 };
 

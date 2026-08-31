@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { UserRole } from '@/utils/roles';
 
 export type AuthUser = {
   id: string;
@@ -7,7 +8,7 @@ export type AuthUser = {
   username: string;
   /** Dato de contacto, lo carga el propio usuario desde su panel. */
   email: string | null;
-  role: 'ADMIN' | 'TEAM_LEADER';
+  role: UserRole;
   teamId: string | null;
 };
 

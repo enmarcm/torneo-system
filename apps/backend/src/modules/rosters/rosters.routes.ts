@@ -10,9 +10,11 @@ export const rostersRouter = Router();
 
 // Montado en '/': autenticación por ruta para no interceptar todo lo demás.
 const staff = [authMiddleware, requireRole('ADMIN', 'TEAM_LEADER')] as const;
+/* El anotador solo lee la plantilla: la necesita para elegir el autor del gol. */
+const readRoster = [authMiddleware, requireRole('ADMIN', 'TEAM_LEADER', 'SCOREKEEPER')] as const;
 const adminOnly = [authMiddleware, requireRole('ADMIN')] as const;
 
-rostersRouter.get('/registrations/:registrationId/roster', ...staff, rostersController.list);
+rostersRouter.get('/registrations/:registrationId/roster', ...readRoster, rostersController.list);
 rostersRouter.post(
   '/registrations/:registrationId/roster',
   ...staff,

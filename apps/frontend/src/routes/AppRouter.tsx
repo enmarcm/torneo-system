@@ -40,8 +40,10 @@ const AdminPlayerDetail = lazy(() => import('@/pages/admin/AdminPlayerDetail'));
 const AdminSchedule = lazy(() => import('@/pages/admin/AdminSchedule'));
 const AdminMatchDetail = lazy(() => import('@/pages/admin/AdminMatchDetail'));
 const AdminStats = lazy(() => import('@/pages/admin/AdminStats'));
-const AdminAds = lazy(() => import('@/pages/admin/AdminAds'));
 const AdminAudit = lazy(() => import('@/pages/admin/AdminAudit'));
+const AdminAds = lazy(() => import('@/pages/admin/AdminAds'));
+const AdminMedia = lazy(() => import('@/pages/admin/AdminMedia'));
+const AdminUsers = lazy(() => import('@/pages/admin/AdminUsers'));
 
 // Team
 const TeamHome = lazy(() => import('@/pages/team/TeamHome'));
@@ -60,7 +62,11 @@ export const AppRouter: React.FC = () => (
         <Route path={ROUTES.login} element={<Login />} />
       </Route>
 
-      {/* Admin */}
+{/*
+        El panel es el mismo para todo el staff; lo que cambia es qué pantallas
+        alcanza cada rol. Cada grupo declara quiénes entran, y el guard manda al
+        resto a su propia portada en vez de al login.
+      */}
       <Route element={<RoleGuard allow={['ADMIN']} />}>
         <Route element={<AdminLayout />}>
           <Route path={ROUTES.admin.dashboard} element={<AdminDashboard />} />
@@ -74,11 +80,25 @@ export const AppRouter: React.FC = () => (
           <Route path={ROUTES.admin.teamBlocks} element={<AdminTeamBlocks />} />
           <Route path={ROUTES.admin.players} element={<AdminPlayers />} />
           <Route path={ROUTES.admin.playerDetail} element={<AdminPlayerDetail />} />
+          <Route path={ROUTES.admin.stats} element={<AdminStats />} />
+          <Route path={ROUTES.admin.audit} element={<AdminAudit />} />
+          <Route path={ROUTES.admin.users} element={<AdminUsers />} />
+        </Route>
+      </Route>
+
+      {/* Community manager: publicidad e imágenes del sitio. */}
+      <Route element={<RoleGuard allow={['ADMIN', 'COMMUNITY_MANAGER']} />}>
+        <Route element={<AdminLayout />}>
+          <Route path={ROUTES.admin.ads} element={<AdminAds />} />
+          <Route path={ROUTES.admin.media} element={<AdminMedia />} />
+        </Route>
+      </Route>
+
+      {/* Anotador: resultados de los partidos. */}
+      <Route element={<RoleGuard allow={['ADMIN', 'SCOREKEEPER']} />}>
+        <Route element={<AdminLayout />}>
           <Route path={ROUTES.admin.schedule} element={<AdminSchedule />} />
           <Route path={ROUTES.admin.matchDetail} element={<AdminMatchDetail />} />
-          <Route path={ROUTES.admin.stats} element={<AdminStats />} />
-          <Route path={ROUTES.admin.ads} element={<AdminAds />} />
-          <Route path={ROUTES.admin.audit} element={<AdminAudit />} />
         </Route>
       </Route>
 

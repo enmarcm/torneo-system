@@ -16,6 +16,7 @@ import type { Match } from '@/api/matches.api';
 import { extractErrorMessage } from '@/api/axios';
 import { useToast } from '@/hooks/common/useToast';
 import { getCompetitionShortLabel, sortCompetitions } from '@/utils/competitionMeta';
+import { usePermissions } from '@/hooks/common/usePermissions';
 
 /*
   La liga juega siempre en la misma cancha, así que la sede se escribía a mano
@@ -43,6 +44,13 @@ const AdminSchedule: React.FC = () => {
     allCompetitions,
   );
   const toast = useToast();
+  /*
+    El anotador entra a esta pantalla solo por el resultado: iniciar, cargar
+    goles y tarjetas, finalizar. Sortear el calendario, crear, reprogramar o
+    borrar partidos sigue siendo del administrador, así que esas acciones ni se
+    le muestran — el backend igual las rechaza.
+  */
+  const { manageSchedule } = usePermissions();
   const create = useCreateMatch();
   const update = useUpdateMatch();
   const remove = useDeleteMatch();
@@ -249,6 +257,7 @@ const AdminSchedule: React.FC = () => {
         title="Programación"
         subtitle="Sorteá los cruces y después asignales día y hora."
         action={
+          !manageSchedule ? undefined : (
           <Stack direction="row" spacing={1}>
             {selectedComp && (
               <Button
@@ -266,6 +275,7 @@ const AdminSchedule: React.FC = () => {
               Nuevo partido
             </Button>
           </Stack>
+          )
         }
       />
 
@@ -390,7 +400,8 @@ const AdminSchedule: React.FC = () => {
         </Box>
       )}
 
-      {competitionId && (
+      {/* "Por programar" es asignar día y hora: no es trabajo del anotador. */}
+      {competitionId && manageSchedule && (
         <Tabs value={view} onChange={(_, v) => setView(v)} sx={{ mb: 2 }}>
           <Tab value="day" label="Por día" sx={{ textTransform: 'none' }} />
           <Tab
@@ -455,7 +466,7 @@ const AdminSchedule: React.FC = () => {
                   : 'No hay partidos programados para este día.'}
               </Typography>
               {/* Crear un partido exige saber en qué competición va. */}
-              {!allCompetitions && (
+              {!allCompetitions && manageSchedule && (
                 <Button variant="contained" startIcon={<AddRounded />} onClick={onOpenCreate}>Crear partido</Button>
               )}
             </Card>
@@ -520,11 +531,13 @@ const AdminSchedule: React.FC = () => {
                           Ver detalle
                         </Button>
                       )}
-                      <Tooltip title="Más opciones">
-                        <IconButton size="small" onClick={(e) => setAnchor({ el: e.currentTarget, m })}>
-                          <MoreVertRounded fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                      {manageSchedule && (
+                        <Tooltip title="Más opciones">
+                          <IconButton size="small" onClick={(e) => setAnchor({ el: e.currentTarget, m })}>
+                            <MoreVertRounded fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
                     </Stack>
                   </Stack>
                 </Grid>

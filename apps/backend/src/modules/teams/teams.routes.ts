@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authMiddleware } from '@/middlewares/auth.middleware';
-import { requireRole } from '@/middlewares/role.middleware';
+import { requireRole, restrictFields } from '@/middlewares/role.middleware';
 import { validate } from '@/middlewares/validate.middleware';
 import { audit } from '@/middlewares/audit.middleware';
 import { teamsController } from './teams.controller';
@@ -10,6 +10,7 @@ import {
   teamStatusSchema,
   registerTeamSchema,
 } from './teams.schema';
+import { MEDIA_FIELDS } from '@/config/roles';
 
 export const teamsRouter = Router();
 
@@ -27,10 +28,12 @@ teamsRouter.post(
   audit('CREATE', 'Team'),
   teamsController.create,
 );
+/* El community manager entra a este PATCH, pero solo con `logoUrl`. */
 teamsRouter.patch(
   '/:id',
   authMiddleware,
-  requireRole('ADMIN', 'TEAM_LEADER'),
+  requireRole('ADMIN', 'TEAM_LEADER', 'COMMUNITY_MANAGER'),
+  restrictFields(['COMMUNITY_MANAGER'], MEDIA_FIELDS.team),
   validate(updateTeamSchema),
   audit('UPDATE', 'Team'),
   teamsController.update,

@@ -10,6 +10,7 @@ import { rostersApi, type RosterEntry } from '@/api/rosters.api';
 import { matchesApi, matchEventsApi, type Match } from '@/api/matches.api';
 import { adsApi, type Ad } from '@/api/ads.api';
 import { authApi } from '@/api/auth.api';
+import { usersApi, type CreateUserPayload, type ManagedUser, type UpdateUserPayload } from '@/api/users.api';
 import { useAuthStore } from '@/store/useAuthStore';
 
 const invalidate = (qc: ReturnType<typeof useQueryClient>, keys: string[][]) => {
@@ -31,6 +32,49 @@ export const useUpdateMe = () => {
   return useMutation({
     mutationFn: (data: { email: string | null }) => authApi.updateMe(data),
     onSuccess: (user) => setUser(user),
+  });
+};
+
+/** El propio usuario cambia su contraseña, sabiendo la anterior. */
+export const useChangeMyPassword = () =>
+  useMutation({
+    mutationFn: (data: { currentPassword: string; newPassword: string }) =>
+      authApi.changePassword(data),
+  });
+
+/* Cuentas del sistema. Tocan `teams` porque el delegado cuelga de un equipo. */
+export const useCreateUser = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: CreateUserPayload) => usersApi.create(data),
+    onSuccess: () => invalidate(qc, [['users'], ['teams']]),
+  });
+};
+export const useUpdateUser = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateUserPayload }) => usersApi.update(id, data),
+    onSuccess: () => invalidate(qc, [['users'], ['teams']]),
+  });
+};
+export const useSetUserPassword = () =>
+  useMutation({
+    mutationFn: ({ id, password }: { id: string; password: string }) =>
+      usersApi.setPassword(id, password),
+  });
+export const useSetUserStatus = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: ManagedUser['status'] }) =>
+      usersApi.setStatus(id, status),
+    onSuccess: () => invalidate(qc, [['users'], ['teams']]),
+  });
+};
+export const useDeleteUser = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => usersApi.remove(id),
+    onSuccess: () => invalidate(qc, [['users'], ['teams']]),
   });
 };
 

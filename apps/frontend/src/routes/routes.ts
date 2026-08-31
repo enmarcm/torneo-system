@@ -16,6 +16,8 @@ export const ROUTES = {
     matchDetail: '/admin/partidos/:id',
     stats: '/admin/estadisticas',
     ads: '/admin/publicidad',
+    media: '/admin/imagenes',
+    users: '/admin/usuarios',
     audit: '/admin/auditoria',
   },
   team: {

@@ -13,6 +13,8 @@ import { dashboardApi, type DashboardMetrics } from '@/api/dashboard.api';
 import { knockoutApi, type BracketRound } from '@/api/knockout.api';
 import { teamBlocksApi, type TeamBlock } from '@/api/team-blocks.api';
 import { publicApi, type MatchListOpts } from '@/api/public.api';
+import { usersApi, type ManagedUser } from '@/api/users.api';
+import type { UserRole } from '@/utils/roles';
 
 const REF_STALE = 5 * 60 * 1000;
 const MID_STALE = 2 * 60 * 1000;
@@ -237,5 +239,9 @@ export const useTeamBlockSummaryQuery = (teamId: string) =>
     staleTime: MID_STALE,
   });
 
+// Cuentas del sistema (solo administrador general)
+export const useUsersQuery = (filters?: { role?: UserRole; q?: string }) =>
+  useQuery({ queryKey: ['users', filters ?? {}], queryFn: () => usersApi.list(filters), staleTime: MID_STALE });
+
 // Re-export common types used in pages
-export type { Edition, Category, Competition, Team, Player, RosterEntry, Match, StandingRow, Ad, DashboardMetrics, TeamRegistrationWithRoster, TeamStats, TeamRosterEntry, BracketRound, TeamBlock };
+export type { Edition, Category, Competition, Team, Player, RosterEntry, Match, StandingRow, Ad, DashboardMetrics, TeamRegistrationWithRoster, TeamStats, TeamRosterEntry, BracketRound, TeamBlock, ManagedUser };

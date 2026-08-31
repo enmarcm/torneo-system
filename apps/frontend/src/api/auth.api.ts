@@ -13,6 +13,10 @@ export const authApi = {
     const res = await api.get('/auth/me');
     return res.data.data;
   },
+  /** El propio usuario cambia su contraseña, sabiendo la anterior. */
+  changePassword: async (data: { currentPassword: string; newPassword: string }): Promise<void> => {
+    await api.patch('/auth/me/password', data);
+  },
   /** El propio usuario carga o cambia su correo de contacto. */
   updateMe: async (data: { email: string | null }): Promise<AuthUser> => {
     const res = await api.patch('/auth/me', data);
