@@ -3,6 +3,7 @@ import { Card, Box, Stack, Typography, Button, Avatar, CircularProgress } from '
 import { MilitaryTechRounded, DownloadRounded } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import type { Match } from '@/api/matches.api';
+import { downloadFile } from '@/utils/downloadFile';
 
 interface Props {
   match: Match;
@@ -20,26 +21,13 @@ export const MvpCard: React.FC<Props> = ({ match, compact = false }) => {
   const fullName = `${match.mvpPlayer.firstName} ${match.mvpPlayer.lastName}`;
   const photo = match.mvpPhotoUrl ?? match.mvpPlayer.photoUrl;
 
-  // Se descarga por blob y no con <a download>: el atributo no funciona cuando
-  // la imagen vive en otro origen (MinIO), y terminaría abriéndola en una pestaña.
+  // La descarga se delega al helper: en escritorio baja el blob y en móvil abre
+  // el diálogo del sistema (Web Share), que es la única vía que guarda en iOS.
   const download = async () => {
     if (!match.mvpPhotoUrl) return;
     setDownloading(true);
     try {
-      const res = await fetch(match.mvpPhotoUrl);
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      const ext = blob.type.split('/')[1] ?? 'jpg';
-      a.download = `MVP-${fullName.replace(/\s+/g, '-')}.${ext}`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch {
-      // Si falla la descarga directa, al menos se abre la imagen.
-      window.open(match.mvpPhotoUrl, '_blank', 'noopener');
+      await downloadFile(match.mvpPhotoUrl, `MVP-${fullName}`);
     } finally {
       setDownloading(false);
     }
