@@ -9,10 +9,11 @@ import { matchesApi, type Match } from '@/api/matches.api';
 import { standingsApi, type StandingRow } from '@/api/standings.api';
 import { statsApi } from '@/api/stats.api';
 import { adsApi, type Ad } from '@/api/ads.api';
+import { newsApi, type Article, type SheetKind } from '@/api/news.api';
 import { dashboardApi, type DashboardMetrics } from '@/api/dashboard.api';
 import { knockoutApi, type BracketRound } from '@/api/knockout.api';
 import { teamBlocksApi, type TeamBlock } from '@/api/team-blocks.api';
-import { publicApi, type MatchListOpts } from '@/api/public.api';
+import { publicApi, type MatchListOpts, type NewsListParams } from '@/api/public.api';
 import { usersApi, type ManagedUser } from '@/api/users.api';
 import type { UserRole } from '@/utils/roles';
 
@@ -135,6 +136,28 @@ export const usePlayerStatsQuery = (params?: { competitionId?: string; teamId?: 
 export const useAdsQuery = () =>
   useQuery({ queryKey: ['ads', 'manage'], queryFn: adsApi.listAll, staleTime: REF_STALE });
 
+/** Panel de noticias: también los borradores. */
+export const useNewsAdminQuery = () =>
+  useQuery({ queryKey: ['news', 'manage'], queryFn: newsApi.listAll, staleTime: MID_STALE });
+
+/*
+  Ficha calculada al vuelo para el panel. Se pide solo cuando ya hay entidad
+  elegida: sin eso el servidor responde 422 y el formulario parpadearía en rojo
+  mientras el redactor todavía está eligiendo.
+*/
+export const useFactSheetPreviewQuery = (
+  kind?: SheetKind,
+  entityId?: string,
+  year?: number | null,
+) =>
+  useQuery({
+    queryKey: ['news', 'preview', kind, entityId, year ?? null],
+    queryFn: () => newsApi.preview(kind as SheetKind, entityId as string, year),
+    enabled: !!kind && !!entityId,
+    staleTime: FRESH_STALE,
+    retry: false,
+  });
+
 export const useDashboardMetricsQuery = (editionId: string) =>
   useQuery({
     queryKey: ['dashboard', editionId],
@@ -201,6 +224,19 @@ export const usePublicStatsQuery = (competitionId?: string, editionId?: string) 
     queryFn: () => publicApi.stats(competitionId, editionId),
     staleTime: MID_STALE,
   });
+export const usePublicNewsQuery = (params?: NewsListParams) =>
+  useQuery({
+    queryKey: ['public', 'news', params ?? {}],
+    queryFn: () => publicApi.news(params),
+    staleTime: MID_STALE,
+  });
+export const usePublicNewsBySlugQuery = (slug?: string) =>
+  useQuery({
+    queryKey: ['public', 'news', 'slug', slug],
+    queryFn: () => publicApi.newsBySlug(slug as string),
+    enabled: !!slug,
+    staleTime: MID_STALE,
+  });
 export const usePublicAdsQuery = (placement?: string) =>
   useQuery({ queryKey: ['public', 'ads', placement], queryFn: () => publicApi.ads(placement), staleTime: REF_STALE });
 export const usePublicGroupsQuery = (competitionId: string) =>
@@ -244,4 +280,4 @@ export const useUsersQuery = (filters?: { role?: UserRole; q?: string }) =>
   useQuery({ queryKey: ['users', filters ?? {}], queryFn: () => usersApi.list(filters), staleTime: MID_STALE });
 
 // Re-export common types used in pages
-export type { Edition, Category, Competition, Team, Player, RosterEntry, Match, StandingRow, Ad, DashboardMetrics, TeamRegistrationWithRoster, TeamStats, TeamRosterEntry, BracketRound, TeamBlock, ManagedUser };
+export type { Edition, Category, Competition, Team, Player, RosterEntry, Match, StandingRow, Ad, Article, DashboardMetrics, TeamRegistrationWithRoster, TeamStats, TeamRosterEntry, BracketRound, TeamBlock, ManagedUser };

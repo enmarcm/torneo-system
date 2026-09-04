@@ -9,6 +9,7 @@ import { matchesService } from '@/modules/matches/matches.service';
 import { standingsService } from '@/modules/standings/standings.service';
 import { statsService } from '@/modules/stats/stats.service';
 import { adsService } from '@/modules/ads/ads.service';
+import { newsService } from '@/modules/news/news.service';
 import { groupsService } from '@/modules/groups/groups.service';
 import { knockoutService } from '@/modules/knockout/knockout.service';
 import { leagueSystemsService } from '@/modules/league-systems/league-systems.service';
@@ -95,4 +96,23 @@ publicRouter.get('/league-systems', asyncHandler(async (req, res) =>
 ));
 publicRouter.get('/matches/:id', asyncHandler(async (req, res) =>
   ok(res, await matchesService.get(req.params.id)),
+));
+
+/*
+  Noticias y fichas técnicas. La ficha viaja con sus números ya congelados
+  dentro de la publicación, así que el detalle no recalcula nada: lo que se lee
+  hoy es exactamente lo que se publicó.
+*/
+publicRouter.get('/news', asyncHandler(async (req, res) =>
+  ok(res, await newsService.listPublic({
+    kind: req.query.kind as string | undefined,
+    editionId: req.query.editionId as string | undefined,
+    competitionId: req.query.competitionId as string | undefined,
+    teamId: req.query.teamId as string | undefined,
+    year: req.query.year ? Number(req.query.year) : undefined,
+    limit: req.query.limit ? Number(req.query.limit) : undefined,
+  })),
+));
+publicRouter.get('/news/:slug', asyncHandler(async (req, res) =>
+  ok(res, await newsService.getPublicBySlug(req.params.slug)),
 ));

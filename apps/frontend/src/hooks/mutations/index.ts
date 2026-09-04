@@ -9,6 +9,7 @@ import { playersApi, type Player } from '@/api/players.api';
 import { rostersApi, type RosterEntry } from '@/api/rosters.api';
 import { matchesApi, matchEventsApi, type Match } from '@/api/matches.api';
 import { adsApi, type Ad } from '@/api/ads.api';
+import { newsApi, type ArticlePayload } from '@/api/news.api';
 import { authApi } from '@/api/auth.api';
 import { usersApi, type CreateUserPayload, type ManagedUser, type UpdateUserPayload } from '@/api/users.api';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -479,5 +480,41 @@ export const useDeleteAd = () => {
   return useMutation({
     mutationFn: adsApi.remove,
     onSuccess: () => invalidate(qc, [['ads'], ['public', 'ads']]),
+  });
+};
+
+/*
+  Noticias y fichas técnicas. Tocan la caché pública además de la del panel: el
+  redactor suele tener el sitio abierto al lado para ver cómo quedó.
+*/
+const NEWS_KEYS = [['news'], ['public', 'news']];
+
+export const useCreateArticle = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: ArticlePayload) => newsApi.create(data),
+    onSuccess: () => invalidate(qc, NEWS_KEYS),
+  });
+};
+export const useUpdateArticle = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: ArticlePayload }) => newsApi.update(id, data),
+    onSuccess: () => invalidate(qc, NEWS_KEYS),
+  });
+};
+/** Vuelve a calcular la ficha con los números de hoy. */
+export const useRegenerateArticleSheet = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => newsApi.regenerate(id),
+    onSuccess: () => invalidate(qc, NEWS_KEYS),
+  });
+};
+export const useDeleteArticle = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: newsApi.remove,
+    onSuccess: () => invalidate(qc, NEWS_KEYS),
   });
 };

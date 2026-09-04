@@ -16,6 +16,7 @@ export const ROUTES = {
     matchDetail: '/admin/partidos/:id',
     stats: '/admin/estadisticas',
     ads: '/admin/publicidad',
+    news: '/admin/noticias',
     media: '/admin/imagenes',
     users: '/admin/usuarios',
     audit: '/admin/auditoria',
@@ -35,6 +36,8 @@ export const ROUTES = {
     stats: '/estadisticas',
     teams: '/equipos',
     schedule: '/calendario',
+    news: '/noticias',
+    newsDetail: '/noticias/:slug',
     live: '/en-vivo',
     /** Ficha de un jugador, buscada por su cédula. */
     playerSearch: '/jugador',

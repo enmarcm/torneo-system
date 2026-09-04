@@ -8,8 +8,9 @@ import type { StandingRow } from './standings.api';
 import type { Ad } from './ads.api';
 import type { BracketRound } from './knockout.api';
 import type { PlayerStatRow } from './stats.api';
+import type { Article } from './news.api';
 
-export type { Edition, Competition, Team, Player, Match, StandingRow, Ad, BracketRound, PlayerStatRow };
+export type { Edition, Competition, Team, Player, Match, StandingRow, Ad, BracketRound, PlayerStatRow, Article };
 
 /** Inscripción de un equipo en una competición, tal como se publica. */
 export interface PublicRegistration {
@@ -30,6 +31,16 @@ export interface MatchListOpts {
   featured?: boolean;
   /** `today` acota a la jornada de hoy, en hora de Venezuela. */
   day?: 'today';
+}
+
+/** Acotaciones del listado de noticias. */
+export interface NewsListParams {
+  kind?: string;
+  editionId?: string;
+  competitionId?: string;
+  teamId?: string;
+  year?: number;
+  limit?: number;
 }
 
 /**
@@ -98,4 +109,9 @@ export const publicApi = {
   /** Busca la ficha de un jugador por su documento completo. */
   playerByDocument: async (number: string): Promise<PublicPlayerProfile> =>
     (await api.get('/public/players/by-document', { params: { number } })).data.data,
+  /** Noticias y fichas técnicas ya publicadas. */
+  news: async (params?: NewsListParams): Promise<Article[]> =>
+    (await api.get('/public/news', { params })).data.data,
+  newsBySlug: async (slug: string): Promise<Article> =>
+    (await api.get(`/public/news/${slug}`)).data.data,
 };

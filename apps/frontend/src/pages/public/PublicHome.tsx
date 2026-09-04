@@ -9,6 +9,7 @@ import {
   usePublicMatchesQuery,
   usePublicStandingsQuery,
   usePublicMatchQuery,
+  usePublicNewsQuery,
 } from '@/hooks/queries';
 import { MatchCard } from '@/components/sport/MatchCard';
 import { LiveScoreboard } from '@/components/sport/LiveScoreboard';
@@ -22,6 +23,7 @@ import { ErrorState } from '@/components/ui/ErrorState';
 import { ROUTES } from '@/routes/routes';
 import { sortCompetitions, getCompetitionShortLabel } from '@/utils/competitionMeta';
 import type { Edition, Competition, Match } from '@/api/public.api';
+import { ARTICLE_KIND_LABEL } from '@/api/news.api';
 
 const PublicHome: React.FC = () => {
   const navigate = useNavigate();
@@ -50,6 +52,10 @@ const PublicHome: React.FC = () => {
   });
   const todayMatches: Match[] = todayQuery.data ?? [];
   const todayIds = new Set(todayMatches.map((m: Match) => m.id));
+
+  // Las tres últimas publicaciones. La portada las muestra como adelanto; el
+  // apartado completo vive en /noticias.
+  const latestNews = usePublicNewsQuery({ limit: 3 }).data ?? [];
 
   /*
     Destacados: los que el administrador marcó con el check al ponerles día y
@@ -301,6 +307,66 @@ const PublicHome: React.FC = () => {
         )}
 
         <AdSlot placement="HOME_INLINE" sx={{ mt: 3 }} />
+
+        {latestNews.length > 0 && (
+          <Box sx={{ mt: 3 }}>
+            <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 1.5 }}>
+              <Typography variant="h4" component="h2">Noticias y fichas</Typography>
+              <Box sx={{ flex: 1 }} />
+              <Button size="small" onClick={() => navigate(ROUTES.public.news)}>
+                Ver todas
+              </Button>
+            </Stack>
+            <Grid container spacing={2}>
+              {latestNews.map((a) => (
+                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={a.id}>
+                  <Card
+                    sx={{
+                      height: '100%',
+                      overflow: 'hidden',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      flexDirection: 'column',
+                    }}
+                    onClick={() => navigate(`/noticias/${a.slug}`)}
+                  >
+                    {a.coverUrl && (
+                      <Box
+                        component="img"
+                        src={a.coverUrl}
+                        alt=""
+                        sx={{ width: '100%', height: 140, objectFit: 'cover', display: 'block' }}
+                      />
+                    )}
+                    <Box sx={{ p: 2 }}>
+                      <Chip
+                        size="small"
+                        label={ARTICLE_KIND_LABEL[a.kind]}
+                        variant="outlined"
+                        sx={{ height: 20, fontSize: 11, fontWeight: 700, mb: 1 }}
+                      />
+                      <Typography variant="h4" sx={{ mb: 0.5 }}>{a.title}</Typography>
+                      {a.summary && (
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                          }}
+                        >
+                          {a.summary}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        )}
 
         {topDivision && standings.length > 0 && (
           <Box sx={{ mt: 3 }}>
