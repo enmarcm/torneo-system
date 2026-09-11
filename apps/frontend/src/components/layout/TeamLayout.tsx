@@ -1,15 +1,19 @@
 import { Box, Drawer, useMediaQuery, useTheme } from '@mui/material';
 import { useState, Suspense } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { TeamSidebar } from './TeamSidebar';
 import { Topbar } from './Topbar';
-import { LoadingState } from '@/components/ui/LoadingState';
+import { PageLoader } from '@/components/ui/PageLoader';
+import { MatchLoader } from '@/components/ui/MatchLoader';
+import { RouteProgressSignal } from '@/components/ui/RouteProgress';
+import { isMatchRoute } from '@/routes/routes';
 import { useGlobalStore } from '@/store/useGlobalStore';
 
 export const TeamLayout: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { pathname } = useLocation();
   const { sidebarCollapsed } = useGlobalStore();
   const sidebarWidth = sidebarCollapsed ? 64 : 264;
 
@@ -36,8 +40,16 @@ export const TeamLayout: React.FC = () => {
         }}
       >
         <Topbar onOpenSidebar={() => setMobileOpen(true)} />
-        <Box sx={{ p: { xs: 2, md: 4 }, flex: 1 }}>
-          <Suspense fallback={<LoadingState rows={4} />}>
+        {/* Cada ruta monta de cero y entra en cascada; ver `.llf-page` en el tema. */}
+        <Box className="llf-page" key={pathname} sx={{ p: { xs: 2, md: 4 }, flex: 1 }}>
+          <Suspense
+            fallback={
+              <>
+                <RouteProgressSignal />
+                {isMatchRoute(pathname) ? <MatchLoader minHeight="50vh" /> : <PageLoader minHeight="50vh" />}
+              </>
+            }
+          >
             <Outlet />
           </Suspense>
         </Box>

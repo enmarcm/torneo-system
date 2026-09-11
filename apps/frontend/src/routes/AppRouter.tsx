@@ -1,17 +1,14 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
-import { Box, CircularProgress } from '@mui/material';
 import { ROUTES } from './routes';
 import { RoleGuard, PublicOnly } from './RoleGuard';
 import { AdminLayout } from '@/components/layout/AdminLayout';
 import { TeamLayout } from '@/components/layout/TeamLayout';
 import { PublicLayout } from '@/components/layout/PublicLayout';
 
-const Loading = () => (
-  <Box sx={{ minHeight: '60vh', display: 'grid', placeItems: 'center' }}>
-    <CircularProgress />
-  </Box>
-);
+import { PageLoader } from '@/components/ui/PageLoader';
+
+const Loading = () => <PageLoader minHeight="100vh" />;
 
 // Public
 const PublicHome = lazy(() => import('@/pages/public/PublicHome'));

@@ -1,4 +1,5 @@
-import { Card, Box, Stack, Avatar, Typography, Chip, Tooltip } from '@mui/material';
+import { Card, Box, Stack, Typography, Chip, Tooltip } from '@mui/material';
+import { Crest } from '@/components/ui/Crest';
 import {
   ScheduleRounded,
   PlaceRounded,
@@ -199,7 +200,7 @@ export const MatchCard: React.FC<Props> = ({
           spacing={compact ? 1 : 0.75}
           sx={{ flex: 1, minWidth: 0 }}
         >
-          <Avatar
+          <Crest
             alt={match.homeRegistration.team.name}
             src={match.homeRegistration.team.logoUrl ?? undefined}
             sx={{
@@ -211,7 +212,7 @@ export const MatchCard: React.FC<Props> = ({
             }}
           >
             {match.homeRegistration.team.name[0]}
-          </Avatar>
+          </Crest>
           <Typography
             variant="body2"
             align={compact ? 'left' : 'center'}
@@ -262,7 +263,7 @@ export const MatchCard: React.FC<Props> = ({
           spacing={compact ? 1 : 0.75}
           sx={{ flex: 1, minWidth: 0 }}
         >
-          <Avatar
+          <Crest
             alt={match.awayRegistration.team.name}
             src={match.awayRegistration.team.logoUrl ?? undefined}
             sx={{
@@ -274,7 +275,7 @@ export const MatchCard: React.FC<Props> = ({
             }}
           >
             {match.awayRegistration.team.name[0]}
-          </Avatar>
+          </Crest>
           <Typography
             variant="body2"
             align={compact ? 'right' : 'center'}

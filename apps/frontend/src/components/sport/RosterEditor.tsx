@@ -30,7 +30,8 @@ import {
 } from '@/hooks/mutations';
 import { useToast } from '@/hooks/common/useToast';
 import { extractErrorMessage } from '@/api/axios';
-import { LoadingState } from '@/components/ui/LoadingState';
+import { RosterSkeleton } from '@/components/ui/LoadingState';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 interface Props {
   registrationId: string;
@@ -135,7 +136,7 @@ export const RosterEditor: React.FC<Props> = ({
     }
   };
 
-  if (isLoading) return <LoadingState rows={3} />;
+  if (isLoading) return <RosterSkeleton rows={4} />;
 
   return (
     <Stack spacing={2}>
@@ -248,9 +249,14 @@ export const RosterEditor: React.FC<Props> = ({
       <Divider />
 
       {active.length === 0 ? (
-        <Typography color="text.secondary" variant="body2">
-          Esta plantilla todavía no tiene jugadores.
-        </Typography>
+        <EmptyState
+          variant="bench"
+          compact
+          seats={5}
+          filled={0}
+          title="Esta plantilla todavía no tiene jugadores"
+          description="Sumá jugadores desde el buscador de arriba; cada uno ocupa un asiento."
+        />
       ) : (
         <Stack spacing={0.5}>
           {active.map((r) => (

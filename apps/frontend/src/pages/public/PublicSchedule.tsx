@@ -1,7 +1,6 @@
 import {
   Box,
   Container,
-  Card,
   Typography,
   Button,
   TextField,
@@ -11,7 +10,9 @@ import {
   Chip,
   Divider,
 } from '@mui/material';
-import { ArrowBackRounded, EventBusyRounded, PendingActionsRounded } from '@mui/icons-material';
+import { ArrowBackRounded, ArrowForwardRounded, PendingActionsRounded } from '@mui/icons-material';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { MatchLoader } from '@/components/ui/MatchLoader';
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -51,7 +52,7 @@ const PublicSchedule: React.FC = () => {
   const [dateFilter, setDateFilter] = useState('');
   const [filter, setFilter] = useState<Filter>('ALL');
 
-  const { data: matches = [] } = usePublicMatchesQuery(
+  const { data: matches = [], isLoading } = usePublicMatchesQuery(
     scope.competitionId || undefined,
     undefined,
     scope.editionId || undefined,
@@ -182,11 +183,22 @@ const PublicSchedule: React.FC = () => {
         </Box>
       )}
 
-      {groups.total === 0 ? (
-        <Card sx={{ p: 6, textAlign: 'center' }}>
-          <EventBusyRounded sx={{ fontSize: 44, color: 'text.disabled', mb: 1 }} />
-          <Typography color="text.secondary">No hay partidos para mostrar.</Typography>
-        </Card>
+      {isLoading ? (
+        <MatchLoader />
+      ) : groups.total === 0 ? (
+        <EmptyState
+          variant="court"
+          title={filter === 'ALL' && !dateFilter ? 'Todavía no hay partidos programados' : 'Ningún partido coincide con ese filtro'}
+          description={
+            filter === 'ALL' && !dateFilter
+              ? 'La liga carga cada jornada antes de la fecha. Cuando estén, aparecen acá.'
+              : 'Probá con otra fecha o quitá el filtro.'
+          }
+          actionLabel="Ver competiciones"
+          actionVariant="text"
+          actionIcon={<ArrowForwardRounded />}
+          onAction={() => navigate(ROUTES.public.competitions)}
+        />
       ) : (
         /*
           Una columna por día en vez de una rejilla de tres. El calendario se

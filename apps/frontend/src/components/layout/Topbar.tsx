@@ -6,6 +6,7 @@ import { useGlobalStore } from '@/store/useGlobalStore';
 import { useEditionsQuery } from '@/hooks/queries';
 import { todayLong } from '@/utils/formatDate';
 import { getRoleLabel } from '@/utils/roles';
+import { RouteProgress } from '@/components/ui/RouteProgress';
 
 interface Props {
   onOpenSidebar?: () => void;
@@ -41,6 +42,7 @@ export const Topbar: React.FC<Props> = ({ onOpenSidebar }) => {
         zIndex: theme.zIndex.appBar,
       }}
     >
+      <RouteProgress />
       <Toolbar sx={{ minHeight: 72, gap: 1.5, px: { xs: 2, md: 3 } }}>
         <IconButton onClick={handleHamburger} aria-label="Abrir menú">
           <MenuRounded />

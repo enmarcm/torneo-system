@@ -1,4 +1,5 @@
 import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Divider, Button, Avatar, Dialog, DialogTitle, DialogContent, TextField, Alert } from '@mui/material';
+import { SaveButton } from '@/components/ui/SaveButton';
 import { GroupsRounded, SportsSoccerRounded, BarChartRounded, EditRounded, MailOutlineRounded } from '@mui/icons-material';
 import { useState } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -118,9 +119,9 @@ const TeamHome: React.FC = () => {
             />
             <Stack direction="row" spacing={1.5} justifyContent="flex-end">
               <Button onClick={() => setEmailOpen(false)}>Cancelar</Button>
-              <Button variant="contained" onClick={saveEmail} disabled={updateMe.isPending}>
+              <SaveButton onClick={saveEmail} loading={updateMe.isPending} error={updateMe.isError}>
                 {updateMe.isPending ? 'Guardando…' : 'Guardar'}
-              </Button>
+              </SaveButton>
             </Stack>
           </Stack>
         </DialogContent>

@@ -8,16 +8,18 @@ import {
   Button,
   Tabs,
   Tab,
-  Avatar,
   Chip,
 } from '@mui/material';
-import { ArrowBackRounded, EmojiEventsRounded } from '@mui/icons-material';
+import { ArrowBackRounded } from '@mui/icons-material';
+import { Crest } from '@/components/ui/Crest';
+import { MatchLoader } from '@/components/ui/MatchLoader';
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   usePublicStandingsQuery,
   usePublicGroupsQuery,
   useBracketQuery,
+  usePublicRegistrationsQuery,
 } from '@/hooks/queries';
 import { usePublicScope } from '@/hooks/common/usePublicScope';
 import { PublicScopeFilters } from '@/components/sport/PublicScopeFilters';
@@ -55,6 +57,10 @@ const PublicCompetitions: React.FC = () => {
     cid ?? '',
     activeView === 'groups' ? groupId || undefined : undefined,
   );
+
+  /* Para la tabla vacía: los inscritos en orden alfabético, con guiones, hasta el primer resultado. */
+  const { data: registrations = [] } = usePublicRegistrationsQuery(scope.editionId || undefined, cid);
+  const ghostTeams = useMemo(() => registrations.map((r) => r.team), [registrations]);
 
   const groupList = groups as PublicGroup[];
   const selectedGroup = useMemo(
@@ -95,7 +101,7 @@ const PublicCompetitions: React.FC = () => {
 
       {!competition ? (
         <EmptyState
-          icon={<EmojiEventsRounded sx={{ fontSize: 32 }} />}
+          variant="table"
           title="Todavía no hay competiciones"
           description="Cuando arranque la edición vas a ver aquí las tablas de cada torneo."
         />
@@ -117,6 +123,8 @@ const PublicCompetitions: React.FC = () => {
             </Tabs>
           )}
 
+          {/* El contenido de la pestaña elegida entra con un leve ascenso. */}
+          <Box key={activeView} className="llf-rise">
           {activeView === 'bracket' ? (
             <BracketView rounds={bracket} />
           ) : activeView === 'groups' ? (
@@ -157,12 +165,12 @@ const PublicCompetitions: React.FC = () => {
                         <Stack spacing={0.5}>
                           {g.registrations.map((r) => (
                             <Stack key={r.id} direction="row" alignItems="center" spacing={1}>
-                              <Avatar
+                              <Crest
                                 src={r.team.logoUrl ?? undefined}
                                 sx={{ width: 20, height: 20, fontSize: 10 }}
                               >
                                 {r.team.name[0]}
-                              </Avatar>
+                              </Crest>
                               <Typography variant="body2" noWrap>
                                 {r.team.name}
                               </Typography>
@@ -175,14 +183,15 @@ const PublicCompetitions: React.FC = () => {
                 </Card>
               </Grid>
               <Grid size={{ xs: 12, md: 8 }}>
-                {isLoading ? <Typography>Cargando…</Typography> : <StandingsTable rows={standings} />}
+                {isLoading ? <MatchLoader /> : <StandingsTable rows={standings} ghostTeams={ghostTeams} />}
               </Grid>
             </Grid>
           ) : isLoading ? (
-            <Typography>Cargando…</Typography>
+            <MatchLoader />
           ) : (
-            <StandingsTable rows={standings} />
+            <StandingsTable rows={standings} ghostTeams={ghostTeams} />
           )}
+          </Box>
         </>
       )}
 

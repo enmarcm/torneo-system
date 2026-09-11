@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { usePublicNewsQuery } from '@/hooks/queries';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { LoadingState } from '@/components/ui/LoadingState';
+import { NewsCardSkeleton } from '@/components/ui/LoadingState';
 import { ROUTES } from '@/routes/routes';
 import { formatDate } from '@/utils/formatDate';
 import { ARTICLE_KIND_LABEL, isSheet, type Article, type ArticleKind } from '@/api/news.api';
@@ -123,15 +123,15 @@ const PublicNews: React.FC = () => {
       </Stack>
 
       {isLoading ? (
-        <LoadingState rows={3} />
+        <NewsCardSkeleton count={3} />
       ) : visible.length === 0 ? (
         <EmptyState
-          icon={<NewspaperRounded sx={{ fontSize: 32 }} />}
-          title={articles.length ? 'Nada por acá todavía' : 'Todavía no hay publicaciones'}
+          variant="news"
+          title={articles.length ? 'Nada por acá todavía' : 'Todavía no hay noticias'}
           description={
             articles.length
               ? 'Probá con otra sección.'
-              : 'Cuando se publique la primera nota o ficha técnica va a aparecer acá.'
+              : 'Acá van las crónicas de cada fecha, los comunicados y las fichas de MVP.'
           }
         />
       ) : (
@@ -140,7 +140,7 @@ const PublicNews: React.FC = () => {
             component={motion.div}
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            whileHover={{ y: -3 }}
+            className="llf-cardlink"
             transition={{ duration: 0.25 }}
             sx={{ overflow: 'hidden', cursor: 'pointer' }}
             onClick={() => navigate(`/noticias/${lead.slug}`)}
@@ -173,7 +173,7 @@ const PublicNews: React.FC = () => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.2, delay: Math.min(i * 0.04, 0.24) }}
-                    whileHover={{ y: -3 }}
+                    className="llf-cardlink"
                     sx={{
                       height: '100%',
                       overflow: 'hidden',

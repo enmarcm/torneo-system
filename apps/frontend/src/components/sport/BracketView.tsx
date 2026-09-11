@@ -1,4 +1,5 @@
-import { Box, Card, Stack, Typography, Avatar, Chip } from '@mui/material';
+import { Box, Card, Stack, Typography, Chip } from '@mui/material';
+import { Crest } from '@/components/ui/Crest';
 import { EmojiEventsRounded } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { getStatusLabel } from '@/utils/statusLabels';
@@ -50,9 +51,9 @@ const TeamRow: React.FC<{
   >
     {side ? (
       <>
-        <Avatar src={side.team.logoUrl ?? undefined} sx={{ width: 24, height: 24, fontSize: 11 }}>
+        <Crest src={side.team.logoUrl ?? undefined} sx={{ width: 24, height: 24, fontSize: 11 }}>
           {side.team.name[0]}
-        </Avatar>
+        </Crest>
         <Typography
           variant="body2"
           sx={{ flex: 1, fontWeight: isWinner ? 800 : 500, minWidth: 0 }}

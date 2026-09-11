@@ -1,4 +1,5 @@
 import { Box, Stack, Typography, Button, Avatar, Chip, TextField, MenuItem } from '@mui/material';
+import { SaveButton } from '@/components/ui/SaveButton';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { AddRounded, VerifiedRounded, VerifiedOutlined, PowerSettingsNewRounded, DeleteForeverRounded } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
@@ -127,9 +128,9 @@ const AdminPlayers: React.FC = () => {
           <TextField label="Fecha de nacimiento" type="date" fullWidth InputLabelProps={{ shrink: true }} value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} />
           <Stack direction="row" spacing={1.5} justifyContent="flex-end">
             <Button onClick={() => setOpen(false)}>Cancelar</Button>
-            <Button variant="contained" onClick={submit} disabled={!form.firstName || !form.lastName || !form.documentNumber || !form.birthDate || create.isPending}>
+            <SaveButton onClick={submit} loading={create.isPending} error={create.isError} disabled={!form.firstName || !form.lastName || !form.documentNumber || !form.birthDate}>
               {create.isPending ? 'Creando…' : 'Crear jugador'}
-            </Button>
+            </SaveButton>
           </Stack>
         </Stack>
       </AppDrawer>

@@ -1,4 +1,7 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { Crest } from '@/components/ui/Crest';
+import { LoadingDots } from '@/components/ui/LoadingState';
+import { EmptyState } from '@/components/ui/EmptyState';
 import {
   Box,
   Card,
@@ -6,9 +9,7 @@ import {
   Typography,
   TextField,
   Button,
-  Avatar,
   Chip,
-  Alert,
   Divider,
 } from '@mui/material';
 import {
@@ -22,7 +23,6 @@ import { useQuery } from '@tanstack/react-query';
 import { publicApi } from '@/api/public.api';
 import { StatCard } from '@/components/ui/StatCard';
 import { CompetitionTags } from '@/components/sport/CompetitionTags';
-import { extractErrorMessage } from '@/api/axios';
 
 /**
  * Buscador público de jugadores por documento.
@@ -34,6 +34,7 @@ import { extractErrorMessage } from '@/api/axios';
  */
 const PublicPlayerSearch: React.FC = () => {
   const [input, setInput] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
   /* La consulta se dispara al enviar, no al tipear: cada tecla no es una búsqueda. */
   const [query, setQuery] = useState('');
 
@@ -68,6 +69,7 @@ const PublicPlayerSearch: React.FC = () => {
           spacing={1.5}
         >
           <TextField
+            inputRef={inputRef}
             fullWidth
             label="Cédula"
             placeholder="Ej: 12345678"
@@ -78,11 +80,11 @@ const PublicPlayerSearch: React.FC = () => {
           <Button
             type="submit"
             variant="contained"
-            startIcon={<SearchRounded />}
+            startIcon={isFetching ? undefined : <SearchRounded />}
             disabled={input.trim().length < 4 || isFetching}
-            sx={{ flexShrink: 0 }}
+            sx={{ flexShrink: 0, minWidth: 124, '&.Mui-disabled': isFetching ? { color: 'primary.contrastText', bgcolor: 'primary.dark' } : undefined }}
           >
-            {isFetching ? 'Buscando…' : 'Buscar'}
+            {isFetching ? <LoadingDots label="Buscando" size={5} color="inherit" /> : 'Buscar'}
           </Button>
         </Stack>
         <Typography variant="caption" color="text.disabled" sx={{ mt: 1.5, display: 'block' }}>
@@ -90,22 +92,29 @@ const PublicPlayerSearch: React.FC = () => {
         </Typography>
       </Card>
 
-      {error && (
-        <Alert severity="info" sx={{ mb: 3 }}>
-          {extractErrorMessage(error, 'No encontramos un jugador con ese documento')}
-        </Alert>
+      {error && !isFetching && (
+        <Box sx={{ mb: 3 }}>
+          <EmptyState
+            variant="search"
+            title="No encontramos a nadie con esa cédula"
+            description="Revisá el número: hace falta completo y sin puntos. Si el jugador es nuevo, puede que su equipo todavía no lo haya inscripto."
+            actionLabel="Buscar de nuevo"
+            actionVariant="text"
+            onAction={() => inputRef.current?.focus()}
+          />
+        </Box>
       )}
 
       {data && (
         <>
           <Card sx={{ p: { xs: 2, md: 3 }, mb: 2 }}>
             <Stack direction="row" spacing={2} alignItems="center">
-              <Avatar
+              <Crest
                 src={data.player.photoUrl ?? undefined}
                 sx={{ width: 64, height: 64, fontSize: 24, fontWeight: 700 }}
               >
                 {data.player.firstName[0]}
-              </Avatar>
+              </Crest>
               <Box sx={{ minWidth: 0 }}>
                 <Typography variant="h3" sx={{ fontWeight: 700 }}>
                   {data.player.firstName} {data.player.lastName}
@@ -177,7 +186,7 @@ const PublicPlayerSearch: React.FC = () => {
                     spacing={1.5}
                     alignItems={{ sm: 'center' }}
                   >
-                    <Avatar
+                    <Crest
                       src={c.team.logoUrl ?? undefined}
                       variant="rounded"
                       sx={{
@@ -189,7 +198,7 @@ const PublicPlayerSearch: React.FC = () => {
                       }}
                     >
                       {c.team.name[0]}
-                    </Avatar>
+                    </Crest>
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Typography sx={{ fontWeight: 600 }}>{c.team.name}</Typography>
                       <Stack

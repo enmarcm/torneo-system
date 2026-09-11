@@ -1,5 +1,6 @@
 import { Box, Container, Card, Stack, Typography, Avatar, Button, Divider } from '@mui/material';
-import { ArrowBackRounded, EmojiEventsRounded } from '@mui/icons-material';
+import { ArrowBackRounded } from '@mui/icons-material';
+import { MatchLoader } from '@/components/ui/MatchLoader';
 import { useNavigate } from 'react-router-dom';
 import { useMemo } from 'react';
 import { usePublicStatsQuery } from '@/hooks/queries';
@@ -89,7 +90,7 @@ const StatRow: React.FC<{ row: PlayerStatRow; position: number }> = ({ row, posi
 const PublicStats: React.FC = () => {
   const navigate = useNavigate();
   const scope = usePublicScope();
-  const { data: stats = [] } = usePublicStatsQuery(scope.competitionId || undefined, scope.editionId);
+  const { data: stats = [], isLoading } = usePublicStatsQuery(scope.competitionId || undefined, scope.editionId);
 
   /** Goleadores de cada competición, en el orden en que llegan (goles desc.). */
   const sections = useMemo(
@@ -133,9 +134,11 @@ const PublicStats: React.FC = () => {
         onCompetitionChange={scope.setCompetitionId}
       />
 
-      {total === 0 ? (
+      {isLoading ? (
+        <MatchLoader />
+      ) : total === 0 ? (
         <EmptyState
-          icon={<EmojiEventsRounded sx={{ fontSize: 32 }} />}
+          variant="table"
           title="Todavía no hay estadísticas"
           description="En cuanto se jueguen partidos vas a ver aquí a los goleadores de cada competición."
         />

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { SaveButton } from '@/components/ui/SaveButton';
 import {
   Box,
   Card,
@@ -436,13 +437,13 @@ const AdminNews: React.FC = () => {
         footer={
           <Stack direction="row" spacing={1.5} justifyContent="flex-end">
             <Button onClick={() => setOpen(false)}>Cancelar</Button>
-            <Button
-              variant="contained"
+            <SaveButton
+             
               onClick={submit}
-              disabled={!canSubmit || create.isPending || update.isPending}
+              loading={create.isPending || update.isPending} error={create.isError || update.isError} disabled={!canSubmit}
             >
               {editing ? 'Guardar' : 'Crear'}
-            </Button>
+            </SaveButton>
           </Stack>
         }
       >

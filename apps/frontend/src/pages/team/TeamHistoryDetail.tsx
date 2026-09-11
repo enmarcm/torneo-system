@@ -6,7 +6,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { StatCard } from '@/components/ui/StatCard';
 import { MatchCard } from '@/components/sport/MatchCard';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { LoadingState } from '@/components/ui/LoadingState';
+import { MatchLoader } from '@/components/ui/MatchLoader';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useEditionQuery, useCompetitionsQuery, useTeamHistoryQuery, useTeamStatsQuery } from '@/hooks/queries';
@@ -35,7 +35,7 @@ const TeamHistoryDetail: React.FC = () => {
     return compMap;
   }, [history]);
 
-  if (loadingEdition || loadingComps || loadingHistory || loadingStats) return <LoadingState rows={6} />;
+  if (loadingEdition || loadingComps || loadingHistory || loadingStats) return <MatchLoader minHeight="50vh" />;
   if (editionError) return <ErrorState onRetry={refetchEdition} />;
   if (!edition) return <ErrorState onRetry={refetchEdition} />;
 

@@ -1,4 +1,5 @@
 import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Button, IconButton, Menu, MenuItem, FormControl, Select, InputLabel, Tooltip, TextField, Divider, ListItemText, Checkbox, OutlinedInput, FormHelperText, Alert } from '@mui/material';
+import { SaveButton } from '@/components/ui/SaveButton';
 import { getStatusLabel, getDivisionLabel } from '@/utils/statusLabels';
 import { AddRounded, MoreVertRounded, EmojiEventsRounded } from '@mui/icons-material';
 import { useState } from 'react';
@@ -579,9 +580,9 @@ const AdminCompetitions: React.FC = () => {
             <StructureFields value={editForm} onChange={setEditForm} takenLevels={takenLevelsForEdit} />
             <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
               <Button onClick={() => { setOpen(null); setEditingComp(null); }}>Cancelar</Button>
-              <Button variant="contained" onClick={submit} disabled={update.isPending}>
+              <SaveButton onClick={submit} loading={update.isPending} error={update.isError}>
                 {update.isPending ? 'Guardando…' : 'Guardar cambios'}
-              </Button>
+              </SaveButton>
             </Stack>
           </Stack>
         ) : (
@@ -678,9 +679,9 @@ const AdminCompetitions: React.FC = () => {
             <StructureFields value={form} onChange={setForm} takenLevels={takenLevelsForCreate} />
             <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
               <Button onClick={() => { setOpen(null); setEditingComp(null); }}>Cancelar</Button>
-              <Button variant="contained" onClick={submit} disabled={!selectedCat || !formEditionId || create.isPending}>
+              <SaveButton onClick={submit} loading={create.isPending} error={create.isError} disabled={!selectedCat || !formEditionId}>
                 {create.isPending ? 'Creando…' : 'Crear competición'}
-              </Button>
+              </SaveButton>
             </Stack>
           </Stack>
         )}

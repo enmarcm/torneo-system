@@ -1,4 +1,5 @@
 import { Box, Stack, Typography, Button, Chip, Switch, TextField, FormControlLabel, MenuItem as MuiMenuItem, Avatar, Tooltip } from '@mui/material';
+import { SaveButton } from '@/components/ui/SaveButton';
 import { AddRounded, InfoRounded, EditRounded, DeleteRounded } from '@mui/icons-material';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { useState } from 'react';
@@ -143,9 +144,9 @@ const AdminCategories: React.FC = () => {
             </Stack>
             <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
               <Button onClick={() => setOpen(false)}>Cancelar</Button>
-              <Button type="submit" variant="contained" disabled={create.isPending || update.isPending}>
+              <SaveButton type="submit" loading={create.isPending || update.isPending} error={create.isError || update.isError}>
                 {editing ? 'Guardar cambios' : 'Crear categoría'}
-              </Button>
+              </SaveButton>
             </Stack>
           </Stack>
         </form>

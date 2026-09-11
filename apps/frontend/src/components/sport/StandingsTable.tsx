@@ -1,11 +1,19 @@
-import { Card, Box, Typography, Stack, Tooltip, Collapse, IconButton, Chip, Avatar, useTheme, useMediaQuery } from '@mui/material';
+import { Card, Box, Typography, Stack, Tooltip, Collapse, IconButton, Chip, useTheme, useMediaQuery } from '@mui/material';
+import { Crest } from '@/components/ui/Crest';
 import type { StandingRow } from '@/api/standings.api';
 import { ShieldRounded, ExpandMoreRounded, ExpandLessRounded } from '@mui/icons-material';
 import { useState } from 'react';
 import { getStatusLabel, getStatusColor } from '@/utils/statusLabels';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 interface Props {
   rows: StandingRow[];
+  /**
+   * Equipos inscritos, para cuando todavía no hay resultados: en vez de una
+   * pantalla en blanco se muestran en orden alfabético con guiones, y la tabla
+   * se ordena sola con el primer partido finalizado.
+   */
+  ghostTeams?: Array<{ id: string; name: string; logoUrl: string | null }>;
 }
 
 /** Franja lateral que marca en qué zona de la tabla quedó el equipo. */
@@ -22,7 +30,7 @@ const zoneColor = (zone: StandingRow['zone']) => {
  * distingue una fila de otra.
  */
 const TeamCrest: React.FC<{ row: StandingRow; size: number }> = ({ row, size }) => (
-  <Avatar
+  <Crest
     src={row.logoUrl ?? undefined}
     alt={row.teamName}
     variant="rounded"
@@ -41,19 +49,63 @@ const TeamCrest: React.FC<{ row: StandingRow; size: number }> = ({ row, size }) 
     }}
   >
     {row.teamName.trim().charAt(0).toUpperCase() || <ShieldRounded sx={{ fontSize: size * 0.6 }} />}
-  </Avatar>
+  </Crest>
 );
 
-export const StandingsTable: React.FC<Props> = ({ rows }) => {
+export const StandingsTable: React.FC<Props> = ({ rows, ghostTeams }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const hasQualify = (rows ?? []).some((r) => r.zone === 'QUALIFY');
   const hasRelegation = (rows ?? []).some((r) => r.zone === 'RELEGATION');
 
   if (!rows || rows.length === 0) {
+    const ghosts = [...(ghostTeams ?? [])].sort((a, b) => a.name.localeCompare(b.name, 'es'));
+    if (ghosts.length === 0) {
+      return (
+        <EmptyState
+          variant="table"
+          title="La tabla se arma con el primer resultado"
+          description="Todavía no hay equipos inscritos en esta competición."
+        />
+      );
+    }
     return (
-      <Card sx={{ p: 4, textAlign: 'center' }}>
-        <Typography color="text.secondary">Aún no hay partidos finalizados en esta competición.</Typography>
+      <Card sx={{ overflow: 'hidden' }}>
+        <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse' }}>
+          <Box component="thead" sx={{ bgcolor: 'background.default' }}>
+            <Box component="tr">
+              {['#', '', 'Equipo', 'PJ', 'PTS'].map((h, i) => (
+                <Box
+                  component="th"
+                  key={i}
+                  sx={{ p: 1.5, fontSize: 12, fontWeight: 600, color: 'text.secondary', textAlign: i >= 3 ? 'right' : 'left', width: i === 0 ? 32 : i === 1 ? 40 : i >= 3 ? 56 : undefined }}
+                >
+                  {h}
+                </Box>
+              ))}
+            </Box>
+          </Box>
+          <Box component="tbody">
+            {ghosts.map((t, i) => (
+              <Box
+                component="tr"
+                key={t.id}
+                sx={{ borderTop: '1px solid', borderColor: 'divider', animation: 'llfRise 0.3s cubic-bezier(.2,.7,.2,1) both', animationDelay: `${Math.min(i, 8) * 50}ms` }}
+              >
+                <Box component="td" className="tabular" sx={{ p: 1.5, color: 'text.disabled' }}>–</Box>
+                <Box component="td" sx={{ p: 1.5, pr: 0 }}>
+                  <TeamCrest row={{ teamName: t.name, logoUrl: t.logoUrl } as StandingRow} size={28} />
+                </Box>
+                <Box component="td" sx={{ p: 1.5, fontWeight: 600 }}>{t.name}</Box>
+                <Box component="td" className="tabular" sx={{ p: 1.5, textAlign: 'right', color: 'text.disabled' }}>0</Box>
+                <Box component="td" className="tabular" sx={{ p: 1.5, textAlign: 'right', color: 'text.disabled' }}>–</Box>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', px: 2, py: 1.25, borderTop: '1px solid', borderColor: 'divider' }}>
+          La tabla se ordena con el primer resultado. Hasta entonces, los equipos van en orden alfabético.
+        </Typography>
       </Card>
     );
   }
@@ -100,19 +152,19 @@ export const StandingsTable: React.FC<Props> = ({ rows }) => {
                   <Box
                     component="tr"
                     key={r.registrationId}
+                    className="llf-row"
                     sx={{
                       borderTop: '1px solid',
                       borderColor: 'divider',
                       boxShadow: `inset 4px 0 0 ${zoneColor(r.zone)}`,
                       opacity: r.outcome === 'WITHDRAWN' ? 0.55 : 1,
-                      '&:hover': { bgcolor: 'background.default' },
                     }}
                   >
                     <Box component="td" sx={{ p: 1.5, fontWeight: 700, width: 32 }}>{r.position}</Box>
                     <Box component="td" sx={{ p: 1.5 }}>
                       <Stack direction="row" alignItems="center" spacing={1.5}>
                         <TeamCrest row={r} size={28} />
-                        <Typography sx={{ fontWeight: 600 }}>{r.teamName}</Typography>
+                        <Typography className="llf-row-name" sx={{ fontWeight: 600 }}>{r.teamName}</Typography>
                         {r.outcome !== 'NONE' && (
                           <Chip
                             size="small"

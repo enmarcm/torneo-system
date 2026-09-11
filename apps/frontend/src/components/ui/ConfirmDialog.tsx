@@ -1,5 +1,6 @@
 import { AppModal } from './AppModal';
 import { Button, Typography, Stack } from '@mui/material';
+import { SaveButton } from './SaveButton';
 
 interface Props {
   open: boolean;
@@ -10,6 +11,8 @@ interface Props {
   confirmLabel?: string;
   cancelLabel?: string;
   loading?: boolean;
+  /** `mutation.isError`: si falló, el botón vuelve a su estado sin confirmar. */
+  error?: boolean;
 }
 
 export const ConfirmDialog: React.FC<Props> = ({
@@ -21,6 +24,7 @@ export const ConfirmDialog: React.FC<Props> = ({
   confirmLabel = 'Eliminar',
   cancelLabel = 'Cancelar',
   loading,
+  error,
 }) => (
   <AppModal
     open={open}
@@ -32,14 +36,16 @@ export const ConfirmDialog: React.FC<Props> = ({
         <Button onClick={onClose} disabled={loading}>
           {cancelLabel}
         </Button>
-        <Button
-          variant="contained"
+        <SaveButton
           color="error"
           onClick={onConfirm}
-          disabled={loading}
+          loading={!!loading}
+          error={error}
+          busyLabel="Eliminando…"
+          doneLabel="Listo"
         >
-          {loading ? 'Eliminando…' : confirmLabel}
-        </Button>
+          {confirmLabel}
+        </SaveButton>
       </Stack>
     }
   >

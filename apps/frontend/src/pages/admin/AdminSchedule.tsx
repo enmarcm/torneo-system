@@ -1,4 +1,6 @@
 import { Box, Grid2 as Grid, Card, Stack, Typography, Button, FormControl, InputLabel, Select, MenuItem, IconButton, TextField, Menu, Tooltip, Tabs, Tab, Chip, FormControlLabel, Checkbox, Avatar, FormHelperText } from '@mui/material';
+import { SaveButton } from '@/components/ui/SaveButton';
+import { MatchLoader } from '@/components/ui/MatchLoader';
 import { AddRounded, PlayArrowRounded, StopRounded, SportsSoccerRounded, StyleRounded, ChevronLeftRounded, ChevronRightRounded, MoreVertRounded, CasinoRounded } from '@mui/icons-material';
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -425,7 +427,7 @@ const AdminSchedule: React.FC = () => {
       )}
 
       {(allCompetitions ? loadingDay : isLoading) ? (
-        <Typography color="text.secondary">Cargando…</Typography>
+        <MatchLoader />
       ) : view === 'pending' ? (
         <Box>
           <Typography variant="h4" sx={{ mb: 1 }}>
@@ -663,9 +665,9 @@ const AdminSchedule: React.FC = () => {
             />
             <Stack direction="row" spacing={1.5} justifyContent="flex-end">
               <Button onClick={() => { setOpen(null); setEditingMatch(null); }}>Cancelar</Button>
-              <Button variant="contained" onClick={submit} disabled={!editForm.scheduledAt || update.isPending}>
+              <SaveButton onClick={submit} loading={update.isPending} error={update.isError} disabled={!editForm.scheduledAt}>
                 {update.isPending ? 'Guardando…' : 'Guardar cambios'}
-              </Button>
+              </SaveButton>
             </Stack>
           </Stack>
         ) : (
@@ -761,9 +763,9 @@ const AdminSchedule: React.FC = () => {
             />
             <Stack direction="row" spacing={1.5} justifyContent="flex-end">
               <Button onClick={() => setOpen(null)}>Cancelar</Button>
-              <Button variant="contained" onClick={submit} disabled={!form.scheduledAt || !form.homeRegistrationId || !form.awayRegistrationId || create.isPending}>
+              <SaveButton onClick={submit} loading={create.isPending} error={create.isError} disabled={!form.scheduledAt || !form.homeRegistrationId || !form.awayRegistrationId}>
                 {create.isPending ? 'Creando…' : 'Crear partido'}
-              </Button>
+              </SaveButton>
             </Stack>
           </Stack>
         )}

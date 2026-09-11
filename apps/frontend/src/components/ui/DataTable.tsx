@@ -8,7 +8,7 @@ import {
 } from '@mui/icons-material';
 import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
-import { LoadingState } from './LoadingState';
+import { TableSkeleton } from './LoadingState';
 import { EmptyState } from './EmptyState';
 import { ErrorState } from './ErrorState';
 
@@ -64,7 +64,7 @@ export function DataTable<T>({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  if (loading) return <LoadingState rows={4} />;
+  if (loading) return <TableSkeleton rows={5} columns={Math.min(columns.length, 6)} />;
   if (error) return <ErrorState onRetry={onRetry} />;
   if (!rows || rows.length === 0)
     return <EmptyState title={emptyTitle} description={emptyDescription} />;
@@ -139,6 +139,7 @@ export function DataTable<T>({
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.18, delay: i * 0.02 }}
+                className={onRowClick ? 'llf-row' : undefined}
                 style={{ display: 'table-row', cursor: onRowClick ? 'pointer' : undefined }}
                 onClick={() => onRowClick?.(row)}
               >

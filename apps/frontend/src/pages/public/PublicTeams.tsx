@@ -5,11 +5,11 @@ import {
   Card,
   Stack,
   Typography,
-  Avatar,
   Button,
   Chip,
 } from '@mui/material';
 import { ArrowBackRounded, PersonRounded, GroupsRounded } from '@mui/icons-material';
+import { Crest } from '@/components/ui/Crest';
 import { useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
@@ -97,9 +97,11 @@ const PublicTeams: React.FC = () => {
         />
       ) : totalTeams === 0 ? (
         <EmptyState
-          icon={<GroupsRounded sx={{ fontSize: 32 }} />}
+          variant="bench"
+          seats={6}
+          filled={0}
           title="Sin equipos inscritos"
-          description="Todavía no hay clubes inscritos en esta selección."
+          description="Todavía no hay clubes inscritos en esta selección. Cuando la liga los cargue, aparecen acá con su escudo."
         />
       ) : (
         <Stack spacing={5}>
@@ -110,11 +112,13 @@ const PublicTeams: React.FC = () => {
                 count={`${teams.length} ${teams.length === 1 ? 'equipo' : 'equipos'}`}
               />
               {teams.length === 0 ? (
-                <Card sx={{ p: 3 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Todavía no hay equipos inscritos en esta competición.
-                  </Typography>
-                </Card>
+                <EmptyState
+                  variant="bench"
+                  compact
+                  seats={6}
+                  filled={0}
+                  title="Todavía no hay equipos inscritos en esta competición"
+                />
               ) : (
                 <Grid container spacing={2}>
                   {teams.map((r: PublicRegistration, i: number) => (
@@ -124,11 +128,11 @@ const PublicTeams: React.FC = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.2, delay: Math.min(i * 0.03, 0.2) }}
-                        whileHover={{ y: -3 }}
+                        className="llf-cardlink"
                         sx={{ p: 3, textAlign: 'center', cursor: 'pointer' }}
                         onClick={() => setSelected({ registration: r, competition })}
                       >
-                        <Avatar
+                        <Crest
                           src={r.team.logoUrl ?? undefined}
                           sx={{
                             width: 64,
@@ -142,7 +146,7 @@ const PublicTeams: React.FC = () => {
                           }}
                         >
                           {r.team.name[0]}
-                        </Avatar>
+                        </Crest>
                         <Typography variant="h4" sx={{ mb: 0.5 }}>
                           {r.team.name}
                         </Typography>
@@ -181,13 +185,13 @@ const PublicTeams: React.FC = () => {
               <Stack spacing={1}>
                 {roster.map((p: TeamRosterEntry) => (
                   <Card key={p.id} sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Avatar
+                    <Crest
                       src={p.player.photoUrl ?? undefined}
                       sx={{ width: 44, height: 44, bgcolor: 'primary.soft', color: 'primary.main', fontWeight: 700 }}
                     >
                       {p.player.firstName[0]}
                       {p.player.lastName[0]}
-                    </Avatar>
+                    </Crest>
                     <Box sx={{ flex: 1 }}>
                       <Typography sx={{ fontWeight: 600 }}>
                         {p.player.firstName} {p.player.lastName}

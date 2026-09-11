@@ -20,6 +20,8 @@ import type { UserRole } from '@/utils/roles';
 const REF_STALE = 5 * 60 * 1000;
 const MID_STALE = 2 * 60 * 1000;
 const FRESH_STALE = 15 * 1000;
+/** Cada cuánto se refresca un partido en vivo si el socket no llega. Lo lee el anillo del chip EN VIVO. */
+export const LIVE_REFETCH_MS = 20_000;
 
 export const useEditionsQuery = (options?: UseQueryOptions<Edition[]>) =>
   useQuery({ queryKey: ['editions'], queryFn: editionsApi.list, staleTime: REF_STALE, ...options });
@@ -190,7 +192,7 @@ export const usePublicMatchesQuery = (
       cae —y en la cancha, con datos móviles, se cae— el marcador se refresca
       igual cada 20 segundos en vez de quedarse clavado sin que nadie se entere.
     */
-    refetchInterval: status === 'LIVE' ? 20_000 : false,
+    refetchInterval: status === 'LIVE' ? LIVE_REFETCH_MS : false,
     refetchOnWindowFocus: status === 'LIVE',
   });
 export const usePublicRegistrationsQuery = (editionId?: string, competitionId?: string) =>

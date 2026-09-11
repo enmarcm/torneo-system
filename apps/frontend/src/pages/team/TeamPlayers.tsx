@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { SaveButton } from '@/components/ui/SaveButton';
 import {
   Box, Card, Typography, Avatar, Chip, Stack, Button, TextField, MenuItem,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
@@ -19,7 +20,7 @@ import { StatCard } from '@/components/ui/StatCard';
 import { DataTable, type DataTableAction, type DataTableColumn } from '@/components/ui/DataTable';
 import { AppDrawer } from '@/components/ui/AppDrawer';
 import { AppModal } from '@/components/ui/AppModal';
-import { LoadingState } from '@/components/ui/LoadingState';
+import { LoadingState, RosterSkeleton } from '@/components/ui/LoadingState';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -262,7 +263,7 @@ const TeamPlayers: React.FC = () => {
     },
   ];
 
-  if (isLoading) return <LoadingState rows={6} />;
+  if (isLoading) return <RosterSkeleton rows={6} />;
   if (error) return <ErrorState onRetry={refetch} />;
 
   return (
@@ -290,7 +291,16 @@ const TeamPlayers: React.FC = () => {
       </Grid>
 
       {players.length === 0 ? (
-        <EmptyState title="Sin jugadores" description="Aún no hay jugadores en las competiciones de tu equipo." />
+        <EmptyState
+          variant="bench"
+          seats={5}
+          filled={0}
+          title="Tu plantilla está vacía"
+          description="Cargá al menos 5 jugadores para poder inscribir al equipo en una competición."
+          actionLabel="Agregar jugador"
+          actionIcon={<AddRounded />}
+          onAction={() => setCreateOpen(true)}
+        />
       ) : (
         <Card sx={{ p: { xs: 2, md: 3 } }}>
           <Typography variant="h3" sx={{ mb: 2 }}>
@@ -350,13 +360,13 @@ const TeamPlayers: React.FC = () => {
           />
           <Stack direction="row" spacing={1.5} justifyContent="flex-end">
             <Button onClick={() => { setCreateOpen(false); setCreateForm(INITIAL_FORM); }}>Cancelar</Button>
-            <Button
-              variant="contained"
+            <SaveButton
+             
               onClick={handleCreate}
-              disabled={!createForm.firstName || !createForm.lastName || !createForm.documentNumber || !createForm.birthDate || createPlayer.isPending}
+              loading={createPlayer.isPending} error={createPlayer.isError} disabled={!createForm.firstName || !createForm.lastName || !createForm.documentNumber || !createForm.birthDate}
             >
               {createPlayer.isPending ? 'Creando…' : 'Crear jugador'}
-            </Button>
+            </SaveButton>
           </Stack>
         </Stack>
       </AppDrawer>
@@ -407,13 +417,13 @@ const TeamPlayers: React.FC = () => {
             />
             <Stack direction="row" spacing={1.5} justifyContent="flex-end">
               <Button onClick={() => { setEditOpen(false); setEditId(null); }}>Cancelar</Button>
-              <Button
-                variant="contained"
+              <SaveButton
+               
                 onClick={handleEdit}
-                disabled={!editForm.firstName || !editForm.lastName || !editForm.documentNumber || !editForm.birthDate || updatePlayer.isPending}
+                loading={updatePlayer.isPending} error={updatePlayer.isError} disabled={!editForm.firstName || !editForm.lastName || !editForm.documentNumber || !editForm.birthDate}
               >
                 {updatePlayer.isPending ? 'Guardando…' : 'Guardar cambios'}
-              </Button>
+              </SaveButton>
             </Stack>
           </Stack>
         )}

@@ -13,6 +13,7 @@ import {
   IconButton,
   Tooltip,
 } from '@mui/material';
+import { SaveButton } from '@/components/ui/SaveButton';
 import {
   AddRounded,
   EditRounded,
@@ -445,13 +446,13 @@ const AdminUsers: React.FC = () => {
           />
           <Stack direction="row" spacing={1.5} justifyContent="flex-end">
             <Button onClick={() => setPasswordFor(null)}>Cancelar</Button>
-            <Button
-              variant="contained"
+            <SaveButton
+             
               onClick={submitPassword}
-              disabled={newPassword.length < 6 || setPassword.isPending}
+              loading={setPassword.isPending} error={setPassword.isError} disabled={newPassword.length < 6}
             >
               Guardar contraseña
-            </Button>
+            </SaveButton>
           </Stack>
         </Stack>
       </AppDrawer>

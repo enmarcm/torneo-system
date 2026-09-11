@@ -1,4 +1,5 @@
 import { Box, Card, Stack, Typography, Button, Avatar, TextField, FormControl, InputLabel, Select, MenuItem, Chip, InputAdornment, FormHelperText } from '@mui/material';
+import { SaveButton } from '@/components/ui/SaveButton';
 import {
   AddRounded,
   SearchRounded,
@@ -306,9 +307,9 @@ const AdminTeams: React.FC = () => {
             />
             <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
               <Button onClick={() => { setOpen(null); setEditingTeam(null); }}>Cancelar</Button>
-              <Button variant="contained" onClick={submit} disabled={!editForm.name || update.isPending}>
+              <SaveButton onClick={submit} loading={update.isPending} error={update.isError} disabled={!editForm.name}>
                 {update.isPending ? 'Guardando…' : 'Guardar cambios'}
-              </Button>
+              </SaveButton>
             </Stack>
           </Stack>
         ) : (
@@ -330,9 +331,9 @@ const AdminTeams: React.FC = () => {
             <TextField label="Contraseña del delegado" type="text" fullWidth value={form.leaderPassword} onChange={(e) => setForm({ ...form, leaderPassword: e.target.value })} helperText="Mínimo 6 caracteres. Entregásela al delegado junto con el usuario." />
             <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
               <Button onClick={() => { setOpen(null); setEditingTeam(null); }}>Cancelar</Button>
-              <Button variant="contained" onClick={submit} disabled={!form.name || form.leaderUsername.length < 3 || form.leaderPassword.length < 6 || create.isPending}>
+              <SaveButton onClick={submit} loading={create.isPending} error={create.isError} disabled={!form.name || form.leaderUsername.length < 3 || form.leaderPassword.length < 6}>
                 {create.isPending ? 'Creando…' : 'Crear equipo'}
-              </Button>
+              </SaveButton>
             </Stack>
           </Stack>
         )}
@@ -468,7 +469,7 @@ const AdminTeams: React.FC = () => {
             )}
             <Stack direction="row" spacing={1.5} justifyContent="flex-end">
               <Button onClick={() => setRegOpen(null)}>Cancelar</Button>
-              <Button variant="contained" disabled={!regOpen.competitionId || register.isPending} onClick={async () => {
+              <SaveButton loading={register.isPending} error={register.isError} disabled={!regOpen.competitionId} onClick={async () => {
                 try {
                   await register.mutateAsync({ id: regOpen.team.id, competitionId: regOpen.competitionId });
                   setRegOpen(null);
@@ -478,7 +479,7 @@ const AdminTeams: React.FC = () => {
                 }
               }}>
                 Inscribir
-              </Button>
+              </SaveButton>
             </Stack>
           </Stack>
         )}

@@ -26,7 +26,8 @@ import { ROUTES } from '@/routes/routes';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { getRoleLabel, type UserRole } from '@/utils/roles';
-import { useMemo, type ReactNode } from 'react';
+import { useMemo, useRef, type ReactNode } from 'react';
+import { RailIndicator } from './RailIndicator';
 
 interface NavItem {
   label: string;
@@ -67,6 +68,7 @@ export const Sidebar: React.FC = () => {
   const logout = useAuthStore((s) => s.logout);
   const user = useAuthStore((s) => s.user);
   const expanded = !sidebarCollapsed;
+  const listRef = useRef<HTMLUListElement>(null);
   /* Sin esto, el community manager veía un menú entero que el guard le rebota. */
   const nav = useMemo(
     () => NAV.filter((item) => !!user && item.roles.includes(user.role)),
@@ -113,13 +115,16 @@ export const Sidebar: React.FC = () => {
           )}
         </Box>
 
-        <List sx={{ flex: 1, overflow: 'auto', px: expanded ? 1 : 0.5, '&::-webkit-scrollbar': { width: 3 }, '&::-webkit-scrollbar-thumb': { bgcolor: 'var(--sidebarBorder)', borderRadius: 4 } }}>
+        {/* El riel naranja viaja entre ítems: un solo indicador, no uno que se apaga y otro que se prende. */}
+        <List ref={listRef} sx={{ position: 'relative', flex: 1, overflow: 'auto', px: expanded ? 1 : 0.5, '&::-webkit-scrollbar': { width: 3 }, '&::-webkit-scrollbar-thumb': { bgcolor: 'var(--sidebarBorder)', borderRadius: 4 } }}>
+          <RailIndicator containerRef={listRef} deps={[pathname, expanded]} />
           {nav.map((item) => {
             const active = isActive(item);
             const btn = (
               <ListItemButton
                 key={item.to}
                 onClick={() => navigate(item.to)}
+                data-nav-active={active ? 'true' : undefined}
                 sx={{
                   borderRadius: expanded ? 1.5 : 1,
                   mb: 0.25,
@@ -129,7 +134,9 @@ export const Sidebar: React.FC = () => {
                   justifyContent: expanded ? 'flex-start' : 'center',
                   color: active ? 'var(--primary)' : 'var(--sidebarText)',
                   bgcolor: active ? 'var(--sidebarActiveBg)' : 'transparent',
+                  transition: 'background-color 0.2s, color 0.2s',
                   '&:hover': { bgcolor: active ? 'var(--sidebarActiveBg)' : 'var(--sidebarHover)' },
+                  '&:hover .MuiListItemIcon-root': { transform: 'translateX(2px)' },
                 }}
               >
                 <ListItemIcon
@@ -137,6 +144,7 @@ export const Sidebar: React.FC = () => {
                     minWidth: 0,
                     mr: expanded ? 1.5 : 0,
                     color: active ? 'var(--primary)' : 'inherit',
+                    transition: 'transform 0.2s',
                     '& svg': { fontSize: 20 },
                   }}
                 >

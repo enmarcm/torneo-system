@@ -29,7 +29,8 @@ import logoAzul from '@/assets/logo_azul.PNG';
 import logoBlanco from '@/assets/logo.PNG';
 import { ROUTES } from '@/routes/routes';
 import { usePublicEditionsQuery, usePublicMatchesQuery } from '@/hooks/queries';
-import type { ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
+import { RailIndicator } from './RailIndicator';
 
 export interface PublicNavItem {
   label: string;
@@ -74,6 +75,7 @@ interface Props {
  */
 export const PublicSidebar: React.FC<Props> = ({ onNavigate, onClose }) => {
   const { pathname } = useLocation();
+  const listRef = useRef<HTMLUListElement>(null);
   const navigate = useNavigate();
   const isDark = useGlobalStore((s) => s.mode) === 'dark';
   const logoSrc = isDark ? logoBlanco : logoAzul;
@@ -192,7 +194,8 @@ export const PublicSidebar: React.FC<Props> = ({ onNavigate, onClose }) => {
         </Stack>
       </Stack>
 
-      <List sx={{ flex: 1, px: 1.25, py: 1.5 }}>
+      <List ref={listRef} sx={{ position: 'relative', flex: 1, px: 1.25, py: 1.5 }}>
+        <RailIndicator containerRef={listRef} deps={[pathname]} />
         {PUBLIC_NAV.map((item) => {
           const isActive = pathname === item.to;
           const isLiveItem = item.to === ROUTES.public.live && liveCount > 0;
@@ -202,6 +205,7 @@ export const PublicSidebar: React.FC<Props> = ({ onNavigate, onClose }) => {
               key={item.to}
               onClick={() => go(item.to)}
               aria-current={isActive ? 'page' : undefined}
+              data-nav-active={isActive ? 'true' : undefined}
               sx={{
                 borderRadius: 2,
                 mb: 0.5,
@@ -214,9 +218,10 @@ export const PublicSidebar: React.FC<Props> = ({ onNavigate, onClose }) => {
                   bgcolor: isActive ? 'var(--sidebarActiveBg)' : 'var(--sidebarHover)',
                   color: isActive ? 'primary.main' : 'var(--logo)',
                 },
+                '&:hover .MuiListItemIcon-root': { transform: 'translateX(2px)' },
               }}
             >
-              <ListItemIcon sx={{ minWidth: 0, mr: 1.75, color: 'inherit', '& svg': { fontSize: 21 } }}>
+              <ListItemIcon sx={{ minWidth: 0, mr: 1.75, color: 'inherit', transition: 'transform 0.2s', '& svg': { fontSize: 21 } }}>
                 {item.icon}
               </ListItemIcon>
 

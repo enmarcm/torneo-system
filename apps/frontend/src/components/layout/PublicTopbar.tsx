@@ -20,6 +20,7 @@ import logoAzul from '@/assets/logo_azul.PNG';
 import logoBlanco from '@/assets/logo.PNG';
 import { ROUTES } from '@/routes/routes';
 import { useGlobalStore } from '@/store/useGlobalStore';
+import { RouteProgress } from '@/components/ui/RouteProgress';
 
 /** Alto de la barra. Es el desplazamiento de todo lo que va debajo, así que vive acá. */
 export const PUBLIC_TOPBAR_H = { xs: 60, md: 72 };
@@ -99,6 +100,8 @@ export const PublicTopbar: React.FC<Props> = ({ onToggleNav, navExpanded }) => {
         transition: 'background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease',
       }}
     >
+      {/* Línea naranja de progreso al cambiar de sección; pegada al borde superior. */}
+      <RouteProgress />
       <Toolbar
         sx={{
           minHeight: { xs: PUBLIC_TOPBAR_H.xs, md: PUBLIC_TOPBAR_H.md },

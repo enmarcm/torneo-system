@@ -32,7 +32,7 @@ export const CompetitionCard: React.FC<Props> = ({ competition, onClick, compact
   return (
     <Card
       component={motion.div}
-      whileHover={{ y: -4 }}
+      className={onClick ? 'llf-cardlink' : undefined}
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}

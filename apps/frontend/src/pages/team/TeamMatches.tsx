@@ -3,7 +3,7 @@ import { Box, Card, Stack, Typography, FormControl, InputLabel, Select, MenuItem
 import Grid from '@mui/material/Grid2';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { MatchCard } from '@/components/sport/MatchCard';
-import { LoadingState } from '@/components/ui/LoadingState';
+import { MatchLoader } from '@/components/ui/MatchLoader';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useMatchesQuery, useCompetitionsQuery } from '@/hooks/queries';
@@ -59,9 +59,9 @@ const TeamMatches: React.FC = () => {
       </Card>
 
       {isLoading ? (
-        <LoadingState rows={4} />
+        <MatchLoader />
       ) : myMatches.length === 0 ? (
-        <EmptyState title="Sin partidos" description="No hay partidos que coincidan con los filtros seleccionados." />
+        <EmptyState variant="court" title="Sin partidos" description="No hay partidos que coincidan con los filtros seleccionados." />
       ) : (
         <Grid container spacing={2}>
           {myMatches.map((m) => (

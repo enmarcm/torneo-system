@@ -1,5 +1,5 @@
 import { Box, Container, Grid2 as Grid, Card, Chip, Stack, Typography, Button } from '@mui/material';
-import { TodayRounded, StarRounded } from '@mui/icons-material';
+import { TodayRounded, StarRounded, ArrowForwardRounded } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import dayjs from 'dayjs';
@@ -18,8 +18,10 @@ import { CompetitionCard } from '@/components/sport/CompetitionCard';
 import { AppModal } from '@/components/ui/AppModal';
 import { AdSlot } from '@/components/ui/AdSlot';
 import { StandingsTable } from '@/components/sport/StandingsTable';
-import { LoadingState } from '@/components/ui/LoadingState';
+import { LoadingState, MatchCardSkeleton } from '@/components/ui/LoadingState';
 import { ErrorState } from '@/components/ui/ErrorState';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { NextMatchRow } from '@/components/sport/NextMatchRow';
 import { ROUTES } from '@/routes/routes';
 import { sortCompetitions, getCompetitionShortLabel } from '@/utils/competitionMeta';
 import type { Edition, Competition, Match } from '@/api/public.api';
@@ -179,7 +181,7 @@ const PublicHome: React.FC = () => {
               <Box sx={{ width: 9, height: 9, borderRadius: '50%', bgcolor: 'var(--live)', animation: 'pulse 1.4s infinite' }} />
               <Typography variant="h4" component="h2">En vivo ahora</Typography>
               <Box sx={{ flex: 1 }} />
-              <Button size="small" onClick={() => navigate(ROUTES.public.live)}>
+              <Button size="small" endIcon={<ArrowForwardRounded />} onClick={() => navigate(ROUTES.public.live)}>
                 Ver todos
               </Button>
             </Stack>
@@ -216,18 +218,19 @@ const PublicHome: React.FC = () => {
                 />
               )}
               <Box sx={{ flex: 1 }} />
-              <Button size="small" onClick={() => navigate(ROUTES.public.schedule)}>
+              <Button size="small" endIcon={<ArrowForwardRounded />} onClick={() => navigate(ROUTES.public.schedule)}>
                 Ver calendario
               </Button>
             </Stack>
             {todayQuery.isLoading ? (
-              <LoadingState rows={3} height={96} />
+              <MatchCardSkeleton count={3} />
             ) : todayMatches.length === 0 ? (
-              <Card sx={{ p: 3, textAlign: 'center' }}>
-                <Typography variant="body2" color="text.secondary">
-                  Hoy no se juega. El calendario tiene la próxima jornada.
-                </Typography>
-              </Card>
+              <EmptyState
+                variant="court"
+                compact
+                title="Hoy no se juega"
+                extra={<NextMatchRow editionId={active?.id} />}
+              />
             ) : (
               <Stack spacing={1.5}>
                 {todayMatches.map((m: Match) => (
@@ -248,18 +251,19 @@ const PublicHome: React.FC = () => {
               <StarRounded sx={{ fontSize: 20, color: 'var(--accent)' }} />
               <Typography variant="h4" component="h2">Destacados de la semana</Typography>
               <Box sx={{ flex: 1 }} />
-              <Button size="small" onClick={() => navigate(ROUTES.public.schedule)}>
+              <Button size="small" endIcon={<ArrowForwardRounded />} onClick={() => navigate(ROUTES.public.schedule)}>
                 Ver calendario
               </Button>
             </Stack>
             {featuredQuery.isLoading ? (
-              <LoadingState rows={3} height={96} />
+              <MatchCardSkeleton count={3} />
             ) : featuredWeek.length === 0 ? (
-              <Card sx={{ p: 3, textAlign: 'center' }}>
-                <Typography variant="body2" color="text.secondary">
-                  La liga todavía no destacó partidos para esta semana.
-                </Typography>
-              </Card>
+              <EmptyState
+                variant="court"
+                compact
+                title="Sin destacados esta semana"
+                description="La liga marca los partidos clave de cada fecha. Cuando los elija, aparecen acá."
+              />
             ) : (
               <Stack spacing={1.5}>
                 {featuredWeek.map((m: Match) => (
@@ -287,7 +291,7 @@ const PublicHome: React.FC = () => {
             <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 1.5 }}>
               <Typography variant="h4" component="h2">Última jornada</Typography>
               <Box sx={{ flex: 1 }} />
-              <Button size="small" onClick={() => navigate(ROUTES.public.schedule)}>
+              <Button size="small" endIcon={<ArrowForwardRounded />} onClick={() => navigate(ROUTES.public.schedule)}>
                 Ver todos
               </Button>
             </Stack>
@@ -313,7 +317,7 @@ const PublicHome: React.FC = () => {
             <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 1.5 }}>
               <Typography variant="h4" component="h2">Noticias y fichas</Typography>
               <Box sx={{ flex: 1 }} />
-              <Button size="small" onClick={() => navigate(ROUTES.public.news)}>
+              <Button size="small" endIcon={<ArrowForwardRounded />} onClick={() => navigate(ROUTES.public.news)}>
                 Ver todas
               </Button>
             </Stack>
@@ -321,6 +325,7 @@ const PublicHome: React.FC = () => {
               {latestNews.map((a) => (
                 <Grid size={{ xs: 12, sm: 6, md: 4 }} key={a.id}>
                   <Card
+                    className="llf-cardlink"
                     sx={{
                       height: '100%',
                       overflow: 'hidden',

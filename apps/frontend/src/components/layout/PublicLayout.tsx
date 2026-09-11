@@ -1,9 +1,12 @@
 import { Box, Typography, Stack, Container, Drawer } from '@mui/material';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { PlaceRounded, PhoneRounded, MailRounded, ScheduleRounded } from '@mui/icons-material';
 import { useState, useEffect, Suspense } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { LoadingState } from '@/components/ui/LoadingState';
+import { PageLoader } from '@/components/ui/PageLoader';
+import { MatchLoader } from '@/components/ui/MatchLoader';
+import { RouteProgressSignal } from '@/components/ui/RouteProgress';
+import { isMatchRoute } from '@/routes/routes';
 import { AdSlot } from '@/components/ui/AdSlot';
 import { useLiveMatchSync } from '@/hooks/common/useLiveMatchSync';
 import { PublicSidebar, PUBLIC_NAV } from './PublicSidebar';
@@ -22,6 +25,7 @@ const CONTACTO = {
 
 export const PublicLayout: React.FC = () => {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const [navOpen, setNavOpen] = useState(false);
   const reduceMotion = useReducedMotion();
 
@@ -101,8 +105,20 @@ export const PublicLayout: React.FC = () => {
           pt: { xs: `${PUBLIC_TOPBAR_H.xs}px`, md: `${PUBLIC_TOPBAR_H.md}px` },
         }}
       >
-          <Box component="main" sx={{ flex: 1 }}>
-          <Suspense fallback={<LoadingState rows={4} />}>
+        {/*
+          `key={pathname}` + `.llf-page`: cada pantalla monta de cero y sus
+          bloques entran en cascada (regla en el tema). El fallback avisa a la
+          barra de ruta de la barra superior mientras baja el código.
+        */}
+        <Box component="main" className="llf-page" key={pathname} sx={{ flex: 1 }}>
+          <Suspense
+            fallback={
+              <>
+                <RouteProgressSignal />
+                {isMatchRoute(pathname) ? <MatchLoader minHeight="60vh" /> : <PageLoader />}
+              </>
+            }
+          >
             <Outlet />
           </Suspense>
         </Box>
@@ -248,10 +264,13 @@ export const PublicLayout: React.FC = () => {
                         component="button"
                         onClick={() => navigate(n.to)}
                         variant="body2"
+                        /* Subrayado que crece desde el centro; la sección actual queda en naranja. */
+                        className={`llf-navlink${pathname === n.to ? ' active' : ''}`}
                         sx={{
                           background: 'none',
                           border: 'none',
                           p: 0,
+                          alignSelf: 'flex-start',
                           textAlign: 'left',
                           cursor: 'pointer',
                           font: 'inherit',

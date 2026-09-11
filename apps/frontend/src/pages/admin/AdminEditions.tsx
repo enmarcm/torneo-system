@@ -1,4 +1,5 @@
 import { Box, Grid2 as Grid, Card, Stack, Typography, IconButton, Menu, MenuItem, Chip, Button, TextField, Tooltip, Divider } from '@mui/material';
+import { SaveButton } from '@/components/ui/SaveButton';
 import { getStatusLabel, getStatusColor } from '@/utils/statusLabels';
 import { AddRounded, MoreVertRounded, EmojiEventsRounded } from '@mui/icons-material';
 import { useState } from 'react';
@@ -157,9 +158,9 @@ const AdminEditions: React.FC = () => {
             <TextField label="Fecha de fin" type="date" fullWidth InputLabelProps={{ shrink: true }} {...register('endDate')} error={!!errors.endDate} helperText={errors.endDate?.message} />
             <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
               <Button onClick={() => setOpen(false)}>Cancelar</Button>
-              <Button type="submit" variant="contained" disabled={create.isPending}>
+              <SaveButton type="submit" loading={create.isPending} error={create.isError}>
                 {create.isPending ? 'Creando…' : 'Crear edición'}
-              </Button>
+              </SaveButton>
             </Stack>
           </Stack>
         </form>

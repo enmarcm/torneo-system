@@ -1,4 +1,5 @@
 import { Box, Card, Stack, Typography, FormControl, InputLabel, Select, MenuItem, Button, TextField, Chip, Avatar } from '@mui/material';
+import { SaveButton } from '@/components/ui/SaveButton';
 import { AddRounded } from '@mui/icons-material';
 import { useState } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -81,9 +82,9 @@ const TeamSquads: React.FC = () => {
               <TextField label="Número de camiseta (opcional)" type="number" fullWidth value={form.jerseyNumber} onChange={(e) => setForm({ ...form, jerseyNumber: e.target.value })} />
               <Stack direction="row" spacing={1.5} justifyContent="flex-end">
                 <Button onClick={() => setOpen(false)}>Cancelar</Button>
-                <Button variant="contained" onClick={submit} disabled={!form.registrationId || !form.playerId || add.isPending}>
+                <SaveButton onClick={submit} loading={add.isPending} error={add.isError} disabled={!form.registrationId || !form.playerId}>
                   {add.isPending ? 'Agregando…' : 'Agregar'}
-                </Button>
+                </SaveButton>
               </Stack>
             </Stack>
           </Card>

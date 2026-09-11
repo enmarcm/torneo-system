@@ -43,3 +43,21 @@ export const ROUTES = {
     playerSearch: '/jugador',
   },
 } as const;
+
+/**
+ * Pantallas de partidos y tablas: mientras baja su código, el loader es el de
+ * la cancha con reflectores (MatchLoader) y no el balón del resto del sitio.
+ */
+const MATCH_ROUTES: string[] = [
+  ROUTES.public.live,
+  ROUTES.public.schedule,
+  ROUTES.public.competitions,
+  ROUTES.public.stats,
+  ROUTES.team.matches,
+  ROUTES.team.stats,
+  ROUTES.team.history,
+  ROUTES.admin.schedule,
+  ROUTES.admin.stats,
+];
+export const isMatchRoute = (pathname: string) =>
+  MATCH_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/'));

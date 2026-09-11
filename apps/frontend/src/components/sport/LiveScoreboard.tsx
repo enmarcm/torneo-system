@@ -1,8 +1,10 @@
-import { Card, Box, Typography, Avatar, Stack } from '@mui/material';
+import { Card, Box, Typography, Stack } from '@mui/material';
 import { SportsSoccerRounded, StyleRounded, SwapHorizRounded } from '@mui/icons-material';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { StatusBadge } from '@/components/ui/StatusBadge';
+import { Crest } from '@/components/ui/Crest';
+import { LIVE_REFETCH_MS } from '@/hooks/queries';
 import { getStatusLabel } from '@/utils/statusLabels';
 import { formatTime, formatDateTimeOrPending, UNSCHEDULED_LABEL } from '@/utils/formatDate';
 import { getCompetitionShortLabel } from '@/utils/competitionMeta';
@@ -25,6 +27,24 @@ export const LiveScoreboard: React.FC<Props> = ({ match, showFeed = true, size =
     setStatus(match.status);
     if (match.events) setEvents(match.events);
   }, [match]);
+
+  /*
+    El gol entra desde arriba, en naranja, y vuelve al rojo del vivo. Se cuenta
+    cada cambio para forzar el remonte del dígito; el primer render no salta.
+  */
+  const [bump, setBump] = useState({ home: 0, away: 0 });
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    setBump((b) => ({ home: b.home + 1, away: b.away }));
+  }, [score.home]);
+  useEffect(() => {
+    if (first.current) return;
+    setBump((b) => ({ home: b.home, away: b.away + 1 }));
+  }, [score.away]);
 
   useEffect(() => {
     joinMatchRoom(match.id);
@@ -103,10 +123,39 @@ export const LiveScoreboard: React.FC<Props> = ({ match, showFeed = true, size =
             component={motion.div}
             animate={reduceMotion ? undefined : { opacity: [1, 0.4, 1] }}
             transition={{ duration: 1.4, repeat: Infinity }}
-            sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75, px: 1.25, py: 0.5, borderRadius: 999, bgcolor: 'var(--live)', color: 'var(--liveOn)', fontSize: 12, fontWeight: 700 }}
+            sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75, pl: 1.25, pr: 0.875, py: 0.5, borderRadius: 999, bgcolor: 'var(--live)', color: 'var(--liveOn)', fontSize: 12, fontWeight: 700 }}
           >
             <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'currentColor' }} />
             EN VIVO
+            {/*
+              El anillo se llena en el mismo tiempo que tarda el refresco de
+              respaldo: la espera se ve, no se sufre. Si el socket trae el gol
+              antes, el marcador cambia igual; el anillo solo dice "esto se
+              está actualizando".
+            */}
+            <Box
+              component="svg"
+              viewBox="0 0 22 22"
+              aria-hidden
+              sx={{ width: 16, height: 16, transform: 'rotate(-90deg)', flexShrink: 0 }}
+            >
+              <circle cx="11" cy="11" r="8" fill="none" stroke="currentColor" strokeWidth="2.5" opacity="0.3" />
+              <Box
+                component="circle"
+                cx="11"
+                cy="11"
+                r="8"
+                sx={{
+                  fill: 'none',
+                  stroke: 'currentColor',
+                  strokeWidth: 2.5,
+                  strokeLinecap: 'round',
+                  strokeDasharray: 50.3,
+                  strokeDashoffset: 50.3,
+                  animation: reduceMotion ? 'none' : `llfSweep ${LIVE_REFETCH_MS}ms linear infinite`,
+                }}
+              />
+            </Box>
           </Box>
         ) : (
           <StatusBadge status={status} />
@@ -115,9 +164,9 @@ export const LiveScoreboard: React.FC<Props> = ({ match, showFeed = true, size =
 
       <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
         <Stack alignItems="center" sx={{ flex: 1 }}>
-          <Avatar alt={match.homeRegistration.team.name} src={match.homeRegistration.team.logoUrl ?? undefined} sx={{ width: 64, height: 64, mb: 1 }}>
+          <Crest alt={match.homeRegistration.team.name} src={match.homeRegistration.team.logoUrl ?? undefined} sx={{ width: 64, height: 64, mb: 1 }}>
             {match.homeRegistration.team.name[0]}
-          </Avatar>
+          </Crest>
           <Typography sx={{ fontWeight: 600, textAlign: 'center' }}>{match.homeRegistration.team.name}</Typography>
         </Stack>
 
@@ -162,16 +211,30 @@ export const LiveScoreboard: React.FC<Props> = ({ match, showFeed = true, size =
                 lineHeight: 1,
               }}
             >
-              {score.home} : {score.away}
+              <Box
+                component="span"
+                key={`h${bump.home}`}
+                sx={{ display: 'inline-block', animation: bump.home && !reduceMotion ? 'llfBump 0.5s cubic-bezier(.2,.8,.2,1)' : 'none' }}
+              >
+                {score.home}
+              </Box>
+              {' : '}
+              <Box
+                component="span"
+                key={`a${bump.away}`}
+                sx={{ display: 'inline-block', animation: bump.away && !reduceMotion ? 'llfBump 0.5s cubic-bezier(.2,.8,.2,1)' : 'none' }}
+              >
+                {score.away}
+              </Box>
             </Typography>
           )}
           {isFinished && <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>Final</Typography>}
         </Stack>
 
         <Stack alignItems="center" sx={{ flex: 1 }}>
-          <Avatar alt={match.awayRegistration.team.name} src={match.awayRegistration.team.logoUrl ?? undefined} sx={{ width: 64, height: 64, mb: 1 }}>
+          <Crest alt={match.awayRegistration.team.name} src={match.awayRegistration.team.logoUrl ?? undefined} sx={{ width: 64, height: 64, mb: 1 }}>
             {match.awayRegistration.team.name[0]}
-          </Avatar>
+          </Crest>
           <Typography sx={{ fontWeight: 600, textAlign: 'center' }}>{match.awayRegistration.team.name}</Typography>
         </Stack>
       </Stack>
