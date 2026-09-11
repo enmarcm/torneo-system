@@ -13,7 +13,7 @@ import { Box } from '@mui/material';
 const LINE = 'rgba(255,255,255,0.22)';
 const LINE_SOFT = 'rgba(255,255,255,0.14)';
 
-const CourtMarkings: React.FC = () => (
+export const CourtMarkings: React.FC = () => (
   <svg viewBox="-60 -40 1120 580" width="100%" height="100%" preserveAspectRatio="none" aria-hidden>
     <g fill="none" stroke={LINE} strokeWidth="3" strokeLinecap="round">
       {/* Perímetro, línea de medio campo y círculo central */}

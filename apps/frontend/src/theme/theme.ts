@@ -156,6 +156,22 @@ export const buildTheme = (mode: 'light' | 'dark') => {
             '41%, 59%': { opacity: 1, textShadow: `0 0 18px ${t.accent}99` },
             '72%, 100%': { opacity: 0.18, textShadow: '0 0 0 transparent' },
           },
+          // Pantalla de acceso: los reflectores respiran, la tarjeta se sacude
+          // con un error y el balón entra rodando con el saludo.
+          '@keyframes llfLampBreathe': {
+            '0%, 100%': { opacity: 0.7 },
+            '50%': { opacity: 1 },
+          },
+          '@keyframes llfShake': {
+            '10%, 90%': { transform: 'translateX(-1px)' },
+            '20%, 80%': { transform: 'translateX(2px)' },
+            '30%, 50%, 70%': { transform: 'translateX(-4px)' },
+            '40%, 60%': { transform: 'translateX(4px)' },
+          },
+          '@keyframes llfRollIn': {
+            from: { opacity: 0, transform: 'translateX(-80px) rotate(-360deg)' },
+            to: { opacity: 1, transform: 'none' },
+          },
           // Reflectores del loader de partidos y tablas (MatchLoader).
           '@keyframes llfLampOn': {
             '0%': { opacity: 0 },

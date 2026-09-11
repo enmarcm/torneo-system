@@ -10,6 +10,7 @@ import { queryClient } from '@/lib/queryClient';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import { AppRouter } from '@/routes/AppRouter';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
+import { SplashGate } from '@/components/ui/SplashGate';
 
 const allTokenKeys = new Set([
   ...Object.keys(lightTokens),
@@ -41,7 +42,10 @@ const Root: React.FC = () => {
                 blanco, sin manera de volver salvo recargar.
               */}
               <ErrorBoundary>
-                <AppRouter />
+                {/* Portada de carga: el balón se ve tres segundos en cada carga de la página. */}
+                <SplashGate>
+                  <AppRouter />
+                </SplashGate>
               </ErrorBoundary>
             </BrowserRouter>
           </QueryClientProvider>
