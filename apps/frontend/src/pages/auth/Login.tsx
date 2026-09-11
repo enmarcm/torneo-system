@@ -284,19 +284,32 @@ const Login: React.FC = () => {
           </Box>
         </Stack>
 
-        {/* El balón descansa en la esquina, sobre la cancha. */}
+        {/*
+          El balón descansa en la esquina, sobre la cancha. Al pasar el cursor
+          rueda: el contenedor va y vuelve y la imagen gira lo que rueda, en
+          dos capas porque un mismo transform no puede hacer las dos cosas.
+        */}
         <Box
           aria-hidden
           sx={{
             position: 'absolute',
             right: { md: '6%', lg: '9%' },
-            bottom: { md: '7%' },
+            bottom: { md: '9%' },
             display: { xs: 'none', md: 'block' },
             zIndex: 1,
+            p: 2,
             filter: 'drop-shadow(0 14px 10px rgba(0,0,0,0.55))',
+            '& .llf-ball-x': { transition: 'transform 0.3s' },
+            '& .llf-ball-r': { transition: 'transform 0.3s' },
+            '&:hover .llf-ball-x': { animation: 'llfRollHoverX 0.9s cubic-bezier(.45,0,.55,1) infinite alternate' },
+            '&:hover .llf-ball-r': { animation: 'llfRollHoverR 0.9s cubic-bezier(.45,0,.55,1) infinite alternate' },
           }}
         >
-          <Ball size={96} />
+          <Box className="llf-ball-x">
+            <Box className="llf-ball-r">
+              <Ball size={96} />
+            </Box>
+          </Box>
         </Box>
 
         <Typography

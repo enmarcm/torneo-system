@@ -13,9 +13,10 @@ import { Box } from '@mui/material';
 const LINE = 'rgba(255,255,255,0.22)';
 const LINE_SOFT = 'rgba(255,255,255,0.14)';
 
-export const CourtMarkings: React.FC = () => (
+/** `line`/`lineSoft`: intensidad de las marcas; el login de noche las pide más fuertes. */
+export const CourtMarkings: React.FC<{ line?: string; lineSoft?: string }> = ({ line = LINE, lineSoft = LINE_SOFT }) => (
   <svg viewBox="-60 -40 1120 580" width="100%" height="100%" preserveAspectRatio="none" aria-hidden>
-    <g fill="none" stroke={LINE} strokeWidth="3" strokeLinecap="round">
+    <g fill="none" stroke={line} strokeWidth="3" strokeLinecap="round">
       {/* Perímetro, línea de medio campo y círculo central */}
       <rect x="0" y="0" width="1000" height="500" />
       <line x1="500" y1="0" x2="500" y2="500" />
@@ -33,7 +34,7 @@ export const CourtMarkings: React.FC = () => (
     </g>
 
     {/* Punto central y penales de 6 y 10 m */}
-    <g fill={LINE}>
+    <g fill={line}>
       <circle cx="500" cy="250" r="5" />
       <circle cx="150" cy="250" r="5" />
       <circle cx="850" cy="250" r="5" />
@@ -42,7 +43,7 @@ export const CourtMarkings: React.FC = () => (
     </g>
 
     {/* Arcos, insinuados por fuera de la línea de fondo */}
-    <g fill="none" stroke={LINE_SOFT} strokeWidth="3">
+    <g fill="none" stroke={lineSoft} strokeWidth="3">
       <rect x="-42" y="212.5" width="42" height="75" />
       <rect x="1000" y="212.5" width="42" height="75" />
     </g>

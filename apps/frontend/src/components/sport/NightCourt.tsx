@@ -8,23 +8,27 @@ import { CourtMarkings } from './FutsalScene';
  */
 export const NightCourt: React.FC = () => (
   <Box aria-hidden sx={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-    {/* Cancha en fuga */}
+    {/*
+      Cancha en fuga. Sube hasta media pantalla y las líneas van al doble de
+      intensidad que en el panel de marca: acá la cancha es el escenario, no
+      una marca de agua, y tiene que leerse alrededor de la tarjeta.
+    */}
     <Box
       sx={{
         position: 'absolute',
-        left: '-30%',
-        right: '-30%',
-        bottom: '-8%',
-        height: '72%',
+        left: '-25%',
+        right: '-25%',
+        bottom: '2%',
+        height: '82%',
         transformOrigin: 'bottom center',
-        transform: 'perspective(1000px) rotateX(66deg)',
-        opacity: 0.5,
-        maskImage: 'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.55) 40%, rgba(0,0,0,0) 88%)',
+        transform: 'perspective(1100px) rotateX(58deg)',
+        opacity: 0.85,
+        maskImage: 'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 55%, rgba(0,0,0,0) 100%)',
         WebkitMaskImage:
-          'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.55) 40%, rgba(0,0,0,0) 88%)',
+          'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 55%, rgba(0,0,0,0) 100%)',
       }}
     >
-      <CourtMarkings />
+      <CourtMarkings line="rgba(255,255,255,0.42)" lineSoft="rgba(255,255,255,0.26)" />
     </Box>
 
     {/* Tres reflectores: repartidos a 1/6, 1/2 y 5/6 del ancho, cada uno con su fase. */}

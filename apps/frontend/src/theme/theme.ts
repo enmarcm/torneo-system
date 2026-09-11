@@ -168,6 +168,16 @@ export const buildTheme = (mode: 'light' | 'dark') => {
             '30%, 50%, 70%': { transform: 'translateX(-4px)' },
             '40%, 60%': { transform: 'translateX(4px)' },
           },
+          // Balón del login al pasar el cursor: va y vuelve 40 px girando lo
+          // que rueda (un balón de 96 px gira 48° en ese recorrido).
+          '@keyframes llfRollHoverX': {
+            from: { transform: 'translateX(-20px)' },
+            to: { transform: 'translateX(20px)' },
+          },
+          '@keyframes llfRollHoverR': {
+            from: { transform: 'rotate(-24deg)' },
+            to: { transform: 'rotate(24deg)' },
+          },
           '@keyframes llfRollIn': {
             from: { opacity: 0, transform: 'translateX(-80px) rotate(-360deg)' },
             to: { opacity: 1, transform: 'none' },
