@@ -170,13 +170,16 @@ export const buildTheme = (mode: 'light' | 'dark') => {
           },
           // Balón del login al pasar el cursor: va y vuelve 40 px girando lo
           // que rueda (un balón de 96 px gira 48° en ese recorrido).
+          // Arranca y termina en reposo: al entrar el cursor no hay salto.
           '@keyframes llfRollHoverX': {
-            from: { transform: 'translateX(-20px)' },
-            to: { transform: 'translateX(20px)' },
+            '0%, 100%': { transform: 'translateX(0)' },
+            '25%': { transform: 'translateX(-20px)' },
+            '75%': { transform: 'translateX(20px)' },
           },
           '@keyframes llfRollHoverR': {
-            from: { transform: 'rotate(-24deg)' },
-            to: { transform: 'rotate(24deg)' },
+            '0%, 100%': { transform: 'rotate(0)' },
+            '25%': { transform: 'rotate(-24deg)' },
+            '75%': { transform: 'rotate(24deg)' },
           },
           '@keyframes llfRollIn': {
             from: { opacity: 0, transform: 'translateX(-80px) rotate(-360deg)' },

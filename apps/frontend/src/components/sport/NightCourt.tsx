@@ -16,16 +16,16 @@ export const NightCourt: React.FC = () => (
     <Box
       sx={{
         position: 'absolute',
-        left: '-25%',
-        right: '-25%',
-        bottom: '2%',
-        height: '82%',
+        left: '-22%',
+        right: '-22%',
+        bottom: '12%',
+        height: '96%',
         transformOrigin: 'bottom center',
-        transform: 'perspective(1100px) rotateX(58deg)',
-        opacity: 0.85,
-        maskImage: 'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 55%, rgba(0,0,0,0) 100%)',
+        transform: 'perspective(1200px) rotateX(54deg)',
+        opacity: 0.9,
+        maskImage: 'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.9) 70%, rgba(0,0,0,0) 100%)',
         WebkitMaskImage:
-          'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 55%, rgba(0,0,0,0) 100%)',
+          'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.9) 70%, rgba(0,0,0,0) 100%)',
       }}
     >
       <CourtMarkings line="rgba(255,255,255,0.42)" lineSoft="rgba(255,255,255,0.26)" />

@@ -129,8 +129,12 @@ const Login: React.FC = () => {
           </Typography>
         </Stack>
 
-        {/* Centro: monograma y tarjeta de vidrio */}
-        <Stack alignItems="center" spacing={3} sx={{ position: 'relative', zIndex: 2, width: '100%' }}>
+        {/*
+          Centro: monograma y tarjeta de vidrio. Acotado al ancho de la
+          tarjeta: a todo el ancho tapaba (invisible, pero por encima) el
+          balón de la esquina y el cursor nunca le llegaba.
+        */}
+        <Stack alignItems="center" spacing={3} sx={{ position: 'relative', zIndex: 2, width: '100%', maxWidth: 400 }}>
           <Box
             component="img"
             src="/llf-removebg-preview.png"
@@ -301,8 +305,9 @@ const Login: React.FC = () => {
             filter: 'drop-shadow(0 14px 10px rgba(0,0,0,0.55))',
             '& .llf-ball-x': { transition: 'transform 0.3s' },
             '& .llf-ball-r': { transition: 'transform 0.3s' },
-            '&:hover .llf-ball-x': { animation: 'llfRollHoverX 0.9s cubic-bezier(.45,0,.55,1) infinite alternate' },
-            '&:hover .llf-ball-r': { animation: 'llfRollHoverR 0.9s cubic-bezier(.45,0,.55,1) infinite alternate' },
+            cursor: 'default',
+            '&:hover .llf-ball-x': { animation: 'llfRollHoverX 1.8s ease-in-out infinite' },
+            '&:hover .llf-ball-r': { animation: 'llfRollHoverR 1.8s ease-in-out infinite' },
           }}
         >
           <Box className="llf-ball-x">
