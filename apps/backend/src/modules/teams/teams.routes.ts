@@ -11,15 +11,16 @@ import {
   registerTeamSchema,
 } from './teams.schema';
 import { MEDIA_FIELDS } from '@/config/roles';
+import { ownTeam } from '@/middlewares/team-ownership.middleware';
 
 export const teamsRouter = Router();
 
-teamsRouter.get('/', teamsController.list);
-teamsRouter.get('/:id', teamsController.get);
-teamsRouter.get('/:id/history', teamsController.history);
-teamsRouter.get('/:id/stats', teamsController.stats);
-teamsRouter.get('/:id/players', teamsController.players);
-teamsRouter.get('/:id/registrations', teamsController.registrations);
+teamsRouter.get('/', authMiddleware, requireRole('ADMIN'), teamsController.list);
+teamsRouter.get('/:id', authMiddleware, requireRole('ADMIN', 'TEAM_LEADER'), ownTeam, teamsController.get);
+teamsRouter.get('/:id/history', authMiddleware, requireRole('ADMIN', 'TEAM_LEADER'), ownTeam, teamsController.history);
+teamsRouter.get('/:id/stats', authMiddleware, requireRole('ADMIN', 'TEAM_LEADER'), ownTeam, teamsController.stats);
+teamsRouter.get('/:id/players', authMiddleware, requireRole('ADMIN', 'TEAM_LEADER'), ownTeam, teamsController.players);
+teamsRouter.get('/:id/registrations', authMiddleware, requireRole('ADMIN', 'TEAM_LEADER'), ownTeam, teamsController.registrations);
 teamsRouter.post(
   '/',
   authMiddleware,
@@ -33,6 +34,7 @@ teamsRouter.patch(
   '/:id',
   authMiddleware,
   requireRole('ADMIN', 'TEAM_LEADER', 'COMMUNITY_MANAGER'),
+  ownTeam,
   restrictFields(['COMMUNITY_MANAGER'], MEDIA_FIELDS.team),
   validate(updateTeamSchema),
   audit('UPDATE', 'Team'),

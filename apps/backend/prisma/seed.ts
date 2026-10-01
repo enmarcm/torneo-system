@@ -54,12 +54,15 @@ async function main() {
   // contacto, opcional como el de cualquier otro usuario.
   const adminUsername = (process.env.ADMIN_USERNAME || 'admin').toLowerCase();
   const adminEmail = process.env.ADMIN_EMAIL || null;
-  const adminPassword = process.env.ADMIN_PASSWORD || 'Admin1234';
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword || adminPassword.length < 12) {
+    throw new Error('ADMIN_PASSWORD es obligatorio y debe tener al menos 12 caracteres.');
+  }
   const adminHash = await argon2.hash(adminPassword);
 
   await prisma.user.upsert({
     where: { username: adminUsername },
-    update: { passwordHash: adminHash, role: 'ADMIN', status: 'ACTIVE' },
+    update: {},
     create: {
       username: adminUsername,
       email: adminEmail,
@@ -146,6 +149,7 @@ async function main() {
     });
   }
 
+  if (process.env.NODE_ENV !== 'production') {
   const teamData = [
     { name: 'Águilas FC', username: 'aguilas' },
     { name: 'Tigres United', username: 'tigres' },
@@ -211,7 +215,10 @@ async function main() {
     },
   });
 
-  console.log('✅ Seed completo: admin, 9 categorías, edición demo, 2 equipos, jugadores y partidos.');
+  console.log('✅ Seed completo: administrador y datos de demostración.');
+  } else {
+    console.log('✅ Seed de producción completo: administrador y categorías, sin cuentas demo.');
+  }
 }
 
 main()

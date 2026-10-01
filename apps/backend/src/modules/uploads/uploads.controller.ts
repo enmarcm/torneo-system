@@ -6,9 +6,6 @@ import { uploadObject, presignedGet, publicUrl } from '@/lib/minio';
 import { env } from '@/config/env';
 import { IMAGE_MIME, DOC_MIME, MESSAGES, IMAGE_MAX_SIDE, IMAGE_WEBP_QUALITY } from '@/config/constants';
 import { randomUUID } from 'crypto';
-import { logger } from '@/lib/logger';
-
-const ext = (name: string) => name.split('.').pop() || 'bin';
 
 export const uploadsController = {
   image: asyncHandler(async (req, res) => {
@@ -23,7 +20,7 @@ export const uploadsController = {
     // que es lo que hace que el portal cargue rápido con datos móviles.
     let buffer = file.buffer;
     let mime = file.mimetype;
-    let extension = ext(file.originalname);
+    let extension = 'webp';
     try {
       buffer = await sharp(file.buffer)
         .rotate() // respeta la orientación EXIF, si no las fotos salen giradas
@@ -37,10 +34,8 @@ export const uploadsController = {
         .toBuffer();
       mime = 'image/webp';
       extension = 'webp';
-    } catch (err) {
-      // Si el archivo no se puede procesar se sube tal cual: es preferible una
-      // imagen pesada a perder la subida.
-      logger.warn(`No se pudo optimizar la imagen, se sube original: ${(err as Error).message}`);
+    } catch {
+      throw new AppError(415, MESSAGES.invalidFileType, 'BAD_IMAGE');
     }
 
     const name = `${randomUUID()}.${extension}`;
@@ -64,7 +59,15 @@ export const uploadsController = {
     if (!DOC_MIME.includes(file.mimetype)) {
       throw new AppError(415, MESSAGES.invalidFileType, 'BAD_TYPE');
     }
-    const name = `${randomUUID()}.${ext(file.originalname)}`;
+    const isPdf = file.mimetype === 'application/pdf';
+    const isJpeg = file.mimetype === 'image/jpeg';
+    const validSignature = isPdf
+      ? file.buffer.subarray(0, 5).toString('ascii') === '%PDF-'
+      : isJpeg
+        ? file.buffer[0] === 0xff && file.buffer[1] === 0xd8 && file.buffer[2] === 0xff
+        : file.buffer[0] === 0x89 && file.buffer.subarray(1, 4).toString('ascii') === 'PNG';
+    if (!validSignature) throw new AppError(415, MESSAGES.invalidFileType, 'BAD_SIGNATURE');
+    const name = `${randomUUID()}.${isPdf ? 'pdf' : isJpeg ? 'jpg' : 'png'}`;
     await uploadObject(env.MINIO_PRIVATE_BUCKET, name, file.buffer, file.mimetype);
     ok(res, { key: name, bucket: env.MINIO_PRIVATE_BUCKET }, 'Subida');
   }),

@@ -15,7 +15,7 @@ import { MEDIA_FIELDS, MEDIA_ROLES } from '@/config/roles';
 export const competitionsRouter = Router();
 
 competitionsRouter.get('/', competitionsController.list);
-competitionsRouter.get('/:id', competitionsController.get);
+competitionsRouter.get('/:id', authMiddleware, requireRole('ADMIN'), competitionsController.get);
 competitionsRouter.post(
   '/',
   authMiddleware,

@@ -19,7 +19,7 @@ const schema = z.object({
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
   UPLOAD_MAX_MB: z.coerce.number().default(5),
   ADMIN_EMAIL: z.string().email(),
-  ADMIN_PASSWORD: z.string().min(6),
+  ADMIN_PASSWORD: z.string().min(12),
   // Endpoint INTERNO: el que usa el backend para conectarse a MinIO.
   // Dentro de Docker es el nombre del servicio ("minio"), que el navegador
   // del usuario no puede resolver.

@@ -1,11 +1,12 @@
 import { asyncHandler } from '@/utils/async-handler';
 import { ok } from '@/utils/http.util';
 import { authService } from './auth.service';
+import { env } from '@/config/env';
 
 const cookieOpts = {
   httpOnly: true,
   sameSite: 'lax' as const,
-  secure: false,
+  secure: env.NODE_ENV === 'production',
   maxAge: 7 * 24 * 3600 * 1000,
   path: '/',
 };
@@ -35,7 +36,7 @@ export const authController = {
   }),
 
   logout: asyncHandler(async (_req, res) => {
-    res.clearCookie('refreshToken', { path: '/' });
+    res.clearCookie('refreshToken', { path: '/', httpOnly: true, sameSite: 'lax', secure: cookieOpts.secure });
     ok(res, null, 'Sesión cerrada');
   }),
 

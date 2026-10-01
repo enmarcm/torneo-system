@@ -5,30 +5,61 @@ import { purgePlayer, CASCADE_TX } from '@/utils/cascade.util';
 import type { CreatePlayerDto } from './players.schema';
 
 export const playersService = {
-  list: (search?: string) =>
+  teamFilter: (teamId: string | null | undefined) =>
+    teamId === undefined
+      ? {}
+      : { rosterEntries: { some: { teamRegistration: { teamId: teamId || '__no_team__' } } } },
+
+  listPublic: (search?: string) =>
+    prisma.player.findMany({
+      where: {
+        status: 'ACTIVE',
+        ...(search
+          ? { OR: [{ firstName: { contains: search, mode: 'insensitive' as const } }, { lastName: { contains: search, mode: 'insensitive' as const } }] }
+          : {}),
+      },
+      select: { id: true, firstName: true, lastName: true, position: true, photoUrl: true },
+      orderBy: { lastName: 'asc' },
+      take: 50,
+    }),
+
+  list: (search?: string, teamId?: string | null) =>
     prisma.player.findMany({
       where: search
         ? {
+            ...playersService.teamFilter(teamId),
             OR: [
               { firstName: { contains: search, mode: 'insensitive' } },
               { lastName: { contains: search, mode: 'insensitive' } },
               { documentNumber: { contains: search } },
             ],
           }
-        : {},
+        : playersService.teamFilter(teamId),
       orderBy: { lastName: 'asc' },
       take: 50,
     }),
 
-  byDocument: (documentType: 'CEDULA' | 'PARTIDA', documentNumber: string) =>
-    prisma.player.findUnique({
-      where: { documentType_documentNumber: { documentType, documentNumber } },
+  byDocument: (documentType: 'CEDULA' | 'PARTIDA', documentNumber: string, teamId?: string | null) =>
+    prisma.player.findFirst({
+      where: {
+        documentType,
+        documentNumber,
+        ...playersService.teamFilter(teamId),
+      },
     }),
 
   get: async (id: string) => {
     const p = await prisma.player.findUnique({ where: { id } });
     if (!p) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
     return p;
+  },
+
+  getForTeam: async (id: string, teamId: string) => {
+    const player = await prisma.player.findFirst({
+      where: { id, rosterEntries: { some: { teamRegistration: { teamId } } } },
+    });
+    if (!player) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
+    return player;
   },
 
   create: async (data: CreatePlayerDto) => {
@@ -47,8 +78,28 @@ export const playersService = {
   update: (id: string, data: Partial<CreatePlayerDto>) =>
     prisma.player.update({ where: { id }, data }),
 
+  updateForTeam: async (id: string, teamId: string, data: Partial<CreatePlayerDto>) => {
+    await playersService.getForTeam(id, teamId);
+    const shared = await prisma.rosterEntry.findFirst({
+      where: { playerId: id, teamRegistration: { teamId: { not: teamId } } },
+      select: { id: true },
+    });
+    if (shared) throw new AppError(403, 'Este jugador también pertenece a otro equipo.', 'SHARED_PLAYER');
+    return prisma.player.update({ where: { id }, data });
+  },
+
   setStatus: (id: string, status: 'ACTIVE' | 'INACTIVE') =>
     prisma.player.update({ where: { id }, data: { status } }),
+
+  setStatusForTeam: async (id: string, teamId: string, status: 'ACTIVE' | 'INACTIVE') => {
+    await playersService.getForTeam(id, teamId);
+    const shared = await prisma.rosterEntry.findFirst({
+      where: { playerId: id, teamRegistration: { teamId: { not: teamId } } },
+      select: { id: true },
+    });
+    if (shared) throw new AppError(403, 'Este jugador también pertenece a otro equipo.', 'SHARED_PLAYER');
+    return prisma.player.update({ where: { id }, data: { status } });
+  },
 
   setDegree: (id: string, data: { universityDegreeVerified: boolean; degreeDocUrl?: string }) =>
     prisma.player.update({ where: { id }, data }),
@@ -145,9 +196,14 @@ export const playersService = {
     };
   },
 
-  competitions: (id: string) =>
+  competitions: (id: string, teamId?: string | null) =>
     prisma.rosterEntry.findMany({
-      where: { playerId: id },
+      where: {
+        playerId: id,
+        ...(teamId !== undefined
+          ? { teamRegistration: { teamId: teamId || '__no_team__' } }
+          : {}),
+      },
       include: {
         teamRegistration: { include: { team: true, competition: { include: { category: true } } } },
         stats: true,

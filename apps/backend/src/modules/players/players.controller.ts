@@ -4,24 +4,24 @@ import { playersService } from './players.service';
 
 export const playersController = {
   list: asyncHandler(async (req, res) =>
-    ok(res, await playersService.list(req.query.search as string | undefined)),
+    ok(res, await playersService.list(req.query.search as string | undefined, req.user?.role === 'TEAM_LEADER' ? (req.user.teamId ?? '') : undefined)),
   ),
   byDocument: asyncHandler(async (req, res) =>
-    ok(res, await playersService.byDocument(req.query.type as 'CEDULA' | 'PARTIDA', req.query.number as string)),
+    ok(res, await playersService.byDocument(req.query.type as 'CEDULA' | 'PARTIDA', req.query.number as string, req.user?.role === 'TEAM_LEADER' ? (req.user.teamId ?? '') : undefined)),
   ),
-  get: asyncHandler(async (req, res) => ok(res, await playersService.get(req.params.id))),
+  get: asyncHandler(async (req, res) => ok(res, req.user?.role === 'TEAM_LEADER' ? await playersService.getForTeam(req.params.id, req.user.teamId!) : await playersService.get(req.params.id))),
   create: asyncHandler(async (req, res) => created(res, await playersService.create(req.body))),
   update: asyncHandler(async (req, res) =>
-    ok(res, await playersService.update(req.params.id, req.body)),
+    ok(res, req.user?.role === 'TEAM_LEADER' ? await playersService.updateForTeam(req.params.id, req.user.teamId!, req.body) : await playersService.update(req.params.id, req.body)),
   ),
   setStatus: asyncHandler(async (req, res) =>
-    ok(res, await playersService.setStatus(req.params.id, req.body.status)),
+    ok(res, req.user?.role === 'TEAM_LEADER' ? await playersService.setStatusForTeam(req.params.id, req.user.teamId!, req.body.status) : await playersService.setStatus(req.params.id, req.body.status)),
   ),
   setDegree: asyncHandler(async (req, res) =>
     ok(res, await playersService.setDegree(req.params.id, req.body)),
   ),
   competitions: asyncHandler(async (req, res) =>
-    ok(res, await playersService.competitions(req.params.id)),
+    ok(res, await playersService.competitions(req.params.id, req.user?.role === 'TEAM_LEADER' ? req.user.teamId : undefined)),
   ),
   remove: asyncHandler(async (req, res) =>
     ok(res, await playersService.remove(req.params.id), 'Eliminado definitivamente'),

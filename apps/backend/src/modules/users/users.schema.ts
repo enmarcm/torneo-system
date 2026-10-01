@@ -3,7 +3,7 @@ import { usernameField } from '@/modules/teams/teams.schema';
 import { USER_ROLES } from '@/config/roles';
 
 const roleField = z.enum(USER_ROLES);
-const passwordField = z.string().min(6, 'Mínimo 6 caracteres');
+const passwordField = z.string().min(12, 'Mínimo 12 caracteres');
 /* Vacío o null borran el correo: no es credencial, es un dato de contacto. */
 const emailField = z.string().trim().toLowerCase().email().nullish().or(z.literal(''));
 

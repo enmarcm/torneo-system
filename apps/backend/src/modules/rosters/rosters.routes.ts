@@ -4,6 +4,7 @@ import { requireRole } from '@/middlewares/role.middleware';
 import { validate } from '@/middlewares/validate.middleware';
 import { audit } from '@/middlewares/audit.middleware';
 import { rostersController } from './rosters.controller';
+import { ownRegistration, ownRosterEntry } from '@/middlewares/team-ownership.middleware';
 import { addRosterSchema, updateRosterSchema, eligibilitySchema } from './rosters.schema';
 
 export const rostersRouter = Router();
@@ -14,10 +15,11 @@ const staff = [authMiddleware, requireRole('ADMIN', 'TEAM_LEADER')] as const;
 const readRoster = [authMiddleware, requireRole('ADMIN', 'TEAM_LEADER', 'SCOREKEEPER')] as const;
 const adminOnly = [authMiddleware, requireRole('ADMIN')] as const;
 
-rostersRouter.get('/registrations/:registrationId/roster', ...readRoster, rostersController.list);
+rostersRouter.get('/registrations/:registrationId/roster', ...readRoster, ownRegistration, rostersController.list);
 rostersRouter.post(
   '/registrations/:registrationId/roster',
   ...staff,
+  ownRegistration,
   validate(addRosterSchema),
   audit('ADD', 'RosterEntry'),
   rostersController.add,
@@ -26,15 +28,17 @@ rostersRouter.post(
 rostersRouter.get(
   '/registrations/:registrationId/roster/previous',
   ...staff,
+  ownRegistration,
   rostersController.previous,
 );
 rostersRouter.post(
   '/registrations/:registrationId/roster/import-previous',
   ...staff,
+  ownRegistration,
   audit('IMPORT', 'RosterEntry'),
   rostersController.importPrevious,
 );
-rostersRouter.patch('/roster/:id', ...staff, validate(updateRosterSchema), rostersController.update);
+rostersRouter.patch('/roster/:id', ...staff, ownRosterEntry, validate(updateRosterSchema), rostersController.update);
 rostersRouter.patch(
   '/roster/:id/eligibility',
   ...adminOnly,
@@ -45,6 +49,7 @@ rostersRouter.patch(
 rostersRouter.delete(
   '/roster/:id',
   ...staff,
+  ownRosterEntry,
   audit('REMOVE', 'RosterEntry'),
   rostersController.remove,
 );

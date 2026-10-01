@@ -3,9 +3,16 @@ import { ok, created } from '@/utils/http.util';
 import { rostersService } from './rosters.service';
 
 export const rostersController = {
-  list: asyncHandler(async (req, res) =>
-    ok(res, await rostersService.list(req.params.registrationId)),
-  ),
+  list: asyncHandler(async (req, res) => {
+    const entries = await rostersService.list(req.params.registrationId);
+    const data = req.user?.role === 'SCOREKEEPER'
+      ? entries.map(({ player, ...entry }) => ({
+          ...entry,
+          player: { id: player.id, firstName: player.firstName, lastName: player.lastName, photoUrl: player.photoUrl, position: player.position },
+        }))
+      : entries;
+    ok(res, data);
+  }),
   add: asyncHandler(async (req, res) =>
     created(
       res,

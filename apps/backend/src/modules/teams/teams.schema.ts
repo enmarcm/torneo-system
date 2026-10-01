@@ -22,7 +22,7 @@ export const createTeamSchema = z.object({
     de poder crear el equipo.
   */
   leaderUsername: usernameField,
-  leaderPassword: z.string().min(6),
+  leaderPassword: z.string().min(12),
 });
 export const updateTeamSchema = z.object({
   name: z.string().min(2).optional(),

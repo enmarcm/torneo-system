@@ -69,7 +69,7 @@ export const authService = {
     if (!token) throw new AppError(401, 'Sin refresh token', 'NO_REFRESH');
     let userId: string;
     try {
-      ({ id: userId } = jwt.verify(token, env.JWT_REFRESH_SECRET) as { id: string });
+      ({ id: userId } = jwt.verify(token, env.JWT_REFRESH_SECRET, { algorithms: ['HS256'] }) as { id: string });
     } catch {
       throw new AppError(401, 'Refresh inválido', 'BAD_REFRESH');
     }
@@ -77,7 +77,7 @@ export const authService = {
       where: { id: userId },
       include: { team: true },
     });
-    if (!user || user.status !== 'ACTIVE') {
+    if (!user || user.status !== 'ACTIVE' || !tokenIssuedAfter(token, user.updatedAt)) {
       throw new AppError(401, 'Refresh inválido', 'BAD_REFRESH');
     }
     // Si al equipo lo bloquearon con la sesión abierta, no se le renueva el token.
@@ -130,4 +130,10 @@ export const authService = {
       select: { id: true, username: true, email: true, role: true, teamId: true },
     });
   },
+};
+
+const tokenIssuedAfter = (token: string, updatedAt: Date) => {
+  const decoded = jwt.decode(token);
+  if (!decoded || typeof decoded === 'string' || typeof decoded.iat !== 'number') return false;
+  return decoded.iat >= Math.floor(updatedAt.getTime() / 1000);
 };

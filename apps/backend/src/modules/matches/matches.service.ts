@@ -37,7 +37,7 @@ const matchInclude = {
   homeRegistration: { include: teamInclude },
   awayRegistration: { include: teamInclude },
   competition: competitionInclude,
-  mvpPlayer: true,
+  mvpPlayer: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
 } as const;
 
 export interface MatchListFilters {
@@ -118,7 +118,10 @@ export const matchesService = {
       where: { id },
       include: {
         ...matchInclude,
-        events: { include: { player: true }, orderBy: { minute: 'desc' } },
+        events: {
+          include: { player: { select: { id: true, firstName: true, lastName: true, photoUrl: true } } },
+          orderBy: { minute: 'desc' },
+        },
         tie: true,
       },
     });

@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-    ports: ["8217:5432"]
+    ports: ["127.0.0.1:8217:5432"]
     volumes: ["pgdata:/var/lib/postgresql/data"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
@@ -21,7 +21,7 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-    ports: ["6773:9000", "6774:9001"]
+    ports: ["127.0.0.1:6773:9000", "127.0.0.1:6774:9001"]
     volumes: ["miniodata:/data"]
 
   createbuckets:
@@ -60,7 +60,7 @@ services:
   adminer:
     image: adminer
     restart: unless-stopped
-    ports: ["8123:8080"]
+    ports: ["127.0.0.1:8123:8080"]
 
 volumes:
   pgdata:

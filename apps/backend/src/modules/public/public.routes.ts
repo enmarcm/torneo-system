@@ -13,6 +13,7 @@ import { newsService } from '@/modules/news/news.service';
 import { groupsService } from '@/modules/groups/groups.service';
 import { knockoutService } from '@/modules/knockout/knockout.service';
 import { leagueSystemsService } from '@/modules/league-systems/league-systems.service';
+import rateLimit from 'express-rate-limit';
 
 export const publicRouter = Router();
 
@@ -20,16 +21,16 @@ publicRouter.get('/editions', asyncHandler(async (_req, res) => ok(res, await ed
 publicRouter.get('/competitions', asyncHandler(async (req, res) =>
   ok(res, await competitionsService.list(req.query.editionId as string | undefined)),
 ));
-publicRouter.get('/teams', asyncHandler(async (_req, res) => ok(res, await teamsService.list())));
+publicRouter.get('/teams', asyncHandler(async (_req, res) => ok(res, await teamsService.listPublic())));
 publicRouter.get('/players', asyncHandler(async (req, res) =>
-  ok(res, await playersService.list(req.query.search as string | undefined)),
+  ok(res, await playersService.listPublic(req.query.search as string | undefined)),
 ));
 /*
   Ficha de un jugador buscada por documento. Se responde 404 cuando no aparece
   para no distinguir entre "no existe" y "no está activo": la búsqueda no debe
   servir para averiguar si una cédula está registrada.
 */
-publicRouter.get('/players/by-document', asyncHandler(async (req, res) => {
+publicRouter.get('/players/by-document', rateLimit({ windowMs: 15 * 60 * 1000, max: 10, standardHeaders: true, legacyHeaders: false }), asyncHandler(async (req, res) => {
   const profile = await playersService.publicProfile(String(req.query.number ?? ''));
   if (!profile) {
     fail(res, 'No encontramos un jugador con ese documento', 404);
@@ -77,7 +78,7 @@ publicRouter.get('/standings', asyncHandler(async (req, res) =>
   )),
 ));
 publicRouter.get('/stats', asyncHandler(async (req, res) =>
-  ok(res, await statsService.players({
+  ok(res, await statsService.playersPublic({
     competitionId: req.query.competitionId as string | undefined,
     editionId: req.query.editionId as string | undefined,
   })),

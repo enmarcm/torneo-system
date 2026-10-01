@@ -17,6 +17,13 @@ const divisionName = (level: number | null) =>
   level == null ? null : (DIVISION_NAMES[level] ?? `División ${level}`);
 
 export const teamsService = {
+  listPublic: () =>
+    prisma.team.findMany({
+      where: { status: 'ACTIVE' },
+      select: { id: true, name: true, logoUrl: true, status: true, _count: { select: { registrations: true } } },
+      orderBy: { name: 'asc' },
+    }),
+
   list: (page = 1, limit = 50) =>
     prisma.team.findMany({
       skip: (page - 1) * limit,

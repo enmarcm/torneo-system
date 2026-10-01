@@ -1,0 +1,729 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual de uso · Liga Lago Futsal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap">
+
+<style>
+  :root {
+    --bg: #F4F6FB; --paper: #FFFFFF; --elev: #F8FAFD; --border: #E6E9F2;
+    --ink: #1A2138; --ink2: #6B7494; --ink3: #9AA3BF;
+    --blue: #034292; --blue-hover: #023575; --blue-soft: #E0E8F4;
+    --orange: #FF8A4C; --orange-soft: #FFEDE1; --orange-ink: #B4501F;
+    --red: #FF3B53; --red-soft: #FDECEC; --navy: #1B2237;
+    --green: #22C55E; --green-soft: #E7F8EE; --green-ink: #15803D;
+    --amber: #F59E0B; --amber-soft: #FEF3E2; --amber-ink: #92400E;
+    --info-soft: #E8F1FE; --info-ink: #1D4ED8;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif; font-size: 15.5px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  .shell { display: grid; grid-template-columns: 272px minmax(0, 1fr); min-height: 100vh; }
+  h1, h2, h3, h4 { font-family: "Plus Jakarta Sans", Inter, "Segoe UI", sans-serif; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+  p { margin: 0 0 12px; }
+  a { color: var(--blue); }
+  code { font: 13px ui-monospace, "Cascadia Code", Consolas, monospace; background: var(--blue-soft); color: var(--blue); padding: 1px 6px; border-radius: 4px; }
+  em { font-style: normal; color: var(--blue); font-weight: 600; }
+  .mono { font-family: "Plus Jakarta Sans", sans-serif; font-weight: 800; font-style: italic; letter-spacing: -0.03em; }
+
+  /* ---- TOC ---- */
+  .toc { position: sticky; top: 0; height: 100vh; overflow-y: auto; background: var(--navy); color: #C9D2E8; padding: 22px 16px 32px; display: flex; flex-direction: column; gap: 14px; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.2) transparent; }
+  .toc-brand { display: grid; gap: 2px; padding: 0 6px 12px; border-bottom: 1px solid rgba(255,255,255,.12); }
+  .toc-brand .mono { font-size: 30px; color: #fff; line-height: 1; }
+  .toc-brand b { color: #fff; font-family: "Plus Jakarta Sans", sans-serif; font-size: 15px; }
+  .toc-brand small { font-size: 11.5px; color: #8A93B0; }
+  .search { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); border-radius: 10px; padding: 0 10px; }
+  .search svg { width: 16px; height: 16px; stroke: #8A93B0; fill: none; stroke-width: 2; stroke-linecap: round; flex-shrink: 0; }
+  .search input { flex: 1; min-width: 0; background: transparent; border: 0; color: #fff; font: 13.5px Inter, sans-serif; padding: 9px 0; outline: none; }
+  .search input::placeholder { color: #6B7494; }
+  .toc nav { display: flex; flex-direction: column; gap: 1px; }
+  .toc nav a { color: #C9D2E8; text-decoration: none; font-size: 13.5px; font-weight: 600; padding: 7px 10px; border-radius: 8px; position: relative; transition: background .18s, color .18s; }
+  .toc nav a.sub { font-weight: 500; font-size: 13px; padding-left: 22px; color: #98A3BE; }
+  .toc nav a:hover { background: rgba(255,255,255,.07); color: #fff; }
+  .toc nav a.active { background: rgba(77,147,255,.16); color: #fff; }
+  .toc nav a.active::before { content: ""; position: absolute; left: 4px; top: 50%; width: 3px; height: 16px; margin-top: -8px; border-radius: 3px; background: var(--orange); }
+  .toc nav a.hidden { display: none; }
+
+  /* ---- Document ---- */
+  .doc { padding: 0 clamp(20px, 5vw, 64px) 96px; max-width: 980px; }
+  .cover { padding: 56px 0 28px; display: grid; gap: 16px; }
+  .cover-kicker { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--orange-ink); }
+  .cover h1 { font-size: clamp(34px, 5vw, 52px); font-weight: 800; line-height: 1.05; color: var(--navy); }
+  .cover .lead { font-size: 17.5px; color: var(--ink2); max-width: 66ch; }
+  .cover-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 14px; margin-top: 6px; }
+  .cover-card { display: grid; gap: 6px; background: var(--paper); border: 1px solid var(--border); border-radius: 14px; padding: 18px 18px 20px; text-decoration: none; color: var(--ink); transition: border-color .2s, transform .2s, box-shadow .2s; }
+  .cover-card:hover { border-color: var(--blue); transform: translateY(-2px); box-shadow: 0 10px 24px -14px rgba(3,66,146,.4); }
+  .cover-card .n { width: 30px; height: 30px; border-radius: 50%; background: var(--navy); color: #fff; display: grid; place-items: center; font: 800 14px "Plus Jakarta Sans", sans-serif; }
+  .cover-card b { font-family: "Plus Jakarta Sans", sans-serif; font-size: 17px; }
+  .cover-card span:last-child { font-size: 13.5px; color: var(--ink2); }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: var(--ink2); padding-top: 8px; border-top: 1px solid var(--border); }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .dot-tip { background: var(--blue); } .dot-warn { background: var(--amber); } .dot-ex { background: var(--green); } .dot-who { background: var(--orange); }
+
+  section { padding-top: 40px; }
+  section > h2 { font-size: 30px; font-weight: 800; color: var(--navy); display: flex; align-items: center; gap: 14px; padding-bottom: 14px; border-bottom: 2px solid var(--navy); margin-bottom: 20px; }
+  section > h2 .num { width: 40px; height: 40px; border-radius: 10px; background: var(--navy); color: #fff; display: grid; place-items: center; font-size: 18px; flex-shrink: 0; }
+  .intro { font-size: 16.5px; color: var(--ink2); max-width: 70ch; }
+  article { padding: 22px 0 10px; border-top: 1px solid var(--border); }
+  section > article:first-of-type { border-top: 0; }
+  h3 { font-size: 21px; font-weight: 700; color: var(--navy); display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 12px; }
+  section > h3 { margin-top: 26px; }
+  h4 { font-size: 15px; font-weight: 700; color: var(--ink); margin: 18px 0 8px; text-transform: uppercase; letter-spacing: .04em; font-family: Inter, sans-serif; }
+  .route { font: 12.5px ui-monospace, Consolas, monospace; background: var(--elev); border: 1px solid var(--border); color: var(--ink2); padding: 2px 8px; border-radius: 6px; font-weight: 500; }
+  .who { font-size: 11.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--orange-ink); background: var(--orange-soft); padding: 2px 9px; border-radius: 999px; }
+
+  .chip { display: inline-flex; align-items: center; height: 22px; padding: 0 9px; border-radius: 999px; font-size: 12px; font-weight: 700; border: 1px solid transparent; vertical-align: middle; }
+  .chip.ok { background: var(--green-soft); color: var(--green-ink); }
+  .chip.warn { background: var(--amber-soft); color: var(--amber-ink); }
+  .chip.info { background: var(--info-soft); color: var(--info-ink); }
+  .chip.live { background: var(--red); color: #2B0710; }
+  .chip.role { background: var(--blue-soft); color: var(--blue); }
+
+  .chain { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; background: var(--paper); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin: 6px 0 14px; }
+  .chain span { font: 700 13.5px "Plus Jakarta Sans", sans-serif; background: var(--navy); color: #fff; padding: 6px 12px; border-radius: 999px; }
+  .chain i { color: var(--orange); font-style: normal; font-weight: 800; }
+
+  ul.defs { margin: 0 0 12px; padding-left: 0; list-style: none; display: grid; gap: 8px; }
+  ul.defs li { padding-left: 18px; position: relative; }
+  ul.defs li::before { content: ""; position: absolute; left: 0; top: 11px; width: 8px; height: 8px; border-radius: 50%; background: var(--orange); }
+  ol.steps { margin: 0 0 14px; padding-left: 0; list-style: none; counter-reset: s; display: grid; gap: 8px; }
+  ol.steps li { position: relative; padding-left: 38px; counter-increment: s; }
+  ol.steps li::before { content: counter(s); position: absolute; left: 0; top: 1px; width: 26px; height: 26px; border-radius: 50%; background: var(--blue-soft); color: var(--blue); font: 800 13px "Plus Jakarta Sans", sans-serif; display: grid; place-items: center; }
+  ol.steps.big li { padding: 10px 14px 10px 50px; background: var(--paper); border: 1px solid var(--border); border-radius: 10px; }
+  ol.steps.big li::before { left: 12px; top: 10px; background: var(--navy); color: #fff; }
+
+  .callout { border-radius: 12px; padding: 12px 16px 12px 18px; margin: 10px 0 16px; font-size: 14.5px; position: relative; border: 1px solid var(--border); background: var(--paper); }
+  .callout::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 4px; border-radius: 4px; }
+  .callout b:first-child { display: block; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 4px; }
+  .callout.tip::before { background: var(--blue); } .callout.tip b:first-child { color: var(--blue); }
+  .callout.warn { background: var(--amber-soft); border-color: transparent; } .callout.warn::before { background: var(--amber); } .callout.warn b:first-child { color: var(--amber-ink); }
+  .callout.ex { background: var(--green-soft); border-color: transparent; } .callout.ex::before { background: var(--green); } .callout.ex b:first-child { color: var(--green-ink); }
+
+  .tbl { width: 100%; border-collapse: collapse; background: var(--paper); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin: 8px 0 16px; font-size: 14.5px; }
+  .tbl th, .tbl td { padding: 10px 14px; border-top: 1px solid var(--border); text-align: left; vertical-align: top; }
+  .tbl thead th { background: var(--elev); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink2); border-top: 0; }
+  .tbl tbody tr:first-child td, .tbl tbody tr:first-child th { border-top: 0; }
+  .tbl.fields th { width: 220px; font-weight: 600; color: var(--ink); background: var(--elev); }
+  .tblwrap { overflow-x: auto; }
+
+  dl.faq { margin: 0; display: grid; gap: 10px; }
+  dl.faq dt { font-weight: 700; color: var(--navy); background: var(--paper); border: 1px solid var(--border); border-bottom: 0; border-radius: 10px 10px 0 0; padding: 10px 14px 6px; }
+  dl.faq dd { margin: 0; background: var(--paper); border: 1px solid var(--border); border-top: 0; border-radius: 0 0 10px 10px; padding: 0 14px 12px; color: var(--ink2); font-size: 14.5px; }
+  dl.glos { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 8px 18px; font-size: 14.5px; }
+  dl.glos dt { font-weight: 700; color: var(--navy); } dl.glos dd { margin: 0; color: var(--ink2); }
+  .end { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 12.5px; color: var(--ink3); }
+  .nores { display: none; padding: 10px; font-size: 12.5px; color: #8A93B0; }
+  .nores.on { display: block; }
+  mark { background: var(--orange-soft); color: inherit; padding: 0 2px; border-radius: 3px; }
+
+  @media (max-width: 860px) {
+    .shell { grid-template-columns: 1fr; }
+    .toc { position: relative; height: auto; max-height: none; padding-bottom: 16px; }
+    .toc nav { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 2px; }
+    .toc nav a.sub { padding-left: 10px; }
+    .doc { padding-inline: 16px; }
+    .tbl.fields th { width: 130px; }
+    dl.glos { grid-template-columns: 1fr; gap: 2px 0; } dl.glos dd { margin-bottom: 8px; }
+  }
+  @media print {
+    .toc { display: none; } .shell { display: block; } .doc { max-width: none; padding: 0; }
+    section { page-break-before: always; padding-top: 0; } #intro { page-break-before: avoid; }
+    .cover-card, .callout, .tbl, ol.steps.big li { break-inside: avoid; }
+    a { color: inherit; text-decoration: none; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="toc" id="toc">
+  <div class="toc-brand"><span class="mono">LLF</span><b>Manual de uso</b><small>Liga Lago Futsal · v1 · sep 2026</small></div>
+  <label class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" placeholder="Buscar en el manual…" autocomplete="off"></label>
+  <nav>
+    <a href="#intro">0 · Antes de empezar</a>
+    <a class="sub" href="#acceso">Acceso y roles</a>
+    <a class="sub" href="#conceptos">Cómo está armada la liga</a>
+    <a class="sub" href="#navegar">Cómo se navega</a>
+    <a href="#publico">1 · Sitio público</a>
+    <a class="sub" href="#pub-inicio">Inicio</a>
+    <a class="sub" href="#pub-competiciones">Competiciones</a>
+    <a class="sub" href="#pub-calendario">Calendario</a>
+    <a class="sub" href="#pub-envivo">En vivo</a>
+    <a class="sub" href="#pub-estadisticas">Estadísticas</a>
+    <a class="sub" href="#pub-equipos">Equipos</a>
+    <a class="sub" href="#pub-noticias">Noticias y fichas</a>
+    <a class="sub" href="#pub-jugador">Buscar jugador</a>
+    <a href="#admin">2 · Panel administrativo</a>
+    <a class="sub" href="#adm-dashboard">Dashboard</a>
+    <a class="sub" href="#adm-ediciones">Ediciones</a>
+    <a class="sub" href="#adm-categorias">Categorías</a>
+    <a class="sub" href="#adm-competiciones">Competiciones</a>
+    <a class="sub" href="#adm-equipos">Equipos e inscripciones</a>
+    <a class="sub" href="#adm-plantillas">Plantillas (editor)</a>
+    <a class="sub" href="#adm-bloqueos">Bloqueos</a>
+    <a class="sub" href="#adm-jugadores">Jugadores</a>
+    <a class="sub" href="#adm-programacion">Programación y control en vivo</a>
+    <a class="sub" href="#adm-estadisticas">Estadísticas</a>
+    <a class="sub" href="#adm-publicidad">Publicidad</a>
+    <a class="sub" href="#adm-noticias">Noticias y fichas</a>
+    <a class="sub" href="#adm-imagenes">Imágenes</a>
+    <a class="sub" href="#adm-usuarios">Usuarios</a>
+    <a class="sub" href="#adm-auditoria">Auditoría</a>
+    <a href="#equipo">3 · Área de equipo</a>
+    <a class="sub" href="#eq-inicio">Inicio</a>
+    <a class="sub" href="#eq-jugadores">Jugadores</a>
+    <a class="sub" href="#eq-plantillas">Plantillas</a>
+    <a class="sub" href="#eq-partidos">Partidos</a>
+    <a class="sub" href="#eq-estadisticas">Estadísticas</a>
+    <a class="sub" href="#eq-historial">Historial</a>
+    <a href="#recetas">4 · Recetas paso a paso</a>
+    <a href="#faq">5 · Problemas frecuentes</a>
+    <a href="#glosario">6 · Glosario</a>
+  </nav>
+</aside>
+
+<main class="doc">
+<header class="cover">
+  <div class="cover-kicker">Liga Lago Futsal · Sistema de torneos</div>
+  <h1>Manual de uso completo</h1>
+  <p class="lead">Todo lo que se puede hacer en el sitio, pantalla por pantalla: el <b>sitio público</b> que consulta cualquiera desde el teléfono, el <b>panel administrativo</b> donde la liga opera la temporada, y el <b>área de equipo</b> donde cada delegado arma su plantilla. Con ejemplos reales de la edición Apertura 2026.</p>
+  <div class="cover-grid">
+    <a class="cover-card" href="#publico"><span class="n">1</span><b>Sitio público</b><span>Resultados, tabla, calendario, en vivo, estadísticas, equipos, noticias y búsqueda de jugadores.</span></a>
+    <a class="cover-card" href="#admin"><span class="n">2</span><b>Panel administrativo</b><span>Ediciones, categorías, competiciones, equipos, jugadores, programación, publicidad, noticias, usuarios y auditoría.</span></a>
+    <a class="cover-card" href="#equipo"><span class="n">3</span><b>Área de equipo</b><span>Lo que ve y hace el líder de equipo: jugadores, plantillas, partidos, estadísticas e historial.</span></a>
+  </div>
+  <div class="legend">
+    <span><i class="dot dot-tip"></i>Consejo</span><span><i class="dot dot-warn"></i>Atención: no tiene vuelta atrás o tiene una regla</span><span><i class="dot dot-ex"></i>Ejemplo concreto</span><span><i class="dot dot-who"></i>Quién puede hacerlo</span>
+  </div>
+</header>
+
+<!-- ============================================================ 0 -->
+<section id="intro">
+  <h2><span class="num">0</span>Antes de empezar</h2>
+
+  <h3 id="acceso">Acceso y roles</h3>
+  <p>El sitio público no pide cuenta. Para entrar al panel se usa la pantalla de acceso, en <code>/login</code> o desde el botón <b>Apartado administrativo</b> al pie del menú del sitio público. Se entra con el <b>usuario</b> y la <b>contraseña</b> que entrega la liga; no hay registro por cuenta propia ni recuperación automática de contraseña: si alguien la olvida, el administrador le asigna una nueva desde <a href="#adm-usuarios">Usuarios</a>.</p>
+  <div class="callout ex"><b>Ejemplo</b> Al entrar, el sistema saluda ("Hola, admin") y te lleva a tu portada según el rol: el administrador al <b>Dashboard</b>, el líder de equipo a <b>Mi equipo · Inicio</b>. Si un usuario intenta abrir una pantalla que no le corresponde, el sistema lo devuelve a su portada en vez de al login.</div>
+
+  <table class="tbl">
+    <thead><tr><th>Rol</th><th>Qué ve</th><th>Qué puede hacer</th></tr></thead>
+    <tbody>
+      <tr><td><span class="chip role">Administrador general</span></td><td>Todo el panel</td><td>Todo. Es el único que crea y administra cuentas, sortea calendarios, crea o borra partidos, inscribe equipos, aplica sanciones y decide ascensos y descensos.</td></tr>
+      <tr><td><span class="chip role">Community manager</span></td><td>Publicidad · Noticias y fichas · Imágenes</td><td>Carga anuncios, publica notas y fichas técnicas, y "viste" categorías, competiciones y equipos con sus imágenes. No toca el torneo.</td></tr>
+      <tr><td><span class="chip role">Anotador</span></td><td>Programación</td><td>Solo el resultado: iniciar un partido, cargar goles y tarjetas, finalizar. No sortea, no crea ni reprograma partidos (esas acciones ni se le muestran).</td></tr>
+      <tr><td><span class="chip role">Líder de equipo</span></td><td>Área de equipo</td><td>Delegado de un club: registra jugadores, arma la plantilla de cada inscripción, mira su fixture, estadísticas e historial, y carga su correo de contacto y el escudo.</td></tr>
+    </tbody>
+  </table>
+  <div class="callout tip"><b>Consejo</b> Un club tiene <b>un solo delegado</b>. Al crear el equipo se crean juntos su usuario y su contraseña; entregáselos al delegado en persona.</div>
+
+  <h3 id="conceptos">Cómo está armada la liga</h3>
+  <p>Conviene entender la cadena antes de tocar el panel, porque cada pantalla es un eslabón:</p>
+  <div class="chain">
+    <span>Edición</span><i>→</i><span>Categoría</span><i>→</i><span>Competición</span><i>→</i><span>Inscripción del equipo</span><i>→</i><span>Plantilla</span><i>→</i><span>Partidos y resultados</span>
+  </div>
+  <ul class="defs">
+    <li><b>Edición</b> es la temporada: tres por año (temporada 1, 2 y 3), con nombre, año y fechas. Ejemplo: <em>Apertura 2026</em>.</li>
+    <li><b>Categoría</b> es el catálogo reutilizable: define formato (liga o copa), rango de edad, cupos de plantilla y si exige habilitación del administrador. Ejemplo: <em>Primera División</em>, <em>Sub-20</em>, <em>Veteranos</em>.</li>
+    <li><b>Competición</b> es una categoría instanciada dentro de una edición: <em>Primera División · Apertura 2026</em>. Tiene tipo (división de liga, copa, menores, especial), nivel de división (Primera, Segunda, Tercera), formato, vueltas, plazas de descenso y una portada con imagen.</li>
+    <li><b>Inscripción</b> es un equipo dentro de una competición. <b>Cada inscripción tiene su propia plantilla</b>: el mismo club puede jugar Primera y Sub-20 con planteles distintos.</li>
+    <li><b>Jugador</b> es un registro único por documento (cédula o partida de nacimiento). Un jugador existe una sola vez en el sistema y puede estar en varias plantillas.</li>
+    <li><b>Elegibilidad</b>: para entrar a una plantilla el jugador tiene que cumplir el rango de edad de la competición (calculado en hora de Caracas) y, si la competición lo exige, estar <b>habilitado</b> por el administrador. La plantilla respeta un cupo mínimo y máximo.</li>
+    <li><b>Posiciones</b>: victoria 3 puntos, empate 1, derrota 0. Orden: puntos → diferencia de gol → goles a favor. El ascenso y el descenso definitivos los decide el administrador equipo por equipo al cerrar la competición.</li>
+    <li><b>Una división por edición</b>: un club no puede estar en dos divisiones de liga de la misma edición (Primera y Segunda a la vez). Copa, menores y especiales no cuentan para esta regla.</li>
+  </ul>
+
+  <h3 id="navegar">Cómo se navega</h3>
+  <ul class="defs">
+    <li><b>Sitio público</b>: barra superior con la marca, el interruptor de modo claro/oscuro y el botón de menú. El menú se desliza por encima del contenido con los ocho destinos (Inicio, Competiciones, Calendario, En vivo, Estadísticas, Equipos, Noticias, Buscar jugador) y, abajo, la entrada al panel.</li>
+    <li><b>Panel y área de equipo</b>: menú lateral a la izquierda (se puede plegar a iconos con el botón de la barra), barra superior con el saludo, la fecha, el selector de <b>edición</b> y el menú de usuario para cerrar sesión. El selector de edición filtra lo que muestran varias pantallas del panel.</li>
+    <li><b>Estados</b> aparecen siempre como chips de color: <span class="chip ok">Activo</span> <span class="chip warn">Borrador</span> <span class="chip info">Finalizado</span> <span class="chip info">Programado</span> <span class="chip live">En vivo</span> <span class="chip warn">Pospuesto</span>.</li>
+    <li><b>Guardar</b>: los botones de guardar muestran un anillo mientras esperan y un tilde verde cuando el cambio entró. Un error aparece en rojo con el motivo.</li>
+    <li><b>Carga</b>: al abrir el sitio se ve el balón de la liga unos segundos; en las pantallas de partidos y tablas, la cancha con reflectores. Las listas muestran su silueta mientras bajan los datos.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ 1 -->
+<section id="publico">
+  <h2><span class="num">1</span>Sitio público</h2>
+  <p class="intro">Es la fuente oficial de la liga: el lugar donde se cierra cualquier discusión sobre un resultado, una tabla o un fixture. Está pensado para consultarlo desde el teléfono, en la cancha, con datos móviles. Toda pantalla pública arranca con un botón <b>Volver</b> y, cuando aplica, una barra de filtros de <b>Edición</b> y <b>Competición</b>.</p>
+
+  <article id="pub-inicio">
+    <h3>Inicio <span class="route">/</span></h3>
+    <p>La portada ocupa la primera pantalla entera: el monograma LLF, el nombre de la edición en curso, cuántos partidos hay <b>EN VIVO</b> (en rojo solo cuando hay alguno), los escudos de los equipos y dos accesos: <b>Ver los partidos</b> y la tabla. Al bajar aparecen, en este orden:</p>
+    <ol class="steps">
+      <li><b>En vivo ahora</b> — solo si hay partidos jugándose. El marcador se actualiza solo.</li>
+      <li><b>Partidos de hoy</b> y <b>Destacados de la semana</b>, uno al lado del otro. Los destacados son los que la liga marcó al programarlos.</li>
+      <li><b>Última jornada</b> — los resultados más recientes, para quien llega "justo después del pitazo final".</li>
+      <li><b>Tabla de posiciones</b> de la división más alta, embebida, con botón <b>Tabla completa</b>.</li>
+      <li><b>Noticias y fichas</b> y <b>Competiciones</b> (tarjetas con la portada de cada torneo).</li>
+    </ol>
+    <div class="callout ex"><b>Ejemplo</b> Es sábado a las 21:30 y terminó Atlético Lago vs. Deportivo Ribera. Abrís el sitio: el resultado ya está en <b>Partidos de hoy</b> (con el MVP si fue designado) y la tabla de abajo ya cambió. Si no hay partidos ese día, el bloque dice <em>"Hoy no se juega"</em> y muestra el próximo partido programado.</div>
+    <div class="callout tip"><b>Consejo</b> Si el sitio no logra hablar con el servidor, la portada lo dice con un aviso rojo ("No pudimos cargar la jornada") y un botón <b>Reintentar</b>. Nunca muestra "no hay partidos" por una falla de red.</div>
+  </article>
+
+  <article id="pub-competiciones">
+    <h3>Competiciones <span class="route">/competiciones</span></h3>
+    <p>Elegís edición y competición en la barra de filtros. Arriba va la portada del torneo (la imagen que cargó la liga) con sus etiquetas: división, copa, menores, edades. Debajo:</p>
+    <ul class="defs">
+      <li><b>Tabla general</b>: posición, escudo, equipo, PJ, G, E, P, GF, GC, DG, PTS. Una franja verde marca la <b>zona de clasificación</b> y una roja el <b>descenso</b>, solo cuando la competición las tiene configuradas. Debajo de la tabla se aclara: <em>"El descenso definitivo lo decide el administrador"</em>.</li>
+      <li>En una copa aparecen las pestañas <b>Tabla general · Grupos · Llaves</b>. En <b>Grupos</b> elegís el grupo a la izquierda y ves su tabla; en <b>Llaves</b>, el cuadro de eliminatoria por rondas (octavos, cuartos, semifinal, final) con marcador global cuando es ida y vuelta.</li>
+      <li>Si todavía no se jugó nada, la tabla muestra a los equipos inscritos en orden alfabético con guiones y avisa que se ordena con el primer resultado.</li>
+    </ul>
+    <div class="callout ex"><b>Ejemplo</b> Para ver la tabla de la Segunda División del Apertura 2026: Menú → Competiciones → Edición <em>Apertura 2026</em> → Competición <em>Segunda División</em>. Tocás una fila para desplegar el detalle del equipo (en el teléfono, cada fila se expande).</div>
+  </article>
+
+  <article id="pub-calendario">
+    <h3>Calendario <span class="route">/calendario</span></h3>
+    <p>Todos los encuentros de la edición, agrupados por día y en orden de hora. Filtros: <b>Edición</b>, <b>Competición</b> (o todas), <b>Día</b> (un selector de fecha) y pestañas <b>Todos · En vivo · Próximos · Finalizados</b> con el conteo de cada una.</p>
+    <ul class="defs">
+      <li>Cada tarjeta muestra escudos, nombres, hora o marcador, y la competición si la lista mezcla torneos. Tocás una tarjeta y se abre el <b>detalle del partido</b>: marcador, sede, eventos (goles y tarjetas por jugador) y MVP.</li>
+      <li>Al final hay un grupo aparte: <b>partidos por programar</b> — ya salió el cruce del sorteo pero falta confirmar día y hora. Se marcan en ámbar con <em>"Por programar"</em>.</li>
+    </ul>
+  </article>
+
+  <article id="pub-envivo">
+    <h3>En vivo <span class="route">/en-vivo</span></h3>
+    <p>Los partidos que se están jugando ahora, con marcador grande y el feed de eventos. El marcador viaja en tiempo real desde el panel del anotador; si la conexión se cae, el sitio igual refresca cada 20 segundos (el anillo del chip <b>EN VIVO</b> muestra ese ciclo). Cuando entra un gol, el número cae desde arriba en naranja.</p>
+    <div class="callout ex"><b>Ejemplo</b> Si no hay nada en juego, la pantalla muestra un marcador apagado ("– : –") y debajo <b>el próximo partido programado</b> con hora, equipos y cancha, más un enlace al calendario completo.</div>
+  </article>
+
+  <article id="pub-estadisticas">
+    <h3>Estadísticas <span class="route">/estadisticas</span></h3>
+    <p>Los goleadores de cada competición de la edición, con podio (oro, plata, bronce) y tabla: jugador, equipo, partidos, goles y tarjetas. Filtrable por competición. La liga lleva dos estadísticas oficiales: <b>goles</b> y <b>tarjetas</b>, y ambas salen de los eventos que carga el anotador en vivo.</p>
+  </article>
+
+  <article id="pub-equipos">
+    <h3>Equipos <span class="route">/equipos</span></h3>
+    <p>Los clubes inscritos, agrupados por competición, cada uno con su escudo. Tocás una tarjeta y se abre su <b>plantilla</b> para esa competición: foto, nombre, dorsal y estado de cada jugador.</p>
+  </article>
+
+  <article id="pub-noticias">
+    <h3>Noticias y fichas <span class="route">/noticias</span></h3>
+    <p>Notas del torneo y <b>fichas técnicas</b> con los números de cada edición, torneo o club. Filtros por tipo: <b>Noticias · Ediciones · Torneos · Equipos</b>. La primera nota va como portada grande; el resto en tarjetas con portada, tipo, titular y bajada. <b>Leer la nota</b> abre el detalle: texto tal como lo escribió la liga (con sus saltos de línea) o, en una ficha, las tablas con los números congelados a la fecha de publicación.</p>
+  </article>
+
+  <article id="pub-jugador">
+    <h3>Buscar jugador <span class="route">/jugador</span></h3>
+    <p>Se busca por <b>cédula completa</b>, no por nombre: en una liga hay homónimos y el documento es lo único que identifica a una persona sin ambigüedad. Hace falta el número entero (mínimo 4 dígitos) y la ficha nunca muestra la cédula completa.</p>
+    <ol class="steps">
+      <li>Escribí la cédula (ej. <code>12345678</code>) y tocá <b>Buscar</b>.</li>
+      <li>La ficha muestra foto, nombre, y totales de <b>Partidos · Goles · Amarillas · Rojas</b>.</li>
+      <li>Debajo, <b>Torneos jugados</b>: por cada competición, el equipo (con escudo), el dorsal y los números de ese torneo.</li>
+    </ol>
+    <div class="callout warn"><b>Atención</b> Si no aparece nadie: revisá el número (completo, sin puntos). Un jugador nuevo puede no figurar todavía si su equipo no lo inscribió en ninguna competición.</div>
+  </article>
+</section>
+
+<!-- ============================================================ 2 -->
+<section id="admin">
+  <h2><span class="num">2</span>Panel administrativo</h2>
+  <p class="intro">Desde acá la liga opera la temporada entera. El menú lateral muestra solo lo que tu rol alcanza. El orden del menú es también el orden lógico de trabajo al arrancar una temporada: Ediciones → Categorías → Competiciones → Equipos → Jugadores → Programación. Hay una <a href="#recetas">receta completa</a> más abajo.</p>
+  <div class="callout warn"><b>El administrador manda sobre el dato</b> Un borrado definitivo se ejecuta en cascada aunque haya historial colgando: el sistema advierte qué se lleva, pero no lo bloquea. Por eso casi todo tiene dos salidas: <b>Desactivar</b> (reversible, conserva el historial) y <b>Eliminar definitivamente</b> (sin vuelta atrás). Usá la primera salvo que sepas exactamente por qué querés la segunda.</div>
+
+  <article id="adm-dashboard">
+    <h3>Dashboard <span class="route">/admin</span> <span class="who">Administrador</span></h3>
+    <p>Cuatro números de la edición seleccionada — <b>Equipos inscritos · Jugadores activos · Partidos jugados · En vivo ahora</b> — y dos listas: <b>Próximos partidos</b> y las competiciones activas. Es la pantalla de "cómo estamos hoy".</p>
+  </article>
+
+  <article id="adm-ediciones">
+    <h3>Ediciones <span class="route">/admin/ediciones</span> <span class="who">Administrador</span></h3>
+    <p>Las temporadas del torneo. Cada tarjeta muestra nombre, año, temporada y el rango de fechas, y abre el detalle con sus competiciones, equipos y partidos.</p>
+    <h4>Crear una edición</h4>
+    <table class="tbl fields"><tbody>
+      <tr><th>Nombre</th><td>Como se va a leer en el sitio. Ej. <em>Apertura 2026</em>.</td></tr>
+      <tr><th>Año</th><td>2026</td></tr>
+      <tr><th>Temporada (1-3)</th><td>Cuál de las tres del año.</td></tr>
+      <tr><th>Fecha de inicio / fin</th><td>La ventana de la temporada.</td></tr>
+    </tbody></table>
+    <div class="callout warn"><b>Atención</b> <b>Eliminar definitivamente</b> una edición se rechaza si ya tiene competiciones. Primero hay que vaciarla.</div>
+  </article>
+
+  <article id="adm-categorias">
+    <h3>Categorías <span class="route">/admin/categorias</span> <span class="who">Administrador</span></h3>
+    <p>El catálogo: cada categoría lleva las reglas que después heredan sus competiciones. Columnas: Nombre · Formato · Rango de edad · Habilitación · Cupo (min-max) · Activa.</p>
+    <table class="tbl fields"><tbody>
+      <tr><th>Nombre / Descripción</th><td><em>Primera División</em>, <em>Sub-20</em>, <em>Gremial</em>…</td></tr>
+      <tr><th>Imagen</th><td>512 × 512 px, cuadrada. La usa el sitio en las portadas.</td></tr>
+      <tr><th>Formato</th><td><b>Liga</b> (todos contra todos) o <b>Copa</b> (grupos + eliminatoria).</td></tr>
+      <tr><th>Edad mínima / máxima</th><td>Rango que el sistema aplica al armar plantillas. Vacío = sin límite.</td></tr>
+      <tr><th>Requiere habilitación del administrador</th><td>Si está activo, cada jugador inscrito en esta categoría necesita que el administrador lo habilite antes de poder jugar partidos oficiales.</td></tr>
+      <tr><th>Cupo mínimo / máximo</th><td>Cuántos jugadores puede tener una plantilla.</td></tr>
+    </tbody></table>
+    <div class="callout ex"><b>Ejemplo</b> Categoría <em>Sub-20</em>: formato Liga, edad 15 a 20, cupo 8–14, con habilitación. Al inscribir un equipo en cualquier competición Sub-20, el sistema rechazará a un jugador de 21 y no dejará jugar a uno de 18 hasta que lo habilites.</div>
+  </article>
+
+  <article id="adm-competiciones">
+    <h3>Competiciones <span class="route">/admin/competiciones</span> <span class="who">Administrador</span></h3>
+    <p>Primero se elige la <b>edición</b> (arriba). Cada competición es una tarjeta con su portada, tipo, estado y contadores de equipos y partidos. El menú <b>⋯</b> de cada tarjeta ofrece <b>Editar</b>, <b>Desactivar</b> y <b>Cambiar a Borrador / Activo / Finalizado</b>.</p>
+    <h4>Crear una competición</h4>
+    <table class="tbl fields"><tbody>
+      <tr><th>Edición</th><td>Se elige explícitamente, para no crearla en la edición equivocada.</td></tr>
+      <tr><th>Categoría</th><td>De dónde hereda edad, cupos y habilitación.</td></tr>
+      <tr><th>Tipo de torneo</th><td><b>División de liga</b> · <b>Copa de la Liga</b> · <b>Menores (Sub-X)</b> · <b>Especial (Gremial / Veterano)</b>.</td></tr>
+      <tr><th>División</th><td>Solo para división de liga: Primera, Segunda o Tercera. Un nivel no se puede repetir en la misma edición. "Primera está por encima de Segunda, y Segunda por encima de Tercera."</td></tr>
+      <tr><th>Formato</th><td>Liga (todos contra todos) o Copa (grupos + eliminatoria).</td></tr>
+      <tr><th>Vueltas del todos contra todos</th><td>Una vuelta o ida y vuelta.</td></tr>
+      <tr><th>Rondas a ida y vuelta</th><td>Solo en copa: cuartos, semifinal, final. En la liga la eliminatoria la fija el nivel de división y solo se informa.</td></tr>
+      <tr><th>Plazas de descenso</th><td>Cuántas filas pinta la tabla en rojo. La división más baja no lo muestra. No hay plazas de ascenso: el ascenso se decide equipo por equipo al cerrar.</td></tr>
+      <tr><th>Imagen del torneo</th><td>1200 × 400 px, horizontal. Es la portada que ve el público.</td></tr>
+    </tbody></table>
+    <h4>Estados</h4>
+    <p><span class="chip warn">Borrador</span> mientras se arma (no admite inscripciones) → <span class="chip ok">Activo</span> en juego → <span class="chip info">Finalizado</span> al cerrar. <b>Desactivar</b> equivale a finalizarla; <b>Eliminar definitivamente</b> solo se permite si no tiene equipos ni partidos.</p>
+    <h4>Detalle de una competición</h4>
+    <p>Tres contadores y las pestañas <b>Tabla</b> y <b>Partidos</b>, más la lista de <b>Equipos registrados</b>. Desde cada equipo abrís su <b>plantilla</b> (ver <a href="#adm-plantillas">editor</a>) y la <b>Decisión de fin de temporada</b>: <b>Sin decisión · Asciende · Desciende · No participa</b>, con motivo opcional que queda guardado. Mover un equipo de división arrastra su inscripción, su plantilla y su historial, por eso pide confirmación explícita.</p>
+    <div class="callout ex"><b>Ejemplo</b> Cerró la Segunda División: Unión Costanera terminó primero. En el detalle de la competición marcás a Unión Costanera como <b>Asciende</b> (motivo: "campeón Apertura 2026") y al último como <b>Desciende</b>. Para la edición siguiente, al inscribirlos, el sistema ya sabe en qué división van.</div>
+  </article>
+
+  <article id="adm-equipos">
+    <h3>Equipos e inscripciones <span class="route">/admin/equipos</span> <span class="who">Administrador</span></h3>
+    <p>Los clubes del sistema. Buscador por nombre, filtro por estado (Activo / Inactivo) y por categoría. Columnas: Equipo · Delegado · Inscripciones · Estado.</p>
+    <h4>Crear un equipo</h4>
+    <table class="tbl fields"><tbody>
+      <tr><th>Nombre del equipo</th><td><em>Atlético Lago</em></td></tr>
+      <tr><th>Logo</th><td>512 × 512 px, cuadrado, preferiblemente PNG con fondo transparente.</td></tr>
+      <tr><th>Usuario del delegado</th><td>Con esto entra al sistema. Letras sin acentos, números, punto, guion y guion bajo. Ej. <code>atletico.lago</code></td></tr>
+      <tr><th>Contraseña del delegado</th><td>Mínimo 6 caracteres. Se la entregás al delegado junto con el usuario.</td></tr>
+    </tbody></table>
+    <h4>Inscribir un equipo en una competición</h4>
+    <ol class="steps">
+      <li>En la fila del equipo, acción <b>Inscribir</b>.</li>
+      <li>Elegí la competición. Las que no corresponden aparecen apagadas <b>con el motivo</b>: ya está inscrito, la competición está en borrador o finalizada, o el equipo ya ocupa una división de liga en esa edición.</li>
+      <li>Leé las <b>Reglas de inscripción</b> que aparecen debajo (rango de edad, cupo, si requiere habilitación): son las que el sistema va a aplicar al armar la plantilla.</li>
+      <li><b>Inscribir</b>. El equipo aparece en la competición con plantilla vacía.</li>
+    </ol>
+    <div class="callout warn"><b>Una división por edición</b> Un club no puede jugar Primera y Segunda a la vez en la misma edición. Para cambiarlo de división, marcá su inscripción actual como <b>No participa</b> y recién ahí inscribilo en la otra. Copa, menores y especiales no entran en la regla.</div>
+    <h4>Detalle de un equipo</h4>
+    <p>Contadores (Inscripciones · Partidos jugados · Jugadores), sus <b>Plantillas por competición</b> con el editor completo, y sus partidos. El administrador puede armar o corregir la plantilla de cualquier equipo sin esperar al delegado.</p>
+    <p><b>Desactivar</b> saca al equipo de circulación y se puede revertir; <b>Eliminar definitivamente</b> no. Para sanciones usá <a href="#adm-bloqueos">Bloqueos</a>, que conserva el historial.</p>
+  </article>
+
+  <article id="adm-plantillas">
+    <h3>Editor de plantillas <span class="who">Administrador · Líder de equipo</span></h3>
+    <p>Es el mismo editor en el panel (detalle de equipo o de competición) y en el área de equipo (Plantillas). Muestra quién está inscrito, con qué dorsal y si está habilitado.</p>
+    <ul class="defs">
+      <li><b>Agregar jugador</b>: buscá por cédula o por nombre; el jugador ya inscrito no se vuelve a ofrecer. Si no aparece, primero hay que registrarlo en <a href="#adm-jugadores">Jugadores</a> (o en Jugadores del área de equipo). Opcionalmente cargá el <b>dorsal</b>.</li>
+      <li><b>Cupo</b>: al llegar al máximo de la competición, el editor lo avisa antes de que el servidor rechace. Para agregar a alguien, primero dá de baja a otro.</li>
+      <li><b>Dar de baja / Reincorporar</b>: los dados de baja no se borran, quedan a la vista para reincorporarlos, y sus goles y tarjetas siguen contando.</li>
+      <li><b>Habilitar</b> (solo administrador): el interruptor por jugador que exige una competición con habilitación. Sin habilitar, el jugador no puede jugar partidos oficiales.</li>
+      <li><b>Traer plantilla del torneo anterior</b>: aparece solo cuando el equipo tiene una plantilla previa con algo para traer. Es un botón y no automático: quién juega el torneo que viene es una decisión del equipo. Lo que no entra (edad, cupo, ya cargado) se lista con su motivo, no se descarta en silencio.</li>
+    </ul>
+    <div class="callout ex"><b>Ejemplo</b> Atlético Lago se inscribió en Primera del Apertura 2026. Abrís su plantilla → <b>Traer</b> del Clausura 2025: entran 11 de 13; el editor dice que Martín Sosa quedó afuera por edad (la categoría es Sub-30 y cumplió 31) y que Julián Reyes ya estaba cargado. Después agregás a los nuevos por cédula.</div>
+  </article>
+
+  <article id="adm-bloqueos">
+    <h3>Bloqueo de equipos <span class="route">/admin/bloqueos</span> <span class="who">Administrador</span></h3>
+    <p>Las sanciones. Los equipos nunca se eliminan por una sanción: se bloquean y conservan todo su historial para poder reincorporarlos. Pestañas <b>Bloqueos activos</b> e <b>Historial completo</b> (los levantados quedan registrados con quién los aplicó y por qué).</p>
+    <table class="tbl fields"><tbody>
+      <tr><th>Equipo</th><td>El club a bloquear.</td></tr>
+      <tr><th>Alcance del bloqueo</th><td><b>Club completo</b> (no juega en nada) o <b>Solo una competición</b> (elegís cuál).</td></tr>
+      <tr><th>Motivo</th><td>Ej. <em>"agresión al árbitro en la fecha 7"</em>. Queda en el historial.</td></tr>
+    </tbody></table>
+    <p><b>Levantar bloqueo</b> rehabilita al equipo; pide un motivo opcional (<em>"sanción cumplida"</em>).</p>
+  </article>
+
+  <article id="adm-jugadores">
+    <h3>Jugadores <span class="route">/admin/jugadores</span> <span class="who">Administrador</span></h3>
+    <p>Registro único por documento: un jugador existe una sola vez y puede estar en varias competiciones. Columnas: Jugador · Documento · Edad · Título · Estado.</p>
+    <table class="tbl fields"><tbody>
+      <tr><th>Tipo de documento</th><td><b>Cédula</b> o <b>Partida de nacimiento</b> (menores).</td></tr>
+      <tr><th>Número</th><td>Es la clave del jugador. Es lo que busca el público en "Buscar jugador".</td></tr>
+      <tr><th>Nombre / Apellido / Fecha de nacimiento</th><td>La fecha define la edad para las categorías con rango.</td></tr>
+    </tbody></table>
+    <ul class="defs">
+      <li><b>Verificar título</b>: marca <span class="chip ok">Verificado</span> en la columna Título cuando la liga comprobó el título universitario del jugador (para las categorías gremiales que lo exigen).</li>
+      <li><b>Desactivar</b> lo saca de las plantillas activas sin borrar nada; <b>Eliminar definitivamente</b> arrastra todo lo que dejó registrado (goles, tarjetas, historial).</li>
+      <li>El <b>detalle</b> muestra sus estadísticas, partidos y competiciones.</li>
+    </ul>
+  </article>
+
+  <article id="adm-programacion">
+    <h3>Programación y control en vivo <span class="route">/admin/programacion</span> <span class="who">Administrador · Anotador</span></h3>
+    <p>Dos trabajos distintos conviven acá: <b>armar el fixture</b> (solo administrador) y <b>cargar el resultado</b> (administrador y anotador).</p>
+    <h4>A · Sortear y programar (administrador)</h4>
+    <ol class="steps">
+      <li>Elegí la <b>Competición</b> arriba. Sin competición se ve la jornada completa de todas, por día — sirve para saber qué se juega un sábado sin ir torneo por torneo.</li>
+      <li><b>Sortear calendario</b> (liga) o <b>Sortear grupos</b> (copa): genera todos los cruces de una vez. El sistema avisa <em>"Sorteo listo: N grupos y M partidos"</em>. Los partidos nacen sin día ni hora.</li>
+      <li>El bloque <b>Partidos sin día ni hora</b> lista los cruces pendientes. Hacé clic en cualquiera para asignarle <b>Fecha y hora</b>, <b>Jornada</b> y <b>Sede</b> (viene precargada con la cancha de la liga, editable). Al guardar uno, el siguiente conserva fecha, jornada y sede: se programa una jornada entera de corrido.</li>
+      <li><b>Destacar este partido</b>: lo pone en "Destacados de la semana" de la portada.</li>
+      <li><b>Nuevo partido</b> crea un cruce a mano: Equipo 1, Equipo 2 (el sistema oculta a los rivales con los que ese cruce ya existe), fecha y hora, jornada, sede, estado.</li>
+      <li>Estados de un partido: <span class="chip info">Programado</span> · <span class="chip live">En vivo</span> · <span class="chip info">Finalizado</span> · <span class="chip warn">Aplazado</span>. Editar y eliminar están en el menú <b>⋯</b> de cada tarjeta.</li>
+    </ol>
+    <h4>B · Cargar un partido en vivo (anotador o administrador)</h4>
+    <ol class="steps">
+      <li>Vista <b>Por día</b>: navegá al día con las flechas o el botón de hoy. Cada partido programado tiene el botón <b>Iniciar</b>.</li>
+      <li><b>Iniciar</b> pasa el partido a <b>En vivo</b>: desde ese instante aparece en la portada y en "En vivo" del sitio.</li>
+      <li><b>Control en vivo</b>: un renglón por equipo con el botón <b>Gol</b> y los iconos de <b>tarjeta amarilla</b> y <b>tarjeta roja</b>. Cada uno abre un diálogo para elegir al <b>jugador</b> de la plantilla de ese equipo. Un gol sin autor no alimenta la tabla de goleadores, por eso siempre pide jugador.</li>
+      <li>El marcador viaja al instante a todos los que estén mirando el sitio.</li>
+      <li><b>Finalizar partido</b>: cierra el resultado, actualiza la tabla de posiciones y las estadísticas.</li>
+      <li>Ya finalizado, en el <b>detalle del partido</b> (<code>/admin/partidos/:id</code>) se ven los eventos y se designa la <b>Figura del partido (MVP)</b>: jugador de cualquiera de las dos plantillas, foto (queda pública, descargable desde el portal) y una nota (<em>"doblete y asistencia"</em>).</li>
+    </ol>
+    <div class="callout warn"><b>Atención</b> Si el equipo no tiene plantilla cargada para esa competición, el control en vivo lo avisa y no deja cargar goles: primero hay que armar la plantilla. La liga no lleva el minuto de cada jugada; no se pide ni se muestra.</div>
+    <div class="callout ex"><b>Ejemplo (anotador)</b> Sábado 20:00, Atlético Lago vs. Dep. Ribera. Entrás a Programación → Por día → <b>Iniciar</b>. Minuto 12, gol de Sosa: fila "Atlético Lago" → <b>Gol</b> → elegís <em>Martín Sosa</em>. Amarilla para Ribera: icono amarillo en la fila de Ribera → elegís al jugador. Al pitazo: <b>Finalizar partido</b>. Mañana el administrador entra al detalle y designa el MVP con la foto.</div>
+  </article>
+
+  <article id="adm-estadisticas">
+    <h3>Estadísticas generales <span class="route">/admin/estadisticas</span> <span class="who">Administrador</span></h3>
+    <p>Jugadores · Goles · Tarjetas amarillas · Tarjetas rojas de la edición, filtrables por competición, con <b>Máximos goleadores</b>, <b>Tarjetas</b> y la <b>Tabla completa</b> por jugador (PJ, G, TA, TR). Se llenan al finalizar partidos.</p>
+  </article>
+
+  <article id="adm-publicidad">
+    <h3>Publicidad <span class="route">/admin/publicidad</span> <span class="who">Administrador · Community manager</span></h3>
+    <p>Cada <b>ubicación</b> es una ranura del sitio público; un anuncio puede ocupar varias. Ranuras: <b>Banner principal</b> (portada) · <b>Portada, entre secciones</b> · <b>Calendario</b> · <b>Ficha de partido</b> · <b>Tabla de posiciones</b> · <b>En vivo</b> · <b>Estadísticas</b> · <b>Equipos</b> · <b>Columna lateral</b> · <b>Pie de página</b> · <b>Tira de logos del pie</b>. Una ranura sin anuncios no se dibuja en el sitio.</p>
+    <table class="tbl fields"><tbody>
+      <tr><th>Nombre del anuncio</th><td>Solo para reconocerlo en el panel; el público no lo ve.</td></tr>
+      <tr><th>Imagen</th><td><b>1200 × 240 px (5:1)</b>, subida ya recortada: se muestra tal cual. Para la tira de logos, PNG con fondo transparente.</td></tr>
+      <tr><th>Enlace de destino</th><td>Opcional. A dónde va quien toca el anuncio.</td></tr>
+      <tr><th>¿Dónde se muestra?</th><td>Una o varias ranuras; la misma imagen se reutiliza.</td></tr>
+      <tr><th>Desde / Hasta</th><td>Ventana de publicación. Vacías = se muestra siempre que esté encendido.</td></tr>
+      <tr><th>Orden</th><td>Menor primero. Define la rotación dentro de la ranura.</td></tr>
+      <tr><th>Encendido</th><td>Interruptor por anuncio.</td></tr>
+    </tbody></table>
+    <p>El panel dice el estado real de cada anuncio, que no es solo el interruptor: uno encendido con fecha de inicio futura todavía <b>no se ve</b>, y uno vencido dejó de verse aunque nadie lo apagara.</p>
+  </article>
+
+  <article id="adm-noticias">
+    <h3>Noticias y fichas <span class="route">/admin/noticias</span> <span class="who">Administrador · Community manager</span></h3>
+    <p>Dos tipos de publicación. Contadores de <b>publicadas</b> y <b>en borrador</b>, filtro por tipo y buscador.</p>
+    <ul class="defs">
+      <li><b>Noticia</b>: <b>Titular</b> (lo que se lee grande en el listado), <b>Bajada</b> opcional (dos líneas para la tarjeta), <b>Portada</b> (horizontal, 1200 × 675 va bien), <b>Cuerpo</b> (texto libre; los saltos de línea se respetan), <b>Destacar en la portada del apartado</b>, y estado borrador/publicada.</li>
+      <li><b>Ficha técnica</b> de <b>edición</b>, <b>torneo</b> o <b>equipo</b> (para el equipo, opcionalmente un año; vacío = toda su historia). Elegís la entidad y la ficha se calcula sola con los números del torneo; vos le ponés titular y foto. <b>Los números se congelan al guardar</b>; después se pueden <b>recalcular con los números de hoy</b> desde la acción de la fila.</li>
+    </ul>
+    <p>Acciones por fila: <b>Ver en el sitio</b>, <b>Recalcular la ficha</b>, <b>Editar</b>, <b>Publicar / Volver a borrador</b>, <b>Eliminar</b>.</p>
+    <div class="callout ex"><b>Ejemplo</b> Cerró la fecha 10. Community manager → Noticias y fichas → <b>Nueva ficha de torneo</b> → Torneo <em>Primera División · Apertura 2026</em>: aparece la tabla y los goleadores al día. Titular "Así quedó la fecha 10", portada con la foto del MVP, <b>Publicar</b>. En el sitio sale en Noticias con la etiqueta "Ficha de torneo".</div>
+  </article>
+
+  <article id="adm-imagenes">
+    <h3>Imágenes <span class="route">/admin/imagenes</span> <span class="who">Administrador · Community manager</span></h3>
+    <p>Un solo lugar para vestir el sitio: pestañas <b>Categorías · Competiciones · Equipos</b>, cada una con su grilla. Elegís qué querés vestir, <b>Subir imagen</b>, <b>Guardar</b>. La imagen se recorta para llenar su caja. El community manager no entra a las fichas del torneo, pero sí es quien las viste: por eso la imagen se edita desde acá.</p>
+  </article>
+
+  <article id="adm-usuarios">
+    <h3>Usuarios <span class="route">/admin/usuarios</span> <span class="who">Administrador</span></h3>
+    <p>Las cuentas del sistema y qué puede hacer cada una. Filtro por rol y buscador. Columnas: Usuario · Rol · Equipo · Activo.</p>
+    <table class="tbl fields"><tbody>
+      <tr><th>Rol</th><td>Administrador general · Community manager · Anotador · Líder de equipo (con su descripción al lado).</td></tr>
+      <tr><th>Usuario</th><td>Solo letras sin acentos, números, punto, guion y guion bajo.</td></tr>
+      <tr><th>Correo</th><td>Opcional; dato de contacto, no credencial.</td></tr>
+      <tr><th>Contraseña</th><td>Mínimo 6 caracteres.</td></tr>
+      <tr><th>Equipo</th><td>Solo para líder de equipo. Un club tiene un solo delegado: los que ya tienen no aparecen en la lista.</td></tr>
+    </tbody></table>
+    <p><b>Cambiar contraseña</b>: la anterior deja de servir en cuanto guardás — pasásela vos a la persona. <b>Eliminar</b> borra la cuenta (el equipo queda). Tu propia cuenta aparece marcada como <b>Vos</b>.</p>
+  </article>
+
+  <article id="adm-auditoria">
+    <h3>Auditoría <span class="route">/admin/auditoria</span> <span class="who">Administrador</span></h3>
+    <p>Registro de las acciones sensibles del sistema: quién hizo qué, sobre qué entidad y cuándo. Filtro por <b>Entidad</b>. Es donde se responde "¿quién cambió este resultado?".</p>
+  </article>
+</section>
+
+<!-- ============================================================ 3 -->
+<section id="equipo">
+  <h2><span class="num">3</span>Área de equipo</h2>
+  <p class="intro">Lo que ve el <b>líder de equipo</b> al entrar: un panel acotado a su club. Menú: Inicio · Jugadores · Plantillas · Partidos · Estadísticas · Historial.</p>
+
+  <article id="eq-inicio">
+    <h3>Inicio <span class="route">/equipo</span></h3>
+    <p>Saludo, tarjeta <b>Tu equipo</b> con el escudo (botón <b>Cambiar</b> para subir otro: 512 × 512, PNG transparente) y contadores de <b>Inscripciones</b> y <b>Partidos</b>. <b>Rendimiento</b> resumido y <b>Tus próximos partidos</b>.</p>
+    <div class="callout warn"><b>Correo de contacto</b> Mientras no haya correo cargado, aparece un aviso: es la única vía que tiene la liga para avisarte algo fuera del sistema. <b>Agregar correo</b> → <code>delegado@ejemplo.com</code>.</div>
+  </article>
+
+  <article id="eq-jugadores">
+    <h3>Jugadores <span class="route">/equipo/jugadores</span></h3>
+    <p>Todos los jugadores registrados en las competiciones de tu equipo, con contadores (Jugadores · Inscripciones · Inactivos) y columnas Jugador · Competiciones · Estado. <b>Nuevo jugador</b> registra a una persona en el sistema (tipo y número de documento, nombre, apellido, fecha de nacimiento); <b>Editar</b> corrige sus datos; la fila abre su detalle con las competiciones en que participa.</p>
+    <div class="callout tip"><b>Consejo</b> Registrar al jugador no lo mete en ninguna plantilla: eso se hace en <b>Plantillas</b>. Si la plantilla está vacía, la pantalla lo dice y te lleva a agregar.</div>
+  </article>
+
+  <article id="eq-plantillas">
+    <h3>Plantillas <span class="route">/equipo/plantillas</span></h3>
+    <p>Elegís la <b>inscripción</b> (competición) y ves su plantilla con el mismo <a href="#adm-plantillas">editor</a> del panel, sin los controles de habilitación (esos son del administrador). <b>Agregar jugador a la plantilla</b>: jugador y número de camiseta opcional. El sistema respeta edad y cupo de la competición y explica por qué rechaza a alguien. También podés <b>traer la plantilla del torneo anterior</b> cuando exista.</p>
+    <div class="callout ex"><b>Ejemplo</b> Inscripción <em>Primera División · Apertura 2026</em>, cupo 8–14. Agregás a Julián Reyes con dorsal 10. Al llegar a 14, el botón se bloquea y avisa que primero hay que dar de baja a alguien.</div>
+  </article>
+
+  <article id="eq-partidos">
+    <h3>Partidos <span class="route">/equipo/partidos</span></h3>
+    <p>Calendario y resultados de tu equipo. Filtros por <b>Competición</b> y <b>Estado</b> (Programados · En vivo · Finalizados · Aplazados). Cada tarjeta abre el detalle con eventos y MVP.</p>
+  </article>
+
+  <article id="eq-estadisticas">
+    <h3>Estadísticas <span class="route">/equipo/estadisticas</span></h3>
+    <p>Rendimiento de tus jugadores en todas las competiciones o en una: Jugadores · Goles · Amarillas · Rojas, <b>Goles por competición</b>, <b>Promedio de goles por jugador</b>, <b>Máximo goleador</b>, ranking de goleadores, tarjetas y la tabla por jugador (PJ, G, TA, TR).</p>
+  </article>
+
+  <article id="eq-historial">
+    <h3>Historial <span class="route">/equipo/historial</span></h3>
+    <p>Todas las ediciones del torneo; cada una abre el detalle con las competiciones que jugó tu equipo, y por competición: partidos, victorias, goles a favor y en contra, y la lista de resultados.</p>
+  </article>
+</section>
+
+<!-- ============================================================ 4 -->
+<section id="recetas">
+  <h2><span class="num">4</span>Recetas paso a paso</h2>
+
+  <article>
+    <h3>Arrancar una temporada nueva <span class="who">Administrador</span></h3>
+    <ol class="steps big">
+      <li><b>Ediciones → Nueva</b>: <em>Apertura 2026</em>, año 2026, temporada 1, fechas.</li>
+      <li><b>Categorías</b>: revisá que existan Primera, Segunda, Tercera, Sub-20… con edad, cupo y habilitación correctos. Se reutilizan de una edición a otra.</li>
+      <li><b>Competiciones → Nueva</b> por cada torneo: edición Apertura 2026, categoría, tipo <em>División de liga</em>, nivel Primera/Segunda/Tercera, formato, vueltas, plazas de descenso, portada 1200×400. Dejalas en <b>Borrador</b> mientras armás.</li>
+      <li><b>Equipos</b>: creá los clubes nuevos (nombre, logo, usuario y contraseña del delegado). Los existentes ya están.</li>
+      <li><b>Equipos → Inscribir</b> a cada club en su competición (recordá: una división de liga por edición).</li>
+      <li>Pasá las competiciones a <b>Activo</b> (menú ⋯ → Cambiar a Activo).</li>
+      <li>Avisá a los delegados: entran al área de equipo y arman sus <b>Plantillas</b> (o las armás vos desde el detalle del equipo). Si la categoría exige habilitación, habilitá jugador por jugador.</li>
+      <li><b>Programación</b>: elegí la competición → <b>Sortear calendario</b> → asigná día, hora y sede a cada cruce de "Partidos sin día ni hora" → marcá los <b>destacados</b>.</li>
+      <li><b>Imágenes</b> (o el community manager): vestí categorías, competiciones y equipos que falten.</li>
+    </ol>
+  </article>
+
+  <article>
+    <h3>Cargar un partido en vivo <span class="who">Anotador</span></h3>
+    <ol class="steps big">
+      <li>Programación → <b>Por día</b> → el partido de hoy → <b>Iniciar</b>.</li>
+      <li><b>Gol</b> en la fila del equipo → elegí al jugador. Repetí por cada gol. Amarilla/roja con los iconos de la fila.</li>
+      <li><b>Finalizar partido</b>. La tabla y las estadísticas se actualizan solas.</li>
+      <li>Si te equivocaste de jugador en un gol, avisale al administrador: los eventos se corrigen desde el detalle del partido.</li>
+    </ol>
+  </article>
+
+  <article>
+    <h3>Designar la figura del partido <span class="who">Administrador</span></h3>
+    <ol class="steps big">
+      <li>Programación → tarjeta del partido finalizado → detalle (<b>Ver</b>).</li>
+      <li>Bloque <b>Figura del partido</b>: jugador (de cualquiera de las dos plantillas), <b>Subir foto del MVP</b>, nota opcional → Guardar.</li>
+      <li>La tarjeta del partido en el sitio muestra "MVP: nombre"; la foto queda descargable desde el portal.</li>
+    </ol>
+  </article>
+
+  <article>
+    <h3>Publicar la ficha de una fecha <span class="who">Community manager</span></h3>
+    <ol class="steps big">
+      <li>Noticias y fichas → <b>Nueva ficha de torneo</b> → elegí edición y torneo: la ficha se calcula sola.</li>
+      <li>Titular, bajada, portada (1200×675) → <b>Publicar</b>.</li>
+      <li>Semanas después, si querés los números al día: acción <b>Recalcular la ficha con los números de hoy</b>.</li>
+    </ol>
+  </article>
+
+  <article>
+    <h3>Sancionar a un equipo y levantarle la sanción <span class="who">Administrador</span></h3>
+    <ol class="steps big">
+      <li>Bloqueos → <b>Bloquear equipo</b>: equipo, alcance (<em>club completo</em> o <em>solo una competición</em>), motivo.</li>
+      <li>El equipo queda fuera del juego en ese alcance; su historial se conserva.</li>
+      <li>Cumplida la sanción: pestaña Bloqueos activos → <b>Levantar bloqueo</b> → motivo (<em>"sanción cumplida"</em>). Queda en el historial con quién la aplicó y quién la levantó.</li>
+    </ol>
+  </article>
+
+  <article>
+    <h3>Dar de alta un delegado que perdió la contraseña <span class="who">Administrador</span></h3>
+    <ol class="steps big">
+      <li>Usuarios → buscá el usuario del club → <b>Cambiar contraseña</b> → contraseña nueva (mín. 6) → Guardar.</li>
+      <li>La anterior deja de servir al instante. Pasásela vos al delegado.</li>
+    </ol>
+  </article>
+
+  <article>
+    <h3>Ver cómo quedó mi equipo <span class="who">Cualquiera (sitio público)</span></h3>
+    <ol class="steps big">
+      <li>Abrí el sitio: si el partido fue hoy, está en <b>Partidos de hoy</b>; si fue antes, en <b>Última jornada</b>.</li>
+      <li>Tocá la tarjeta para ver goles, tarjetas y MVP.</li>
+      <li>Tabla actualizada: abajo en la portada (Primera) o en <b>Competiciones</b> con el filtro de tu división.</li>
+    </ol>
+  </article>
+</section>
+
+<!-- ============================================================ 5 -->
+<section id="faq">
+  <h2><span class="num">5</span>Problemas frecuentes</h2>
+  <dl class="faq">
+    <dt>No puedo inscribir a un equipo en una competición: la opción está apagada.</dt>
+    <dd>El motivo aparece debajo de la opción. Las causas: ya está inscrito; la competición está en <b>Borrador</b> o <b>Finalizado</b> (pasala a Activo); el club ya ocupa otra <b>división de liga</b> en esa edición (marcá esa inscripción como "No participa" primero); o el club está <b>bloqueado</b>.</dd>
+    <dt>Un jugador no entra en la plantilla.</dt>
+    <dd>El editor dice por qué: fuera del <b>rango de edad</b> de la competición (revisá su fecha de nacimiento en Jugadores), la plantilla llegó al <b>cupo máximo</b> (dá de baja a alguien), o ya está cargado. Si no aparece en la búsqueda, todavía no está registrado: creá primero al jugador.</dd>
+    <dt>El jugador está en la plantilla pero no puede jugar / no aparece para cargarle un gol.</dt>
+    <dd>La competición exige <b>habilitación</b> y el administrador no lo habilitó. Panel → detalle del equipo → plantilla → interruptor <b>Habilitar</b>.</dd>
+    <dt>El control en vivo no me deja cargar goles.</dt>
+    <dd>Ese equipo no tiene plantilla cargada para esa competición. Primero hay que armarla.</dd>
+    <dt>La tabla de posiciones está vacía o en orden alfabético.</dt>
+    <dd>Todavía no hay partidos <b>finalizados</b>. Un partido "en vivo" no cuenta hasta que se finaliza.</dd>
+    <dt>Un partido aparece "Por programar".</dt>
+    <dd>Salió del sorteo pero nadie le asignó día y hora. Programación → "Partidos sin día ni hora" → clic → fecha, hora y sede.</dd>
+    <dt>El anuncio está encendido pero no se ve en el sitio.</dt>
+    <dd>Mirá el estado en el panel: puede tener una fecha <b>Desde</b> futura, una fecha <b>Hasta</b> vencida, o no estar asignado a la ranura donde lo buscás. Una ranura sin anuncios no se dibuja.</dd>
+    <dt>La ficha técnica muestra números viejos.</dt>
+    <dd>Es a propósito: los números se congelan al publicar. Acción <b>Recalcular la ficha con los números de hoy</b> en Noticias y fichas.</dd>
+    <dt>No puedo eliminar una edición / competición.</dt>
+    <dd>El borrado definitivo se rechaza si tiene contenido (competiciones, equipos o partidos). Vaciá primero, o usá Desactivar / Finalizar.</dd>
+    <dt>Quiero cambiar de división a un equipo.</dt>
+    <dd>Detalle de la competición → equipo → <b>Decisión de fin de temporada</b> (Asciende / Desciende / No participa). Arrastra inscripción, plantilla e historial: pide confirmación.</dd>
+    <dt>El marcador en vivo no cambia en mi teléfono.</dt>
+    <dd>Con mala señal, el sitio refresca solo cada 20 s (el anillo del chip EN VIVO lo muestra). Si no, recargá la página.</dd>
+    <dt>Olvidé mi contraseña.</dt>
+    <dd>No hay recuperación automática: pedile al administrador una nueva desde Usuarios → Cambiar contraseña.</dd>
+  </dl>
+</section>
+
+<!-- ============================================================ 6 -->
+<section id="glosario">
+  <h2><span class="num">6</span>Glosario</h2>
+  <dl class="glos">
+    <dt>Edición</dt><dd>Temporada del torneo (tres por año).</dd>
+    <dt>Categoría</dt><dd>Plantilla de reglas reutilizable: formato, edades, cupos, habilitación.</dd>
+    <dt>Competición</dt><dd>Una categoría jugándose en una edición concreta.</dd>
+    <dt>División de liga</dt><dd>Primera, Segunda o Tercera; las divisiones de una edición se entrelazan para el ascenso y descenso.</dd>
+    <dt>Inscripción</dt><dd>Un equipo dentro de una competición. Tiene su propia plantilla.</dd>
+    <dt>Plantilla</dt><dd>Los jugadores inscritos por un equipo en una competición, con dorsal y habilitación.</dd>
+    <dt>Habilitación</dt><dd>Aprobación explícita del administrador para que un jugador pueda jugar, en las categorías que la exigen.</dd>
+    <dt>Jornada</dt><dd>Número de fecha del fixture (contabilidad interna; el sitio no la muestra en liga).</dd>
+    <dt>Destacado</dt><dd>Partido que la liga eligió mostrar en "Destacados de la semana".</dd>
+    <dt>MVP / Figura del partido</dt><dd>Jugador designado al finalizar, con foto pública y nota.</dd>
+    <dt>Bloqueo</dt><dd>Sanción a un club (completa o por competición), reversible y con historial.</dd>
+    <dt>Ficha técnica</dt><dd>Publicación con los números de una edición, torneo o club, congelados al publicar.</dd>
+    <dt>Ranura</dt><dd>Ubicación del sitio público donde puede aparecer un anuncio.</dd>
+    <dt>Auditoría</dt><dd>Registro de quién hizo qué en el panel.</dd>
+  </dl>
+  <footer class="end">Liga Lago Futsal · Manual de uso · Developed with Colina and Merchan</footer>
+</section>
+</main>
+</div>
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc nav a'));
+  var targets = links.map(function (a) { return document.querySelector(a.getAttribute('href')); });
+  // Resalta en el índice la sección que se está leyendo.
+  function onScroll() {
+    var y = window.scrollY + 120, idx = 0;
+    for (var i = 0; i < targets.length; i++) { if (targets[i] && targets[i].offsetTop <= y) idx = i; }
+    links.forEach(function (a, i) { a.classList.toggle('active', i === idx); });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  // Buscador: filtra el índice por lo que dice cada sección, y resalta coincidencias en el texto.
+  var q = document.getElementById('q'); var nores = document.createElement('div'); nores.className = 'nores'; nores.textContent = 'Nada con esa palabra.'; q.parentNode.parentNode.appendChild(nores);
+  var texts = targets.map(function (t) { return t ? (t.closest('article') || t).textContent.toLowerCase() : ''; });
+  function clearMarks() { document.querySelectorAll('mark[data-q]').forEach(function (m) { m.replaceWith(document.createTextNode(m.textContent)); }); document.querySelectorAll('.doc').forEach(function (d) { d.normalize(); }); }
+  function markAll(term) {
+    if (!term || term.length < 3) return;
+    var walker = document.createTreeWalker(document.querySelector('.doc'), NodeFilter.SHOW_TEXT, null); var nodes = []; var n;
+    while ((n = walker.nextNode())) { if (n.parentNode.closest('script,style') || !n.nodeValue.toLowerCase().includes(term)) continue; nodes.push(n); if (nodes.length > 400) break; }
+    nodes.forEach(function (node) {
+      var text = node.nodeValue, lower = text.toLowerCase(), i = lower.indexOf(term), frag = document.createDocumentFragment(), last = 0;
+      while (i !== -1) { frag.appendChild(document.createTextNode(text.slice(last, i))); var m = document.createElement('mark'); m.setAttribute('data-q', '1'); m.textContent = text.slice(i, i + term.length); frag.appendChild(m); last = i + term.length; i = lower.indexOf(term, last); }
+      frag.appendChild(document.createTextNode(text.slice(last))); node.parentNode.replaceChild(frag, node);
+    });
+  }
+  var timer;
+  q.addEventListener('input', function () {
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      var term = q.value.trim().toLowerCase(); clearMarks(); var any = false;
+      links.forEach(function (a, i) { var hit = !term || texts[i].includes(term) || a.textContent.toLowerCase().includes(term); a.classList.toggle('hidden', !hit); if (hit) any = true; });
+      nores.classList.toggle('on', !any); markAll(term);
+    }, 120);
+  });
+})();
+</script>
+
+</body>
+</html>

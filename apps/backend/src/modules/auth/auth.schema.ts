@@ -32,7 +32,7 @@ export type UpdateMeDto = z.infer<typeof updateMeSchema>;
 /** Cambio de contraseña propio: se pide la actual para que no baste con la sesión abierta. */
 export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, 'Ingresá tu contraseña actual'),
-  newPassword: z.string().min(6, 'Mínimo 6 caracteres'),
+  newPassword: z.string().min(12, 'Mínimo 12 caracteres'),
 });
 
 export type ChangePasswordDto = z.infer<typeof changePasswordSchema>;

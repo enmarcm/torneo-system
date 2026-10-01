@@ -28,7 +28,7 @@ export const createApp = () => {
   );
   app.use(
     '/api/auth',
-    rateLimit({ windowMs: 15 * 60 * 1000, max: 30, standardHeaders: true, legacyHeaders: false }),
+    rateLimit({ windowMs: 15 * 60 * 1000, max: 10, standardHeaders: true, legacyHeaders: false }),
   );
 
   app.get('/api/health', (_req, res) => res.json({ success: true, message: 'ok' }));
