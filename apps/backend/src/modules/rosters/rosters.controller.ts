@@ -1,5 +1,6 @@
 import { asyncHandler } from '@/utils/async-handler';
 import { ok, created } from '@/utils/http.util';
+import { assertIdentityPhotoOwner } from '../players/player-photos';
 import { rostersService } from './rosters.service';
 
 export const rostersController = {
@@ -19,6 +20,10 @@ export const rostersController = {
       await rostersService.add(req.params.registrationId, req.body.playerId, req.body.jerseyNumber),
     ),
   ),
+  createPlayer: asyncHandler(async (req, res) => {
+    assertIdentityPhotoOwner(req.user!, req.body.identityPhotoKey);
+    created(res, await rostersService.createPlayer(req.params.registrationId, req.body), 'Jugador agregado a la plantilla');
+  }),
   previous: asyncHandler(async (req, res) =>
     ok(res, await rostersService.previous(req.params.registrationId)),
   ),

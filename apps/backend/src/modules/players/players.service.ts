@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { AppError } from '@/utils/app-error';
 import { MESSAGES } from '@/config/constants';
 import { purgePlayer, CASCADE_TX } from '@/utils/cascade.util';
+import { validatePlayerPhotos } from './player-photos';
 import type { CreatePlayerDto } from './players.schema';
 
 export const playersService = {
@@ -63,6 +64,7 @@ export const playersService = {
   },
 
   create: async (data: CreatePlayerDto) => {
+    await validatePlayerPhotos(data);
     const exists = await prisma.player.findUnique({
       where: {
         documentType_documentNumber: {
@@ -75,8 +77,11 @@ export const playersService = {
     return prisma.player.create({ data });
   },
 
-  update: (id: string, data: Partial<CreatePlayerDto>) =>
-    prisma.player.update({ where: { id }, data }),
+  update: async (id: string, data: Partial<CreatePlayerDto>) => {
+    const current = await playersService.get(id);
+    await validatePlayerPhotos({ ...current, ...data });
+    return prisma.player.update({ where: { id }, data });
+  },
 
   updateForTeam: async (id: string, teamId: string, data: Partial<CreatePlayerDto>) => {
     await playersService.getForTeam(id, teamId);
@@ -85,11 +90,13 @@ export const playersService = {
       select: { id: true },
     });
     if (shared) throw new AppError(403, 'Este jugador también pertenece a otro equipo.', 'SHARED_PLAYER');
-    return prisma.player.update({ where: { id }, data });
+    return playersService.update(id, data);
   },
 
-  setStatus: (id: string, status: 'ACTIVE' | 'INACTIVE') =>
-    prisma.player.update({ where: { id }, data: { status } }),
+  setStatus: async (id: string, status: 'ACTIVE' | 'INACTIVE') => {
+    if (status === 'ACTIVE') await validatePlayerPhotos(await playersService.get(id));
+    return prisma.player.update({ where: { id }, data: { status } });
+  },
 
   setStatusForTeam: async (id: string, teamId: string, status: 'ACTIVE' | 'INACTIVE') => {
     await playersService.getForTeam(id, teamId);
@@ -98,7 +105,7 @@ export const playersService = {
       select: { id: true },
     });
     if (shared) throw new AppError(403, 'Este jugador también pertenece a otro equipo.', 'SHARED_PLAYER');
-    return prisma.player.update({ where: { id }, data: { status } });
+    return playersService.setStatus(id, status);
   },
 
   setDegree: (id: string, data: { universityDegreeVerified: boolean; degreeDocUrl?: string }) =>
@@ -137,12 +144,11 @@ export const playersService = {
               select: {
                 id: true,
                 name: true,
-                kind: true,
+                kind: true, ageGroup: true,
                 format: true,
                 division: true,
                 divisionLevel: true,
                 editionId: true,
-                category: { select: { id: true, name: true } },
                 edition: { select: { id: true, name: true, year: true } },
               },
             },
@@ -205,7 +211,7 @@ export const playersService = {
           : {}),
       },
       include: {
-        teamRegistration: { include: { team: true, competition: { include: { category: true } } } },
+        teamRegistration: { include: { team: true, competition: true } },
         stats: true,
       },
     }),

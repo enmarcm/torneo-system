@@ -23,6 +23,9 @@ import {
 } from '@/hooks/queries';
 import { usePublicScope } from '@/hooks/common/usePublicScope';
 import { PublicScopeFilters } from '@/components/sport/PublicScopeFilters';
+import { CompetitionSectionTabs } from '@/components/sport/CompetitionSectionTabs';
+import { getCompetitionAgeGroup, AGE_GROUP_LABELS } from '@/utils/competitionMeta';
+import type { Competition } from '@/api/competitions.api';
 import { CompetitionCard } from '@/components/sport/CompetitionCard';
 import { StandingsTable } from '@/components/sport/StandingsTable';
 import { BracketView } from '@/components/sport/BracketView';
@@ -43,7 +46,10 @@ const PublicCompetitions: React.FC = () => {
   const scope = usePublicScope();
 
   // Aquí siempre se mira una competición concreta: sin elección, la primera.
-  const competition = scope.competition ?? scope.competitions[0];
+  const [selectedAgeGroup, setSelectedAgeGroup] = useState<Competition['ageGroup']>('ADULT');
+  const ageGroup = scope.competition ? getCompetitionAgeGroup(scope.competition) : selectedAgeGroup;
+  const sectionCompetitions = scope.competitions.filter((c) => getCompetitionAgeGroup(c) === ageGroup);
+  const competition = scope.competition ?? sectionCompetitions[0];
   const cid = competition?.id;
   const isCup = competition?.format === 'GROUPS_KNOCKOUT';
 
@@ -84,12 +90,19 @@ const PublicCompetitions: React.FC = () => {
         Volver
       </Button>
 
+      <CompetitionSectionTabs value={ageGroup} competitions={scope.competitions} onChange={(next) => {
+        setSelectedAgeGroup(next);
+        scope.setCompetitionId('');
+        setView('table');
+        setGroupId('');
+      }} />
+
       <PublicScopeFilters
         editions={scope.editions}
         editionId={scope.editionId}
-        onEditionChange={scope.setEditionId}
+        onEditionChange={(id) => { setSelectedAgeGroup(ageGroup); scope.setEditionId(id); }}
         isCurrentEdition={scope.isCurrentEdition}
-        competitions={scope.competitions}
+        competitions={sectionCompetitions}
         competitionId={cid ?? ''}
         onCompetitionChange={(id) => {
           scope.setCompetitionId(id);
@@ -99,10 +112,10 @@ const PublicCompetitions: React.FC = () => {
         allowAll={false}
       />
 
-      {!competition ? (
+      {scope.isLoading ? <MatchLoader /> : !competition ? (
         <EmptyState
           variant="table"
-          title="Todavía no hay competiciones"
+          title={`Todavía no hay competiciones de ${AGE_GROUP_LABELS[ageGroup].toLowerCase()}`}
           description="Cuando arranque la edición vas a ver aquí las tablas de cada torneo."
         />
       ) : (

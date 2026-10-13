@@ -88,6 +88,7 @@ const AdminUsers: React.FC = () => {
 
   const [passwordFor, setPasswordFor] = useState<ManagedUser | null>(null);
   const [newPassword, setNewPassword] = useState('');
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<ManagedUser | null>(null);
 
   /*
@@ -168,13 +169,14 @@ const AdminUsers: React.FC = () => {
 
   const submitPassword = async () => {
     if (!passwordFor) return;
+    setPasswordError(null);
     try {
       await setPassword.mutateAsync({ id: passwordFor.id, password: newPassword });
       toast.success(`Contraseña nueva para ${passwordFor.username}`);
       setPasswordFor(null);
       setNewPassword('');
     } catch (e) {
-      toast.error(extractErrorMessage(e));
+      setPasswordError(extractErrorMessage(e));
     }
   };
 
@@ -273,6 +275,7 @@ const AdminUsers: React.FC = () => {
       icon: <KeyRounded fontSize="small" />,
       onClick: (u) => {
         setNewPassword('');
+        setPasswordError(null);
         setPasswordFor(u);
       },
     },
@@ -360,7 +363,7 @@ const AdminUsers: React.FC = () => {
               type={showPwd ? 'text' : 'password'}
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
-              helperText="Mínimo 6 caracteres."
+              helperText="Mínimo 12 caracteres."
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -432,8 +435,9 @@ const AdminUsers: React.FC = () => {
             fullWidth
             type={showPwd ? 'text' : 'password'}
             value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            helperText="Mínimo 6 caracteres."
+            onChange={(e) => { setNewPassword(e.target.value); setPasswordError(null); }}
+            error={!!passwordError}
+            helperText={passwordError || 'Mínimo 12 caracteres.'}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -449,7 +453,7 @@ const AdminUsers: React.FC = () => {
             <SaveButton
              
               onClick={submitPassword}
-              loading={setPassword.isPending} error={setPassword.isError} disabled={newPassword.length < 6}
+              loading={setPassword.isPending} error={setPassword.isError} disabled={!newPassword}
             >
               Guardar contraseña
             </SaveButton>

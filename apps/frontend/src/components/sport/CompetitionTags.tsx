@@ -9,7 +9,7 @@ interface Props {
 }
 
 /**
- * Etiquetas de un torneo: división, copa, menores, gremial, categoría y edades.
+ * Etiquetas de un torneo: división, copa, menores, gremial y edades.
  * Es lo que le dice al visitante en qué está mirando.
  */
 export const CompetitionTags: React.FC<Props> = ({ competition, onDark = false, max }) => {

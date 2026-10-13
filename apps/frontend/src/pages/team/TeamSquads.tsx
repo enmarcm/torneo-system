@@ -1,97 +1,80 @@
-import { Box, Card, Stack, Typography, FormControl, InputLabel, Select, MenuItem, Button, TextField, Chip, Avatar } from '@mui/material';
-import { SaveButton } from '@/components/ui/SaveButton';
-import { AddRounded } from '@mui/icons-material';
 import { useState } from 'react';
+import { Box, Button, Card, Chip, Divider, Grid2 as Grid, Stack, Typography, TextField, MenuItem } from '@mui/material';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useTeamsQuery, usePlayersQuery, useCompetitionsQuery } from '@/hooks/queries';
-import { useAddRoster } from '@/hooks/mutations';
+import { useTeamRegistrationsQuery } from '@/hooks/queries';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { calcAge } from '@/utils/formatDate';
-import { extractErrorMessage } from '@/api/axios';
-import { useToast } from '@/hooks/common/useToast';
-import { getCompetitionShortLabel } from '@/utils/competitionMeta';
+import { AppDrawer } from '@/components/ui/AppDrawer';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { LoadingState } from '@/components/ui/LoadingState';
+import { StatusBadge } from '@/components/ui/StatusBadge';
+import { CompetitionSectionTabs } from '@/components/sport/CompetitionSectionTabs';
+import { RosterEditor } from '@/components/sport/RosterEditor';
+import { getCompetitionAgeGroup, getCompetitionShortLabel, getCompetitionSubtitle, sortCompetitions } from '@/utils/competitionMeta';
+import { canManageRoster, getVisibleTeamRegistrations, getTeamCompetitions } from '@/utils/teamRegistrations';
+import type { Competition } from '@/api/competitions.api';
 
 const TeamSquads: React.FC = () => {
-  const user = useAuthStore((s) => s.user);
-  const { data: teams = [] } = useTeamsQuery();
-  const { data: players = [] } = usePlayersQuery();
-  const { data: comps = [] } = useCompetitionsQuery();
-  const team = teams.find((t) => t.id === user?.teamId);
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ registrationId: '', playerId: '', jerseyNumber: '' });
-  const toast = useToast();
-  const add = useAddRoster();
-
-  const submit = async () => {
-    try {
-      await add.mutateAsync({
-        registrationId: form.registrationId,
-        data: { playerId: form.playerId, jerseyNumber: form.jerseyNumber ? Number(form.jerseyNumber) : undefined },
-      });
-      setOpen(false);
-      setForm({ registrationId: '', playerId: '', jerseyNumber: '' });
-      toast.success('Jugador agregado a la plantilla');
-    } catch (e) {
-      toast.error(extractErrorMessage(e));
-    }
-  };
+  const teamId = useAuthStore((state) => state.user?.teamId);
+  const { data: registrations = [], isLoading, error, refetch } = useTeamRegistrationsQuery(teamId ?? undefined, true);
+  const [pickedAgeGroup, setAgeGroup] = useState<Competition['ageGroup'] | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const displayedRegistrations = getVisibleTeamRegistrations(registrations, showHistory);
+  const selected = displayedRegistrations.find((registration) => registration.id === selectedId);
+  const competitions = getTeamCompetitions(displayedRegistrations);
+  const ageGroup = pickedAgeGroup ?? (competitions.some((competition) => getCompetitionAgeGroup(competition) === 'ADULT') ? 'ADULT' : 'YOUTH');
+  const visible = sortCompetitions(competitions.filter((competition) => getCompetitionAgeGroup(competition) === ageGroup));
 
   return (
     <Box>
-      <PageHeader
-        title="Plantillas"
-        subtitle={`Gestiona la plantilla de ${team?.name ?? 'tu equipo'}`}
-        action={<Button variant="contained" startIcon={<AddRounded />} onClick={() => setOpen(true)}>Agregar jugador</Button>}
-      />
-      <Card sx={{ p: 3 }}>
-        {team ? (
-          <Typography color="text.secondary">
-            Tus inscripciones aparecerán aquí. Selecciona una inscripción y agrega jugadores respetando edad y cupo.
-          </Typography>
-        ) : (
-          <Typography color="text.secondary">No tienes equipo asignado.</Typography>
-        )}
-      </Card>
-
-      {open && (
-        <Box sx={{ position: 'fixed', inset: 0, bgcolor: 'rgba(0,0,0,0.4)', display: 'grid', placeItems: 'center', zIndex: 1300, p: 2 }} onClick={() => setOpen(false)}>
-          <Card sx={{ width: '100%', maxWidth: 460, p: 3 }} onClick={(e) => e.stopPropagation()}>
-            <Typography variant="h3" sx={{ mb: 2 }}>Agregar jugador a la plantilla</Typography>
-            <Stack spacing={2}>
-              <FormControl fullWidth>
-                <InputLabel>Competición</InputLabel>
-                <Select label="Competición" value={form.registrationId} onChange={(e) => setForm({ ...form, registrationId: e.target.value as string })}>
-                  {/* Las divisiones comparten nombre: sin la división, todas dicen lo mismo. */}
-              {comps.map((c) => (
-                <MenuItem key={c.id} value={c.id}>
-                  {getCompetitionShortLabel(c)}
-                </MenuItem>
-              ))}
-                </Select>
-              </FormControl>
-              <FormControl fullWidth>
-                <InputLabel>Jugador</InputLabel>
-                <Select label="Jugador" value={form.playerId} onChange={(e) => setForm({ ...form, playerId: e.target.value as string })}>
-                  {players.map((p) => (
-                    <MenuItem key={p.id} value={p.id}>
-                      {p.firstName} {p.lastName} ({calcAge(p.birthDate)} años)
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <TextField label="Número de camiseta (opcional)" type="number" fullWidth value={form.jerseyNumber} onChange={(e) => setForm({ ...form, jerseyNumber: e.target.value })} />
-              <Stack direction="row" spacing={1.5} justifyContent="flex-end">
-                <Button onClick={() => setOpen(false)}>Cancelar</Button>
-                <SaveButton onClick={submit} loading={add.isPending} error={add.isError} disabled={!form.registrationId || !form.playerId}>
-                  {add.isPending ? 'Agregando…' : 'Agregar'}
-                </SaveButton>
-              </Stack>
-            </Stack>
-          </Card>
-        </Box>
-      )}
+      <PageHeader title="Mis torneos" subtitle="El administrador inscribe a tu equipo. Aquí agregas jugadores y gestionas una plantilla independiente para cada torneo." />
+      {!teamId ? <EmptyState title="No tienes equipo asignado" description="Contacta al administrador para vincular tu cuenta de delegado con un equipo." />
+        : isLoading ? <LoadingState rows={3} />
+        : error ? <ErrorState onRetry={() => void refetch()} />
+        : registrations.length === 0 ? <EmptyState title="Tu equipo aún no está inscrito en torneos" description="Cuando el administrador inscriba a tu equipo, el torneo aparecerá aquí para que agregues jugadores." />
+        : <>
+          <TextField select size="small" label="Inscripciones" value={showHistory ? 'all' : 'current'} sx={{ mb: 2, minWidth: 240 }} onChange={(event) => { setShowHistory(event.target.value === 'all'); setSelectedId(null); }}>
+            <MenuItem value="current">Torneos actuales</MenuItem>
+            <MenuItem value="all">Todas, incluido el historial</MenuItem>
+          </TextField>
+          <CompetitionSectionTabs value={ageGroup} onChange={setAgeGroup} competitions={competitions} />
+          {visible.length === 0 ? <EmptyState title={showHistory ? 'No hay inscripciones en este apartado' : 'No hay torneos actuales en este apartado'} description="Aquí aparecen las inscripciones de tu equipo. Puedes consultar las anteriores seleccionando el historial." />
+            : <Grid container spacing={2}>
+              {visible.map((competition) => {
+                const registration = registrations.find((r) => r.competition.id === competition.id)!;
+                const editable = canManageRoster(registration);
+                const count = registration.roster.filter((entry) => entry.status === 'ACTIVE').length;
+                return <Grid key={registration.id} size={{ xs: 12, md: 6 }}>
+                  <Card sx={{ p: { xs: 2, sm: 3 } }}>
+                    <Typography variant="h4" sx={{ overflowWrap: 'anywhere', mb: 1 }}>{getCompetitionShortLabel(competition)}</Typography>
+                    <Typography variant="body2" color="text.secondary">{getCompetitionSubtitle(competition)}</Typography>
+                    {competition.edition && <Typography variant="body2" color="text.secondary">{competition.edition.name} · {competition.edition.year}</Typography>}
+                    <Stack direction="row" spacing={1} sx={{ my: 2 }} flexWrap="wrap" useFlexGap>
+                      <Chip size="small" label={`${count}/${competition.maxPlayers} jugadores`} variant="outlined" />
+                      <StatusBadge status={competition.status} />
+                      {!editable && <Chip size="small" label="Solo consulta" variant="outlined" />}
+                    </Stack>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+                      {competition.ageMin != null ? `Desde ${competition.ageMin} años` : 'Sin edad mínima'}{competition.ageMax != null ? ` · Hasta ${competition.ageMax} años` : ''}
+                    </Typography>
+                    <Button variant={editable ? 'contained' : 'outlined'} onClick={() => setSelectedId(registration.id)}>{editable ? 'Gestionar jugadores' : 'Ver plantilla'}</Button>
+                  </Card>
+                </Grid>;
+              })}
+            </Grid>}
+        </>}
+      <AppDrawer open={!!selected} onClose={() => setSelectedId(null)} title={selected ? getCompetitionShortLabel(selected.competition) : 'Plantilla'} subtitle="Plantilla de tu equipo en este torneo." width={560}>
+        {selected && (canManageRoster(selected)
+          ? <RosterEditor key={selected.id} registrationId={selected.id} maxPlayers={selected.competition.maxPlayers} canApproveEligibility={false} allowCreatePlayer />
+          : <Stack divider={<Divider />} spacing={1}>
+            {selected.roster.length === 0 && <Typography color="text.secondary">Esta plantilla no tiene jugadores.</Typography>}
+            {selected.roster.map((entry) => <Stack key={entry.id} direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
+              <Typography>{entry.player.firstName} {entry.player.lastName}</Typography><StatusBadge status={entry.status} />
+            </Stack>)}
+          </Stack>)}
+      </AppDrawer>
     </Box>
   );
 };
-
 export default TeamSquads;

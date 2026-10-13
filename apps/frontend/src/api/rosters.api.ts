@@ -1,4 +1,7 @@
 import { api } from './axios';
+import type { Player } from './players.api';
+
+export type CreateRosterPlayerInput = Pick<Player, 'documentType' | 'documentNumber' | 'firstName' | 'lastName' | 'birthDate' | 'photoUrl' | 'identityPhotoKey'> & { jerseyNumber?: number };
 
 export interface RosterEntry {
   id: string;
@@ -54,6 +57,8 @@ export interface ImportPreviousResult {
 }
 
 export const rostersApi = {
+  createPlayer: async (registrationId: string, data: CreateRosterPlayerInput): Promise<RosterEntry> =>
+    (await api.post(`/registrations/${registrationId}/roster/players`, data)).data.data,
   previous: async (registrationId: string): Promise<PreviousRoster | null> =>
     (await api.get(`/registrations/${registrationId}/roster/previous`)).data.data,
   importPrevious: async (registrationId: string): Promise<ImportPreviousResult> =>

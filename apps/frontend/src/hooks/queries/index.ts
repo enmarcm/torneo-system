@@ -1,6 +1,5 @@
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import { editionsApi, type Edition } from '@/api/editions.api';
-import { categoriesApi, type Category } from '@/api/categories.api';
 import { competitionsApi, type Competition } from '@/api/competitions.api';
 import { teamsApi, type Team, type TeamRegistrationWithRoster, type TeamStats, type TeamRosterEntry } from '@/api/teams.api';
 import { playersApi, type Player } from '@/api/players.api';
@@ -29,9 +28,6 @@ export const useEditionsQuery = (options?: UseQueryOptions<Edition[]>) =>
 export const useEditionQuery = (id: string) =>
   useQuery({ queryKey: ['editions', id], queryFn: () => editionsApi.get(id), enabled: !!id, staleTime: REF_STALE });
 
-export const useCategoriesQuery = (options?: UseQueryOptions<Category[]>) =>
-  useQuery({ queryKey: ['categories'], queryFn: categoriesApi.list, staleTime: REF_STALE, ...options });
-
 export const useCompetitionsQuery = (editionId?: string) =>
   useQuery({ queryKey: ['competitions', editionId], queryFn: () => competitionsApi.list(editionId), staleTime: REF_STALE });
 
@@ -44,20 +40,25 @@ export const useTeamsQuery = (options?: UseQueryOptions<Team[]>) =>
 export const useTeamQuery = (id: string) =>
   useQuery({ queryKey: ['teams', id], queryFn: () => teamsApi.get(id), enabled: !!id, staleTime: MID_STALE });
 
-export const useTeamRegistrationsQuery = (teamId?: string) =>
+export const useTeamRegistrationsQuery = (teamId?: string, live = false) =>
   useQuery({
     queryKey: ['teams', teamId, 'registrations'],
     queryFn: () => teamsApi.getRegistrations(teamId!),
     enabled: !!teamId,
-    staleTime: MID_STALE,
+    staleTime: live ? 0 : MID_STALE,
+    refetchOnMount: live ? 'always' : true,
+    refetchOnWindowFocus: live,
+    refetchInterval: live ? 30000 : false,
   });
 
-export const useTeamHistoryQuery = (teamId?: string) =>
+export const useTeamHistoryQuery = (teamId?: string, live = false) =>
   useQuery({
     queryKey: ['teams', teamId, 'history'],
     queryFn: () => teamsApi.getHistory(teamId!),
     enabled: !!teamId,
-    staleTime: MID_STALE,
+    staleTime: live ? 0 : MID_STALE,
+    refetchOnWindowFocus: live,
+    refetchInterval: live ? 30000 : false,
   });
 
 export const useTeamStatsQuery = (teamId?: string) =>
@@ -92,12 +93,15 @@ export const usePreviousRosterQuery = (registrationId: string, enabled = true) =
     retry: false,
   });
 
-export const useRosterQuery = (registrationId: string) =>
+export const useRosterQuery = (registrationId: string, live = false) =>
   useQuery({
     queryKey: ['roster', registrationId],
     queryFn: () => rostersApi.list(registrationId),
     enabled: !!registrationId,
-    staleTime: MID_STALE,
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+    refetchInterval: live ? 30000 : false,
   });
 
 export const useMatchesQuery = (competitionId?: string, status?: string) =>
@@ -282,4 +286,13 @@ export const useUsersQuery = (filters?: { role?: UserRole; q?: string }) =>
   useQuery({ queryKey: ['users', filters ?? {}], queryFn: () => usersApi.list(filters), staleTime: MID_STALE });
 
 // Re-export common types used in pages
-export type { Edition, Category, Competition, Team, Player, RosterEntry, Match, StandingRow, Ad, Article, DashboardMetrics, TeamRegistrationWithRoster, TeamStats, TeamRosterEntry, BracketRound, TeamBlock, ManagedUser };
+export type { Edition, Competition, Team, Player, RosterEntry, Match, StandingRow, Ad, Article, DashboardMetrics, TeamRegistrationWithRoster, TeamStats, TeamRosterEntry, BracketRound, TeamBlock, ManagedUser };
+
+
+export const useMatchAttendanceQuery = (matchId: string, enabled = true) =>
+  useQuery({
+    queryKey: ['match-attendance', matchId],
+    queryFn: () => matchesApi.attendance(matchId),
+    enabled: enabled && !!matchId,
+    staleTime: FRESH_STALE,
+  });

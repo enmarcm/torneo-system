@@ -1,13 +1,41 @@
 import sharp from 'sharp';
+import { prisma } from '@/lib/prisma';
+import { identityPhotoKeySchema } from '../players/players.schema';
 import { asyncHandler } from '@/utils/async-handler';
 import { ok } from '@/utils/http.util';
 import { AppError } from '@/utils/app-error';
-import { uploadObject, presignedGet, publicUrl } from '@/lib/minio';
+import { uploadObject, presignedGet, publicUrl, minioClient } from '@/lib/minio';
 import { env } from '@/config/env';
-import { IMAGE_MIME, DOC_MIME, MESSAGES, IMAGE_MAX_SIDE, IMAGE_WEBP_QUALITY } from '@/config/constants';
+import { IMAGE_MIME, DOC_MIME, MESSAGES, IMAGE_MAX_SIDE, IMAGE_WEBP_QUALITY, IDENTITY_IMAGE_MAX_SIDE, IDENTITY_IMAGE_QUALITY } from '@/config/constants';
 import { randomUUID } from 'crypto';
 
 export const uploadsController = {
+  identity: asyncHandler(async (req, res) => {
+    const file = (req as unknown as { file?: Express.Multer.File }).file;
+    if (!file) throw new AppError(400, 'Archivo requerido', 'NO_FILE');
+    if (!IMAGE_MIME.includes(file.mimetype)) throw new AppError(415, MESSAGES.invalidFileType, 'BAD_TYPE');
+    let buffer: Buffer;
+    try {
+      buffer = await sharp(file.buffer).rotate().resize({ width: IDENTITY_IMAGE_MAX_SIDE, height: IDENTITY_IMAGE_MAX_SIDE, fit: 'inside', withoutEnlargement: true }).webp({ quality: IDENTITY_IMAGE_QUALITY }).toBuffer();
+    } catch { throw new AppError(415, MESSAGES.invalidFileType, 'BAD_IMAGE'); }
+    const key = `identity/${req.user!.id}/${randomUUID()}.webp`;
+    await uploadObject(env.MINIO_PRIVATE_BUCKET, key, buffer, 'image/webp');
+    ok(res, { key }, 'Documento subido');
+  }),
+  identityImage: asyncHandler(async (req, res) => {
+    const key = identityPhotoKeySchema.parse(req.params.key);
+    if (req.user!.role !== 'ADMIN') {
+      const player = await prisma.player.findFirst({ where: { identityPhotoKey: key }, select: { rosterEntries: { select: { teamRegistration: { select: { teamId: true } } } } } });
+      const allowed = player
+        ? player.rosterEntries.some((entry) => entry.teamRegistration.teamId === req.user!.teamId)
+        : key.startsWith(`identity/${req.user!.id}/`);
+      if (!allowed) throw new AppError(403, MESSAGES.forbidden, 'FORBIDDEN');
+    }
+    const stream = await minioClient.getObject(env.MINIO_PRIVATE_BUCKET, key);
+    res.type('image/webp').set('Cache-Control', 'private, no-store').set('X-Content-Type-Options', 'nosniff');
+    stream.on('error', (error) => res.destroy(error));
+    stream.pipe(res);
+  }),
   image: asyncHandler(async (req, res) => {
     const file = (req as unknown as { file?: Express.Multer.File }).file;
     if (!file) throw new AppError(400, 'Archivo requerido', 'NO_FILE');

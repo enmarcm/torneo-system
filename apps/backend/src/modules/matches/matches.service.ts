@@ -17,12 +17,11 @@ const competitionInclude = {
   select: {
     id: true,
     name: true,
-    kind: true,
+    kind: true, ageGroup: true,
     format: true,
     division: true,
     divisionLevel: true,
     editionId: true,
-    category: { select: { id: true, name: true } },
   },
 } as const;
 
@@ -136,7 +135,17 @@ export const matchesService = {
   },
 
   update: async (id: string, data: Partial<CreateMatchDto>) => {
-    const m = await prisma.match.update({ where: { id }, data, include: matchInclude });
+    const m = await prisma.$transaction(async (tx) => {
+      const current = await tx.match.findUnique({ where: { id } });
+      if (!current) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
+      const changedTeams = (['competitionId', 'homeRegistrationId', 'awayRegistrationId'] as const)
+        .some((field) => data[field] !== undefined && data[field] !== current[field]);
+      const updated = await tx.match.update({
+        where: { id }, data: { ...data, ...(changedTeams ? { attendanceUpdatedAt: null } : {}) }, include: matchInclude,
+      });
+      if (changedTeams) await tx.matchAttendance.deleteMany({ where: { matchId: id } });
+      return updated;
+    });
     emitMatchUpdate({
       matchId: id,
       status: m.status,

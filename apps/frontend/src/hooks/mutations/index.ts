@@ -1,13 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { editionsApi, type Edition } from '@/api/editions.api';
-import { categoriesApi, type Category } from '@/api/categories.api';
 import { competitionsApi, fixturesApi, type Competition } from '@/api/competitions.api';
 import { knockoutApi } from '@/api/knockout.api';
 import { teamBlocksApi } from '@/api/team-blocks.api';
 import { teamsApi, type Team } from '@/api/teams.api';
 import { playersApi, type Player } from '@/api/players.api';
-import { rostersApi, type RosterEntry } from '@/api/rosters.api';
-import { matchesApi, matchEventsApi, type Match } from '@/api/matches.api';
+import { rostersApi, type RosterEntry, type CreateRosterPlayerInput } from '@/api/rosters.api';
+import { matchesApi, matchEventsApi, type Match, type AttendanceEntry } from '@/api/matches.api';
 import { adsApi, type Ad } from '@/api/ads.api';
 import { newsApi, type ArticlePayload } from '@/api/news.api';
 import { authApi } from '@/api/auth.api';
@@ -15,7 +14,7 @@ import { usersApi, type CreateUserPayload, type ManagedUser, type UpdateUserPayl
 import { useAuthStore } from '@/store/useAuthStore';
 
 const invalidate = (qc: ReturnType<typeof useQueryClient>, keys: string[][]) => {
-  keys.forEach((k) => qc.invalidateQueries({ queryKey: k }));
+  return Promise.all(keys.map((key) => qc.invalidateQueries({ queryKey: key })));
 };
 
 export const useLoginMutation = () => {
@@ -100,28 +99,6 @@ export const useSetEditionStatus = () => {
     onSuccess: () => invalidate(qc, [['editions'], ['public', 'editions']]),
   });
 };
-export const useCreateCategory = () => {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: categoriesApi.create,
-    onSuccess: () => invalidate(qc, [['categories']]),
-  });
-};
-export const useUpdateCategory = () => {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Category> }) => categoriesApi.update(id, data),
-    onSuccess: () => invalidate(qc, [['categories']]),
-  });
-};
-export const useDeleteCategory = () => {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: categoriesApi.remove,
-    onSuccess: () => invalidate(qc, [['categories']]),
-  });
-};
-
 export const useCreateCompetition = () => {
   const qc = useQueryClient();
   return useMutation({
@@ -169,7 +146,7 @@ export const useRegisterTeam = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, competitionId }: { id: string; competitionId: string }) => teamsApi.register(id, competitionId),
-    onSuccess: () => invalidate(qc, [['teams'], ['competitions'], ['public', 'teams'], ['public', 'competitions']]),
+    onSuccess: () => invalidate(qc, [['teams'], ['competitions'], ['public', 'teams'], ['public', 'competitions'], ['public', 'registrations']]),
   });
 };
 
@@ -208,7 +185,7 @@ export const useAddRoster = () => {
   return useMutation({
     mutationFn: ({ registrationId, data }: { registrationId: string; data: { playerId: string; jerseyNumber?: number } }) =>
       rostersApi.add(registrationId, data),
-    onSuccess: (_d, vars) => invalidate(qc, [['roster', vars.registrationId], ['teams']]),
+    onSuccess: (_d, vars) => invalidate(qc, [['roster', vars.registrationId], ['teams'], ['match-attendance']]),
   });
 };
 /** Copia la plantilla del torneo anterior a esta inscripción. */
@@ -225,7 +202,7 @@ export const useUpdateRoster = () => {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: { jerseyNumber?: number; status?: 'ACTIVE' | 'INACTIVE' } }) =>
       rostersApi.update(id, data),
-    onSuccess: () => invalidate(qc, [['roster'], ['teams']]),
+    onSuccess: () => invalidate(qc, [['roster'], ['teams'], ['match-attendance']]),
   });
 };
 export const useSetEligibility = () => {
@@ -239,7 +216,7 @@ export const useRemoveRoster = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: rostersApi.remove,
-    onSuccess: () => invalidate(qc, [['roster'], ['teams']]),
+    onSuccess: () => invalidate(qc, [['roster'], ['teams'], ['match-attendance']]),
   });
 };
 
@@ -247,21 +224,21 @@ export const useCreateMatch = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: matchesApi.create,
-    onSuccess: () => invalidate(qc, [['matches'], ['public', 'matches'], ['dashboard']]),
+    onSuccess: () => invalidate(qc, [['matches'], ['public', 'matches'], ['dashboard'], ['match-attendance']]),
   });
 };
 export const useUpdateMatch = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<Match> }) => matchesApi.update(id, data),
-    onSuccess: () => invalidate(qc, [['matches'], ['public', 'matches'], ['dashboard']]),
+    onSuccess: () => invalidate(qc, [['matches'], ['public', 'matches'], ['dashboard'], ['match-attendance']]),
   });
 };
 export const useStartMatch = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: matchesApi.start,
-    onSuccess: () => invalidate(qc, [['matches'], ['public', 'matches'], ['dashboard']]),
+    onSuccess: () => invalidate(qc, [['matches'], ['public', 'matches'], ['dashboard'], ['match-attendance']]),
   });
 };
 export const useFinishMatch = () => {
@@ -275,7 +252,7 @@ export const useDeleteMatch = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: matchesApi.remove,
-    onSuccess: () => invalidate(qc, [['matches'], ['public', 'matches'], ['dashboard']]),
+    onSuccess: () => invalidate(qc, [['matches'], ['public', 'matches'], ['dashboard'], ['match-attendance']]),
   });
 };
 /** Asigna día y hora a un partido que salió del sorteo sin fecha. */
@@ -289,7 +266,7 @@ export const useScheduleMatch = () => {
       id: string;
       data: { scheduledAt: string | null; venue?: string | null };
     }) => matchesApi.schedule(id, data),
-    onSuccess: () => invalidate(qc, [['matches'], ['public', 'matches'], ['dashboard']]),
+    onSuccess: () => invalidate(qc, [['matches'], ['public', 'matches'], ['dashboard'], ['match-attendance']]),
   });
 };
 export const useSetMatchMvp = () => {
@@ -516,5 +493,25 @@ export const useDeleteArticle = () => {
   return useMutation({
     mutationFn: newsApi.remove,
     onSuccess: () => invalidate(qc, NEWS_KEYS),
+  });
+};
+
+
+export const useSetMatchAttendance = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, entries }: { id: string; entries: AttendanceEntry[] }) => matchesApi.setAttendance(id, entries),
+    onSuccess: (sheet, { id }) => {
+      qc.setQueryData(['match-attendance', id], sheet);
+    },
+  });
+};
+
+
+export const useCreateRosterPlayer = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ registrationId, data }: { registrationId: string; data: CreateRosterPlayerInput }) => rostersApi.createPlayer(registrationId, data),
+    onSuccess: (_entry, { registrationId }) => invalidate(qc, [['roster', registrationId], ['teams'], ['players'], ['match-attendance']]),
   });
 };

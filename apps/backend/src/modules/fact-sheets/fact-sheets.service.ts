@@ -55,7 +55,8 @@ const FORMAT_LABEL: Record<CompetitionFormat, string> = {
 };
 
 const KIND_LABEL: Record<CompetitionKind, string> = {
-  LEAGUE_DIVISION: 'División de liga',
+  LEAGUE_DIVISION: 'Liga con divisiones',
+  STANDALONE_LEAGUE: 'Liga sin divisiones',
   CUP: 'Copa',
   YOUTH: 'Juvenil',
   SPECIAL: 'Torneo especial',
@@ -161,7 +162,7 @@ const topScorers = async (filter: ScorerFilter, take: number) => {
 const competitionSheet = async (competitionId: string): Promise<FactSheet> => {
   const competition = await prisma.competition.findUnique({
     where: { id: competitionId },
-    include: { edition: true, category: true, _count: { select: { registrations: true } } },
+    include: { edition: true, _count: { select: { registrations: true } } },
   });
   if (!competition) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
 
@@ -175,7 +176,6 @@ const competitionSheet = async (competitionId: string): Promise<FactSheet> => {
 
   const facts: SheetFact[] = [
     { label: 'Edición', value: `${competition.edition.name} · ${competition.edition.year}` },
-    { label: 'Categoría', value: competition.category.name },
     { label: 'Formato', value: FORMAT_LABEL[competition.format] },
     { label: 'Tipo', value: KIND_LABEL[competition.kind] },
     { label: 'Estado', value: STATUS_LABEL[competition.status] ?? competition.status },
@@ -189,7 +189,7 @@ const competitionSheet = async (competitionId: string): Promise<FactSheet> => {
     subject: {
       id: competition.id,
       name: competition.name,
-      subtitle: `${competition.category.name} · ${competition.edition.year}`,
+      subtitle: `${competition.edition.year}`,
       imageUrl: competition.imageUrl,
     },
     facts,
@@ -236,7 +236,7 @@ const editionSheet = async (editionId: string): Promise<FactSheet> => {
     where: { id: editionId },
     include: {
       competitions: {
-        include: { category: true, _count: { select: { registrations: true } } },
+        include: { _count: { select: { registrations: true } } },
         orderBy: [{ divisionLevel: 'asc' }, { name: 'asc' }],
       },
     },
@@ -294,10 +294,9 @@ const editionSheet = async (editionId: string): Promise<FactSheet> => {
     tables: [
       {
         title: 'Competiciones de la edición',
-        columns: ['Torneo', 'Categoría', 'Equipos', 'Partidos', 'Campeón'],
+        columns: ['Torneo', 'Equipos', 'Partidos', 'Campeón'],
         rows: perCompetition.map((p) => [
           p.competition.name,
-          p.competition.category.name,
           p.competition._count.registrations,
           p.totals.played,
           p.champion?.teamName ?? '—',
@@ -332,7 +331,7 @@ const teamSheet = async (teamId: string, year?: number | null): Promise<FactShee
       teamId,
       ...(year ? { competition: { edition: { year } } } : {}),
     },
-    include: { competition: { include: { edition: true, category: true } } },
+    include: { competition: { include: { edition: true } } },
   });
 
   // Una sola consulta de tabla por competición, aunque haya varias inscripciones.

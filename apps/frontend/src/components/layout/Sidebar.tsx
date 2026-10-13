@@ -6,7 +6,6 @@ import { motion } from 'framer-motion';
 import {
   GridViewRounded,
   EmojiEventsRounded,
-  CategoryRounded,
   SportsSoccerRounded,
   GroupsRounded,
   PersonRounded,
@@ -44,7 +43,6 @@ const SCORING: UserRole[] = ['ADMIN', 'SCOREKEEPER'];
 const NAV: NavItem[] = [
   { label: 'Dashboard', icon: <GridViewRounded />, to: ROUTES.admin.dashboard, roles: ADMIN_ONLY },
   { label: 'Ediciones', icon: <EmojiEventsRounded />, to: ROUTES.admin.editions, roles: ADMIN_ONLY },
-  { label: 'Categorías', icon: <CategoryRounded />, to: ROUTES.admin.categories, roles: ADMIN_ONLY },
   { label: 'Competiciones', icon: <SportsSoccerRounded />, to: ROUTES.admin.competitions, roles: ADMIN_ONLY },
   { label: 'Equipos', icon: <GroupsRounded />, to: ROUTES.admin.teams, roles: ADMIN_ONLY },
   { label: 'Bloqueos', icon: <BlockRounded />, to: ROUTES.admin.teamBlocks, roles: ADMIN_ONLY },

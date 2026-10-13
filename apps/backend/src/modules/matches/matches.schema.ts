@@ -28,3 +28,15 @@ export const setMvpSchema = z.object({
 });
 
 export type CreateMatchDto = z.infer<typeof createMatchSchema>;
+
+
+export const setAttendanceSchema = z.object({
+  entries: z.array(z.object({
+    rosterEntryId: z.string().uuid(),
+    present: z.boolean(),
+  }).strict()).max(1000).refine(
+    (entries) => new Set(entries.map((entry) => entry.rosterEntryId)).size === entries.length,
+    'No se puede repetir un jugador en la asistencia',
+  ),
+}).strict();
+export type SetAttendanceDto = z.infer<typeof setAttendanceSchema>;

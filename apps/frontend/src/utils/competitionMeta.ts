@@ -8,13 +8,18 @@ import { getDivisionLabel } from './statusLabels';
 export interface CompetitionLike {
   name: string;
   kind?: Competition['kind'] | null;
+  ageGroup?: Competition['ageGroup'] | null;
   format?: Competition['format'] | null;
   division?: string | null;
   divisionLevel?: number | null;
   ageMin?: number | null;
   ageMax?: number | null;
-  category?: { id: string; name: string } | null;
 }
+
+export const getCompetitionAgeGroup = (c: CompetitionLike): Competition['ageGroup'] =>
+  c.ageGroup ?? (c.kind === 'YOUTH' ? 'YOUTH' : 'ADULT');
+
+export const AGE_GROUP_LABELS: Record<Competition['ageGroup'], string> = { ADULT: 'Adultos', YOUTH: 'Menores' };
 
 export type TagColor = 'primary' | 'secondary' | 'info' | 'warning' | 'default';
 
@@ -26,13 +31,15 @@ export interface CompetitionTag {
 /** Orden en que se presentan los torneos al público: liga, copa, menores y especiales. */
 const KIND_ORDER: Record<NonNullable<Competition['kind']>, number> = {
   LEAGUE_DIVISION: 0,
-  CUP: 1,
-  YOUTH: 2,
-  SPECIAL: 3,
+  STANDALONE_LEAGUE: 1,
+  CUP: 2,
+  YOUTH: 3,
+  SPECIAL: 4,
 };
 
 const KIND_TAG: Record<NonNullable<Competition['kind']>, CompetitionTag> = {
   LEAGUE_DIVISION: { label: 'Liga', color: 'primary' },
+  STANDALONE_LEAGUE: { label: 'Liga sin divisiones', color: 'primary' },
   CUP: { label: 'Copa', color: 'secondary' },
   YOUTH: { label: 'Menores', color: 'info' },
   SPECIAL: { label: 'Torneo especial', color: 'warning' },
@@ -48,7 +55,7 @@ const normalize = (v: string) =>
 /**
  * Etiquetas con las que se identifica un torneo en la parte pública: si es una
  * división de la liga (y cuál), si es la copa, si es de menores o un torneo
- * especial como el gremial, más la categoría cuando aporta.
+ * especial como el gremial.
  *
  * El rango de edad queda fuera a propósito: es una regla de inscripción que le
  * sirve al administrador, no algo que el visitante necesite leer en cada tarjeta.
@@ -64,16 +71,12 @@ export const getCompetitionTags = (c: CompetitionLike): CompetitionTag[] => {
     if (c.division) tags.push({ label: c.division, color: 'default' });
   }
 
-  const category = c.category?.name;
-  if (category && normalize(category) !== normalize(c.name)) {
-    tags.push({ label: category, color: 'default' });
-  }
-
   // Solo se aclara el formato cuando no se deduce del tipo de torneo.
   if (c.format === 'GROUPS_KNOCKOUT' && c.kind !== 'CUP') {
     tags.push({ label: 'Grupos y eliminatoria', color: 'default' });
   }
 
+  if (c.ageGroup) tags.push({ label: AGE_GROUP_LABELS[c.ageGroup], color: 'default' });
   return tags;
 };
 
@@ -96,6 +99,8 @@ export const getCompetitionShortLabel = (c: CompetitionLike): string => {
 /** Liga (por división) → copa → menores → especiales, y dentro de cada una por nombre. */
 export const sortCompetitions = <T extends CompetitionLike>(list: T[]): T[] =>
   [...list].sort((a, b) => {
+    const groupDiff = (getCompetitionAgeGroup(a) === 'ADULT' ? 0 : 1) - (getCompetitionAgeGroup(b) === 'ADULT' ? 0 : 1);
+    if (groupDiff) return groupDiff;
     const ka = a.kind ? KIND_ORDER[a.kind] : 99;
     const kb = b.kind ? KIND_ORDER[b.kind] : 99;
     if (ka !== kb) return ka - kb;

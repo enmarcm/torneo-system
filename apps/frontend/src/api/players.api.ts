@@ -9,6 +9,7 @@ export interface Player {
   birthDate: string;
   position: string | null;
   photoUrl: string | null;
+  identityPhotoKey: string | null;
   universityDegreeVerified: boolean;
   degreeDocUrl: string | null;
   status: 'ACTIVE' | 'INACTIVE';

@@ -4,7 +4,6 @@ export const ROUTES = {
     dashboard: '/admin',
     editions: '/admin/ediciones',
     editionDetail: '/admin/ediciones/:id',
-    categories: '/admin/categorias',
     competitions: '/admin/competiciones',
     competitionDetail: '/admin/competiciones/:id',
     teams: '/admin/equipos',

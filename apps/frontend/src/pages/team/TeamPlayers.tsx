@@ -15,6 +15,10 @@ import {
 } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/routes/routes';
+import { PlayerPhotoFields } from '@/components/sport/PlayerPhotoFields';
+import { NewRosterPlayer } from '@/components/sport/NewRosterPlayer';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatCard } from '@/components/ui/StatCard';
 import { DataTable, type DataTableAction, type DataTableColumn } from '@/components/ui/DataTable';
@@ -26,7 +30,7 @@ import { ErrorState } from '@/components/ui/ErrorState';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useTeamRegistrationsQuery } from '@/hooks/queries';
-import { useCreatePlayer, useUpdatePlayer, useSetPlayerStatus } from '@/hooks/mutations';
+import { useUpdatePlayer, useSetPlayerStatus } from '@/hooks/mutations';
 import { playersApi } from '@/api/players.api';
 import type { Player } from '@/api/players.api';
 import { extractErrorMessage } from '@/api/axios';
@@ -57,7 +61,7 @@ interface PlayerCompetition {
   id: string;
   teamRegistration: {
     team: { id: string; name: string; logoUrl: string | null };
-    competition: { id: string; name: string; category: { id: string; name: string } | null };
+    competition: { id: string; name: string; };
   };
   jerseyNumber: number | null;
   status: string;
@@ -77,20 +81,18 @@ const INITIAL_FORM = {
   firstName: '',
   lastName: '',
   birthDate: '',
+  photoUrl: '',
+  identityPhotoKey: '',
 };
 
 const TeamPlayers: React.FC = () => {
+  const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const teamId = user?.teamId;
-  const { data: registrations = [], isLoading, error, refetch } = useTeamRegistrationsQuery(teamId ?? undefined);
+  const { data: registrations = [], isLoading, error, refetch } = useTeamRegistrationsQuery(teamId ?? undefined, true);
   const toast = useToast();
-  const createPlayer = useCreatePlayer();
   const updatePlayer = useUpdatePlayer();
   const setStatus = useSetPlayerStatus();
-
-  // Create drawer
-  const [createOpen, setCreateOpen] = useState(false);
-  const [createForm, setCreateForm] = useState(INITIAL_FORM);
 
   // Edit drawer
   const [editId, setEditId] = useState<string | null>(null);
@@ -100,6 +102,7 @@ const TeamPlayers: React.FC = () => {
     queryFn: () => playersApi.get(editId!),
     enabled: !!editId,
   });
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [editForm, setEditForm] = useState(INITIAL_FORM);
 
   useEffect(() => {
@@ -110,6 +113,8 @@ const TeamPlayers: React.FC = () => {
         firstName: editPlayer.firstName,
         lastName: editPlayer.lastName,
         birthDate: dayjs(editPlayer.birthDate).format('YYYY-MM-DD'),
+        photoUrl: editPlayer.photoUrl ?? '',
+        identityPhotoKey: editPlayer.identityPhotoKey ?? '',
       });
     }
   }, [editPlayer]);
@@ -164,20 +169,6 @@ const TeamPlayers: React.FC = () => {
     () => players.filter((p) => p.registrations.every((r) => r.entryStatus === 'INACTIVE')).length,
     [players],
   );
-
-  const handleCreate = async () => {
-    try {
-      await createPlayer.mutateAsync({
-        ...createForm,
-        birthDate: new Date(createForm.birthDate).toISOString(),
-      } as Partial<Player>);
-      setCreateOpen(false);
-      setCreateForm(INITIAL_FORM);
-      toast.success('Jugador creado');
-    } catch (e) {
-      toast.error(extractErrorMessage(e));
-    }
-  };
 
   const handleEdit = async () => {
     if (!editId) return;
@@ -271,11 +262,7 @@ const TeamPlayers: React.FC = () => {
       <PageHeader
         title="Jugadores"
         subtitle="Todos los jugadores registrados en las competiciones de tu equipo."
-        action={
-          <Button variant="contained" startIcon={<AddRounded />} onClick={() => setCreateOpen(true)}>
-            Nuevo jugador
-          </Button>
-        }
+        action={<NewRosterPlayer registrations={registrations} />}
       />
 
       <Grid container spacing={2} sx={{ mb: 3 }}>
@@ -296,10 +283,10 @@ const TeamPlayers: React.FC = () => {
           seats={5}
           filled={0}
           title="Tu plantilla está vacía"
-          description="Cargá al menos 5 jugadores para poder inscribir al equipo en una competición."
-          actionLabel="Agregar jugador"
+          description="El administrador inscribe a tu equipo en los torneos. Desde Mis torneos puedes agregar jugadores a cada plantilla."
+          actionLabel="Ir a mis torneos"
           actionIcon={<AddRounded />}
-          onAction={() => setCreateOpen(true)}
+          onAction={() => navigate(ROUTES.team.squads)}
         />
       ) : (
         <Card sx={{ p: { xs: 2, md: 3 } }}>
@@ -317,64 +304,10 @@ const TeamPlayers: React.FC = () => {
         </Card>
       )}
 
-      {/* Create Player Drawer */}
-      <AppDrawer
-        open={createOpen}
-        onClose={() => { setCreateOpen(false); setCreateForm(INITIAL_FORM); }}
-        title="Nuevo jugador"
-        subtitle="Registra un nuevo jugador en el sistema."
-      >
-        <Stack spacing={2}>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-            <TextField
-              select label="Tipo de documento" fullWidth
-              value={createForm.documentType}
-              onChange={(e) => setCreateForm({ ...createForm, documentType: e.target.value as 'CEDULA' | 'PARTIDA' })}
-            >
-              <MenuItem value="CEDULA">Cédula</MenuItem>
-              <MenuItem value="PARTIDA">Partida de nacimiento</MenuItem>
-            </TextField>
-            <TextField
-              label="Número de documento" fullWidth
-              value={createForm.documentNumber}
-              onChange={(e) => setCreateForm({ ...createForm, documentNumber: e.target.value })}
-            />
-          </Stack>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-            <TextField
-              label="Nombre" fullWidth
-              value={createForm.firstName}
-              onChange={(e) => setCreateForm({ ...createForm, firstName: e.target.value })}
-            />
-            <TextField
-              label="Apellido" fullWidth
-              value={createForm.lastName}
-              onChange={(e) => setCreateForm({ ...createForm, lastName: e.target.value })}
-            />
-          </Stack>
-          <TextField
-            label="Fecha de nacimiento" type="date" fullWidth
-            InputLabelProps={{ shrink: true }}
-            value={createForm.birthDate}
-            onChange={(e) => setCreateForm({ ...createForm, birthDate: e.target.value })}
-          />
-          <Stack direction="row" spacing={1.5} justifyContent="flex-end">
-            <Button onClick={() => { setCreateOpen(false); setCreateForm(INITIAL_FORM); }}>Cancelar</Button>
-            <SaveButton
-             
-              onClick={handleCreate}
-              loading={createPlayer.isPending} error={createPlayer.isError} disabled={!createForm.firstName || !createForm.lastName || !createForm.documentNumber || !createForm.birthDate}
-            >
-              {createPlayer.isPending ? 'Creando…' : 'Crear jugador'}
-            </SaveButton>
-          </Stack>
-        </Stack>
-      </AppDrawer>
-
       {/* Edit Player Drawer */}
       <AppDrawer
         open={editOpen}
-        onClose={() => { setEditOpen(false); setEditId(null); }}
+        onClose={() => { if (!uploadingPhotos && !updatePlayer.isPending) { setEditOpen(false); setEditId(null); } }}
         title="Editar jugador"
         subtitle={editPlayer ? `${editPlayer.firstName} ${editPlayer.lastName}` : 'Cargando…'}
       >
@@ -415,12 +348,13 @@ const TeamPlayers: React.FC = () => {
               value={editForm.birthDate}
               onChange={(e) => setEditForm({ ...editForm, birthDate: e.target.value })}
             />
+            <PlayerPhotoFields photoUrl={editForm.photoUrl} identityPhotoKey={editForm.identityPhotoKey} documentType={editForm.documentType} disabled={updatePlayer.isPending} onPhotoChange={(value) => setEditForm((current) => ({ ...current, photoUrl: value }))} onIdentityChange={(value) => setEditForm((current) => ({ ...current, identityPhotoKey: value }))} onBusyChange={setUploadingPhotos} />
             <Stack direction="row" spacing={1.5} justifyContent="flex-end">
-              <Button onClick={() => { setEditOpen(false); setEditId(null); }}>Cancelar</Button>
+              <Button disabled={uploadingPhotos || updatePlayer.isPending} onClick={() => { setEditOpen(false); setEditId(null); }}>Cancelar</Button>
               <SaveButton
                
                 onClick={handleEdit}
-                loading={updatePlayer.isPending} error={updatePlayer.isError} disabled={!editForm.firstName || !editForm.lastName || !editForm.documentNumber || !editForm.birthDate}
+                loading={updatePlayer.isPending} error={updatePlayer.isError} disabled={uploadingPhotos || !editForm.photoUrl || !editForm.identityPhotoKey || !editForm.firstName || !editForm.lastName || !editForm.documentNumber || !editForm.birthDate}
               >
                 {updatePlayer.isPending ? 'Guardando…' : 'Guardar cambios'}
               </SaveButton>
@@ -478,7 +412,6 @@ const TeamPlayers: React.FC = () => {
                     <TableHead>
                       <TableRow>
                         <TableCell sx={{ fontWeight: 600 }}>Competición</TableCell>
-                        <TableCell sx={{ fontWeight: 600 }}>Categoría</TableCell>
                         <TableCell sx={{ fontWeight: 600 }}>Equipo</TableCell>
                         <TableCell sx={{ fontWeight: 600 }}>#</TableCell>
                         <TableCell sx={{ fontWeight: 600 }}>Estado</TableCell>
@@ -495,11 +428,6 @@ const TeamPlayers: React.FC = () => {
                           <TableCell>
                             <Typography variant="body2" sx={{ fontWeight: 500 }}>
                               {pc.teamRegistration.competition.name}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body2" color="text.secondary">
-                              {pc.teamRegistration.competition.category?.name ?? '—'}
                             </Typography>
                           </TableCell>
                           <TableCell>

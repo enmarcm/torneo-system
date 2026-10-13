@@ -1,14 +1,15 @@
 import { Box, Stack, Typography, Button, Avatar, Chip, TextField, MenuItem } from '@mui/material';
+import { PlayerPhotoFields } from '@/components/sport/PlayerPhotoFields';
 import { SaveButton } from '@/components/ui/SaveButton';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { AddRounded, VerifiedRounded, VerifiedOutlined, PowerSettingsNewRounded, DeleteForeverRounded } from '@mui/icons-material';
+import { AddRounded, EditRounded, VerifiedRounded, VerifiedOutlined, PowerSettingsNewRounded, DeleteForeverRounded } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { DataTable, type DataTableColumn, type DataTableAction } from '@/components/ui/DataTable';
 import { AppDrawer } from '@/components/ui/AppDrawer';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { usePlayersQuery } from '@/hooks/queries';
-import { useCreatePlayer, useSetPlayerDegree, useSetPlayerStatus, useDeletePlayer } from '@/hooks/mutations';
+import { useCreatePlayer, useUpdatePlayer, useSetPlayerDegree, useSetPlayerStatus, useDeletePlayer } from '@/hooks/mutations';
 import type { Player } from '@/api/players.api';
 import { calcAge } from '@/utils/formatDate';
 import { extractErrorMessage } from '@/api/axios';
@@ -24,23 +25,26 @@ const AdminPlayers: React.FC = () => {
   const { data: players = [], isLoading, refetch, error } = usePlayersQuery(debouncedSearch);
   const toast = useToast();
   const create = useCreatePlayer();
+  const update = useUpdatePlayer();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const setStatus = useSetPlayerStatus();
   const setDegree = useSetPlayerDegree();
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ documentType: 'CEDULA' as 'CEDULA' | 'PARTIDA', documentNumber: '', firstName: '', lastName: '', birthDate: '' });
+  const [form, setForm] = useState({ documentType: 'CEDULA' as 'CEDULA' | 'PARTIDA', documentNumber: '', firstName: '', lastName: '', birthDate: '', photoUrl: '', identityPhotoKey: '' });
   const [deletingPlayer, setDeletingPlayer] = useState<Player | null>(null);
   const [purgingPlayer, setPurgingPlayer] = useState<Player | null>(null);
   const deletePlayer = useDeletePlayer();
 
   const submit = async () => {
     try {
-      await create.mutateAsync({
-        ...form,
-        birthDate: new Date(form.birthDate).toISOString(),
-      } as Partial<Player>);
+      const data = { ...form, birthDate: new Date(form.birthDate).toISOString() };
+      if (editingId) await update.mutateAsync({ id: editingId, data });
+      else await create.mutateAsync(data);
       setOpen(false);
-      setForm({ documentType: 'CEDULA', documentNumber: '', firstName: '', lastName: '', birthDate: '' });
-      toast.success('Jugador creado correctamente');
+      setForm({ documentType: 'CEDULA', documentNumber: '', firstName: '', lastName: '', birthDate: '', photoUrl: '', identityPhotoKey: '' });
+      setEditingId(null);
+      toast.success(editingId ? 'Jugador actualizado' : 'Jugador creado correctamente');
     } catch (e) {
       toast.error(extractErrorMessage(e));
     }
@@ -63,6 +67,9 @@ const AdminPlayers: React.FC = () => {
     { key: 'status', label: 'Estado', render: (r) => <StatusBadge status={r.status} /> },
   ];
   const actions: DataTableAction<Player>[] = [
+    { label: 'Editar jugador y fotos', icon: <EditRounded fontSize="small" />, onClick: (player) => {
+      setEditingId(player.id); setForm({ documentType: player.documentType, documentNumber: player.documentNumber, firstName: player.firstName, lastName: player.lastName, birthDate: player.birthDate.slice(0, 10), photoUrl: player.photoUrl ?? '', identityPhotoKey: player.identityPhotoKey ?? '' }); setOpen(true);
+    } },
     {
       label: (r) => (r.universityDegreeVerified ? 'Quitar verificación' : 'Verificar título'),
       icon: (r) =>
@@ -98,7 +105,7 @@ const AdminPlayers: React.FC = () => {
         title="Jugadores"
         subtitle="Registro único por documento. Un jugador puede estar en varias competiciones."
         search={{ value: search, onChange: setSearch, placeholder: 'Buscar por nombre o documento…' }}
-        action={<Button variant="contained" startIcon={<AddRounded />} onClick={() => setOpen(true)}>Nuevo jugador</Button>}
+        action={<Button variant="contained" startIcon={<AddRounded />} onClick={() => { setEditingId(null); setForm({ documentType: 'CEDULA', documentNumber: '', firstName: '', lastName: '', birthDate: '', photoUrl: '', identityPhotoKey: '' }); setOpen(true); }}>Nuevo jugador</Button>}
       />
       <DataTable
         columns={columns}
@@ -112,7 +119,7 @@ const AdminPlayers: React.FC = () => {
         emptyDescription="Crea el primer jugador para empezar."
       />
 
-      <AppDrawer open={open} onClose={() => setOpen(false)} title="Nuevo jugador">
+      <AppDrawer open={open} onClose={() => { if (!uploadingPhotos && !create.isPending && !update.isPending) setOpen(false); }} title={editingId ? 'Editar jugador' : 'Nuevo jugador'}>
         <Stack spacing={2}>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
             <TextField select label="Tipo" fullWidth value={form.documentType} onChange={(e) => setForm({ ...form, documentType: e.target.value as 'CEDULA' | 'PARTIDA' })}>
@@ -126,10 +133,11 @@ const AdminPlayers: React.FC = () => {
             <TextField label="Apellido" fullWidth value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
           </Stack>
           <TextField label="Fecha de nacimiento" type="date" fullWidth InputLabelProps={{ shrink: true }} value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} />
+          <PlayerPhotoFields photoUrl={form.photoUrl} identityPhotoKey={form.identityPhotoKey} documentType={form.documentType} disabled={create.isPending || update.isPending} onPhotoChange={(value) => setForm((current) => ({ ...current, photoUrl: value }))} onIdentityChange={(value) => setForm((current) => ({ ...current, identityPhotoKey: value }))} onBusyChange={setUploadingPhotos} />
           <Stack direction="row" spacing={1.5} justifyContent="flex-end">
-            <Button onClick={() => setOpen(false)}>Cancelar</Button>
-            <SaveButton onClick={submit} loading={create.isPending} error={create.isError} disabled={!form.firstName || !form.lastName || !form.documentNumber || !form.birthDate}>
-              {create.isPending ? 'Creando…' : 'Crear jugador'}
+            <Button disabled={uploadingPhotos || create.isPending || update.isPending} onClick={() => setOpen(false)}>Cancelar</Button>
+            <SaveButton onClick={submit} loading={create.isPending || update.isPending} error={create.isError || update.isError} disabled={uploadingPhotos || !form.photoUrl || !form.identityPhotoKey || !form.firstName || !form.lastName || !form.documentNumber || !form.birthDate}>
+              {editingId ? 'Guardar cambios' : 'Crear jugador'}
             </SaveButton>
           </Stack>
         </Stack>

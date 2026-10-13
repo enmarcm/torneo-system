@@ -16,5 +16,8 @@ export const uploadsRouter = Router();
 uploadsRouter.use(authMiddleware);
 const uploadLimit = rateLimit({ windowMs: 60 * 60 * 1000, max: 30, standardHeaders: true, legacyHeaders: false });
 uploadsRouter.post('/image', uploadLimit, upload.single('file'), uploadsController.image);
+const identityUploadLimit = rateLimit({ windowMs: 60 * 60 * 1000, max: 60, standardHeaders: true, legacyHeaders: false });
+uploadsRouter.post('/identity', requireRole('ADMIN', 'TEAM_LEADER'), identityUploadLimit, upload.single('file'), uploadsController.identity);
+uploadsRouter.get('/identity/:key/image', requireRole('ADMIN', 'TEAM_LEADER'), uploadsController.identityImage);
 uploadsRouter.post('/document', requireRole('ADMIN'), uploadLimit, upload.single('file'), uploadsController.document);
 uploadsRouter.get('/document/:key/url', requireRole('ADMIN'), uploadsController.documentUrl);

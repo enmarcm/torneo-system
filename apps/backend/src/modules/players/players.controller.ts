@@ -1,5 +1,6 @@
 import { asyncHandler } from '@/utils/async-handler';
 import { ok, created } from '@/utils/http.util';
+import { assertIdentityPhotoOwner } from './player-photos';
 import { playersService } from './players.service';
 
 export const playersController = {
@@ -10,10 +11,16 @@ export const playersController = {
     ok(res, await playersService.byDocument(req.query.type as 'CEDULA' | 'PARTIDA', req.query.number as string, req.user?.role === 'TEAM_LEADER' ? (req.user.teamId ?? '') : undefined)),
   ),
   get: asyncHandler(async (req, res) => ok(res, req.user?.role === 'TEAM_LEADER' ? await playersService.getForTeam(req.params.id, req.user.teamId!) : await playersService.get(req.params.id))),
-  create: asyncHandler(async (req, res) => created(res, await playersService.create(req.body))),
-  update: asyncHandler(async (req, res) =>
-    ok(res, req.user?.role === 'TEAM_LEADER' ? await playersService.updateForTeam(req.params.id, req.user.teamId!, req.body) : await playersService.update(req.params.id, req.body)),
-  ),
+  create: asyncHandler(async (req, res) => {
+    assertIdentityPhotoOwner(req.user!, req.body.identityPhotoKey);
+    created(res, await playersService.create(req.body));
+  }),
+  update: asyncHandler(async (req, res) => {
+    const current = req.user?.role === 'TEAM_LEADER'
+      ? await playersService.getForTeam(req.params.id, req.user.teamId!) : await playersService.get(req.params.id);
+    assertIdentityPhotoOwner(req.user!, req.body.identityPhotoKey, current.identityPhotoKey);
+    ok(res, req.user?.role === 'TEAM_LEADER' ? await playersService.updateForTeam(req.params.id, req.user.teamId!, req.body) : await playersService.update(req.params.id, req.body));
+  }),
   setStatus: asyncHandler(async (req, res) =>
     ok(res, req.user?.role === 'TEAM_LEADER' ? await playersService.setStatusForTeam(req.params.id, req.user.teamId!, req.body.status) : await playersService.setStatus(req.params.id, req.body.status)),
   ),

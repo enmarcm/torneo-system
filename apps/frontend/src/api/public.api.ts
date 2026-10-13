@@ -70,7 +70,6 @@ export interface PublicPlayerProfile {
       format: Competition['format'] | null;
       division: string | null;
       divisionLevel: number | null;
-      category: { id: string; name: string } | null;
     };
     edition: { id: string; name: string; year: number } | null;
     stats: { matchesPlayed: number; goals: number; yellowCards: number; redCards: number };

@@ -12,8 +12,8 @@ export const ROLE_LABELS: Record<UserRole, string> = {
 
 export const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
   ADMIN: 'Hace todo y es el único que administra las cuentas del sistema.',
-  COMMUNITY_MANAGER: 'Publicidad e imágenes de categorías, competiciones y equipos.',
-  SCOREKEEPER: 'Resultados de los partidos: iniciar, cargar goles y tarjetas, finalizar.',
+  COMMUNITY_MANAGER: 'Publicidad e imágenes de competiciones y equipos.',
+  SCOREKEEPER: 'Resultados y asistencia de los partidos: iniciar, cargar goles y tarjetas, finalizar.',
   TEAM_LEADER: 'Delegado de un club: entra al panel de su equipo.',
 };
 

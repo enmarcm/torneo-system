@@ -4,10 +4,10 @@ import { MESSAGES } from '@/config/constants';
 
 const systemInclude = {
   divisions: {
-    include: { category: true, _count: { select: { registrations: true } } },
+    include: { _count: { select: { registrations: true } } },
     orderBy: { divisionLevel: 'asc' },
   },
-  cups: { include: { category: true } },
+  cups: true,
 } as const;
 
 export const leagueSystemsService = {
@@ -27,7 +27,7 @@ export const leagueSystemsService = {
     return system;
   },
 
-  create: (data: { editionId: string; name: string }) =>
+  create: (data: { editionId: string; name: string; ageGroup?: 'ADULT' | 'YOUTH' }) =>
     prisma.leagueSystem.create({ data, include: systemInclude }),
 
   update: (id: string, data: { name?: string }) =>
@@ -45,9 +45,12 @@ export const leagueSystemsService = {
     if (competition.editionId !== system.editionId) {
       throw new AppError(422, 'La competición es de otra edición', 'EDITION_MISMATCH');
     }
+    if (competition.ageGroup !== system.ageGroup) {
+      throw new AppError(422, 'La competición es de otro apartado', 'AGE_GROUP_MISMATCH');
+    }
     return prisma.competition.update({
       where: { id: competitionId },
-      data: { leagueSystemId: id, divisionLevel, kind: 'LEAGUE_DIVISION' },
+      data: { leagueSystemId: id, sourceLeagueSystemId: null, divisionLevel, kind: 'LEAGUE_DIVISION', format: 'LEAGUE' },
     });
   },
 
@@ -55,17 +58,29 @@ export const leagueSystemsService = {
   attachCup: async (id: string, competitionId: string) => {
     const system = await prisma.leagueSystem.findUnique({ where: { id } });
     if (!system) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
+    const competition = await prisma.competition.findUnique({ where: { id: competitionId } });
+    if (!competition) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
+    if (competition.editionId !== system.editionId || competition.ageGroup !== system.ageGroup) {
+      throw new AppError(422, 'La copa debe ser de la misma edición y apartado', 'LEAGUE_SCOPE_MISMATCH');
+    }
     return prisma.competition.update({
       where: { id: competitionId },
-      data: { sourceLeagueSystemId: id, kind: 'CUP' },
+      data: { sourceLeagueSystemId: id, leagueSystemId: null, divisionLevel: null, kind: 'CUP', format: 'GROUPS_KNOCKOUT' },
     });
   },
 
-  detach: (competitionId: string) =>
-    prisma.competition.update({
+  detach: async (competitionId: string) => {
+    const competition = await prisma.competition.findUnique({ where: { id: competitionId } });
+    if (!competition) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
+    return prisma.competition.update({
       where: { id: competitionId },
-      data: { leagueSystemId: null, sourceLeagueSystemId: null, divisionLevel: null },
-    }),
+      data: {
+        leagueSystemId: null, sourceLeagueSystemId: null, divisionLevel: null, division: null,
+        promotionSpots: 0, relegationSpots: 0,
+        ...(competition.kind === 'LEAGUE_DIVISION' ? { kind: 'STANDALONE_LEAGUE', format: 'LEAGUE', knockoutQualifiers: null, twoLeggedStages: [] } : {}),
+      },
+    });
+  },
 
   /**
    * Equipos disponibles para inscribir en la copa: los que juegan cualquiera de

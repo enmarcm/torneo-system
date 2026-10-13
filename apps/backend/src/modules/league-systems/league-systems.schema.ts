@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const createLeagueSystemSchema = z.object({
   editionId: z.string().uuid(),
   name: z.string().min(2),
+  ageGroup: z.enum(['ADULT', 'YOUTH']).optional(),
 });
 
 export const updateLeagueSystemSchema = z.object({
@@ -11,7 +12,7 @@ export const updateLeagueSystemSchema = z.object({
 
 export const attachDivisionSchema = z.object({
   competitionId: z.string().uuid(),
-  divisionLevel: z.number().int().min(1).max(10),
+  divisionLevel: z.number().int().min(1).max(3),
 });
 
 export const attachCupSchema = z.object({

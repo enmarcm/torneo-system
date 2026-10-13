@@ -4,13 +4,13 @@ import { requireRole, restrictFields } from '@/middlewares/role.middleware';
 import { validate } from '@/middlewares/validate.middleware';
 import { audit } from '@/middlewares/audit.middleware';
 import { matchesController } from './matches.controller';
-import { createMatchSchema, updateMatchSchema, setMvpSchema } from './matches.schema';
+import { createMatchSchema, updateMatchSchema, setMvpSchema, setAttendanceSchema } from './matches.schema';
 import { SCORING_ROLES } from '@/config/roles';
 
 export const matchesRouter = Router();
 
 /**
- * El anotador toca el resultado y nada más: crear, borrar o reprogramar un
+ * El anotador registra resultado, eventos y asistencia: crear, borrar o reprogramar un
  * partido sigue siendo del administrador. Por eso el PATCH general le acota los
  * campos a marcador y estado.
  */
@@ -19,6 +19,14 @@ const SCORE_FIELDS = ['homeScore', 'awayScore', 'status'] as const;
 matchesRouter.get('/', matchesController.list);
 matchesRouter.get('/:id', matchesController.get);
 matchesRouter.use(authMiddleware);
+matchesRouter.get('/:id/attendance', requireRole(...SCORING_ROLES), matchesController.getAttendance);
+matchesRouter.put(
+  '/:id/attendance',
+  requireRole(...SCORING_ROLES),
+  validate(setAttendanceSchema),
+  audit('ATTENDANCE', 'Match'),
+  matchesController.setAttendance,
+);
 matchesRouter.post(
   '/',
   requireRole('ADMIN'),

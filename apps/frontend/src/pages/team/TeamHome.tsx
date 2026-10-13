@@ -3,7 +3,7 @@ import { SaveButton } from '@/components/ui/SaveButton';
 import { GroupsRounded, SportsSoccerRounded, BarChartRounded, EditRounded, MailOutlineRounded } from '@mui/icons-material';
 import { useState } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useTeamsQuery, useTeamHistoryQuery, useTeamStatsQuery } from '@/hooks/queries';
+import { useTeamQuery, useTeamHistoryQuery, useTeamStatsQuery } from '@/hooks/queries';
 import { useUpdateTeam, useUpdateMe } from '@/hooks/mutations';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatCard } from '@/components/ui/StatCard';
@@ -16,8 +16,7 @@ import { useToast } from '@/hooks/common/useToast';
 const TeamHome: React.FC = () => {
   const user = useAuthStore((s) => s.user);
   const teamId = user?.teamId;
-  const { data: teams = [] } = useTeamsQuery();
-  const team = teams.find((t) => t.id === teamId);
+  const { data: team } = useTeamQuery(teamId ?? '');
   const updateTeam = useUpdateTeam();
   const updateMe = useUpdateMe();
   const toast = useToast();

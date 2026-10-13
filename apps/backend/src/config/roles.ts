@@ -19,7 +19,7 @@ export const STAFF_ROLES = ['ADMIN', 'COMMUNITY_MANAGER', 'SCOREKEEPER'] as cons
 /** Publicidad e imágenes del sitio. */
 export const MEDIA_ROLES = ['ADMIN', 'COMMUNITY_MANAGER'] as const satisfies readonly UserRole[];
 
-/** Resultados de los partidos: iniciar, cargar eventos, finalizar. */
+/** Resultados y asistencia de los partidos: iniciar, cargar eventos, finalizar. */
 export const SCORING_ROLES = ['ADMIN', 'SCOREKEEPER'] as const satisfies readonly UserRole[];
 
 /**
@@ -27,7 +27,6 @@ export const SCORING_ROLES = ['ADMIN', 'SCOREKEEPER'] as const satisfies readonl
  * demás de esas fichas (nombre, cupos, formato) sigue siendo del administrador.
  */
 export const MEDIA_FIELDS = {
-  category: ['imageUrl'],
   competition: ['imageUrl'],
   team: ['logoUrl'],
 } as const;

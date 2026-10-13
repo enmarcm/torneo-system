@@ -1,6 +1,25 @@
 import { api } from './axios';
 import type { CompetitionSummary } from './competitions.api';
 
+export interface MatchAttendanceSheet {
+  matchId: string;
+  competitionId: string;
+  updatedAt: string | null;
+  teams: Array<{
+    registrationId: string;
+    team: { id: string; name: string };
+    players: Array<{
+      rosterEntryId: string;
+      jerseyNumber: number | null;
+      player: { id: string; firstName: string; lastName: string; photoUrl: string | null };
+      active: boolean;
+      present: boolean | null;
+    }>;
+  }>;
+}
+
+export type AttendanceEntry = { rosterEntryId: string; present: boolean };
+
 export interface MatchTeamRegistration {
   id: string;
   team: { id: string; name: string; logoUrl: string | null };
@@ -71,6 +90,9 @@ export const matchesApi = {
         params: { competitionId, status, editionId, day: opts.day, limit: opts.limit },
       })
     ).data.data,
+  attendance: async (id: string): Promise<MatchAttendanceSheet> => (await api.get(`/matches/${id}/attendance`)).data.data,
+  setAttendance: async (id: string, entries: AttendanceEntry[]): Promise<MatchAttendanceSheet> =>
+    (await api.put(`/matches/${id}/attendance`, { entries })).data.data,
   get: async (id: string): Promise<Match> => (await api.get(`/matches/${id}`)).data.data,
   create: async (data: Partial<Match>): Promise<Match> => (await api.post('/matches', data)).data.data,
   update: async (id: string, data: Partial<Match>): Promise<Match> =>

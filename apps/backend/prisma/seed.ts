@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { PrismaClient, Prisma } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import argon2 from 'argon2';
 
 const prisma = new PrismaClient();
@@ -12,42 +12,6 @@ const prisma = new PrismaClient();
  *    eliminatoria desde octavos a ida y vuelta.
  *  - Las menores (Sub-X), el Gremial y el Veterano son torneos independientes.
  */
-const CATEGORIES: Prisma.CategoryCreateInput[] = [
-  {
-    name: 'Sub-12',
-    defaultKind: 'YOUTH',
-    defaultAgeMin: 0,
-    defaultAgeMax: 12,
-    defaultMinPlayers: 7,
-    defaultMaxPlayers: 20,
-  },
-  {
-    name: 'Sub-15',
-    defaultKind: 'YOUTH',
-    defaultAgeMin: 13,
-    defaultAgeMax: 15,
-    defaultMinPlayers: 7,
-    defaultMaxPlayers: 20,
-  },
-  {
-    name: 'Sub-17',
-    defaultKind: 'YOUTH',
-    defaultAgeMin: 16,
-    defaultAgeMax: 17,
-    defaultMinPlayers: 7,
-    defaultMaxPlayers: 22,
-  },
-  { name: 'Primera División', defaultKind: 'LEAGUE_DIVISION', defaultDivisionLevel: 1, defaultAgeMin: 18 },
-  { name: 'Segunda División', defaultKind: 'LEAGUE_DIVISION', defaultDivisionLevel: 2, defaultAgeMin: 18 },
-  { name: 'Tercera División', defaultKind: 'LEAGUE_DIVISION', defaultDivisionLevel: 3, defaultAgeMin: 18 },
-  { name: 'Gremial', defaultKind: 'SPECIAL', defaultAgeMin: 18, defaultRequiresAdminEligibility: true },
-  { name: 'Veterano', defaultKind: 'SPECIAL', defaultAgeMin: 35, defaultRequiresAdminEligibility: true },
-  {
-    name: 'Copa de la Liga',
-    defaultKind: 'CUP',
-    defaultFormat: 'GROUPS_KNOCKOUT',
-  },
-];
 
 async function main() {
   // Se entra por nombre de usuario; el correo del admin queda como dato de
@@ -72,13 +36,6 @@ async function main() {
     },
   });
 
-  for (const c of CATEGORIES) {
-    await prisma.category.upsert({
-      where: { name: c.name },
-      update: {},
-      create: c,
-    });
-  }
 
   const existingEdition = await prisma.edition.findFirst({ where: { name: 'Apertura 2026' } });
   if (existingEdition) {
@@ -98,9 +55,6 @@ async function main() {
     },
   });
 
-  const primera = await prisma.category.findUnique({ where: { name: 'Primera División' } });
-  if (!primera) throw new Error('No se encontró categoría Primera División');
-
   // Sistema de liga: agrupa las divisiones para el ascenso/descenso y le dice a
   // la Copa de dónde salen sus equipos.
   const leagueSystem = await prisma.leagueSystem.create({
@@ -110,7 +64,6 @@ async function main() {
   const comp = await prisma.competition.create({
     data: {
       editionId: edition.id,
-      categoryId: primera.id,
       name: 'Primera División',
       format: 'LEAGUE',
       kind: 'LEAGUE_DIVISION',
@@ -128,12 +81,10 @@ async function main() {
 
   // Copa de la Liga: 8 grupos de 4 → octavos, cuartos y semis a ida y vuelta,
   // final a partido único.
-  const copaCat = await prisma.category.findUnique({ where: { name: 'Copa de la Liga' } });
-  if (copaCat) {
+  {
     await prisma.competition.create({
       data: {
         editionId: edition.id,
-        categoryId: copaCat.id,
         name: 'Copa de la Liga',
         format: 'GROUPS_KNOCKOUT',
         kind: 'CUP',
@@ -217,7 +168,7 @@ async function main() {
 
   console.log('✅ Seed completo: administrador y datos de demostración.');
   } else {
-    console.log('✅ Seed de producción completo: administrador y categorías, sin cuentas demo.');
+    console.log('✅ Seed de producción completo: administrador y competiciones, sin cuentas demo.');
   }
 }
 

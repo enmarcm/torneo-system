@@ -9,7 +9,8 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { MatchLoader } from '@/components/ui/MatchLoader';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useEditionQuery, useCompetitionsQuery, useTeamHistoryQuery, useTeamStatsQuery } from '@/hooks/queries';
+import { useEditionQuery, useTeamRegistrationsQuery, useTeamHistoryQuery, useTeamStatsQuery } from '@/hooks/queries';
+import { getTeamCompetitions } from '@/utils/teamRegistrations';
 import { formatDate } from '@/utils/formatDate';
 import { EmojiEventsRounded, GroupsRounded, SportsSoccerRounded, BarChartRounded } from '@mui/icons-material';
 
@@ -19,12 +20,12 @@ const TeamHistoryDetail: React.FC = () => {
   const teamId = user?.teamId;
 
   const { data: edition, isLoading: loadingEdition, error: editionError, refetch: refetchEdition } = useEditionQuery(id ?? '');
-  const { data: comps = [], isLoading: loadingComps } = useCompetitionsQuery(id);
+  const { data: registrations = [], isLoading: loadingComps, error: registrationsError, refetch: refetchRegistrations } = useTeamRegistrationsQuery(teamId ?? undefined, true);
   const { data: history = [], isLoading: loadingHistory } = useTeamHistoryQuery(teamId ?? undefined);
   const { data: stats, isLoading: loadingStats } = useTeamStatsQuery(teamId ?? undefined);
 
   const editionComps = useMemo(() =>
-    comps.filter((c: any) => c.editionId === id), [comps, id]);
+    getTeamCompetitions(registrations, id), [registrations, id]);
 
   const compMatches = useMemo(() => {
     const compMap: Record<string, typeof history> = {};
@@ -36,6 +37,7 @@ const TeamHistoryDetail: React.FC = () => {
   }, [history]);
 
   if (loadingEdition || loadingComps || loadingHistory || loadingStats) return <MatchLoader minHeight="50vh" />;
+  if (registrationsError) return <ErrorState onRetry={() => void refetchRegistrations()} />;
   if (editionError) return <ErrorState onRetry={refetchEdition} />;
   if (!edition) return <ErrorState onRetry={refetchEdition} />;
 
@@ -105,7 +107,7 @@ const TeamHistoryDetail: React.FC = () => {
                   <Box sx={{ flex: 1 }}>
                     <Typography variant="h4">{comp.name}</Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {comp.category?.name} · {comp.format === 'LEAGUE' ? 'Liga' : 'Copa'}
+                      {comp.format === 'LEAGUE' ? 'Liga' : 'Copa'}
                     </Typography>
                   </Box>
                   <Stack direction="row" spacing={2}>

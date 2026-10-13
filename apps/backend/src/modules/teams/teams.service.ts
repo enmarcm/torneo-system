@@ -41,7 +41,7 @@ export const teamsService = {
       include: {
         leader: { select: { username: true, email: true, status: true } },
         registrations: {
-          include: { competition: { include: { category: true } }, roster: { include: { player: true } } },
+          include: { competition: true, roster: { include: { player: true } } },
         },
       },
     });
@@ -114,7 +114,7 @@ export const teamsService = {
   register: async (teamId: string, competitionId: string) => {
     const competition = await prisma.competition.findUnique({
       where: { id: competitionId },
-      select: { id: true, editionId: true, kind: true },
+      select: { id: true, editionId: true, kind: true, leagueSystemId: true, ageGroup: true },
     });
     if (!competition) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
 
@@ -130,7 +130,7 @@ export const teamsService = {
           teamId,
           status: 'ACTIVE',
           outcome: { not: 'WITHDRAWN' },
-          competition: { editionId: competition.editionId, kind: 'LEAGUE_DIVISION' },
+          competition: { editionId: competition.editionId, ageGroup: competition.ageGroup, leagueSystemId: competition.leagueSystemId, kind: 'LEAGUE_DIVISION' },
         },
         select: {
           competition: { select: { name: true, division: true, divisionLevel: true } },
@@ -155,7 +155,7 @@ export const teamsService = {
     prisma.teamRegistration.findMany({
       where: { teamId },
       include: {
-        competition: { include: { category: true } },
+        competition: { include: { edition: { select: { id: true, name: true, year: true } } } },
         roster: { include: { player: true, stats: true } },
       },
     }),
@@ -176,6 +176,7 @@ export const teamsService = {
       include: {
         homeRegistration: { include: { team: true } },
         awayRegistration: { include: { team: true } },
+        competition: true,
       },
       orderBy: { scheduledAt: 'desc' },
     });

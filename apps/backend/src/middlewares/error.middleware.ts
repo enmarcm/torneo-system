@@ -2,6 +2,7 @@ import type { ErrorRequestHandler } from 'express';
 import { ZodError } from 'zod';
 import { AppError } from '@/utils/app-error';
 import { logger } from '@/lib/logger';
+import { formatValidationErrors } from '@/utils/validation-errors';
 
 export const errorMiddleware: ErrorRequestHandler = (err, _req, res, _next) => {
   if (err instanceof AppError) {
@@ -13,8 +14,7 @@ export const errorMiddleware: ErrorRequestHandler = (err, _req, res, _next) => {
     return res.status(422).json({
       success: false,
       code: 'VALIDATION',
-      message: 'Datos inválidos',
-      fields: err.flatten().fieldErrors,
+      ...formatValidationErrors(err),
     });
   }
   logger.error(err?.message ?? 'error', { stack: err?.stack });

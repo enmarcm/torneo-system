@@ -29,7 +29,7 @@ interface NavItem {
 const NAV: NavItem[] = [
   { label: 'Inicio', icon: <HomeRounded />, to: ROUTES.team.home },
   { label: 'Jugadores', icon: <PersonRounded />, to: ROUTES.team.players },
-  { label: 'Plantillas', icon: <GroupRounded />, to: ROUTES.team.squads },
+  { label: 'Mis torneos', icon: <GroupRounded />, to: ROUTES.team.squads },
   { label: 'Partidos', icon: <SportsSoccerRounded />, to: ROUTES.team.matches },
   { label: 'Estadísticas', icon: <BarChartRounded />, to: ROUTES.team.stats },
   { label: 'Historial', icon: <HistoryRounded />, to: ROUTES.team.history },

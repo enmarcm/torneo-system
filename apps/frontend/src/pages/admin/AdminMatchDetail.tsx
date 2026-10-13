@@ -5,6 +5,7 @@ import { useMatchQuery } from '@/hooks/queries';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { LiveScoreboard } from '@/components/sport/LiveScoreboard';
+import { MatchAttendanceEditor } from '@/components/sport/MatchAttendanceEditor';
 import { MvpEditor } from '@/components/sport/MvpEditor';
 import { formatDateTimeOrPending } from '@/utils/formatDate';
 import { getStatusLabel } from '@/utils/statusLabels';
@@ -52,6 +53,7 @@ const AdminMatchDetail: React.FC = () => {
           <MvpEditor match={match} />
         </Grid>
       </Grid>
+      <MatchAttendanceEditor key={match.id} matchId={match.id} />
       <Typography variant="h4" sx={{ mb: 2 }}>Eventos del partido</Typography>
       {!match.events || match.events.length === 0 ? (
         <Card sx={{ p: 3, textAlign: 'center' }}>

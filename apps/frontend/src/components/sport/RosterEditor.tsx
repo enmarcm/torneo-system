@@ -31,10 +31,13 @@ import {
 import { useToast } from '@/hooks/common/useToast';
 import { extractErrorMessage } from '@/api/axios';
 import { RosterSkeleton } from '@/components/ui/LoadingState';
+import { NewRosterPlayer } from '@/components/sport/NewRosterPlayer';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { EmptyState } from '@/components/ui/EmptyState';
 
 interface Props {
   registrationId: string;
+  allowCreatePlayer?: boolean;
   /** Cupo máximo de la competición, para avisar antes de que el servidor rechace. */
   maxPlayers?: number;
   /** Con `false` se ocultan los controles de habilitación, que son solo del admin. */
@@ -49,9 +52,10 @@ interface Props {
 export const RosterEditor: React.FC<Props> = ({
   registrationId,
   maxPlayers,
+  allowCreatePlayer = false,
   canApproveEligibility = true,
 }) => {
-  const { data: roster = [], isLoading } = useRosterQuery(registrationId);
+  const { data: roster = [], isLoading, isFetching, error, refetch } = useRosterQuery(registrationId, allowCreatePlayer);
   const [search, setSearch] = useState('');
   /* Lo que quedó afuera en la última importación, para poder resolverlo a mano. */
   const [skipped, setSkipped] = useState<Array<{ name: string; reason: string }> | null>(null);
@@ -136,7 +140,8 @@ export const RosterEditor: React.FC<Props> = ({
     }
   };
 
-  if (isLoading) return <RosterSkeleton rows={4} />;
+  if (isLoading || (isFetching && roster.length === 0)) return <RosterSkeleton rows={4} />;
+  if (error) return <ErrorState onRetry={() => void refetch()} />;
 
   return (
     <Stack spacing={2}>
@@ -144,6 +149,8 @@ export const RosterEditor: React.FC<Props> = ({
         {active.length} {active.length === 1 ? 'jugador' : 'jugadores'} en plantilla
         {maxPlayers != null ? ` · cupo ${maxPlayers}` : ''}
       </Typography>
+
+      {allowCreatePlayer && <Box><NewRosterPlayer registrationId={registrationId} disabled={full} /></Box>}
 
       {/*
         Solo se ofrece cuando hay algo real para traer: un botón que no puede
@@ -199,7 +206,7 @@ export const RosterEditor: React.FC<Props> = ({
       <TextField
         size="small"
         fullWidth
-        label="Agregar jugador"
+        label="Agregar jugador existente"
         placeholder="Buscá por cédula o nombre…"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
@@ -210,7 +217,7 @@ export const RosterEditor: React.FC<Props> = ({
         <Stack spacing={0.5}>
           {results.length === 0 ? (
             <Typography variant="caption" color="text.secondary">
-              Sin jugadores para esa búsqueda. Si es nuevo, registralo primero en Jugadores.
+              Sin jugadores para esa búsqueda. Puedes registrar uno nuevo en esta plantilla.
             </Typography>
           ) : (
             results.map((p) => (
@@ -255,7 +262,7 @@ export const RosterEditor: React.FC<Props> = ({
           seats={5}
           filled={0}
           title="Esta plantilla todavía no tiene jugadores"
-          description="Sumá jugadores desde el buscador de arriba; cada uno ocupa un asiento."
+          description="Agrega un jugador existente desde el buscador o registra uno nuevo para este torneo."
         />
       ) : (
         <Stack spacing={0.5}>

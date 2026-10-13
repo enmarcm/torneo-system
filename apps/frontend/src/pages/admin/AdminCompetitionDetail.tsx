@@ -110,7 +110,7 @@ const AdminCompetitionDetail: React.FC = () => {
       </Button>
       <PageHeader
         title={comp.name}
-        subtitle={`${comp.category?.name ?? 'Sin categoría'} · ${getStatusLabel(comp.format)}`}
+        subtitle={getStatusLabel(comp.format)}
       />
       <Stack direction="row" spacing={1} sx={{ mb: 3 }}>
         <StatusBadge status={comp.status} />
@@ -197,8 +197,8 @@ const AdminCompetitionDetail: React.FC = () => {
                       sx={{ mt: 2 }}
                     >
                       <MenuItem value="NONE">Sin decisión</MenuItem>
-                      <MenuItem value="PROMOTED">Asciende</MenuItem>
-                      <MenuItem value="RELEGATED">Desciende</MenuItem>
+                      {(comp.kind === 'LEAGUE_DIVISION' || r.outcome === 'PROMOTED') && <MenuItem value="PROMOTED" disabled={comp.kind !== 'LEAGUE_DIVISION'}>Asciende</MenuItem>}
+                      {(comp.kind === 'LEAGUE_DIVISION' || r.outcome === 'RELEGATED') && <MenuItem value="RELEGATED" disabled={comp.kind !== 'LEAGUE_DIVISION'}>Desciende</MenuItem>}
                       <MenuItem value="WITHDRAWN">No participa</MenuItem>
                     </TextField>
                     {r.outcomeNote && (

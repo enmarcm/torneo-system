@@ -16,13 +16,13 @@ import { ImageUpload } from '@/components/ui/ImageUpload';
 import { AppDrawer } from '@/components/ui/AppDrawer';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { useCategoriesQuery, useCompetitionsQuery, useTeamsQuery } from '@/hooks/queries';
-import { useUpdateCategory, useUpdateCompetition, useUpdateTeam } from '@/hooks/mutations';
+import { useCompetitionsQuery, useTeamsQuery } from '@/hooks/queries';
+import { useUpdateCompetition, useUpdateTeam } from '@/hooks/mutations';
 import { extractErrorMessage } from '@/api/axios';
 import { useToast } from '@/hooks/common/useToast';
 import { getCompetitionShortLabel } from '@/utils/competitionMeta';
 
-type Kind = 'categories' | 'competitions' | 'teams';
+type Kind = 'competitions' | 'teams';
 
 /** Lo mínimo que la grilla necesita de cada cosa, venga de donde venga. */
 type MediaItem = {
@@ -34,47 +34,36 @@ type MediaItem = {
 
 /*
   Un solo lugar para las imágenes del sitio. El community manager no entra a las
-  fichas de categoría, competición ni equipo — ahí se define el torneo — pero sí
+  fichas de competición ni equipo — ahí se define el torneo — pero sí
   es quien las viste, así que la imagen se edita desde acá.
 */
 const HINTS: Record<Kind, string> = {
-  categories: '512 × 512 px (cuadrado)',
   competitions: '512 × 512 px (cuadrado)',
   teams: '512 × 512 px (cuadrado, fondo transparente para el escudo)',
 };
 
 const AdminMedia: React.FC = () => {
   const toast = useToast();
-  const [tab, setTab] = useState<Kind>('categories');
+  const [tab, setTab] = useState<Kind>('competitions');
   const [search, setSearch] = useState('');
   const [editing, setEditing] = useState<MediaItem | null>(null);
   const [draftUrl, setDraftUrl] = useState('');
 
-  const categories = useCategoriesQuery();
   const competitions = useCompetitionsQuery();
   const teams = useTeamsQuery();
 
-  const updateCategory = useUpdateCategory();
   const updateCompetition = useUpdateCompetition();
   const updateTeam = useUpdateTeam();
 
-  const source = tab === 'categories' ? categories : tab === 'competitions' ? competitions : teams;
+  const source = tab === 'competitions' ? competitions : teams;
 
   const items: MediaItem[] = useMemo(() => {
-    if (tab === 'categories') {
-      return (categories.data ?? []).map((c) => ({
-        id: c.id,
-        name: c.name,
-        imageUrl: c.imageUrl ?? null,
-        caption: c.active ? undefined : 'Inactiva',
-      }));
-    }
     if (tab === 'competitions') {
       return (competitions.data ?? []).map((c) => ({
         id: c.id,
         name: getCompetitionShortLabel(c),
         imageUrl: c.imageUrl ?? null,
-        caption: c.category?.name,
+        caption: c.division ?? undefined,
       }));
     }
     return (teams.data ?? []).map((t) => ({
@@ -83,23 +72,21 @@ const AdminMedia: React.FC = () => {
       imageUrl: t.logoUrl ?? null,
       caption: t.status === 'ACTIVE' ? undefined : 'Inactivo',
     }));
-  }, [tab, categories.data, competitions.data, teams.data]);
+  }, [tab, competitions.data, teams.data]);
 
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase();
     return q ? items.filter((i) => i.name.toLowerCase().includes(q)) : items;
   }, [items, search]);
 
-  const saving = updateCategory.isPending || updateCompetition.isPending || updateTeam.isPending;
+  const saving = updateCompetition.isPending || updateTeam.isPending;
 
   const save = async () => {
     if (!editing) return;
     /* El campo se llama distinto en cada entidad, pero el trabajo es el mismo. */
     const url = draftUrl || null;
     try {
-      if (tab === 'categories') {
-        await updateCategory.mutateAsync({ id: editing.id, data: { imageUrl: url } });
-      } else if (tab === 'competitions') {
+      if (tab === 'competitions') {
         await updateCompetition.mutateAsync({ id: editing.id, data: { imageUrl: url } });
       } else {
         await updateTeam.mutateAsync({ id: editing.id, data: { logoUrl: url } });
@@ -127,7 +114,6 @@ const AdminMedia: React.FC = () => {
         }}
         sx={{ mb: 3 }}
       >
-        <Tab value="categories" label="Categorías" sx={{ textTransform: 'none' }} />
         <Tab value="competitions" label="Competiciones" sx={{ textTransform: 'none' }} />
         <Tab value="teams" label="Equipos" sx={{ textTransform: 'none' }} />
       </Tabs>

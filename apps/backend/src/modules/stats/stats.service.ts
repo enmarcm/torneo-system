@@ -23,7 +23,7 @@ export const statsService = {
               select: {
                 id: true, competitionId: true,
                 team: { select: { id: true, name: true, logoUrl: true } },
-                competition: { select: { id: true, name: true, kind: true, format: true, division: true, divisionLevel: true, editionId: true, category: { select: { id: true, name: true } } } },
+                competition: { select: { id: true, name: true, kind: true, ageGroup: true, format: true, division: true, divisionLevel: true, editionId: true, } },
               },
             },
           },
@@ -64,12 +64,11 @@ export const statsService = {
                   select: {
                     id: true,
                     name: true,
-                    kind: true,
+                    kind: true, ageGroup: true,
                     format: true,
                     division: true,
                     divisionLevel: true,
                     editionId: true,
-                    category: { select: { id: true, name: true } },
                   },
                 },
               },

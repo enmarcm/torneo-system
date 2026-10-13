@@ -58,7 +58,7 @@ const AdminEditionDetail: React.FC = () => {
                   </Box>
                   <Box>
                     <Typography variant="h4">{c.name}</Typography>
-                    <Typography variant="caption" color="text.secondary">{c.category?.name} · {c.format === 'LEAGUE' ? 'Liga' : 'Copa'}</Typography>
+                    <Typography variant="caption" color="text.secondary">{c.format === 'LEAGUE' ? 'Liga' : 'Copa'}</Typography>
                   </Box>
                 </Stack>
                 <Stack direction="row" spacing={2} sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>

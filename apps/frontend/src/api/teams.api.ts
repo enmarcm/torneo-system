@@ -29,12 +29,18 @@ export interface TeamRegistrationWithRoster {
     name: string;
     editionId: string;
     kind: Competition['kind'] | null;
+    ageGroup: Competition['ageGroup'];
+    leagueSystemId: string | null;
     format: Competition['format'] | null;
     division: string | null;
     divisionLevel: number | null;
     /** Cupo de la competición, para avisar cuando la plantilla se llena. */
     maxPlayers: number;
-    category: { id: string; name: string } | null;
+    minPlayers: number;
+    ageMin: number | null;
+    ageMax: number | null;
+    status: Competition['status'];
+    edition?: { id: string; name: string; year: number };
   };
   roster: Array<{
     id: string;

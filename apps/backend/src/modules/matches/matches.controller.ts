@@ -1,8 +1,11 @@
 import { asyncHandler } from '@/utils/async-handler';
 import { ok, created } from '@/utils/http.util';
+import { attendanceService } from './attendance.service';
 import { matchesService } from './matches.service';
 
 export const matchesController = {
+  getAttendance: asyncHandler(async (req, res) => ok(res, await attendanceService.get(req.params.id))),
+  setAttendance: asyncHandler(async (req, res) => ok(res, await attendanceService.save(req.params.id, req.body), 'Asistencia guardada')),
   list: asyncHandler(async (req, res) =>
     ok(
       res,

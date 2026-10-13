@@ -10,7 +10,7 @@ export const editionsService = {
   get: async (id: string) => {
     const e = await prisma.edition.findUnique({
       where: { id },
-      include: { competitions: { include: { category: true } } },
+      include: { competitions: true },
     });
     if (!e) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
     return e;

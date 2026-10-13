@@ -23,7 +23,11 @@ export const CompetitionFormat = {
 } as const;
 export type CompetitionFormat = (typeof CompetitionFormat)[keyof typeof CompetitionFormat];
 
+export const CompetitionAgeGroup = { ADULT: 'ADULT', YOUTH: 'YOUTH' } as const;
+export type CompetitionAgeGroup = (typeof CompetitionAgeGroup)[keyof typeof CompetitionAgeGroup];
+
 export const CompetitionKind = {
+  STANDALONE_LEAGUE: 'STANDALONE_LEAGUE',
   LEAGUE_DIVISION: 'LEAGUE_DIVISION',
   CUP: 'CUP',
   YOUTH: 'YOUTH',

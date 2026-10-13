@@ -1,0 +1,2 @@
+CREATE TYPE "CompetitionAgeGroup" AS ENUM ('ADULT', 'YOUTH');
+ALTER TYPE "CompetitionKind" ADD VALUE 'STANDALONE_LEAGUE';

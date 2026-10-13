@@ -19,7 +19,7 @@ import { DataTable, type DataTableColumn, type DataTableAction } from '@/compone
 import { AppDrawer } from '@/components/ui/AppDrawer';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { useTeamsQuery, useCompetitionsQuery, useCategoriesQuery, useTeamRegistrationsQuery } from '@/hooks/queries';
+import { useTeamsQuery, useCompetitionsQuery, usePublicRegistrationsQuery, useTeamRegistrationsQuery } from '@/hooks/queries';
 import { useCreateTeam, useUpdateTeam, useSetTeamStatus, useRegisterTeam, useDeleteTeam } from '@/hooks/mutations';
 import type { Team } from '@/api/teams.api';
 import type { Competition } from '@/api/competitions.api';
@@ -63,7 +63,6 @@ const AdminTeams: React.FC = () => {
   const deleteTeam = useDeleteTeam();
   const { data: teams = [], isLoading, refetch, error } = useTeamsQuery();
   const { data: competitions = [] } = useCompetitionsQuery();
-  const { data: categories = [] } = useCategoriesQuery();
   const toast = useToast();
   const create = useCreateTeam();
   const update = useUpdateTeam();
@@ -81,21 +80,20 @@ const AdminTeams: React.FC = () => {
   // Filters
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('');
-  const [filterCategory, setFilterCategory] = useState<string>('');
+  const [filterCompetition, setFilterCompetition] = useState<string>('');
+
+  const { data: filterRegistrations = [], isLoading: loadingRegistrations, error: registrationsError, refetch: refetchRegistrations } = usePublicRegistrationsQuery(undefined, filterCompetition || undefined);
 
   const filteredTeams = useMemo(() => {
     return teams.filter((t) => {
       if (search && !t.name.toLowerCase().includes(search.toLowerCase())) return false;
       if (filterStatus && t.status !== filterStatus) return false;
-      if (filterCategory) {
-        const hasCat = competitions.some(
-          (c) => c.categoryId === filterCategory && t._count?.registrations && t._count.registrations > 0,
-        );
-        if (!hasCat) return false;
+      if (filterCompetition) {
+        if (!filterRegistrations.some((r) => r.team.id === t.id)) return false;
       }
       return true;
     });
-  }, [teams, search, filterStatus, filterCategory, competitions]);
+  }, [teams, search, filterStatus, filterCompetition, filterRegistrations]);
 
   const submit = async () => {
     try {
@@ -150,7 +148,7 @@ const AdminTeams: React.FC = () => {
     salen el ascenso y el descenso, que no significan nada si el mismo club está
     en dos escalones a la vez. Copa, menores y especiales no cuentan.
   */
-  const takenDivisionEditions = useMemo(
+  const takenDivisionSystems = useMemo(
     () =>
       new Set(
         teamRegs
@@ -160,7 +158,7 @@ const AdminTeams: React.FC = () => {
               r.status === 'ACTIVE' &&
               r.outcome !== 'WITHDRAWN',
           )
-          .map((r) => r.competition.editionId),
+          .map((r) => r.competition.leagueSystemId ?? `${r.competition.editionId}:${r.competition.ageGroup}`),
       ),
     [teamRegs],
   );
@@ -168,8 +166,8 @@ const AdminTeams: React.FC = () => {
   /** Por qué no se puede inscribir en esta competición, o null si sí se puede. */
   const blockedReason = (c: (typeof competitions)[number]): string | null => {
     if (registeredIds.has(c.id)) return 'Ya inscrito';
-    if (c.kind === 'LEAGUE_DIVISION' && takenDivisionEditions.has(c.editionId)) {
-      return 'Ya tiene división en esta edición';
+    if (c.kind === 'LEAGUE_DIVISION' && takenDivisionSystems.has(c.leagueSystemId ?? `${c.editionId}:${c.ageGroup}`)) {
+      return 'Ya tiene división en esta liga';
     }
     return null;
   };
@@ -276,19 +274,19 @@ const AdminTeams: React.FC = () => {
           </Select>
         </FormControl>
         <FormControl size="small" sx={{ minWidth: 180 }}>
-          <InputLabel>Categoría</InputLabel>
-          <Select label="Categoría" value={filterCategory} onChange={(e) => setFilterCategory(e.target.value as string)}>
+          <InputLabel>Competición</InputLabel>
+          <Select label="Competición" value={filterCompetition} onChange={(e) => setFilterCompetition(e.target.value as string)}>
             <MenuItem value="">Todas</MenuItem>
-            {categories.map((c) => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
+            {competitions.map((c) => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
           </Select>
         </FormControl>
       </Stack>
       <DataTable
         columns={columns}
         rows={filteredTeams}
-        loading={isLoading}
-        error={error}
-        onRetry={refetch}
+        loading={isLoading || (!!filterCompetition && loadingRegistrations)}
+        error={error || (filterCompetition ? registrationsError : null)}
+        onRetry={() => { void refetch(); if (filterCompetition) void refetchRegistrations(); }}
         getRowKey={(r) => r.id}
         actions={actions}
         emptyTitle="Aún no hay equipos"
@@ -328,10 +326,10 @@ const AdminTeams: React.FC = () => {
               onChange={(e) => setForm({ ...form, leaderUsername: e.target.value.toLowerCase().replace(/\s+/g, '') })}
               helperText="Con esto entra al sistema. Letras sin acentos, números, punto, guion y guion bajo."
             />
-            <TextField label="Contraseña del delegado" type="text" fullWidth value={form.leaderPassword} onChange={(e) => setForm({ ...form, leaderPassword: e.target.value })} helperText="Mínimo 6 caracteres. Entregásela al delegado junto con el usuario." />
+            <TextField label="Contraseña del delegado" type="text" fullWidth value={form.leaderPassword} onChange={(e) => setForm({ ...form, leaderPassword: e.target.value })} helperText="Mínimo 12 caracteres. Entregásela al delegado junto con el usuario." />
             <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
               <Button onClick={() => { setOpen(null); setEditingTeam(null); }}>Cancelar</Button>
-              <SaveButton onClick={submit} loading={create.isPending} error={create.isError} disabled={!form.name || form.leaderUsername.length < 3 || form.leaderPassword.length < 6}>
+              <SaveButton onClick={submit} loading={create.isPending} error={create.isError} disabled={!form.name || !form.leaderUsername || !form.leaderPassword}>
                 {create.isPending ? 'Creando…' : 'Crear equipo'}
               </SaveButton>
             </Stack>
@@ -408,7 +406,7 @@ const AdminTeams: React.FC = () => {
                   );
                 })}
               </Select>
-              {takenDivisionEditions.size > 0 && (
+              {takenDivisionSystems.size > 0 && (
                 <FormHelperText>
                   Un equipo juega una sola división por edición. Para moverlo, marcá su
                   inscripción actual como &quot;No participa&quot;.

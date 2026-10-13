@@ -1,16 +1,18 @@
-import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Button, IconButton, Menu, MenuItem, FormControl, Select, InputLabel, Tooltip, TextField, Divider, ListItemText, Checkbox, OutlinedInput, FormHelperText, Alert } from '@mui/material';
+import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Button, IconButton, Menu, MenuItem, FormControl, Select, InputLabel, Tooltip, TextField, Divider, ListItemText, Checkbox, OutlinedInput, FormHelperText, FormControlLabel, Switch, Alert } from '@mui/material';
 import { SaveButton } from '@/components/ui/SaveButton';
 import { getStatusLabel, getDivisionLabel } from '@/utils/statusLabels';
 import { AddRounded, MoreVertRounded, EmojiEventsRounded } from '@mui/icons-material';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { CompetitionSectionTabs } from '@/components/sport/CompetitionSectionTabs';
+import { AGE_GROUP_LABELS, getCompetitionAgeGroup, sortCompetitions } from '@/utils/competitionMeta';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { AppDrawer } from '@/components/ui/AppDrawer';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { ImageUpload } from '@/components/ui/ImageUpload';
-import { EntityHeroCard } from '@/components/sport/EntityHeroCard';
-import { useEditionsQuery, useCategoriesQuery, useCompetitionsQuery } from '@/hooks/queries';
+import { useEditionsQuery, useCompetitionsQuery } from '@/hooks/queries';
 import { useCreateCompetition, useUpdateCompetition, useSetCompetitionStatus, useDeleteCompetition } from '@/hooks/mutations';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import { extractErrorMessage } from '@/api/axios';
@@ -19,6 +21,9 @@ import type { Competition } from '@/api/competitions.api';
 
 type CompForm = {
   name: string;
+  ageGroup: Competition['ageGroup'];
+  description: string;
+  requiresAdminEligibility: boolean;
   division: string;
   ageMin: string;
   ageMax: string;
@@ -36,13 +41,16 @@ type CompForm = {
 
 const EMPTY_FORM: CompForm = {
   name: '',
+  ageGroup: 'ADULT',
+  description: '',
+  requiresAdminEligibility: false,
   division: '',
   ageMin: '',
   ageMax: '',
   minPlayers: 11,
   maxPlayers: 25,
   format: 'LEAGUE',
-  kind: 'SPECIAL',
+  kind: 'STANDALONE_LEAGUE',
   imageUrl: '',
   divisionLevel: '',
   rounds: 1,
@@ -52,9 +60,10 @@ const EMPTY_FORM: CompForm = {
 };
 
 const KINDS: Array<{ value: Competition['kind']; label: string; hint: string }> = [
+  { value: 'STANDALONE_LEAGUE', label: 'Liga sin divisiones', hint: 'Una liga independiente, sin ascenso ni descenso entre divisiones.' },
   {
     value: 'LEAGUE_DIVISION',
-    label: 'División de liga',
+    label: 'Liga con divisiones',
     hint: 'Primera, Segunda o Tercera. Se enlazan entre sí por ascenso y descenso.',
   },
   {
@@ -62,7 +71,7 @@ const KINDS: Array<{ value: Competition['kind']; label: string; hint: string }> 
     label: 'Copa de la Liga',
     hint: 'Se nutre de las divisiones: grupos y después eliminatoria.',
   },
-  { value: 'YOUTH', label: 'Menores (Sub-X)', hint: 'Torneo independiente por edad.' },
+  { value: 'YOUTH', label: 'Torneo por edad', hint: 'Competición independiente.' },
   { value: 'SPECIAL', label: 'Especial (Gremial / Veterano)', hint: 'Torneo independiente.' },
 ];
 
@@ -102,6 +111,13 @@ const StructureFields: React.FC<{
 
   return (
     <>
+      <TextField select fullWidth label="Apartado" value={value.ageGroup} onChange={(e) => set('ageGroup', e.target.value as Competition['ageGroup'])}>
+        <MenuItem value="ADULT">Adultos</MenuItem>
+        <MenuItem value="YOUTH">Menores</MenuItem>
+      </TextField>
+      <TextField label="Nombre de la competición" required fullWidth value={value.name} onChange={(e) => set('name', e.target.value)} inputProps={{ maxLength: 120 }} />
+      <TextField label="Descripción" fullWidth multiline minRows={2} value={value.description} onChange={(e) => set('description', e.target.value)} inputProps={{ maxLength: 2000 }} />
+      <FormControlLabel control={<Switch checked={value.requiresAdminEligibility} onChange={(_, checked) => set('requiresAdminEligibility', checked)} />} label="Requiere habilitación administrativa de jugadores" />
       <Divider textAlign="left">
         <Typography variant="caption" color="text.secondary">
           Imagen del torneo
@@ -131,12 +147,12 @@ const StructureFields: React.FC<{
             // limpian nivel y etiqueta para no arrastrar un dato que ya no aplica.
             onChange(
               kind === 'LEAGUE_DIVISION'
-                ? { ...value, kind }
-                : { ...value, kind, divisionLevel: '', division: '' },
+                ? { ...value, kind, format: 'LEAGUE' }
+                : { ...value, kind, format: kind === 'CUP' ? 'GROUPS_KNOCKOUT' : 'LEAGUE', divisionLevel: '', division: '', promotionSpots: 0, relegationSpots: 0, twoLeggedStages: [] },
             );
           }}
         >
-          {KINDS.map((k) => (
+          {KINDS.filter((k) => !['YOUTH', 'SPECIAL'].includes(k.value) || k.value === value.kind).map((k) => (
             <MenuItem key={k.value} value={k.value}>
               <ListItemText primary={k.label} secondary={k.hint} />
             </MenuItem>
@@ -150,6 +166,7 @@ const StructureFields: React.FC<{
           fullWidth
           size="small"
           label="División"
+          required
           value={value.divisionLevel}
           onChange={(e) => {
             const level = Number(e.target.value);
@@ -240,7 +257,7 @@ const StructureFields: React.FC<{
         así que el campo no gobernaba nada. La división más baja tampoco tiene a
         dónde descender y ahí ni se muestra el de descenso.
       */}
-      {divisionLevel !== BOTTOM_DIVISION && (
+      {value.kind === 'LEAGUE_DIVISION' && divisionLevel !== BOTTOM_DIVISION && (
         <TextField
           fullWidth
           size="small"
@@ -250,12 +267,12 @@ const StructureFields: React.FC<{
           onChange={(e) => set('relegationSpots', Math.max(0, Number(e.target.value)))}
         />
       )}
-      <Typography variant="caption" color="text.secondary">
+      {value.kind === 'LEAGUE_DIVISION' && <Typography variant="caption" color="text.secondary">
         {divisionLevel === BOTTOM_DIVISION
           ? 'Tercera es la división más baja: no tiene descenso. '
           : 'Estas plazas solo pintan la zona roja de la tabla. '}
         El ascenso y el descenso definitivos los marcás vos equipo por equipo.
-      </Typography>
+      </Typography>}
     </>
   );
 };
@@ -264,8 +281,9 @@ const AdminCompetitions: React.FC = () => {
   const selectedEditionId = useGlobalStore((s) => s.selectedEditionId);
   const { data: editions = [] } = useEditionsQuery();
   const editionId = selectedEditionId ?? editions[0]?.id;
-  const { data: competitions = [], isLoading } = useCompetitionsQuery(editionId);
-  const { data: categories = [] } = useCategoriesQuery();
+  const { data: competitions = [], isLoading, error, refetch } = useCompetitionsQuery(editionId);
+  const [ageGroup, setAgeGroup] = useState<Competition['ageGroup']>('ADULT');
+  const visibleCompetitions = sortCompetitions(competitions.filter((c) => getCompetitionAgeGroup(c) === ageGroup));
   const toast = useToast();
   const create = useCreateCompetition();
   const update = useUpdateCompetition();
@@ -273,7 +291,6 @@ const AdminCompetitions: React.FC = () => {
   const [open, setOpen] = useState<'create' | 'edit' | null>(null);
   const [editingComp, setEditingComp] = useState<Competition | null>(null);
   const [anchor, setAnchor] = useState<{ el: HTMLElement; c: Competition } | null>(null);
-  const [selectedCat, setSelectedCat] = useState('');
   const [deletingComp, setDeletingComp] = useState<Competition | null>(null);
   const [purgingComp, setPurgingComp] = useState<Competition | null>(null);
   const deleteComp = useDeleteCompetition();
@@ -283,7 +300,6 @@ const AdminCompetitions: React.FC = () => {
   // puede cambiar sin salir del drawer.
   const [formEditionId, setFormEditionId] = useState('');
 
-  const cat = categories.find((c) => c.id === selectedCat);
   const currentEdition = editions.find((e) => e.id === editionId);
 
   // Competiciones de la edición elegida en el formulario de alta: puede ser
@@ -292,11 +308,11 @@ const AdminCompetitions: React.FC = () => {
 
   /** Niveles de división ya usados, para no permitir duplicarlos en una edición. */
   const takenLevelsForCreate = formEditionComps
-    .filter((c) => c.divisionLevel != null)
+    .filter((c) => c.kind === 'LEAGUE_DIVISION' && getCompetitionAgeGroup(c) === form.ageGroup && c.divisionLevel != null)
     .map((c) => c.divisionLevel as number);
 
   const takenLevelsForEdit = competitions
-    .filter((c) => c.divisionLevel != null && c.id !== editingComp?.id)
+    .filter((c) => c.kind === 'LEAGUE_DIVISION' && getCompetitionAgeGroup(c) === editForm.ageGroup && c.divisionLevel != null && c.id !== editingComp?.id)
     .map((c) => c.divisionLevel as number);
 
   const submit = async () => {
@@ -305,15 +321,18 @@ const AdminCompetitions: React.FC = () => {
         await update.mutateAsync({
           id: editingComp.id,
           data: {
-            name: editForm.name || undefined,
-            division: editForm.division || undefined,
+            name: editForm.name.trim(),
+            ageGroup: editForm.ageGroup,
+            description: editForm.description.trim() || null,
+            requiresAdminEligibility: editForm.requiresAdminEligibility,
+            division: editForm.division || null,
             ageMin: editForm.ageMin ? Number(editForm.ageMin) : null,
             ageMax: editForm.ageMax ? Number(editForm.ageMax) : null,
             minPlayers: Number(editForm.minPlayers) || undefined,
             maxPlayers: Number(editForm.maxPlayers) || undefined,
             format: editForm.format,
             kind: editForm.kind,
-            imageUrl: editForm.imageUrl || undefined,
+            imageUrl: editForm.imageUrl || null,
             divisionLevel: editForm.divisionLevel ? Number(editForm.divisionLevel) : null,
             rounds: Number(editForm.rounds) || 1,
             twoLeggedStages: editForm.twoLeggedStages,
@@ -323,13 +342,16 @@ const AdminCompetitions: React.FC = () => {
         });
         setOpen(null);
         setEditingComp(null);
+        setAgeGroup(editForm.ageGroup);
         toast.success('Competición actualizada');
       } else {
-        if (!formEditionId || !selectedCat) return;
+        if (!formEditionId || !form.name.trim()) return;
         await create.mutateAsync({
           editionId: formEditionId,
-          categoryId: selectedCat,
-          name: form.name || undefined,
+          name: form.name.trim(),
+          ageGroup: form.ageGroup,
+          description: form.description.trim() || null,
+          requiresAdminEligibility: form.requiresAdminEligibility,
           division: form.division || undefined,
           ageMin: form.ageMin ? Number(form.ageMin) : undefined,
           ageMax: form.ageMax ? Number(form.ageMax) : undefined,
@@ -346,8 +368,8 @@ const AdminCompetitions: React.FC = () => {
         } as Partial<Competition>);
         setOpen(null);
         setEditingComp(null);
-        setSelectedCat('');
         setForm({ ...EMPTY_FORM });
+        setAgeGroup(form.ageGroup);
         toast.success('Competición creada');
       }
     } catch (e) {
@@ -359,6 +381,9 @@ const AdminCompetitions: React.FC = () => {
     setEditingComp(c);
     setEditForm({
       name: c.name ?? '',
+      ageGroup: getCompetitionAgeGroup(c),
+      description: c.description ?? '',
+      requiresAdminEligibility: c.requiresAdminEligibility,
       division: c.division ?? '',
       ageMin: c.ageMin?.toString() ?? '',
       ageMax: c.ageMax?.toString() ?? '',
@@ -377,8 +402,7 @@ const AdminCompetitions: React.FC = () => {
   };
   const onOpenCreate = () => {
     setEditingComp(null);
-    setForm({ ...EMPTY_FORM });
-    setSelectedCat('');
+    setForm({ ...EMPTY_FORM, ageGroup });
     // Se propone la edición que está activa en el Topbar, pero queda visible y
     // editable para no crear a ciegas.
     setFormEditionId(editionId ?? '');
@@ -394,7 +418,7 @@ const AdminCompetitions: React.FC = () => {
         subtitle={
           currentEdition
             ? `Torneos que se juegan en ${currentEdition.name} (${currentEdition.year}). Cambiá de edición desde el selector de arriba.`
-            : 'Cada competición es una categoría jugándose dentro de una edición.'
+            : 'Crea y configura los torneos directamente dentro de cada edición.'
         }
         action={
           <Button variant="contained" startIcon={<AddRounded />} onClick={onOpenCreate} disabled={!editionId}>
@@ -402,6 +426,8 @@ const AdminCompetitions: React.FC = () => {
           </Button>
         }
       />
+
+      {editionId && <CompetitionSectionTabs value={ageGroup} onChange={setAgeGroup} competitions={competitions} />}
 
       {!editionId && (
         <Card sx={{ p: 3, textAlign: 'center' }}>
@@ -411,14 +437,16 @@ const AdminCompetitions: React.FC = () => {
 
       {editionId && isLoading && <Typography color="text.secondary">Cargando…</Typography>}
 
-      {editionId && !isLoading && (
+      {editionId && error && <ErrorState onRetry={() => void refetch()} />}
+
+      {editionId && !isLoading && !error && (
         <Grid container spacing={2}>
-          {competitions.length === 0 ? (
+          {visibleCompetitions.length === 0 ? (
             <Grid size={{ xs: 12 }}>
               <Card sx={{ p: 4, textAlign: 'center' }}>
-                <Typography variant="h4" sx={{ mb: 1 }}>Aún no hay competiciones</Typography>
+                <Typography variant="h4" sx={{ mb: 1 }}>Aún no hay competiciones de {AGE_GROUP_LABELS[ageGroup].toLowerCase()}</Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  Crea la primera competición para esta edición.
+                  Crea la primera competición en este apartado.
                 </Typography>
                 <Button variant="contained" startIcon={<AddRounded />} onClick={onOpenCreate}>
                   Crear competición
@@ -426,7 +454,7 @@ const AdminCompetitions: React.FC = () => {
               </Card>
             </Grid>
           ) : (
-            competitions.map((c) => (
+            visibleCompetitions.map((c) => (
               <Grid size={{ xs: 12, md: 6 }} key={c.id}>
                 <Card component={motion.div} whileHover={{ y: -2 }} sx={{ p: 3 }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
@@ -436,7 +464,6 @@ const AdminCompetitions: React.FC = () => {
                       </Box>
                       <Box>
                         <Typography variant="h4">{c.name}</Typography>
-                        <Typography variant="caption" color="text.secondary">{c.category?.name}</Typography>
                       </Box>
                     </Stack>
                     <Tooltip title="Ver más opciones">
@@ -545,14 +572,15 @@ const AdminCompetitions: React.FC = () => {
         open={!!open}
         onClose={() => { setOpen(null); setEditingComp(null); }}
         title={editingComp ? 'Editar competición' : 'Nueva competición'}
-        subtitle={editingComp ? 'Actualiza los datos de la competición.' : 'Al elegir categoría, se pre-rellenan los defaults.'}
+        subtitle={editingComp ? 'Actualiza los datos de la competición.' : 'Define el nombre y las reglas de la competición.'}
         width={480}
       >
         {open === 'edit' && editingComp ? (
           <Stack spacing={2}>
+            <StructureFields value={editForm} onChange={setEditForm} takenLevels={takenLevelsForEdit} />
             <FormControl fullWidth>
               <InputLabel>Formato</InputLabel>
-              <Select label="Formato" value={editForm.format} onChange={(e) => setEditForm({ ...editForm, format: e.target.value as 'LEAGUE' | 'GROUPS_KNOCKOUT' })}>
+              <Select label="Formato" disabled={editForm.kind === 'STANDALONE_LEAGUE' || editForm.kind === 'LEAGUE_DIVISION'} value={editForm.format} onChange={(e) => setEditForm({ ...editForm, format: e.target.value as 'LEAGUE' | 'GROUPS_KNOCKOUT' })}>
                 <MenuItem value="LEAGUE">Liga (todos contra todos)</MenuItem>
                 <MenuItem value="GROUPS_KNOCKOUT">Copa (grupos + eliminatoria)</MenuItem>
               </Select>
@@ -577,22 +605,15 @@ const AdminCompetitions: React.FC = () => {
                 <input type="number" value={editForm.maxPlayers} onChange={(e) => setEditForm({ ...editForm, maxPlayers: Number(e.target.value) })} style={{ width: '100%', padding: 10, borderRadius: 12, border: '1px solid var(--border)', fontSize: 14 }} />
               </Box>
             </Stack>
-            <StructureFields value={editForm} onChange={setEditForm} takenLevels={takenLevelsForEdit} />
             <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
               <Button onClick={() => { setOpen(null); setEditingComp(null); }}>Cancelar</Button>
-              <SaveButton onClick={submit} loading={update.isPending} error={update.isError}>
+              <SaveButton onClick={submit} loading={update.isPending} error={update.isError} disabled={!editForm.name.trim() || (editForm.kind === 'LEAGUE_DIVISION' && !editForm.divisionLevel)}>
                 {update.isPending ? 'Guardando…' : 'Guardar cambios'}
               </SaveButton>
             </Stack>
           </Stack>
         ) : (
           <Stack spacing={2}>
-            {/*
-              La competición es la instancia de una categoría DENTRO de una edición,
-              así que la edición se elige acá de forma explícita. Antes se tomaba del
-              selector del Topbar y, si estaba sin tocar, caía silenciosamente en la
-              última edición creada: se podía crear en la edición equivocada sin aviso.
-            */}
             <FormControl fullWidth>
               <InputLabel>Edición</InputLabel>
               <Select
@@ -611,47 +632,10 @@ const AdminCompetitions: React.FC = () => {
               </FormHelperText>
             </FormControl>
 
-            <FormControl fullWidth>
-              <InputLabel>Categoría</InputLabel>
-              <Select
-                label="Categoría"
-                value={selectedCat}
-                onChange={(e) => {
-                  const id = e.target.value as string;
-                  setSelectedCat(id);
-                  // Al elegir la categoría se copian TODOS sus defaults al
-                  // formulario: formato, tipo, nivel de división, rango de edad
-                  // y cupos. Quedan visibles y editables antes de crear.
-                  const picked = categories.find((c) => c.id === id);
-                  if (picked) {
-                    setForm((f) => ({
-                      ...f,
-                      format: picked.defaultFormat,
-                      kind: picked.defaultKind ?? f.kind,
-                      divisionLevel: picked.defaultDivisionLevel?.toString() ?? '',
-                      division: getDivisionLabel(picked.defaultDivisionLevel) ?? '',
-                      imageUrl: f.imageUrl || (picked.imageUrl ?? ''),
-                      ageMin: picked.defaultAgeMin?.toString() ?? '',
-                      ageMax: picked.defaultAgeMax?.toString() ?? '',
-                      minPlayers: picked.defaultMinPlayers ?? EMPTY_FORM.minPlayers,
-                      maxPlayers: picked.defaultMaxPlayers ?? EMPTY_FORM.maxPlayers,
-                    }));
-                  }
-                }}
-              >
-                {categories.map((c) => (<MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>))}
-              </Select>
-            </FormControl>
-            {cat && (
-              <EntityHeroCard
-                title={cat.name}
-                subtitle={cat.description ?? 'Defaults aplicados desde la categoría'}
-                chips={<Box sx={{ px: 1.5, py: 0.5, borderRadius: 999, bgcolor: 'rgba(255,255,255,0.12)', fontSize: 12, fontWeight: 600 }}>{cat.defaultFormat === 'LEAGUE' ? 'Liga' : 'Copa'}</Box>}
-              />
-            )}
+            <StructureFields value={form} onChange={setForm} takenLevels={takenLevelsForCreate} />
             <FormControl fullWidth>
               <InputLabel>Formato</InputLabel>
-              <Select label="Formato" value={form.format} onChange={(e) => setForm({ ...form, format: e.target.value as 'LEAGUE' | 'GROUPS_KNOCKOUT' })}>
+              <Select label="Formato" disabled={form.kind === 'STANDALONE_LEAGUE' || form.kind === 'LEAGUE_DIVISION'} value={form.format} onChange={(e) => setForm({ ...form, format: e.target.value as 'LEAGUE' | 'GROUPS_KNOCKOUT' })}>
                 <MenuItem value="LEAGUE">Liga (todos contra todos)</MenuItem>
                 <MenuItem value="GROUPS_KNOCKOUT">Copa (grupos + eliminatoria)</MenuItem>
               </Select>
@@ -676,10 +660,9 @@ const AdminCompetitions: React.FC = () => {
                 <input type="number" value={form.maxPlayers} onChange={(e) => setForm({ ...form, maxPlayers: Number(e.target.value) })} style={{ width: '100%', padding: 10, borderRadius: 12, border: '1px solid var(--border)', fontSize: 14 }} />
               </Box>
             </Stack>
-            <StructureFields value={form} onChange={setForm} takenLevels={takenLevelsForCreate} />
             <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
               <Button onClick={() => { setOpen(null); setEditingComp(null); }}>Cancelar</Button>
-              <SaveButton onClick={submit} loading={create.isPending} error={create.isError} disabled={!selectedCat || !formEditionId}>
+              <SaveButton onClick={submit} loading={create.isPending} error={create.isError} disabled={!form.name.trim() || !formEditionId || (form.kind === 'LEAGUE_DIVISION' && !form.divisionLevel)}>
                 {create.isPending ? 'Creando…' : 'Crear competición'}
               </SaveButton>
             </Stack>

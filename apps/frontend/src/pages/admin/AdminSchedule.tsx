@@ -3,6 +3,7 @@ import { SaveButton } from '@/components/ui/SaveButton';
 import { MatchLoader } from '@/components/ui/MatchLoader';
 import { AddRounded, PlayArrowRounded, StopRounded, SportsSoccerRounded, StyleRounded, ChevronLeftRounded, ChevronRightRounded, MoreVertRounded, CasinoRounded } from '@mui/icons-material';
 import { useState, useMemo } from 'react';
+import { ROUTES } from '@/routes/routes';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { PageHeader } from '@/components/ui/PageHeader';
@@ -402,8 +403,8 @@ const AdminSchedule: React.FC = () => {
         </Box>
       )}
 
-      {/* "Por programar" es asignar día y hora: no es trabajo del anotador. */}
-      {competitionId && manageSchedule && (
+      {/* El anotador puede abrir la asistencia sin recibir permisos de programación. */}
+      {competitionId && (
         <Tabs value={view} onChange={(_, v) => setView(v)} sx={{ mb: 2 }}>
           <Tab value="day" label="Por día" sx={{ textTransform: 'none' }} />
           <Tab
@@ -411,7 +412,7 @@ const AdminSchedule: React.FC = () => {
             sx={{ textTransform: 'none' }}
             label={
               <Stack direction="row" alignItems="center" spacing={0.75}>
-                <span>Por programar</span>
+                <span>{manageSchedule ? 'Por programar' : 'Sin fecha'}</span>
                 {pendingMatches.length > 0 && (
                   <Chip
                     size="small"
@@ -434,8 +435,9 @@ const AdminSchedule: React.FC = () => {
             Partidos sin día ni hora
           </Typography>
           <Typography color="text.secondary" sx={{ mb: 2 }}>
-            Salieron del sorteo con el cruce ya definido. Hacé clic en cualquiera para asignarle
-            fecha, hora y sede.
+            {manageSchedule
+              ? 'Salieron del sorteo con el cruce definido. Puedes asignar fecha, hora y sede o registrar la asistencia.'
+              : 'Abre un partido para registrar la asistencia de los jugadores inscritos.'}
           </Typography>
           {pendingMatches.length === 0 ? (
             <Card sx={{ p: 4, textAlign: 'center' }}>
@@ -447,7 +449,8 @@ const AdminSchedule: React.FC = () => {
             <Grid container spacing={2}>
               {pendingMatches.map((m) => (
                 <Grid size={{ xs: 12, md: 6, lg: 4 }} key={m.id}>
-                  <MatchCard match={m} onClick={() => onOpenEdit(m)} />
+                  <MatchCard match={m} onClick={() => manageSchedule ? onOpenEdit(m) : navigate(ROUTES.admin.matchDetail.replace(':id', m.id))} />
+                  <Button size="small" variant="outlined" sx={{ mt: 1 }} onClick={() => navigate(ROUTES.admin.matchDetail.replace(':id', m.id))}>Asistencia</Button>
                 </Grid>
               ))}
             </Grid>
@@ -498,7 +501,8 @@ const AdminSchedule: React.FC = () => {
                       Las acciones van fuera de la ficha: meterlas adentro
                       obligaba a anidar una tarjeta dentro de otra.
                     */}
-                    <Stack direction="row" spacing={1} alignItems="center" justifyContent="flex-end">
+                    <Stack direction="row" spacing={1} alignItems="center" justifyContent="flex-end" flexWrap="wrap" useFlexGap>
+                      <Button size="small" variant="outlined" onClick={() => navigate(ROUTES.admin.matchDetail.replace(':id', m.id))}>Asistencia</Button>
                       {m.status === 'SCHEDULED' && (
                         <Button
                           size="small"

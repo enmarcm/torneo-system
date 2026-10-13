@@ -5,7 +5,7 @@ import { validate } from '@/middlewares/validate.middleware';
 import { audit } from '@/middlewares/audit.middleware';
 import { rostersController } from './rosters.controller';
 import { ownRegistration, ownRosterEntry } from '@/middlewares/team-ownership.middleware';
-import { addRosterSchema, updateRosterSchema, eligibilitySchema } from './rosters.schema';
+import { addRosterSchema, updateRosterSchema, eligibilitySchema, createRosterPlayerSchema } from './rosters.schema';
 
 export const rostersRouter = Router();
 
@@ -23,6 +23,14 @@ rostersRouter.post(
   validate(addRosterSchema),
   audit('ADD', 'RosterEntry'),
   rostersController.add,
+);
+rostersRouter.post(
+  '/registrations/:registrationId/roster/players',
+  ...staff,
+  ownRegistration,
+  validate(createRosterPlayerSchema),
+  audit('CREATE_PLAYER', 'RosterEntry'),
+  rostersController.createPlayer,
 );
 /* Traer la plantilla del torneo anterior: primero se mira qué entraría, después se importa. */
 rostersRouter.get(

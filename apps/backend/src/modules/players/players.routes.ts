@@ -18,7 +18,7 @@ playersRouter.get('/', playersController.list);
 playersRouter.get('/by-document', playersController.byDocument);
 playersRouter.get('/:id', playersController.get);
 playersRouter.get('/:id/competitions', playersController.competitions);
-playersRouter.post('/', validate(createPlayerSchema), audit('CREATE', 'Player'), playersController.create);
+playersRouter.post('/', requireRole('ADMIN'), validate(createPlayerSchema), audit('CREATE', 'Player'), playersController.create);
 playersRouter.patch('/:id', validate(updatePlayerSchema), audit('UPDATE', 'Player'), playersController.update);
 playersRouter.patch(
   '/:id/status',

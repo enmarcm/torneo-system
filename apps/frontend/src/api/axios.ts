@@ -58,7 +58,4 @@ api.interceptors.response.use(
   },
 );
 
-export const extractErrorMessage = (err: unknown, fallback = 'Algo salió mal'): string => {
-  const e = err as AxiosError<{ message?: string; code?: string }>;
-  return e?.response?.data?.message || e?.message || fallback;
-};
+export { extractErrorMessage } from '@/utils/apiErrors';

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { queryClient } from '@/lib/queryClient';
 import type { UserRole } from '@/utils/roles';
 
 export type AuthUser = {
@@ -23,13 +24,21 @@ type State = {
 
 export const useAuthStore = create<State>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       accessToken: null,
-      setSession: (user, accessToken) => set({ user, accessToken }),
+      setSession: (user, accessToken) => {
+        const previous = get().user;
+        if (previous?.id !== user.id || previous?.role !== user.role || previous?.teamId !== user.teamId) queryClient.clear();
+        set({ user, accessToken });
+      },
       setAccessToken: (accessToken) => set({ accessToken }),
-      setUser: (user) => set({ user }),
-      logout: () => set({ user: null, accessToken: null }),
+      setUser: (user) => {
+        const previous = get().user;
+        if (previous?.id !== user.id || previous?.role !== user.role || previous?.teamId !== user.teamId) queryClient.clear();
+        set({ user });
+      },
+      logout: () => { queryClient.clear(); set({ user: null, accessToken: null }); },
     }),
     {
       name: 'torneo-auth',

@@ -36,7 +36,13 @@ enum CompetitionFormat {
 
 /// Tipo de torneo. Determina si la competición forma parte del sistema de liga
 /// (con ascenso/descenso entre divisiones) o si es un torneo independiente.
+enum CompetitionAgeGroup {
+  ADULT
+  YOUTH
+}
+
 enum CompetitionKind {
+  STANDALONE_LEAGUE // Liga independiente, sin divisiones
   LEAGUE_DIVISION // Primera / Segunda / Tercera — ligadas entre sí
   CUP // Copa de la Liga — se nutre de las divisiones
   YOUTH // Sub-12, Sub-15, Sub-17… cada una es un torneo aparte
@@ -170,6 +176,7 @@ model LeagueSystem {
   id        String        @id @default(uuid())
   edition   Edition       @relation(fields: [editionId], references: [id])
   editionId String
+  ageGroup  CompetitionAgeGroup @default(ADULT)
   name      String
   divisions Competition[] @relation("SystemDivisions")
   cups      Competition[] @relation("SystemCups")
@@ -179,34 +186,15 @@ model LeagueSystem {
   @@index([editionId])
 }
 
-model Category {
-  id                              String            @id @default(uuid())
-  name                            String            @unique
-  description                     String?
-  imageUrl                        String?
-  defaultFormat                   CompetitionFormat @default(LEAGUE)
-  defaultKind                     CompetitionKind   @default(SPECIAL)
-  defaultDivisionLevel            Int?
-  defaultAgeMin                   Int?
-  defaultAgeMax                   Int?
-  defaultRequiresAdminEligibility Boolean           @default(false)
-  defaultMinPlayers               Int               @default(11)
-  defaultMaxPlayers               Int               @default(25)
-  active                          Boolean           @default(true)
-  competitions                    Competition[]
-  createdAt                       DateTime          @default(now())
-  updatedAt                       DateTime          @updatedAt
-}
-
 model Competition {
   id                       String             @id @default(uuid())
   edition                  Edition            @relation(fields: [editionId], references: [id])
   editionId                String
-  category                 Category           @relation(fields: [categoryId], references: [id])
-  categoryId               String
   name                     String
+  description              String?
   format                   CompetitionFormat
-  kind                     CompetitionKind    @default(SPECIAL)
+  kind                     CompetitionKind    @default(STANDALONE_LEAGUE)
+  ageGroup                 CompetitionAgeGroup @default(ADULT)
   imageUrl                 String?
   division                 String?
   /// 1 = Primera, 2 = Segunda, 3 = Tercera. Ordena el ascenso/descenso.
@@ -244,7 +232,6 @@ model Competition {
   createdAt                DateTime           @default(now())
   updatedAt                DateTime           @updatedAt
   @@index([editionId])
-  @@index([categoryId])
   @@index([leagueSystemId])
 }
 
@@ -373,6 +360,7 @@ model Player {
   birthDate                DateTime
   position                 String?
   photoUrl                 String?
+  identityPhotoKey         String?
   universityDegreeVerified Boolean       @default(false)
   degreeDocUrl             String?
   status                   EntityStatus  @default(ACTIVE)
@@ -395,6 +383,7 @@ model RosterEntry {
   eligibilityApproved Boolean            @default(false)
   status              EntityStatus       @default(ACTIVE)
   stats               PlayerSeasonStats?
+  matchAttendances    MatchAttendance[]
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
   @@unique([playerId, teamRegistrationId])
@@ -445,6 +434,8 @@ model Match {
   mvpPhotoUrl        String?
   mvpNote            String?
   events             MatchEvent[]
+  attendances        MatchAttendance[]
+  attendanceUpdatedAt DateTime?
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
   @@index([competitionId])
@@ -551,4 +542,39 @@ model AuditLog {
   ip        String?
   createdAt DateTime @default(now())
   @@index([entity])
+}
+
+/// Historical catalogue, retained only for recovery.
+model CategoryArchive {
+  id                              String            @id(map: "Category_pkey") @default(uuid())
+  name                            String            @unique(map: "Category_name_key")
+  description                     String?
+  imageUrl                        String?
+  defaultFormat                   CompetitionFormat @default(LEAGUE)
+  defaultKind                     CompetitionKind   @default(SPECIAL)
+  defaultDivisionLevel            Int?
+  defaultAgeMin                   Int?
+  defaultAgeMax                   Int?
+  defaultRequiresAdminEligibility Boolean           @default(false)
+  defaultMinPlayers               Int               @default(11)
+  defaultMaxPlayers               Int               @default(25)
+  active                          Boolean           @default(true)
+  createdAt                       DateTime          @default(now())
+  updatedAt                       DateTime          @updatedAt
+  @@ignore
+}
+
+/// Presence at a specific match, scoped to the tournament roster registration.
+model MatchAttendance {
+  id            String      @id @default(uuid())
+  match         Match       @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  matchId       String
+  rosterEntry   RosterEntry @relation(fields: [rosterEntryId], references: [id], onDelete: Cascade)
+  rosterEntryId String
+  present       Boolean
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([matchId, rosterEntryId])
+  @@index([rosterEntryId])
 }

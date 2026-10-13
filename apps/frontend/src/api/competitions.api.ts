@@ -3,11 +3,12 @@ import { api } from './axios';
 export interface Competition {
   id: string;
   editionId: string;
-  categoryId: string;
   name: string;
+  description?: string | null;
   format: 'LEAGUE' | 'GROUPS_KNOCKOUT';
-  /** Tipo de torneo: división de liga, copa, menores o especial (Gremial/Veterano). */
-  kind: 'LEAGUE_DIVISION' | 'CUP' | 'YOUTH' | 'SPECIAL';
+  /** Apartado independiente de la estructura y del rango de edad del torneo. */
+  ageGroup: 'ADULT' | 'YOUTH';
+  kind: 'STANDALONE_LEAGUE' | 'LEAGUE_DIVISION' | 'CUP' | 'YOUTH' | 'SPECIAL';
   imageUrl: string | null;
   division: string | null;
   /** 1 = Primera, 2 = Segunda, 3 = Tercera. */
@@ -30,7 +31,6 @@ export interface Competition {
   groupSize: number | null;
   qualifiersPerGroup: number | null;
   status: 'DRAFT' | 'ACTIVE' | 'FINISHED';
-  category?: { id: string; name: string };
   _count?: { registrations: number; matches: number };
 }
 
@@ -42,11 +42,11 @@ export interface CompetitionSummary {
   id: string;
   name: string;
   kind: Competition['kind'];
+  ageGroup: 'ADULT' | 'YOUTH';
   format: Competition['format'];
   division: string | null;
   divisionLevel: number | null;
   editionId: string;
-  category?: { id: string; name: string } | null;
 }
 
 export const competitionsApi = {
