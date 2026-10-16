@@ -24,9 +24,11 @@ export const playersService = {
       take: 50,
     }),
 
-  list: (search?: string, teamId?: string | null) =>
+  list: (search?: string, teamId?: string | null, ageGroup?: 'ADULT' | 'YOUTH') =>
     prisma.player.findMany({
-      where: search
+      where: {
+        ...(ageGroup ? { AND: [{ rosterEntries: { some: { status: 'ACTIVE' as const, teamRegistration: { ...(teamId !== undefined ? { teamId: teamId || '__no_team__' } : {}), competition: { ageGroup } } } } }] } : {}),
+        ...(search
         ? {
             ...playersService.teamFilter(teamId),
             OR: [
@@ -35,7 +37,8 @@ export const playersService = {
               { documentNumber: { contains: search } },
             ],
           }
-        : playersService.teamFilter(teamId),
+        : playersService.teamFilter(teamId)),
+      },
       orderBy: { lastName: 'asc' },
       take: 50,
     }),

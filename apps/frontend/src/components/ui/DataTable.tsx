@@ -80,24 +80,24 @@ export function DataTable<T>({
             transition={{ duration: 0.18, delay: i * 0.03 }}
           >
             <Card
-              sx={{ p: 2, pt: 3, position: 'relative', cursor: onRowClick ? 'pointer' : undefined }}
+              sx={{ p: 2, minWidth: 0, cursor: onRowClick ? 'pointer' : undefined }}
               onClick={() => onRowClick?.(row)}
             >
-              {actions && actions.length > 0 && (
-                <Box sx={{ position: 'absolute', top: 4, right: 4 }}>
-                  <RowActionsIcons actions={actions} row={row} />
-                </Box>
-              )}
               {columns
                 .filter((c) => !c.hideInMobile)
                 .map((c) => (
-                  <Box key={c.key} sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, py: 0.75 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                  <Box key={c.key} sx={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 2fr)', gap: 1.5, py: 0.75, alignItems: 'start' }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, overflowWrap: 'anywhere' }}>
                       {c.label}
                     </Typography>
-                    <Box sx={{ textAlign: 'right' }}>{c.render(row)}</Box>
+                    <Box sx={{ textAlign: 'right', minWidth: 0, overflowWrap: 'anywhere', '& .MuiStack-root': { minWidth: 0, flexWrap: 'wrap', justifyContent: 'flex-end', gap: 1 }, '& .MuiAvatar-root': { flexShrink: 0 }, '& .MuiChip-root': { maxWidth: '100%' }, '& .MuiTypography-root': { whiteSpace: 'normal', overflowWrap: 'anywhere' } }}>{c.render(row)}</Box>
                   </Box>
                 ))}
+              {actions && actions.length > 0 && (
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1, pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
+                  <RowActionsIcons actions={actions} row={row} />
+                </Box>
+              )}
             </Card>
           </motion.div>
         ))}
@@ -201,10 +201,10 @@ function RowActionsIcons<T>({ actions, row }: { actions: DataTableAction<T>[]; r
   const getColor = (a: DataTableAction<T>): DataTableActionColor =>
     (typeof a.color === 'function' ? a.color(row) : a.color) ?? 'inherit';
   return (
-    <Stack direction="row" spacing={0.25}>
+    <Stack direction="row" spacing={0.25} useFlexGap flexWrap="wrap" justifyContent="flex-end" onClick={(event) => event.stopPropagation()}>
       {actions.map((a, i) => (
         <Tooltip key={i} title={typeof a.label === 'function' ? a.label(row) : a.label}>
-          <IconButton size="small" color={getColor(a)} onClick={() => a.onClick(row)} sx={{ p: 0.5 }}>
+          <IconButton aria-label={typeof a.label === 'function' ? a.label(row) : a.label} size="small" color={getColor(a)} onClick={() => a.onClick(row)} sx={{ p: 0.5, minWidth: { xs: 44, md: 28 }, minHeight: { xs: 44, md: 28 } }}>
             {getIcon(a)}
           </IconButton>
         </Tooltip>

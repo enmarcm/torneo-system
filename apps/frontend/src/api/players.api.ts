@@ -16,8 +16,8 @@ export interface Player {
 }
 
 export const playersApi = {
-  list: async (search?: string): Promise<Player[]> =>
-    (await api.get('/players', { params: { search } })).data.data,
+  list: async (search?: string, ageGroup?: 'ADULT' | 'YOUTH'): Promise<Player[]> =>
+    (await api.get('/players', { params: { search, ageGroup } })).data.data,
   byDocument: async (type: 'CEDULA' | 'PARTIDA', number: string): Promise<Player | null> =>
     (await api.get('/players/by-document', { params: { type, number } })).data.data,
   get: async (id: string): Promise<Player> => (await api.get(`/players/${id}`)).data.data,

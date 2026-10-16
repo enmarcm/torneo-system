@@ -116,7 +116,7 @@ const AdminTeamBlocks: React.FC = () => {
         puede tener equipos en varias categorías a la vez, el resto sigue jugando normalmente.
       </Alert>
 
-      <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
+      <Tabs variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
         <Tab value="active" label="Bloqueos activos" sx={{ textTransform: 'none' }} />
         <Tab
           value="history"

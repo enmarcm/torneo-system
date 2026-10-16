@@ -69,7 +69,8 @@ export const StatCard: React.FC<Props> = ({ label, value, icon, trend, tint = 'p
           sx={{
             fontFamily: '"Plus Jakarta Sans", sans-serif',
             fontWeight: 700,
-            fontSize: 30,
+            fontSize: { xs: 26, sm: 30 },
+            overflowWrap: 'anywhere',
             fontVariantNumeric: 'tabular-nums',
             color: 'text.primary',
             lineHeight: 1.1,
@@ -78,7 +79,7 @@ export const StatCard: React.FC<Props> = ({ label, value, icon, trend, tint = 'p
           {isNumeric ? <AnimatedNumber value={value} /> : value}
         </Typography>
       )}
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, overflowWrap: 'anywhere' }}>
         {label}
       </Typography>
     </Card>

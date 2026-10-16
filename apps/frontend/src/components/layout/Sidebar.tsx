@@ -56,7 +56,7 @@ const NAV: NavItem[] = [
   { label: 'Auditoría', icon: <FactCheckRounded />, to: ROUTES.admin.audit, roles: ADMIN_ONLY },
 ];
 
-export const Sidebar: React.FC = () => {
+export const Sidebar: React.FC<{ onNavigate?: () => void }> = ({ onNavigate }) => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -65,7 +65,7 @@ export const Sidebar: React.FC = () => {
   const logoSrc = mode === 'dark' ? logoBlanco : logoAzul;
   const logout = useAuthStore((s) => s.logout);
   const user = useAuthStore((s) => s.user);
-  const expanded = !sidebarCollapsed;
+  const expanded = isMobile || !sidebarCollapsed;
   const listRef = useRef<HTMLUListElement>(null);
   /* Sin esto, el community manager veía un menú entero que el guard le rebota. */
   const nav = useMemo(
@@ -83,6 +83,7 @@ export const Sidebar: React.FC = () => {
     <Box
         sx={{
           width: expanded ? 264 : 64,
+          maxWidth: '85vw',
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
@@ -121,14 +122,14 @@ export const Sidebar: React.FC = () => {
             const btn = (
               <ListItemButton
                 key={item.to}
-                onClick={() => navigate(item.to)}
+                onClick={() => { navigate(item.to); onNavigate?.(); }}
                 data-nav-active={active ? 'true' : undefined}
                 sx={{
                   borderRadius: expanded ? 1.5 : 1,
                   mb: 0.25,
                   py: 0.75,
                   px: expanded ? 1.5 : 0.75,
-                  minHeight: 40,
+                  minHeight: { xs: 44, md: 40 },
                   justifyContent: expanded ? 'flex-start' : 'center',
                   color: active ? 'var(--primary)' : 'var(--sidebarText)',
                   bgcolor: active ? 'var(--sidebarActiveBg)' : 'transparent',

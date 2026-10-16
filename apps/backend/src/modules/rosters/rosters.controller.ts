@@ -4,6 +4,9 @@ import { assertIdentityPhotoOwner } from '../players/player-photos';
 import { rostersService } from './rosters.service';
 
 export const rostersController = {
+  candidates: asyncHandler(async (req, res) =>
+    ok(res, await rostersService.candidates(req.params.registrationId, req.query.search as string)),
+  ),
   list: asyncHandler(async (req, res) => {
     const entries = await rostersService.list(req.params.registrationId);
     const data = req.user?.role === 'SCOREKEEPER'

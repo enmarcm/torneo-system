@@ -4,9 +4,25 @@ import express from 'express';
 import { z } from 'zod';
 import { errorMiddleware } from '../src/middlewares/error.middleware';
 import { validate } from '../src/middlewares/validate.middleware';
-import { createUserSchema } from '../src/modules/users/users.schema';
+import { createUserSchema, updateUserPasswordSchema } from '../src/modules/users/users.schema';
+import { changePasswordSchema } from '../src/modules/auth/auth.schema';
 import { createTeamSchema } from '../src/modules/teams/teams.schema';
 import { formatValidationErrors } from '../src/utils/validation-errors';
+
+test('all password creation and change paths accept six characters without composition requirements', () => {
+  const validatePasswords = (password: string) => [
+    createUserSchema.safeParse({ username: 'delegado', password }).success,
+    createTeamSchema.safeParse({ name: 'Equipo', leaderUsername: 'delegado', leaderPassword: password }).success,
+    updateUserPasswordSchema.safeParse({ password }).success,
+    changePasswordSchema.safeParse({ currentPassword: 'anterior', newPassword: password }).success,
+  ];
+  for (const password of ['abcdef', '123456', '!!!!!!', 'ABCDEF', 'clave sencilla']) {
+    assert.deepEqual(validatePasswords(password), [true, true, true, true]);
+  }
+  for (const password of ['', 'abcde', '12345']) {
+    assert.deepEqual(validatePasswords(password), [false, false, false, false]);
+  }
+});
 
 test('short passwords return a named Spanish HTTP validation error', async () => {
   const app = express();
@@ -26,8 +42,8 @@ test('short passwords return a named Spanish HTTP validation error', async () =>
       assert.equal(response.status, 422);
       const payload = await response.json() as any;
       assert.equal(payload.code, 'VALIDATION');
-      assert.equal(payload.message, `${label}: Mínimo 12 caracteres`);
-      assert.deepEqual(payload.fields[field], ['Mínimo 12 caracteres']);
+      assert.equal(payload.message, `${label}: Mínimo 6 caracteres`);
+      assert.deepEqual(payload.fields[field], ['Mínimo 6 caracteres']);
       assert.equal(payload.errors[0].field, field);
       assert.equal(JSON.stringify(payload).includes('corta'), false);
     }

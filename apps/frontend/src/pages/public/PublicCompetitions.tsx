@@ -9,6 +9,7 @@ import {
   Tabs,
   Tab,
   Chip,
+  ButtonBase,
 } from '@mui/material';
 import { ArrowBackRounded } from '@mui/icons-material';
 import { Crest } from '@/components/ui/Crest';
@@ -28,6 +29,8 @@ import { getCompetitionAgeGroup, AGE_GROUP_LABELS } from '@/utils/competitionMet
 import type { Competition } from '@/api/competitions.api';
 import { CompetitionCard } from '@/components/sport/CompetitionCard';
 import { StandingsTable } from '@/components/sport/StandingsTable';
+import { CompetitionRoster } from '@/components/sport/CompetitionRoster';
+import { AppModal } from '@/components/ui/AppModal';
 import { BracketView } from '@/components/sport/BracketView';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { AdSlot } from '@/components/ui/AdSlot';
@@ -51,6 +54,10 @@ const PublicCompetitions: React.FC = () => {
   const sectionCompetitions = scope.competitions.filter((c) => getCompetitionAgeGroup(c) === ageGroup);
   const competition = scope.competition ?? sectionCompetitions[0];
   const cid = competition?.id;
+  const [selectedTeam, setSelectedTeam] = useState<{ registrationId: string; name: string; competitionId: string } | null>(null);
+  const openRoster = (registrationId: string, name: string) => {
+    if (cid) setSelectedTeam({ registrationId, name, competitionId: cid });
+  };
   const isCup = competition?.format === 'GROUPS_KNOCKOUT';
 
   const [view, setView] = useState<View>('table');
@@ -66,7 +73,7 @@ const PublicCompetitions: React.FC = () => {
 
   /* Para la tabla vacía: los inscritos en orden alfabético, con guiones, hasta el primer resultado. */
   const { data: registrations = [] } = usePublicRegistrationsQuery(scope.editionId || undefined, cid);
-  const ghostTeams = useMemo(() => registrations.map((r) => r.team), [registrations]);
+  const ghostTeams = useMemo(() => registrations.map((r) => ({ ...r.team, registrationId: r.id })), [registrations]);
 
   const groupList = groups as PublicGroup[];
   const selectedGroup = useMemo(
@@ -184,9 +191,9 @@ const PublicCompetitions: React.FC = () => {
                               >
                                 {r.team.name[0]}
                               </Crest>
-                              <Typography variant="body2" noWrap>
+                              <ButtonBase onClick={(event) => { event.stopPropagation(); openRoster(r.id, r.team.name); }} aria-label={`Ver jugadores de ${r.team.name}`} sx={{ textAlign: 'left', minHeight: 44, minWidth: 0, color: 'primary.main', overflowWrap: 'anywhere' }}>
                                 {r.team.name}
-                              </Typography>
+                              </ButtonBase>
                             </Stack>
                           ))}
                         </Stack>
@@ -196,18 +203,23 @@ const PublicCompetitions: React.FC = () => {
                 </Card>
               </Grid>
               <Grid size={{ xs: 12, md: 8 }}>
-                {isLoading ? <MatchLoader /> : <StandingsTable rows={standings} ghostTeams={ghostTeams} />}
+                {isLoading ? <MatchLoader /> : <StandingsTable rows={standings} ghostTeams={ghostTeams} onTeamClick={openRoster} />}
               </Grid>
             </Grid>
           ) : isLoading ? (
             <MatchLoader />
           ) : (
-            <StandingsTable rows={standings} ghostTeams={ghostTeams} />
+            <StandingsTable rows={standings} ghostTeams={ghostTeams} onTeamClick={openRoster} />
           )}
           </Box>
         </>
       )}
 
+      {selectedTeam && selectedTeam.competitionId === cid && (
+        <AppModal open onClose={() => setSelectedTeam(null)} title={selectedTeam.name} subtitle={competition?.name} maxWidth={640}>
+          <CompetitionRoster key={selectedTeam.registrationId} registrationId={selectedTeam.registrationId} />
+        </AppModal>
+      )}
       <AdSlot placement="STANDINGS" sx={{ mt: 4 }} />
     </Container>
   );

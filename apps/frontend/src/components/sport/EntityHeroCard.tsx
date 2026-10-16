@@ -23,14 +23,15 @@ export const EntityHeroCard: React.FC<Props> = ({ title, subtitle, chips, right 
       minHeight: 150,
     }}
   >
-    <Box sx={{ flex: 1, minWidth: 200 }}>
-      {chips && <Stack direction="row" spacing={1} sx={{ mb: 1.5 }}>{chips}</Stack>}
+    <Box sx={{ flex: 1, minWidth: 0, width: { xs: '100%', sm: 'auto' } }}>
+      {chips && <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mb: 1.5 }}>{chips}</Stack>}
       <Typography
         sx={{
           fontFamily: '"Plus Jakarta Sans", sans-serif',
           fontWeight: 800,
           fontSize: { xs: 24, md: 34 },
           lineHeight: 1.1,
+          overflowWrap: 'anywhere',
         }}
       >
         {title}
@@ -39,6 +40,6 @@ export const EntityHeroCard: React.FC<Props> = ({ title, subtitle, chips, right 
         <Typography sx={{ color: 'rgba(255,255,255,0.65)', mt: 1 }}>{subtitle}</Typography>
       )}
     </Box>
-    {right && <Box>{right}</Box>}
+    {right && <Box sx={{ minWidth: 0, maxWidth: '100%' }}>{right}</Box>}
   </Box>
 );

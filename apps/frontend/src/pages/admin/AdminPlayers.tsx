@@ -1,4 +1,4 @@
-import { Box, Stack, Typography, Button, Avatar, Chip, TextField, MenuItem } from '@mui/material';
+import { Box, Stack, Typography, Button, Avatar, Chip, TextField, MenuItem, Tabs, Tab } from '@mui/material';
 import { PlayerPhotoFields } from '@/components/sport/PlayerPhotoFields';
 import { SaveButton } from '@/components/ui/SaveButton';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -17,12 +17,13 @@ import { useToast } from '@/hooks/common/useToast';
 
 const AdminPlayers: React.FC = () => {
   const [search, setSearch] = useState('');
+  const [ageGroup, setAgeGroup] = useState<'' | 'ADULT' | 'YOUTH'>('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 300);
     return () => clearTimeout(t);
   }, [search]);
-  const { data: players = [], isLoading, refetch, error } = usePlayersQuery(debouncedSearch);
+  const { data: players = [], isLoading, refetch, error } = usePlayersQuery(debouncedSearch, ageGroup || undefined);
   const toast = useToast();
   const create = useCreatePlayer();
   const update = useUpdatePlayer();
@@ -83,7 +84,7 @@ const AdminPlayers: React.FC = () => {
       onClick: (r) => setDegree.mutate({ id: r.id, data: { universityDegreeVerified: !r.universityDegreeVerified } }),
     },
     {
-      label: (r) => (r.status === 'ACTIVE' ? 'Desactivar' : 'Activar'),
+      label: (r) => (r.status === 'ACTIVE' ? 'Desactivar en todo el sistema' : 'Activar en todo el sistema'),
       icon: <PowerSettingsNewRounded fontSize="small" />,
       // Rojo si la acción va a desactivar, verde si va a reactivar.
       color: (r) => (r.status === 'ACTIVE' ? 'error' : 'success'),
@@ -103,10 +104,15 @@ const AdminPlayers: React.FC = () => {
     <Box>
       <PageHeader
         title="Jugadores"
-        subtitle="Registro único por documento. Un jugador puede estar en varias competiciones."
+        subtitle="Una ficha por jugador, con plantillas independientes. Un menor puede jugar en un equipo de Menores y en otro de Adultos si cumple el rango de edad."
         search={{ value: search, onChange: setSearch, placeholder: 'Buscar por nombre o documento…' }}
         action={<Button variant="contained" startIcon={<AddRounded />} onClick={() => { setEditingId(null); setForm({ documentType: 'CEDULA', documentNumber: '', firstName: '', lastName: '', birthDate: '', photoUrl: '', identityPhotoKey: '' }); setOpen(true); }}>Nuevo jugador</Button>}
       />
+      <Tabs value={ageGroup} onChange={(_, next) => setAgeGroup(next)} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile sx={{ mb: 2 }} aria-label="Jugadores por plantilla">
+        <Tab value="" label="Todos los jugadores" />
+        <Tab value="ADULT" label="Plantillas de Adultos" />
+        <Tab value="YOUTH" label="Plantillas de Menores" />
+      </Tabs>
       <DataTable
         columns={columns}
         rows={players}
@@ -115,8 +121,8 @@ const AdminPlayers: React.FC = () => {
         onRetry={refetch}
         getRowKey={(r) => r.id}
         actions={actions}
-        emptyTitle="Aún no hay jugadores"
-        emptyDescription="Crea el primer jugador para empezar."
+        emptyTitle={ageGroup ? `Sin jugadores inscritos en ${ageGroup === 'ADULT' ? 'Adultos' : 'Menores'}` : 'Aún no hay jugadores'}
+        emptyDescription="Los jugadores aparecen en cada apartado al agregarlos a la plantilla de una competición. Su ficha se registra una sola vez."
       />
 
       <AppDrawer open={open} onClose={() => { if (!uploadingPhotos && !create.isPending && !update.isPending) setOpen(false); }} title={editingId ? 'Editar jugador' : 'Nuevo jugador'}>
@@ -134,7 +140,7 @@ const AdminPlayers: React.FC = () => {
           </Stack>
           <TextField label="Fecha de nacimiento" type="date" fullWidth InputLabelProps={{ shrink: true }} value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} />
           <PlayerPhotoFields photoUrl={form.photoUrl} identityPhotoKey={form.identityPhotoKey} documentType={form.documentType} disabled={create.isPending || update.isPending} onPhotoChange={(value) => setForm((current) => ({ ...current, photoUrl: value }))} onIdentityChange={(value) => setForm((current) => ({ ...current, identityPhotoKey: value }))} onBusyChange={setUploadingPhotos} />
-          <Stack direction="row" spacing={1.5} justifyContent="flex-end">
+          <Stack direction={{ xs: 'column-reverse', sm: 'row' }} spacing={1.5} justifyContent="flex-end">
             <Button disabled={uploadingPhotos || create.isPending || update.isPending} onClick={() => setOpen(false)}>Cancelar</Button>
             <SaveButton onClick={submit} loading={create.isPending || update.isPending} error={create.isError || update.isError} disabled={uploadingPhotos || !form.photoUrl || !form.identityPhotoKey || !form.firstName || !form.lastName || !form.documentNumber || !form.birthDate}>
               {editingId ? 'Guardar cambios' : 'Crear jugador'}
@@ -152,7 +158,7 @@ const AdminPlayers: React.FC = () => {
           toast.success('Jugador desactivado');
         }}
         title="¿Desactivar jugador?"
-        message={`Se desactivará a "${deletingPlayer?.firstName} ${deletingPlayer?.lastName}". No podrá participar en competiciones.`}
+        message={`Se desactivará a "${deletingPlayer?.firstName} ${deletingPlayer?.lastName}" en todo el sistema, tanto Adultos como Menores. Para quitarlo solo de un equipo o torneo, dale de baja desde esa plantilla.`}
         confirmLabel="Desactivar"
         loading={setStatus.isPending}
       />

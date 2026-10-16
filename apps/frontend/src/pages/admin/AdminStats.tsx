@@ -30,7 +30,7 @@ const AdminStats: React.FC = () => {
   ];
   return <Box>
     <PageHeader title="Historial y estadísticas" subtitle="Consulta la trayectoria completa de jugadores y equipos, incluidas las ediciones terminadas y los registros inactivos." />
-    <Tabs value={kind} onChange={(_e, next) => { setKind(next); setFilters({ ...filters, page: 1, teamId: undefined }); }} sx={{ mb: 3 }}><Tab value="players" label="Jugadores" /><Tab value="teams" label="Equipos" /></Tabs>
+    <Tabs variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile value={kind} onChange={(_e, next) => { setKind(next); setFilters({ ...filters, page: 1, teamId: undefined }); }} sx={{ mb: 3 }}><Tab value="players" label="Jugadores" /><Tab value="teams" label="Equipos" /></Tabs>
     <HistoryControls key={kind} value={filters} onChange={setFilters} report teamFilter={kind === 'players'} />
     <Grid container spacing={2} sx={{ mb: 3 }}>
       <Grid size={{ xs: 12, sm: 4 }}><StatCard label={kind === 'players' ? 'Jugadores únicos' : 'Equipos únicos'} value={data?.summary.total ?? 0} icon={kind === 'players' ? <PersonRounded /> : <GroupsRounded />} loading={report.isPending} /></Grid>

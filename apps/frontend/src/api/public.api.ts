@@ -22,6 +22,13 @@ export interface PublicRegistration {
   group: { id: string; name: string } | null;
 }
 
+export interface PublicRosterEntry {
+  id: string;
+  jerseyNumber: number | null;
+  player: { id: string; firstName: string; lastName: string; photoUrl: string | null; position: string | null };
+  stats: { goals: number; matchesPlayed: number } | null;
+}
+
 /** Acotaciones de la lista de partidos: cuántos, en qué orden y si solo los que vienen. */
 export interface MatchListOpts {
   limit?: number;
@@ -94,6 +101,8 @@ export const publicApi = {
     })).data.data,
   registrations: async (editionId?: string, competitionId?: string): Promise<PublicRegistration[]> =>
     (await api.get('/public/registrations', { params: { editionId, competitionId } })).data.data,
+  roster: async (registrationId: string): Promise<PublicRosterEntry[]> =>
+    (await api.get(`/public/registrations/${registrationId}/roster`)).data.data,
   standings: async (competitionId: string, groupId?: string): Promise<StandingRow[]> =>
     (await api.get('/public/standings', { params: { competitionId, groupId } })).data.data,
   stats: async (competitionId?: string, editionId?: string): Promise<PlayerStatRow[]> =>

@@ -5,7 +5,7 @@ import { validate } from '@/middlewares/validate.middleware';
 import { audit } from '@/middlewares/audit.middleware';
 import { rostersController } from './rosters.controller';
 import { ownRegistration, ownRosterEntry } from '@/middlewares/team-ownership.middleware';
-import { addRosterSchema, updateRosterSchema, eligibilitySchema, createRosterPlayerSchema } from './rosters.schema';
+import { addRosterSchema, updateRosterSchema, eligibilitySchema, createRosterPlayerSchema, rosterCandidatesQuerySchema } from './rosters.schema';
 
 export const rostersRouter = Router();
 
@@ -16,6 +16,7 @@ const readRoster = [authMiddleware, requireRole('ADMIN', 'TEAM_LEADER', 'SCOREKE
 const adminOnly = [authMiddleware, requireRole('ADMIN')] as const;
 
 rostersRouter.get('/registrations/:registrationId/roster', ...readRoster, ownRegistration, rostersController.list);
+rostersRouter.get('/registrations/:registrationId/roster/candidates', ...staff, ownRegistration, validate(rosterCandidatesQuerySchema, 'query'), rostersController.candidates);
 rostersRouter.post(
   '/registrations/:registrationId/roster',
   ...staff,

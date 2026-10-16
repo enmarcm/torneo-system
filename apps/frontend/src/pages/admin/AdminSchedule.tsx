@@ -261,7 +261,7 @@ const AdminSchedule: React.FC = () => {
         subtitle="Sorteá los cruces y después asignales día y hora."
         action={
           !manageSchedule ? undefined : (
-          <Stack direction="row" spacing={1}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} useFlexGap flexWrap="wrap">
             {selectedComp && (
               <Button
                 variant="outlined"
@@ -282,8 +282,8 @@ const AdminSchedule: React.FC = () => {
         }
       />
 
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 3 }} alignItems="center">
-        <FormControl sx={{ minWidth: 280 }}>
+      <Stack direction={{ xs: 'column', lg: 'row' }} spacing={2} sx={{ mb: 3 }} alignItems={{ xs: 'stretch', lg: 'center' }}>
+        <FormControl sx={{ minWidth: { xs: 0, lg: 280 }, flex: 1 }}>
           <InputLabel>Competición</InputLabel>
           <Select
             label="Competición"
@@ -309,8 +309,8 @@ const AdminSchedule: React.FC = () => {
             ))}
           </Select>
         </FormControl>
-        <Stack direction="row" spacing={1} alignItems="center">
-          <IconButton size="small" onClick={() => setSelectedDate(dayjs(selectedDate).subtract(1, 'day').format('YYYY-MM-DD'))}>
+        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" alignItems="center" sx={{ minWidth: 0 }}>
+          <IconButton aria-label="Día anterior" size="small" onClick={() => setSelectedDate(dayjs(selectedDate).subtract(1, 'day').format('YYYY-MM-DD'))}>
             <ChevronLeftRounded />
           </IconButton>
           <TextField
@@ -319,9 +319,10 @@ const AdminSchedule: React.FC = () => {
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
             InputProps={{ sx: { borderRadius: 2 } }}
-            sx={{ minWidth: 180 }}
+            inputProps={{ 'aria-label': 'Fecha de los partidos' }}
+            sx={{ minWidth: 0, flex: '1 1 140px', width: { sm: 180 } }}
           />
-          <IconButton size="small" onClick={() => setSelectedDate(dayjs(selectedDate).add(1, 'day').format('YYYY-MM-DD'))}>
+          <IconButton aria-label="Día siguiente" size="small" onClick={() => setSelectedDate(dayjs(selectedDate).add(1, 'day').format('YYYY-MM-DD'))}>
             <ChevronRightRounded />
           </IconButton>
           <Button size="small" variant="outlined" onClick={() => setSelectedDate(today)} sx={{ flexShrink: 0 }}>
@@ -347,10 +348,12 @@ const AdminSchedule: React.FC = () => {
                 key={side.regId}
                 direction="row"
                 spacing={1}
+                useFlexGap
+                flexWrap="wrap"
                 alignItems="center"
                 sx={{ p: 1, borderRadius: 2, bgcolor: 'var(--surface2)' }}
               >
-                <Typography sx={{ flex: 1, fontWeight: 700, fontSize: 14, minWidth: 0 }} noWrap>
+                <Typography sx={{ flex: { xs: '1 0 100%', sm: 1 }, fontWeight: 700, fontSize: 14, minWidth: 0, overflowWrap: 'anywhere' }}>
                   {side.name}
                 </Typography>
                 <Button
@@ -405,7 +408,7 @@ const AdminSchedule: React.FC = () => {
 
       {/* El anotador puede abrir la asistencia sin recibir permisos de programación. */}
       {competitionId && (
-        <Tabs value={view} onChange={(_, v) => setView(v)} sx={{ mb: 2 }}>
+        <Tabs variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile value={view} onChange={(_, v) => setView(v)} sx={{ mb: 2 }}>
           <Tab value="day" label="Por día" sx={{ textTransform: 'none' }} />
           <Tab
             value="pending"
@@ -667,7 +670,7 @@ const AdminSchedule: React.FC = () => {
               }
               sx={{ alignItems: 'flex-start', m: 0 }}
             />
-            <Stack direction="row" spacing={1.5} justifyContent="flex-end">
+            <Stack direction={{ xs: 'column-reverse', sm: 'row' }} spacing={1.5} justifyContent="flex-end">
               <Button onClick={() => { setOpen(null); setEditingMatch(null); }}>Cancelar</Button>
               <SaveButton onClick={submit} loading={update.isPending} error={update.isError} disabled={!editForm.scheduledAt}>
                 {update.isPending ? 'Guardando…' : 'Guardar cambios'}
@@ -765,7 +768,7 @@ const AdminSchedule: React.FC = () => {
               }
               sx={{ alignItems: 'flex-start', m: 0 }}
             />
-            <Stack direction="row" spacing={1.5} justifyContent="flex-end">
+            <Stack direction={{ xs: 'column-reverse', sm: 'row' }} spacing={1.5} justifyContent="flex-end">
               <Button onClick={() => setOpen(null)}>Cancelar</Button>
               <SaveButton onClick={submit} loading={create.isPending} error={create.isError} disabled={!form.scheduledAt || !form.homeRegistrationId || !form.awayRegistrationId}>
                 {create.isPending ? 'Creando…' : 'Crear partido'}

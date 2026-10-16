@@ -44,6 +44,30 @@ const insertRoster = (tx: Prisma.TransactionClient, registration: { id: string; 
   });
 
 export const rostersService = {
+  /** Reutiliza la identidad del jugador aunque juegue para otro club en otro apartado. */
+  candidates: async (teamRegistrationId: string, search: string) => {
+    const registration = await prisma.teamRegistration.findUnique({ where: { id: teamRegistrationId }, include: { competition: true } });
+    if (!registration) throw new AppError(404, 'Inscripción no encontrada', 'NOT_FOUND');
+    const players = await prisma.player.findMany({
+      where: {
+        status: 'ACTIVE',
+        rosterEntries: { none: { teamRegistrationId } },
+        OR: [
+          { firstName: { contains: search, mode: 'insensitive' } },
+          { lastName: { contains: search, mode: 'insensitive' } },
+          { documentNumber: { contains: search } },
+        ],
+      },
+      select: { id: true, firstName: true, lastName: true, documentType: true, documentNumber: true, photoUrl: true, birthDate: true },
+      orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
+      take: 20,
+    });
+    const { ageMin, ageMax } = registration.competition;
+    return players.map(({ birthDate, documentNumber, ...player }) => {
+      const age = calcAge(birthDate);
+      return { ...player, documentMasked: `***${documentNumber.slice(-4)}`, eligible: (ageMin == null || age >= ageMin) && (ageMax == null || age <= ageMax) };
+    });
+  },
   list: (teamRegistrationId: string) =>
     prisma.rosterEntry.findMany({
       where: { teamRegistrationId },
@@ -89,7 +113,7 @@ export const rostersService = {
     if (!reg) throw new AppError(404, 'Inscripción no encontrada', 'NOT_FOUND');
 
     const others = await prisma.teamRegistration.findMany({
-      where: { teamId: reg.teamId, id: { not: teamRegistrationId } },
+      where: { teamId: reg.teamId, id: { not: teamRegistrationId }, competition: { ageGroup: reg.competition.ageGroup } },
       include: {
         competition: { include: { edition: { select: { id: true, name: true, year: true } } } },
         roster: {
@@ -141,6 +165,7 @@ export const rostersService = {
     return {
       source: {
         registrationId: source.id,
+        ageGroup: source.competition.ageGroup,
         competitionName: source.competition.name,
         editionName: source.competition.edition?.name ?? null,
         editionYear: source.competition.edition?.year ?? null,

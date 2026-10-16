@@ -24,7 +24,7 @@ const AdminPlayerDetail: React.FC = () => {
   const data = query.data, player = data.player;
   return <Box>
     <Button startIcon={<ArrowBackRounded />} onClick={() => navigate(ROUTES.admin.players)} sx={{ mb: 2 }}>Volver a jugadores</Button>
-    <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3 }}><Avatar src={player.photoUrl || undefined} sx={{ width: 64, height: 64 }} /><Box>
+    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'flex-start', sm: 'center' }} sx={{ mb: 3, minWidth: 0 }}><Avatar src={player.photoUrl || undefined} sx={{ width: 64, height: 64, flexShrink: 0 }} /><Box sx={{ minWidth: 0, width: '100%' }}>
       <PageHeader title={`${player.firstName} ${player.lastName}`} subtitle={`${player.documentType === 'CEDULA' ? 'C.I.' : 'P.N.'} ${player.documentNumber} · ${calcAge(player.birthDate)} años · Registro: ${formatDate(player.createdAt)}`} />
       <Stack direction="row" spacing={1.5} alignItems="center"><StatusBadge status={player.status} />{player.universityDegreeVerified && <Typography variant="caption" color="success.main">Título verificado</Typography>}</Stack>
     </Box></Stack>

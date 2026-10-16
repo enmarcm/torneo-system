@@ -45,7 +45,7 @@ export const NewRosterPlayer: React.FC<{
   return (
     <>
       <Button variant="contained" startIcon={<AddRounded />} disabled={disabled || (!registrationId && options.length === 0)} onClick={() => setOpen(true)}>Nuevo jugador</Button>
-      <AppDrawer open={open} onClose={close} title="Nuevo jugador" subtitle="El jugador queda inscrito directamente en la plantilla de este torneo.">
+      <AppDrawer open={open} onClose={close} title="Nuevo jugador" subtitle="El jugador queda inscrito en este torneo. Si ya existe en Adultos o Menores, búscalo en la plantilla con «Agregar jugador existente» para reutilizar su ficha.">
         <Stack spacing={2}>
           {!registrationId && <TextField select fullWidth label="Torneo" value={selectedId} disabled={create.isPending} onChange={(event) => setPickedRegistrationId(event.target.value)}>
             {options.map((registration) => <MenuItem key={registration.id} value={registration.id}>

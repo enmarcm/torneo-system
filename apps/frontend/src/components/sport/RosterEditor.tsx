@@ -20,7 +20,8 @@ import {
   RestoreRounded,
   HistoryRounded,
 } from '@mui/icons-material';
-import { usePlayersQuery, useRosterQuery, usePreviousRosterQuery } from '@/hooks/queries';
+import { useRosterCandidatesQuery, useRosterQuery, usePreviousRosterQuery } from '@/hooks/queries';
+import { useDebouncedValue } from '@/hooks/common/useDebouncedValue';
 import {
   useAddRoster,
   useUpdateRoster,
@@ -59,7 +60,9 @@ export const RosterEditor: React.FC<Props> = ({
   const [search, setSearch] = useState('');
   /* Lo que quedó afuera en la última importación, para poder resolverlo a mano. */
   const [skipped, setSkipped] = useState<Array<{ name: string; reason: string }> | null>(null);
-  const { data: candidates = [] } = usePlayersQuery(search.trim() || undefined);
+  const settledSearch = useDebouncedValue(search.trim());
+  const candidateQuery = useRosterCandidatesQuery(registrationId, settledSearch);
+  const candidates = candidateQuery.data ?? [];
   const add = useAddRoster();
   const update = useUpdateRoster();
   const remove = useRemoveRoster();
@@ -213,9 +216,14 @@ export const RosterEditor: React.FC<Props> = ({
         disabled={full}
       />
 
-      {search.trim().length > 0 && (
+      <Typography variant="caption" color="text.secondary">
+        Cada torneo tiene su propia plantilla. Puedes agregar a un jugador que ya esté en otro equipo de Adultos o Menores, si cumple la edad de esta competición.
+      </Typography>
+      {search.trim().length >= 2 && (
         <Stack spacing={0.5}>
-          {results.length === 0 ? (
+          {search.trim() !== settledSearch || candidateQuery.isFetching ? <Typography variant="caption" color="text.secondary">Buscando jugadores…</Typography> : candidateQuery.isError ? (
+            <ErrorState title="No pudimos buscar jugadores" onRetry={() => void candidateQuery.refetch()} retrying={candidateQuery.isFetching} />
+          ) : results.length === 0 ? (
             <Typography variant="caption" color="text.secondary">
               Sin jugadores para esa búsqueda. Puedes registrar uno nuevo en esta plantilla.
             </Typography>
@@ -236,14 +244,15 @@ export const RosterEditor: React.FC<Props> = ({
                     {p.firstName} {p.lastName}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {p.documentType === 'CEDULA' ? 'C.I.' : 'P.N.'} {p.documentNumber}
+                    {p.documentType === 'CEDULA' ? 'C.I.' : 'P.N.'} {p.documentMasked}
                   </Typography>
+                  {!p.eligible && <Typography variant="caption" color="error.main">No cumple la edad de esta competición</Typography>}
                 </Box>
                 <Button
                   size="small"
                   startIcon={<AddRounded />}
                   onClick={() => addPlayer(p.id)}
-                  disabled={add.isPending || full}
+                  disabled={add.isPending || full || !p.eligible}
                 >
                   Agregar
                 </Button>
@@ -272,7 +281,8 @@ export const RosterEditor: React.FC<Props> = ({
               direction="row"
               alignItems="center"
               spacing={1.5}
-              sx={{ p: 1, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}
+              useFlexGap
+              sx={{ p: 1, borderRadius: 2, border: '1px solid', borderColor: 'divider', display: { xs: 'grid', sm: 'flex' }, gridTemplateColumns: '32px minmax(0, 1fr) auto 44px', gap: { xs: 1, sm: 1.5 } }}
             >
               <Avatar
                 src={r.player.photoUrl ?? undefined}
@@ -281,7 +291,7 @@ export const RosterEditor: React.FC<Props> = ({
                 {r.player.firstName[0]}
               </Avatar>
               <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography sx={{ fontWeight: 600, fontSize: 14 }} noWrap>
+                <Typography sx={{ fontWeight: 600, fontSize: 14, overflowWrap: 'anywhere' }}>
                   {r.player.firstName} {r.player.lastName}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
@@ -294,7 +304,7 @@ export const RosterEditor: React.FC<Props> = ({
                 label="Dorsal"
                 defaultValue={r.jerseyNumber ?? ''}
                 onBlur={(e) => setJersey(r.id, e.target.value)}
-                sx={{ width: 90 }}
+                sx={{ width: { xs: '100%', sm: 90 }, minWidth: 0, gridColumn: '1 / -1', gridRow: 2, flexShrink: 0 }}
                 InputLabelProps={{ shrink: true }}
               />
               {canApproveEligibility ? (

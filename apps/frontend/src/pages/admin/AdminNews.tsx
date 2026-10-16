@@ -239,8 +239,8 @@ const AdminNews: React.FC = () => {
     const subject = a.edition?.name ?? a.competition?.name ?? a.team?.name;
     return (
       <Stack
-        direction="row"
-        alignItems="center"
+        direction={{ xs: 'column', sm: 'row' }}
+        alignItems={{ xs: 'stretch', sm: 'center' }}
         spacing={1.5}
         sx={{
           p: 1.25,
@@ -299,7 +299,7 @@ const AdminNews: React.FC = () => {
           </Typography>
         </Box>
 
-        <Stack direction="row" spacing={0.25}>
+        <Stack direction="row" spacing={0.25} useFlexGap flexWrap="wrap" justifyContent="flex-end">
           {published && (
             <Tooltip title="Ver en el sitio">
               <IconButton
@@ -435,7 +435,7 @@ const AdminNews: React.FC = () => {
         subtitle="Los números de la ficha se congelan al guardar. Después se pueden recalcular."
         width={720}
         footer={
-          <Stack direction="row" spacing={1.5} justifyContent="flex-end">
+          <Stack direction={{ xs: 'column-reverse', sm: 'row' }} spacing={1.5} justifyContent="flex-end">
             <Button onClick={() => setOpen(false)}>Cancelar</Button>
             <SaveButton
              
@@ -516,7 +516,7 @@ const AdminNews: React.FC = () => {
                 value={form.year}
                 onChange={(e) => set('year', e.target.value)}
                 helperText="Vacío = toda su historia"
-                sx={{ minWidth: 200 }}
+                sx={{ minWidth: 0, width: { xs: '100%', sm: 200 } }}
               >
                 <MenuItem value="">Todos los años</MenuItem>
                 {years.map((y) => (

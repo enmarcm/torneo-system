@@ -16,8 +16,8 @@ export const PageHeader: React.FC<Props> = ({ title, subtitle, action, search })
     spacing={2}
     sx={{ mb: 3 }}
   >
-    <Box>
-      <Typography variant="h2" sx={{ mb: 0.5 }}>
+    <Box sx={{ minWidth: 0 }}>
+      <Typography variant="h2" sx={{ mb: 0.5, overflowWrap: 'anywhere' }}>
         {title}
       </Typography>
       {subtitle && (
@@ -26,15 +26,16 @@ export const PageHeader: React.FC<Props> = ({ title, subtitle, action, search })
         </Typography>
       )}
     </Box>
-    <Stack direction="row" spacing={1.5} alignItems="center" sx={{ width: { xs: '100%', md: 'auto' } }}>
+    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} useFlexGap flexWrap="wrap" alignItems={{ xs: 'stretch', sm: 'center' }} sx={{ width: { xs: '100%', md: 'auto' }, minWidth: 0, '& > .MuiStack-root': { flexWrap: 'wrap', gap: 1, minWidth: 0 }, '& > .MuiButton-root': { width: { xs: '100%', sm: 'auto' } } }}>
       {search && (
         <TextField
           size="small"
           value={search.value}
           onChange={(e) => search.onChange(e.target.value)}
           placeholder={search.placeholder ?? 'Buscar…'}
+          inputProps={{ 'aria-label': search.placeholder ?? 'Buscar' }}
           InputProps={{ startAdornment: <SearchRounded sx={{ color: 'text.secondary', mr: 1 }} fontSize="small" /> }}
-          sx={{ minWidth: 240 }}
+          sx={{ minWidth: { xs: 0, sm: 240 }, width: { xs: '100%', sm: 'auto' }, flex: { sm: '1 1 240px', md: 'initial' } }}
         />
       )}
       {action}

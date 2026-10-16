@@ -73,13 +73,13 @@ const AdminEditions: React.FC = () => {
         <Grid container spacing={2}>
           {editions.map((ed) => (
             <Grid size={{ xs: 12, md: 6, lg: 4 }} key={ed.id}>
-              <Card component={motion.div} whileHover={{ y: -2 }} sx={{ p: 3 }}>
-                <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                  <Stack direction="row" alignItems="center" spacing={1.5}>
-                    <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: 'primary.soft', color: 'primary.main', display: 'grid', placeItems: 'center' }}>
+              <Card component={motion.div} whileHover={{ y: -2 }} sx={{ p: { xs: 2, sm: 3 } }}>
+                <Stack direction="row" spacing={1} justifyContent="space-between" alignItems="flex-start">
+                  <Stack direction="row" alignItems="center" spacing={1.5} sx={{ minWidth: 0 }}>
+                    <Box sx={{ width: 40, height: 40, flexShrink: 0, borderRadius: 2, bgcolor: 'primary.soft', color: 'primary.main', display: 'grid', placeItems: 'center' }}>
                       <EmojiEventsRounded />
                     </Box>
-                    <Box>
+                    <Box sx={{ minWidth: 0 }}>
                       <Typography variant="h4">{ed.name}</Typography>
                       <Typography variant="caption" color="text.secondary">Temporada {ed.seasonNumber} · {ed.year}</Typography>
                     </Box>
@@ -90,7 +90,7 @@ const AdminEditions: React.FC = () => {
                     </IconButton>
                   </Tooltip>
                 </Stack>
-                <Stack direction="row" spacing={1} sx={{ mt: 2, mb: 2 }}>
+                <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 2, mb: 2 }}>
                   <StatusBadge status={ed.status} />
                   <Chip size="small" label={`${formatDate(ed.startDate)} → ${formatDate(ed.endDate)}`} variant="outlined" />
                 </Stack>
@@ -156,7 +156,7 @@ const AdminEditions: React.FC = () => {
             </Stack>
             <TextField label="Fecha de inicio" type="date" fullWidth InputLabelProps={{ shrink: true }} {...register('startDate')} error={!!errors.startDate} helperText={errors.startDate?.message} />
             <TextField label="Fecha de fin" type="date" fullWidth InputLabelProps={{ shrink: true }} {...register('endDate')} error={!!errors.endDate} helperText={errors.endDate?.message} />
-            <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
+            <Stack direction={{ xs: 'column-reverse', sm: 'row' }} spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
               <Button onClick={() => setOpen(false)}>Cancelar</Button>
               <SaveButton type="submit" loading={create.isPending} error={create.isError}>
                 {create.isPending ? 'Creando…' : 'Crear edición'}

@@ -48,7 +48,7 @@ export const MatchAttendanceEditor: React.FC<{ matchId: string }> = ({ matchId }
           const presentCount = team.players.filter((entry) => valueFor(entry) === true).length;
           return (
             <Grid key={team.registrationId} size={{ xs: 12, md: 6 }}>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1} sx={{ mb: 1 }}>
+              <Stack direction="row" useFlexGap flexWrap="wrap" justifyContent="space-between" alignItems="center" spacing={1} sx={{ mb: 1 }}>
                 <Typography variant="h6" sx={{ minWidth: 0, overflowWrap: 'anywhere' }}>{team.team.name}</Typography>
                 <Chip size="small" variant="outlined" label={`${presentCount}/${team.players.length} presentes`} />
               </Stack>
@@ -66,7 +66,7 @@ export const MatchAttendanceEditor: React.FC<{ matchId: string }> = ({ matchId }
                       const name = `${entry.player.firstName} ${entry.player.lastName}`;
                       const present = valueFor(entry);
                       return (
-                        <Stack key={entry.rosterEntryId} direction="row" alignItems="center" spacing={1} sx={{ py: 1, minWidth: 0 }}>
+                        <Stack key={entry.rosterEntryId} direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'stretch', sm: 'center' }} spacing={1} sx={{ py: 1, minWidth: 0, '& > .MuiChip-root': { alignSelf: { xs: 'flex-end', sm: 'center' } } }}>
                           <FormControlLabel sx={{ m: 0, flex: 1, minWidth: 0, '& .MuiFormControlLabel-label': { minWidth: 0, flex: 1 } }} control={
                             <Checkbox checked={present === true} disabled={saveAttendance.isPending}
                               onChange={(_, checked) => setDraft((current) => ({ ...current, [entry.rosterEntryId]: checked }))}

@@ -17,6 +17,8 @@ import { usersApi, type ManagedUser } from '@/api/users.api';
 import type { UserRole } from '@/utils/roles';
 
 const REF_STALE = 5 * 60 * 1000;
+export const useRosterCandidatesQuery = (registrationId: string, search: string) =>
+  useQuery({ queryKey: ['roster-candidates', registrationId, search], queryFn: () => rostersApi.candidates(registrationId, search), enabled: !!registrationId && search.length >= 2, staleTime: 0 });
 const MID_STALE = 2 * 60 * 1000;
 const FRESH_STALE = 15 * 1000;
 /** Cada cuánto se refresca un partido en vivo si el socket no llega. Lo lee el anillo del chip EN VIVO. */
@@ -77,8 +79,8 @@ export const useTeamPlayersQuery = (teamId?: string) =>
     staleTime: MID_STALE,
   });
 
-export const usePlayersQuery = (search?: string) =>
-  useQuery({ queryKey: ['players', search], queryFn: () => playersApi.list(search), staleTime: MID_STALE });
+export const usePlayersQuery = (search?: string, ageGroup?: 'ADULT' | 'YOUTH') =>
+  useQuery({ queryKey: ['players', search, ageGroup], queryFn: () => playersApi.list(search, ageGroup), staleTime: MID_STALE });
 
 export const usePlayerQuery = (id: string) =>
   useQuery({ queryKey: ['players', id], queryFn: () => playersApi.get(id), enabled: !!id, staleTime: MID_STALE });
@@ -173,6 +175,9 @@ export const useDashboardMetricsQuery = (editionId: string) =>
   });
 
 // Public
+export const usePublicRosterQuery = (registrationId: string) =>
+  useQuery({ queryKey: ['public', 'roster', registrationId], queryFn: () => publicApi.roster(registrationId), enabled: !!registrationId, staleTime: FRESH_STALE });
+
 export const usePublicEditionsQuery = () =>
   useQuery({ queryKey: ['public', 'editions'], queryFn: publicApi.editions, staleTime: REF_STALE });
 export const usePublicCompetitionsQuery = (editionId?: string) =>

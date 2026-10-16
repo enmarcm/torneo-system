@@ -432,7 +432,7 @@ const AdminCompetitions: React.FC = () => {
       {editionId && <CompetitionSectionTabs value={ageGroup} onChange={setAgeGroup} competitions={competitions} />}
 
       {!editionId && (
-        <Card sx={{ p: 3, textAlign: 'center' }}>
+        <Card sx={{ p: { xs: 2, sm: 3 }, textAlign: 'center' }}>
           <Typography color="text.secondary">Selecciona una edición para ver sus competiciones.</Typography>
         </Card>
       )}
@@ -472,14 +472,14 @@ const AdminCompetitions: React.FC = () => {
                       setViewingCompetition(c);
                     }
                   }}
-                  sx={{ p: 3, cursor: 'pointer', '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 3 } }}
+                  sx={{ p: { xs: 2, sm: 3 }, cursor: 'pointer', '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 3 } }}
                 >
-                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                    <Stack direction="row" alignItems="center" spacing={1.5}>
-                      <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: 'primary.soft', color: 'primary.main', display: 'grid', placeItems: 'center' }}>
+                  <Stack direction="row" spacing={1} justifyContent="space-between" alignItems="flex-start">
+                    <Stack direction="row" alignItems="center" spacing={1.5} sx={{ minWidth: 0 }}>
+                      <Box sx={{ width: 40, height: 40, flexShrink: 0, borderRadius: 2, bgcolor: 'primary.soft', color: 'primary.main', display: 'grid', placeItems: 'center' }}>
                         <EmojiEventsRounded />
                       </Box>
-                      <Box>
+                      <Box sx={{ minWidth: 0 }}>
                         <Typography variant="h4">{c.name}</Typography>
                       </Box>
                     </Stack>
@@ -626,7 +626,7 @@ const AdminCompetitions: React.FC = () => {
                 <input type="number" value={editForm.maxPlayers} onChange={(e) => setEditForm({ ...editForm, maxPlayers: Number(e.target.value) })} style={{ width: '100%', padding: 10, borderRadius: 12, border: '1px solid var(--border)', fontSize: 14 }} />
               </Box>
             </Stack>
-            <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
+            <Stack direction={{ xs: 'column-reverse', sm: 'row' }} spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
               <Button onClick={() => { setOpen(null); setEditingComp(null); }}>Cancelar</Button>
               <SaveButton onClick={submit} loading={update.isPending} error={update.isError} disabled={!editForm.name.trim() || (editForm.kind === 'LEAGUE_DIVISION' && !editForm.divisionLevel)}>
                 {update.isPending ? 'Guardando…' : 'Guardar cambios'}
@@ -681,7 +681,7 @@ const AdminCompetitions: React.FC = () => {
                 <input type="number" value={form.maxPlayers} onChange={(e) => setForm({ ...form, maxPlayers: Number(e.target.value) })} style={{ width: '100%', padding: 10, borderRadius: 12, border: '1px solid var(--border)', fontSize: 14 }} />
               </Box>
             </Stack>
-            <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
+            <Stack direction={{ xs: 'column-reverse', sm: 'row' }} spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
               <Button onClick={() => { setOpen(null); setEditingComp(null); }}>Cancelar</Button>
               <SaveButton onClick={submit} loading={create.isPending} error={create.isError} disabled={!form.name.trim() || !formEditionId || (form.kind === 'LEAGUE_DIVISION' && !form.divisionLevel)}>
                 {create.isPending ? 'Creando…' : 'Crear competición'}

@@ -67,6 +67,11 @@ Confirmado en el código:
   aparece en dos escalones a la vez. Copa, menores y especiales no cuentan para
   la regla — ahí sí puede jugar en paralelo. La salida es explícita: marcar la
   inscripción actual como "No participa" libera al equipo.
+- **Plantillas de Adultos y Menores independientes.** Una ficha única por
+  documento puede estar en un club de Menores y otro club de Adultos. El rango
+  de edad lo define cada competición, sin un corte global obligatorio de 18
+  años. La baja de una inscripción no desactiva al jugador en las demás. Al
+  traer una plantilla anterior se conserva el apartado de destino.
 - **Elegibilidad al rostear**: rango de edad (calculado en zona horaria de
   Caracas) y, cuando la competición lo exige, habilitación explícita del
   administrador. Cupos mínimo y máximo de plantilla.

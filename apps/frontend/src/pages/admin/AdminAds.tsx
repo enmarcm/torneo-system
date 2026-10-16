@@ -185,8 +185,8 @@ const AdminAds: React.FC = () => {
     const state = STATE_META[adState(ad)];
     return (
       <Stack
-        direction="row"
-        alignItems="center"
+        direction={{ xs: 'column', sm: 'row' }}
+        alignItems={{ xs: 'stretch', sm: 'center' }}
         spacing={1.5}
         sx={{
           p: 1,
@@ -224,7 +224,7 @@ const AdminAds: React.FC = () => {
             {ad.linkUrl && ' · Con enlace'}
           </Typography>
         </Box>
-        <Stack direction="row" spacing={0.25}>
+        <Stack direction="row" spacing={0.25} useFlexGap flexWrap="wrap" justifyContent="flex-end">
           {ad.linkUrl && (
             <Tooltip title="Abrir destino">
               <IconButton size="small" component="a" href={ad.linkUrl} target="_blank" rel="noreferrer">
@@ -353,7 +353,7 @@ const AdminAds: React.FC = () => {
         subtitle="La imagen se muestra tal cual: subila ya recortada a la medida sugerida."
         width={520}
         footer={
-          <Stack direction="row" spacing={1.5} justifyContent="flex-end">
+          <Stack direction={{ xs: 'column-reverse', sm: 'row' }} spacing={1.5} justifyContent="flex-end">
             <Button onClick={() => setOpen(false)}>Cancelar</Button>
             <SaveButton
              

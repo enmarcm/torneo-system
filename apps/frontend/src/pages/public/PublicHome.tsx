@@ -7,7 +7,6 @@ import {
   usePublicEditionsQuery,
   usePublicCompetitionsQuery,
   usePublicMatchesQuery,
-  usePublicStandingsQuery,
   usePublicMatchQuery,
   usePublicNewsQuery,
 } from '@/hooks/queries';
@@ -17,13 +16,12 @@ import { PublicHero } from '@/components/sport/PublicHero';
 import { CompetitionCard } from '@/components/sport/CompetitionCard';
 import { AppModal } from '@/components/ui/AppModal';
 import { AdSlot } from '@/components/ui/AdSlot';
-import { StandingsTable } from '@/components/sport/StandingsTable';
 import { LoadingState, MatchCardSkeleton } from '@/components/ui/LoadingState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { NextMatchRow } from '@/components/sport/NextMatchRow';
 import { ROUTES } from '@/routes/routes';
-import { sortCompetitions, getCompetitionShortLabel } from '@/utils/competitionMeta';
+import { AGE_GROUP_LABELS, getCompetitionAgeGroup, sortCompetitions, getCompetitionShortLabel } from '@/utils/competitionMeta';
 import type { Edition, Competition, Match } from '@/api/public.api';
 import { ARTICLE_KIND_LABEL } from '@/api/news.api';
 
@@ -97,14 +95,6 @@ const PublicHome: React.FC = () => {
   const finished: Match[] = (finishedQuery.data ?? [])
     .filter((m: Match) => !todayIds.has(m.id))
     .slice(0, 4);
-
-  /*
-    La tabla es una de las tres preguntas que trae el visitante y hoy exige tres
-    toques. Se embebe la de la división más alta, que es la que mira la mayoría.
-  */
-  const topDivision = comps.find((c) => c.kind === 'LEAGUE_DIVISION') ?? comps[0];
-  const standingsQuery = usePublicStandingsQuery(topDivision?.id ?? '');
-  const standings = standingsQuery.data ?? [];
 
   /*
     Sin esto las cuatro consultas caían a `[]` ante cualquier fallo, así que
@@ -373,41 +363,38 @@ const PublicHome: React.FC = () => {
           </Box>
         )}
 
-        {topDivision && standings.length > 0 && (
-          <Box sx={{ mt: 3 }}>
-            <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 1.5 }}>
-              <Typography variant="h4" component="h2">
-                {getCompetitionShortLabel(topDivision)}
-              </Typography>
-              <Box sx={{ flex: 1 }} />
-              <Button
-                size="small"
-                onClick={() => navigate(`${ROUTES.public.competitions}?c=${topDivision.id}`)}
-              >
-                Tabla completa
-              </Button>
-            </Stack>
-            <StandingsTable rows={standings.slice(0, 5)} />
-          </Box>
-        )}
-
         <Box sx={{ mt: 3 }}>
           <Typography variant="h4" component="h2" sx={{ mb: 1.5 }}>Competiciones</Typography>
-          {compsQuery.isLoading && <LoadingState rows={1} height={130} />}
-          {/* En fila: con tres o cuatro torneos entran todos de una pasada. */}
-          <Grid container spacing={2}>
-            {comps.slice(0, 6).map((c: Competition) => (
-              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={c.id}>
-                <CompetitionCard
-                  competition={c}
-                  compact
-                  // Antes las seis tarjetas caían en la misma pantalla, que
-                  // arrancaba siempre en la primera división: tocabas "Tercera"
-                  // y aterrizabas en "Primera".
-                  onClick={() => navigate(`${ROUTES.public.competitions}?c=${c.id}`)}
-                />
-              </Grid>
-            ))}
+          <Grid container spacing={3}>
+            {(['YOUTH', 'ADULT'] as const).map((ageGroup) => {
+              const groupCompetitions = comps.filter((c) => getCompetitionAgeGroup(c) === ageGroup);
+              return (
+                <Grid size={{ xs: 12, md: 6 }} key={ageGroup}>
+                  <Box component="section" aria-labelledby={`home-competitions-${ageGroup}`}>
+                    <Typography id={`home-competitions-${ageGroup}`} variant="h4" component="h3" sx={{ mb: 1.5 }}>
+                      {AGE_GROUP_LABELS[ageGroup]}
+                    </Typography>
+                    {compsQuery.isLoading ? <LoadingState rows={1} height={148} /> : (
+                      <Stack spacing={2}>
+                        {groupCompetitions.map((c) => (
+                          <CompetitionCard
+                            key={c.id}
+                            competition={c}
+                            compact
+                            onClick={() => navigate(`${ROUTES.public.competitions}?c=${c.id}`)}
+                          />
+                        ))}
+                        {!compsQuery.isError && groupCompetitions.length === 0 && (
+                          <Typography color="text.secondary" variant="body2">
+                            No hay competiciones de {AGE_GROUP_LABELS[ageGroup].toLowerCase()} en esta edición.
+                          </Typography>
+                        )}
+                      </Stack>
+                    )}
+                  </Box>
+                </Grid>
+              );
+            })}
           </Grid>
         </Box>
       </Container>

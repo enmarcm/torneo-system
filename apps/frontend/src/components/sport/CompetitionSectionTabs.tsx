@@ -9,7 +9,7 @@ interface Props {
 }
 
 export const CompetitionSectionTabs: React.FC<Props> = ({ value, onChange, competitions }) => (
-  <Tabs value={value} onChange={(_, next: Competition['ageGroup']) => onChange(next)} aria-label="Apartados de competiciones" sx={{ mb: 2 }}>
+  <Tabs variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile value={value} onChange={(_, next: Competition['ageGroup']) => onChange(next)} aria-label="Apartados de competiciones" sx={{ mb: 2 }}>
     {(['ADULT', 'YOUTH'] as const).map((group) => (
       <Tab key={group} value={group} label={`${AGE_GROUP_LABELS[group]} (${competitions.filter((c) => getCompetitionAgeGroup(c) === group).length})`} sx={{ textTransform: 'none' }} />
     ))}

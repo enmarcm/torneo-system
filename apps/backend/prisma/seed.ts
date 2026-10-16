@@ -19,8 +19,8 @@ async function main() {
   const adminUsername = (process.env.ADMIN_USERNAME || 'admin').toLowerCase();
   const adminEmail = process.env.ADMIN_EMAIL || null;
   const adminPassword = process.env.ADMIN_PASSWORD;
-  if (!adminPassword || adminPassword.length < 12) {
-    throw new Error('ADMIN_PASSWORD es obligatorio y debe tener al menos 12 caracteres.');
+  if (!adminPassword || adminPassword.length < 6) {
+    throw new Error('ADMIN_PASSWORD es obligatorio y debe tener al menos 6 caracteres.');
   }
   const adminHash = await argon2.hash(adminPassword);
 

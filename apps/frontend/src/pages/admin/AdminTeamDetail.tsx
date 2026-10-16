@@ -29,7 +29,7 @@ const AdminTeamDetail: React.FC = () => {
   const historicalPlayers = data.career.flatMap((r) => r.roster.map((entry) => ({ ...entry, competition: r.competition })));
   return <Box>
     <Button startIcon={<ArrowBackRounded />} onClick={() => navigate(ROUTES.admin.teams)} sx={{ mb: 2 }}>Volver a equipos</Button>
-    <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3 }}><Avatar src={team.logoUrl || undefined} sx={{ width: 64, height: 64 }} /><Box>
+    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'flex-start', sm: 'center' }} sx={{ mb: 3, minWidth: 0 }}><Avatar src={team.logoUrl || undefined} sx={{ width: 64, height: 64, flexShrink: 0 }} /><Box sx={{ minWidth: 0, width: '100%' }}>
       <PageHeader title={team.name} subtitle={`${team.leader ? `Delegado: ${team.leader.username}` : 'Sin delegado asignado'} · Registro: ${formatDate(team.createdAt)}`} /><StatusBadge status={team.status} />
     </Box></Stack>
     <HistoryControls value={filters} onChange={(next) => { setRosterPage(0); setFilters(next); }} />

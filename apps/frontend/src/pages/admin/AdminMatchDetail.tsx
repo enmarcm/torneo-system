@@ -45,9 +45,9 @@ const AdminMatchDetail: React.FC = () => {
       </Stack>
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid size={{ xs: 12, lg: 7 }}>
-          <Card sx={{ p: 3, height: '100%' }}>
+          <Box sx={{ height: '100%' }}>
             <LiveScoreboard match={match} size="lg" />
-          </Card>
+          </Box>
         </Grid>
         <Grid size={{ xs: 12, lg: 5 }}>
           <MvpEditor match={match} />
@@ -63,7 +63,7 @@ const AdminMatchDetail: React.FC = () => {
         <Stack spacing={1}>
           {match.events.map((ev) => (
             <Card key={ev.id} sx={{ p: 2 }}>
-              <Stack direction="row" alignItems="center" spacing={2}>
+              <Stack direction="row" alignItems="center" spacing={2} useFlexGap flexWrap="wrap">
                 <Chip size="small" label={getStatusLabel(ev.type)} variant="outlined" />
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
                   {ev.player ? `${ev.player.firstName} ${ev.player.lastName}` : 'Autor sin definir'}

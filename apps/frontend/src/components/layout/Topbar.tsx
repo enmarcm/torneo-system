@@ -43,7 +43,7 @@ export const Topbar: React.FC<Props> = ({ onOpenSidebar }) => {
       }}
     >
       <RouteProgress />
-      <Toolbar sx={{ minHeight: 72, gap: 1.5, px: { xs: 2, md: 3 } }}>
+      <Toolbar sx={{ minHeight: 72, gap: { xs: 1, md: 1.5 }, flexWrap: { xs: 'wrap', sm: 'nowrap' }, py: { xs: 1, sm: 0 }, px: { xs: 2, md: 3 }, '& > .MuiIconButton-root': { flexShrink: 0 } }}>
         <IconButton onClick={handleHamburger} aria-label="Abrir menú">
           <MenuRounded />
         </IconButton>
@@ -51,12 +51,12 @@ export const Topbar: React.FC<Props> = ({ onOpenSidebar }) => {
           <Typography variant="h4" sx={{ lineHeight: 1.1, fontSize: { xs: 16, md: 20 } }} noWrap>
             Hola, {user?.username?.toUpperCase() ?? 'EQUIPO'}
           </Typography>
-          <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'capitalize' }}>
+          <Typography variant="caption" color="text.secondary" noWrap sx={{ textTransform: 'capitalize', display: { xs: 'none', sm: 'block' } }}>
             {todayLong()}
           </Typography>
         </Box>
 
-        <FormControl size="small" sx={{ minWidth: { xs: 120, md: 180 }, display: { xs: 'none', sm: 'inline-flex' } }}>
+        <FormControl size="small" sx={{ minWidth: { xs: 0, md: 180 }, width: { xs: '100%', sm: 180, md: 220 }, flexShrink: 0, order: { xs: 1, sm: 0 } }}>
           <Select
             value={selectedEditionId ?? ''}
             onChange={(e) => setSelectedEditionId(e.target.value || null)}

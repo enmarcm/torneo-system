@@ -8,12 +8,12 @@ import {
   Button,
   Chip,
 } from '@mui/material';
-import { ArrowBackRounded, PersonRounded, GroupsRounded } from '@mui/icons-material';
+import { ArrowBackRounded, GroupsRounded } from '@mui/icons-material';
 import { Crest } from '@/components/ui/Crest';
 import { useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { usePublicRegistrationsQuery, useTeamPlayersQuery } from '@/hooks/queries';
+import { usePublicRegistrationsQuery } from '@/hooks/queries';
 import { usePublicScope } from '@/hooks/common/usePublicScope';
 import { PublicScopeFilters } from '@/components/sport/PublicScopeFilters';
 import { CompetitionHeading } from '@/components/sport/CompetitionHeading';
@@ -25,7 +25,7 @@ import { getCompetitionSubtitle } from '@/utils/competitionMeta';
 import { ROUTES } from '@/routes/routes';
 import type { PublicRegistration } from '@/api/public.api';
 import type { Competition } from '@/api/competitions.api';
-import type { TeamRosterEntry } from '@/api/teams.api';
+import { CompetitionRoster } from '@/components/sport/CompetitionRoster';
 
 interface Selection {
   registration: PublicRegistration;
@@ -38,7 +38,6 @@ const PublicTeams: React.FC = () => {
   const [selected, setSelected] = useState<Selection | null>(null);
 
   const { data: registrations = [] } = usePublicRegistrationsQuery(scope.editionId);
-  const { data: players = [] } = useTeamPlayersQuery(selected?.registration.teamId);
 
   /** Cada competición con los equipos que se inscribieron en ella. */
   const sections = useMemo(
@@ -51,15 +50,6 @@ const PublicTeams: React.FC = () => {
   );
 
   const totalTeams = sections.reduce((acc, s) => acc + s.teams.length, 0);
-
-  // El plantel se pide por club, así que se acota a la competición abierta.
-  const roster = useMemo(
-    () =>
-      players.filter(
-        (p: TeamRosterEntry) => p.teamRegistration?.competition?.id === selected?.competition.id,
-      ),
-    [players, selected],
-  );
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -129,6 +119,15 @@ const PublicTeams: React.FC = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.2, delay: Math.min(i * 0.03, 0.2) }}
                         className="llf-cardlink"
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`Ver jugadores de ${r.team.name}`}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            setSelected({ registration: r, competition });
+                          }
+                        }}
                         sx={{ p: 3, textAlign: 'center', cursor: 'pointer' }}
                         onClick={() => setSelected({ registration: r, competition })}
                       >
@@ -177,39 +176,7 @@ const PublicTeams: React.FC = () => {
         {selected && (
           <Stack spacing={2}>
             <CompetitionTags competition={selected.competition} />
-            {roster.length === 0 ? (
-              <Typography color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
-                Este equipo todavía no tiene jugadores inscritos en esta competición.
-              </Typography>
-            ) : (
-              <Stack spacing={1}>
-                {roster.map((p: TeamRosterEntry) => (
-                  <Card key={p.id} sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Crest
-                      src={p.player.photoUrl ?? undefined}
-                      sx={{ width: 44, height: 44, bgcolor: 'primary.soft', color: 'primary.main', fontWeight: 700 }}
-                    >
-                      {p.player.firstName[0]}
-                      {p.player.lastName[0]}
-                    </Crest>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography sx={{ fontWeight: 600 }}>
-                        {p.player.firstName} {p.player.lastName}
-                      </Typography>
-                      <Stack direction="row" spacing={1} sx={{ mt: 0.25 }}>
-                        {p.jerseyNumber && (
-                          <Chip label={`#${p.jerseyNumber}`} size="small" variant="outlined" />
-                        )}
-                      </Stack>
-                    </Box>
-                    <Stack direction="row" spacing={1} sx={{ color: 'text.secondary' }}>
-                      <PersonRounded sx={{ fontSize: 16 }} />
-                      <Typography variant="caption">{p.stats?.goals ?? 0} goles</Typography>
-                    </Stack>
-                  </Card>
-                ))}
-              </Stack>
-            )}
+            <CompetitionRoster key={selected.registration.id} registrationId={selected.registration.id} />
           </Stack>
         )}
       </AppModal>

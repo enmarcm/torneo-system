@@ -5,7 +5,7 @@ import { playersService } from './players.service';
 
 export const playersController = {
   list: asyncHandler(async (req, res) =>
-    ok(res, await playersService.list(req.query.search as string | undefined, req.user?.role === 'TEAM_LEADER' ? (req.user.teamId ?? '') : undefined)),
+    ok(res, await playersService.list(req.query.search as string | undefined, req.user?.role === 'TEAM_LEADER' ? (req.user.teamId ?? '') : undefined, req.query.ageGroup as 'ADULT' | 'YOUTH' | undefined)),
   ),
   byDocument: asyncHandler(async (req, res) =>
     ok(res, await playersService.byDocument(req.query.type as 'CEDULA' | 'PARTIDA', req.query.number as string, req.user?.role === 'TEAM_LEADER' ? (req.user.teamId ?? '') : undefined)),

@@ -11,6 +11,7 @@ import { rostersService } from '../src/modules/rosters/rosters.service';
 import { teamsRouter } from '../src/modules/teams/teams.routes';
 import { rostersRouter } from '../src/modules/rosters/rosters.routes';
 import { playersRouter } from '../src/modules/players/players.routes';
+import { playersService } from '../src/modules/players/players.service';
 
 const stub = (t: TestContext, delegate: object, method: string, implementation: (...args: any[]) => any) => {
   const original = Reflect.get(delegate, method);
@@ -118,6 +119,15 @@ test('administrator registration appears to the owning delegate, who can add pla
   assert.equal((await fetch(`${base}/teams/other-club/registrations`, { headers })).status, 403);
   assert.equal((await fetch(`${base}/registrations/foreign-registration/roster/players`, { method: 'POST', headers, body: JSON.stringify({ ...input, documentNumber: '9999999' }) })).status, 403);
   assert.equal((await fetch(`${base}/players`, { method: 'POST', headers, body: JSON.stringify(input) })).status, 403);
+  stub(t, prisma.player, 'findMany', async () => [{ id: 'other-club-player', firstName: 'Ana', lastName: 'Perez', documentType: 'CEDULA', documentNumber: '12345678', photoUrl: input.photoUrl, birthDate: input.birthDate }]);
+  const candidates = await fetch(`${base}/registrations/${registrationId}/roster/candidates?search=Ana`, { headers });
+  assert.equal(candidates.status, 200);
+  const candidateBody = await candidates.json() as any;
+  assert.equal(candidateBody.data[0].id, 'other-club-player');
+  assert.equal(candidateBody.data[0].documentMasked, '***5678');
+  assert.equal((await fetch(`${base}/registrations/foreign-registration/roster/candidates?search=Ana`, { headers })).status, 403);
+  assert.equal((await fetch(`${base}/registrations/${registrationId}/roster/candidates?search=a`, { headers })).status, 422);
+  assert.equal((await fetch(`${base}/registrations/${registrationId}/roster/candidates?search=Ana`)).status, 401);
   assert.equal(state.profiles.length, 1);
   assert.equal(state.entries.length, 1);
 });
@@ -145,4 +155,81 @@ test('a failed roster insert rolls back the newly created profile', async (t) =>
   assert.equal(state.transaction.mock.callCount(), 1);
   assert.equal(state.profiles.length, 0);
   assert.equal(state.entries.length, 0);
+});
+
+test('a minor can play for different youth and adult clubs with independent entries and withdrawals', async (t) => {
+  const state = setup(t);
+  const birthDate = new Date(); birthDate.setUTCFullYear(birthDate.getUTCFullYear() - 16);
+  state.competition.ageMin = 12;
+  const youthCompetition = { ...state.competition, ageGroup: 'YOUTH', ageMax: 17 };
+  state.registration.competition = youthCompetition;
+  const youth = await rostersService.createPlayer(registrationId, { ...input, birthDate });
+  const adultRegistration = { ...state.registration, id: 'adult-registration', teamId: 'other-club', competition: { ...state.competition, id: 'adult-tournament', ageGroup: 'ADULT', ageMin: 15, ageMax: 50 } };
+  state.registrations.push(adultRegistration);
+  const adult = await rostersService.add(adultRegistration.id, youth.playerId, 12);
+  stub(t, prisma.rosterEntry, 'update', async ({ where, data }) => {
+    const entry = state.entries.find((row) => row.id === where.id); Object.assign(entry, data); return entry;
+  });
+  await rostersService.remove(youth.id);
+  assert.equal(state.profiles.length, 1);
+  assert.equal(state.entries.length, 2);
+  assert.equal(adult.playerId, youth.playerId);
+  assert.equal(adult.teamRegistrationId, 'adult-registration');
+  assert.equal(adult.jerseyNumber, 12);
+  assert.equal(youth.jerseyNumber, 9);
+  assert.equal(youth.status, 'INACTIVE');
+  assert.equal(adult.status, 'ACTIVE');
+  assert.equal(state.profiles[0].status, 'ACTIVE');
+});
+
+test('an adult outside the youth competition age range cannot enter its roster', async (t) => {
+  const state = setup(t);
+  const adult = await rostersService.createPlayer(registrationId, input);
+  state.registrations.push({ ...state.registration, id: 'youth-registration', teamId: 'youth-club', competition: { ...state.competition, ageGroup: 'YOUTH', ageMin: 12, ageMax: 17 } });
+  await assert.rejects(rostersService.add('youth-registration', adult.playerId), { code: 'AGE' });
+  assert.equal(state.profiles.length, 1);
+  assert.equal(state.entries.length, 1);
+  assert.equal(adult.status, 'ACTIVE');
+});
+
+test('candidate search finds another club player without returning birth dates or identity images', async (t) => {
+  const state = setup(t);
+  state.registration.competition = { ...state.competition, ageMin: 12, ageMax: 17, ageGroup: 'YOUTH' };
+  const birthDate = new Date(); birthDate.setUTCFullYear(birthDate.getUTCFullYear() - 16);
+  stub(t, prisma.player, 'findMany', async ({ where, select }) => {
+    assert.deepEqual(where.rosterEntries, { none: { teamRegistrationId: registrationId } });
+    assert.equal(select.identityPhotoKey, undefined);
+    return [{ id: 'other-club-minor', firstName: 'Ana', lastName: 'Perez', documentType: 'CEDULA', documentNumber: '12345678', photoUrl: input.photoUrl, birthDate },
+      { id: 'adult', firstName: 'Otro', lastName: 'Jugador', documentType: 'CEDULA', documentNumber: '87654321', photoUrl: input.photoUrl, birthDate: input.birthDate }];
+  });
+  const candidates = await rostersService.candidates(registrationId, 'Ana');
+  assert.equal(candidates[0].eligible, true);
+  assert.equal(candidates[1].eligible, false);
+  assert.equal(candidates[0].documentMasked, '***5678');
+  assert.equal('birthDate' in candidates[0], false);
+  assert.equal('documentNumber' in candidates[0], false);
+});
+
+test('previous roster selection stays within the destination adult or youth section', async (t) => {
+  const state = setup(t);
+  state.registration.competition = { ...state.competition, ageGroup: 'YOUTH' };
+  const find = stub(t, prisma.teamRegistration, 'findMany', async ({ where }) => {
+    assert.equal(where.competition.ageGroup, 'YOUTH');
+    assert.equal(where.teamId, 'club');
+    return [];
+  });
+  assert.equal(await rostersService.previous(registrationId), null);
+  assert.equal(find.mock.callCount(), 1);
+});
+
+test('player sections follow active memberships rather than an assumed adult birthday threshold', async (t) => {
+  const lookup = stub(t, prisma.player, 'findMany', async () => []);
+  await playersService.list('Ana', 'youth-club', 'YOUTH');
+  const query = lookup.mock.calls[0].arguments[0];
+  assert.deepEqual(query.where.AND[0].rosterEntries.some, {
+    status: 'ACTIVE', teamRegistration: { teamId: 'youth-club', competition: { ageGroup: 'YOUTH' } },
+  });
+  assert.equal(query.where.birthDate, undefined);
+  await playersService.list('Ana', undefined, 'ADULT');
+  assert.deepEqual(lookup.mock.calls[1].arguments[0].where.AND[0].rosterEntries.some.teamRegistration, { competition: { ageGroup: 'ADULT' } });
 });

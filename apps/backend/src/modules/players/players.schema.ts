@@ -1,5 +1,10 @@
 import { z } from 'zod';
 
+export const listPlayersQuerySchema = z.object({
+  search: z.string().trim().max(100).optional(),
+  ageGroup: z.enum(['ADULT', 'YOUTH']).optional(),
+});
+
 export const identityPhotoKeySchema = z.string().regex(/^identity\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.webp$/, 'Sube la foto del documento');
 
 export const createPlayerSchema = z.object({

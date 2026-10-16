@@ -312,7 +312,7 @@ const AdminUsers: React.FC = () => {
         label="Rol"
         value={roleFilter}
         onChange={(e) => setRoleFilter(e.target.value as UserRole | '')}
-        sx={{ minWidth: 240, mb: 2 }}
+        sx={{ minWidth: 0, width: { xs: '100%', sm: 240 }, mb: 2 }}
       >
         <MenuItem value="">Todos los roles</MenuItem>
         {USER_ROLES.map((r) => (
@@ -363,7 +363,8 @@ const AdminUsers: React.FC = () => {
               type={showPwd ? 'text' : 'password'}
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
-              helperText="Mínimo 12 caracteres."
+              helperText="Mínimo 6 caracteres, sin combinaciones obligatorias."
+              inputProps={{ minLength: 6 }}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -411,9 +412,9 @@ const AdminUsers: React.FC = () => {
               ))}
             </TextField>
           )}
-          <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
+          <Stack direction={{ xs: 'column-reverse', sm: 'row' }} spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
             <Button onClick={() => setOpen(false)}>Cancelar</Button>
-            <Button variant="contained" onClick={submit} disabled={saving}>
+            <Button variant="contained" onClick={submit} disabled={saving || (!editing && form.password.length < 6)}>
               {editing ? 'Guardar cambios' : 'Crear usuario'}
             </Button>
           </Stack>
@@ -437,7 +438,8 @@ const AdminUsers: React.FC = () => {
             value={newPassword}
             onChange={(e) => { setNewPassword(e.target.value); setPasswordError(null); }}
             error={!!passwordError}
-            helperText={passwordError || 'Mínimo 12 caracteres.'}
+            helperText={passwordError || 'Mínimo 6 caracteres, sin combinaciones obligatorias.'}
+            inputProps={{ minLength: 6 }}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -448,12 +450,12 @@ const AdminUsers: React.FC = () => {
               ),
             }}
           />
-          <Stack direction="row" spacing={1.5} justifyContent="flex-end">
+          <Stack direction={{ xs: 'column-reverse', sm: 'row' }} spacing={1.5} justifyContent="flex-end">
             <Button onClick={() => setPasswordFor(null)}>Cancelar</Button>
             <SaveButton
              
               onClick={submitPassword}
-              loading={setPassword.isPending} error={setPassword.isError} disabled={!newPassword}
+              loading={setPassword.isPending} error={setPassword.isError} disabled={newPassword.length < 6}
             >
               Guardar contraseña
             </SaveButton>

@@ -9,12 +9,13 @@ import {
   updatePlayerSchema,
   playerStatusSchema,
   degreeSchema,
+  listPlayersQuerySchema,
 } from './players.schema';
 
 export const playersRouter = Router();
 
 playersRouter.use(authMiddleware, requireRole('ADMIN', 'TEAM_LEADER'));
-playersRouter.get('/', playersController.list);
+playersRouter.get('/', validate(listPlayersQuerySchema, 'query'), playersController.list);
 playersRouter.get('/by-document', playersController.byDocument);
 playersRouter.get('/:id', playersController.get);
 playersRouter.get('/:id/competitions', playersController.competitions);

@@ -3,6 +3,16 @@ import type { Player } from './players.api';
 
 export type CreateRosterPlayerInput = Pick<Player, 'documentType' | 'documentNumber' | 'firstName' | 'lastName' | 'birthDate' | 'photoUrl' | 'identityPhotoKey'> & { jerseyNumber?: number };
 
+export interface RosterCandidate {
+  id: string;
+  firstName: string;
+  lastName: string;
+  photoUrl: string | null;
+  documentType: Player['documentType'];
+  documentMasked: string;
+  eligible: boolean;
+}
+
 export interface RosterEntry {
   id: string;
   playerId: string;
@@ -57,6 +67,8 @@ export interface ImportPreviousResult {
 }
 
 export const rostersApi = {
+  candidates: async (registrationId: string, search: string): Promise<RosterCandidate[]> =>
+    (await api.get(`/registrations/${registrationId}/roster/candidates`, { params: { search } })).data.data,
   createPlayer: async (registrationId: string, data: CreateRosterPlayerInput): Promise<RosterEntry> =>
     (await api.post(`/registrations/${registrationId}/roster/players`, data)).data.data,
   previous: async (registrationId: string): Promise<PreviousRoster | null> =>

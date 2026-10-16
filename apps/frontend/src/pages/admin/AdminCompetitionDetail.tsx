@@ -112,7 +112,7 @@ const AdminCompetitionDetail: React.FC = () => {
         title={comp.name}
         subtitle={getStatusLabel(comp.format)}
       />
-      <Stack direction="row" spacing={1} sx={{ mb: 3 }}>
+      <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mb: 3 }}>
         <StatusBadge status={comp.status} />
         {comp.division && <Chip size="small" label={comp.division} variant="outlined" />}
         <Chip size="small" label={`Edad: ${comp.ageMin ?? '—'}-${comp.ageMax ?? '∞'}`} variant="outlined" />
@@ -126,7 +126,7 @@ const AdminCompetitionDetail: React.FC = () => {
           <StatCard label="Partidos" value={comp._count?.matches ?? 0} icon={<SportsSoccerRounded />} tint="info" />
         </Grid>
       </Grid>
-      <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 3, borderBottom: 1, borderColor: 'divider' }}>
+      <Tabs variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 3, borderBottom: 1, borderColor: 'divider' }}>
         <Tab label="Tabla" icon={<TableChartRounded />} iconPosition="start" />
         <Tab label="Partidos" icon={<SportsSoccerRounded />} iconPosition="start" />
         <Tab label={`Equipos (${compTeams.length})`} icon={<GroupsRounded />} iconPosition="start" />
@@ -136,7 +136,7 @@ const AdminCompetitionDetail: React.FC = () => {
           {standings.length === 0 ? (
             <Card sx={{ p: 3, textAlign: 'center' }}><Typography color="text.secondary">Sin posiciones aún.</Typography></Card>
           ) : (
-            <StandingsTable rows={standings} />
+            <StandingsTable rows={standings} onTeamClick={(registrationId, teamName) => setRosterOf({ id: registrationId, teamName })} />
           )}
         </>
       )}
@@ -162,12 +162,12 @@ const AdminCompetitionDetail: React.FC = () => {
               {compTeams.map((r: any) => (
                 <Grid size={{ xs: 12, md: 6 }} key={r.id}>
                   <Card sx={{ p: 2.5 }}>
-                    <Stack direction="row" alignItems="center" spacing={1.5}>
+                    <Stack direction="row" alignItems="center" spacing={1.5} useFlexGap flexWrap="wrap">
                       <Avatar src={r.team?.logoUrl ?? undefined} sx={{ width: 40, height: 40, bgcolor: 'primary.soft', color: 'primary.main' }}>
                         {r.team?.name?.[0] ?? '?'}
                       </Avatar>
                       <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography sx={{ fontWeight: 600 }} noWrap>{r.team?.name ?? '—'}</Typography>
+                        <Button onClick={() => setRosterOf({ id: r.id, teamName: r.team?.name ?? 'el equipo' })} sx={{ p: 0, textAlign: 'left', justifyContent: 'flex-start', fontWeight: 600 }}>{r.team?.name ?? '—'}</Button>
                         <Typography variant="caption" color="text.secondary">{r.roster?.length ?? 0} jugadores</Typography>
                       </Box>
                       <StatusBadge status={r.status} />

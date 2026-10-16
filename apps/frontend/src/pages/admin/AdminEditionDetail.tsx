@@ -27,33 +27,33 @@ const AdminEditionDetail: React.FC = () => {
         title={edition.name}
         subtitle={`Temporada ${edition.seasonNumber} · ${edition.year}`}
       />
-      <Stack direction="row" spacing={1} sx={{ mb: 3 }}>
+      <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mb: 3 }}>
         <StatusBadge status={edition.status} />
         <Chip size="small" label={`${formatDate(edition.startDate)} → ${formatDate(edition.endDate)}`} variant="outlined" />
       </Stack>
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 4, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 4, md: 3 }}>
           <StatCard label="Competiciones" value={competitions.length} icon={<EmojiEventsRounded />} tint="primary" />
         </Grid>
-        <Grid size={{ xs: 4, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 4, md: 3 }}>
           <StatCard label="Equipos" value={metrics?.teams ?? 0} icon={<GroupsRounded />} tint="info" />
         </Grid>
-        <Grid size={{ xs: 4, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 4, md: 3 }}>
           <StatCard label="Partidos" value={metrics?.matchesPlayed ?? 0} icon={<SportsSoccerRounded />} tint="success" />
         </Grid>
       </Grid>
       <Typography variant="h4" sx={{ mb: 2 }}>Competiciones</Typography>
       {competitions.length === 0 ? (
-        <Card sx={{ p: 3, textAlign: 'center' }}>
+        <Card sx={{ p: { xs: 2, sm: 3 }, textAlign: 'center' }}>
           <Typography color="text.secondary">Esta edición no tiene competiciones.</Typography>
         </Card>
       ) : (
         <Grid container spacing={2}>
           {competitions.map((c) => (
             <Grid size={{ xs: 12, md: 6 }} key={c.id}>
-              <Card sx={{ p: 3, cursor: 'pointer' }} onClick={() => navigate(`/admin/competiciones/${c.id}`)}>
-                <Stack direction="row" alignItems="center" spacing={1.5}>
-                  <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: 'primary.soft', color: 'primary.main', display: 'grid', placeItems: 'center' }}>
+              <Card sx={{ p: { xs: 2, sm: 3 }, cursor: 'pointer' }} onClick={() => navigate(`/admin/competiciones/${c.id}`)}>
+                <Stack direction="row" alignItems="center" spacing={1.5} sx={{ minWidth: 0 }}>
+                  <Box sx={{ width: 40, height: 40, flexShrink: 0, borderRadius: 2, bgcolor: 'primary.soft', color: 'primary.main', display: 'grid', placeItems: 'center' }}>
                     <EmojiEventsRounded />
                   </Box>
                   <Box>

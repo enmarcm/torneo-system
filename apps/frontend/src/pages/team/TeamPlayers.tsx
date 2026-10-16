@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { SaveButton } from '@/components/ui/SaveButton';
 import {
   Box, Card, Typography, Avatar, Chip, Stack, Button, TextField, MenuItem,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Tabs, Tab,
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import {
@@ -30,7 +30,9 @@ import { ErrorState } from '@/components/ui/ErrorState';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useTeamRegistrationsQuery } from '@/hooks/queries';
-import { useUpdatePlayer, useSetPlayerStatus } from '@/hooks/mutations';
+import { useUpdatePlayer, useUpdateRoster } from '@/hooks/mutations';
+import { getCompetitionAgeGroup } from '@/utils/competitionMeta';
+import { canManageRoster } from '@/utils/teamRegistrations';
 import { playersApi } from '@/api/players.api';
 import type { Player } from '@/api/players.api';
 import { extractErrorMessage } from '@/api/axios';
@@ -42,6 +44,8 @@ interface PlayerRow {
   lastName: string;
   photoUrl: string | null;
   registrations: Array<{
+    rosterEntryId: string;
+    editable: boolean;
     competitionId: string;
     competitionName: string;
     jerseyNumber: number | null;
@@ -60,6 +64,7 @@ interface PlayerRow {
 interface PlayerCompetition {
   id: string;
   teamRegistration: {
+    id: string;
     team: { id: string; name: string; logoUrl: string | null };
     competition: { id: string; name: string; };
   };
@@ -92,7 +97,10 @@ const TeamPlayers: React.FC = () => {
   const { data: registrations = [], isLoading, error, refetch } = useTeamRegistrationsQuery(teamId ?? undefined, true);
   const toast = useToast();
   const updatePlayer = useUpdatePlayer();
-  const setStatus = useSetPlayerStatus();
+  const updateRoster = useUpdateRoster();
+  const [pickedAgeGroup, setAgeGroup] = useState<'ADULT' | 'YOUTH' | null>(null);
+  const ageGroup = pickedAgeGroup ?? (registrations.some((r) => getCompetitionAgeGroup(r.competition) === 'ADULT') ? 'ADULT' : 'YOUTH');
+  const sectionRegistrations = useMemo(() => registrations.filter((r) => getCompetitionAgeGroup(r.competition) === ageGroup), [registrations, ageGroup]);
 
   // Edit drawer
   const [editId, setEditId] = useState<string | null>(null);
@@ -127,6 +135,7 @@ const TeamPlayers: React.FC = () => {
     queryFn: () => playersApi.competitions(detailPlayerId!) as Promise<PlayerCompetition[]>,
     enabled: !!detailPlayerId,
   });
+  const sectionPlayerCompetitions = playerCompetitions.filter((entry) => sectionRegistrations.some((r) => r.id === entry.teamRegistration.id));
 
   const detailPlayerInfo = useMemo(() => {
     if (!detailPlayerId) return null;
@@ -142,7 +151,7 @@ const TeamPlayers: React.FC = () => {
 
   const players = useMemo(() => {
     const map = new Map<string, PlayerRow>();
-    registrations.forEach((reg) => {
+    sectionRegistrations.forEach((reg) => {
       reg.roster.forEach((e) => {
         if (!map.has(e.player.id)) {
           map.set(e.player.id, {
@@ -154,6 +163,8 @@ const TeamPlayers: React.FC = () => {
           });
         }
         map.get(e.player.id)!.registrations.push({
+          rosterEntryId: e.id,
+          editable: canManageRoster(reg),
           competitionId: reg.competition.id,
           competitionName: reg.competition.name,
           jerseyNumber: e.jerseyNumber,
@@ -163,7 +174,7 @@ const TeamPlayers: React.FC = () => {
       });
     });
     return Array.from(map.values());
-  }, [registrations]);
+  }, [sectionRegistrations]);
 
   const inactiveCount = useMemo(
     () => players.filter((p) => p.registrations.every((r) => r.entryStatus === 'INACTIVE')).length,
@@ -243,13 +254,19 @@ const TeamPlayers: React.FC = () => {
     {
       label: (r) => {
         const anyActive = r.registrations.some((reg) => reg.entryStatus === 'ACTIVE');
-        return anyActive ? 'Desactivar' : 'Activar';
+        return anyActive ? 'Dar de baja en este apartado' : 'Reincorporar en este apartado';
       },
       icon: <PowerSettingsNewRounded fontSize="small" />,
       color: 'error',
-      onClick: (r) => {
+      onClick: async (r) => {
         const anyActive = r.registrations.some((reg) => reg.entryStatus === 'ACTIVE');
-        setStatus.mutate({ id: r.id, status: anyActive ? 'INACTIVE' : 'ACTIVE' });
+        const status = anyActive ? 'INACTIVE' as const : 'ACTIVE' as const;
+        const entries = r.registrations.filter((entry) => entry.editable && entry.entryStatus !== status);
+        if (!entries.length) { toast.error('Esta plantilla es histórica o está cerrada. Solo puedes consultarla.'); return; }
+        try {
+          await Promise.all(entries.map((entry) => updateRoster.mutateAsync({ id: entry.rosterEntryId, data: { status } })));
+          toast.success(status === 'ACTIVE' ? 'Jugador reincorporado en este apartado' : 'Jugador dado de baja solo en este apartado');
+        } catch (err) { toast.error(extractErrorMessage(err)); }
       },
     },
   ];
@@ -261,16 +278,21 @@ const TeamPlayers: React.FC = () => {
     <Box>
       <PageHeader
         title="Jugadores"
-        subtitle="Todos los jugadores registrados en las competiciones de tu equipo."
-        action={<NewRosterPlayer registrations={registrations} />}
+        subtitle="Adultos y Menores tienen plantillas independientes. Las bajas de un apartado no afectan al otro."
+        action={<NewRosterPlayer key={ageGroup} registrations={sectionRegistrations} />}
       />
+
+      <Tabs value={ageGroup} onChange={(_, next) => { setAgeGroup(next); setDetailOpen(false); setDetailPlayerId(null); }} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile sx={{ mb: 3 }} aria-label="Plantillas de jugadores">
+        <Tab value="ADULT" label="Adultos" />
+        <Tab value="YOUTH" label="Menores" />
+      </Tabs>
 
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid size={{ xs: 6, md: 4 }}>
           <StatCard label="Jugadores" value={players.length} icon={<PersonRounded />} tint="primary" />
         </Grid>
         <Grid size={{ xs: 6, md: 4 }}>
-          <StatCard label="Inscripciones" value={registrations.length} icon={<FlagRounded />} tint="info" />
+          <StatCard label="Inscripciones" value={sectionRegistrations.length} icon={<FlagRounded />} tint="info" />
         </Grid>
         <Grid size={{ xs: 6, md: 4 }}>
           <StatCard label="Inactivos" value={inactiveCount} icon={<FlagRounded />} tint="warning" />
@@ -400,9 +422,9 @@ const TeamPlayers: React.FC = () => {
             {/* Registrations */}
             <Box>
               <Typography variant="h4" sx={{ mb: 1.5 }}>
-                Competiciones ({playerCompetitions.length})
+                Competiciones ({sectionPlayerCompetitions.length})
               </Typography>
-              {playerCompetitions.length === 0 ? (
+              {sectionPlayerCompetitions.length === 0 ? (
                 <Typography variant="body2" color="text.secondary">
                   Este jugador no está inscrito en ninguna competición.
                 </Typography>
@@ -423,7 +445,7 @@ const TeamPlayers: React.FC = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {playerCompetitions.map((pc) => (
+                      {sectionPlayerCompetitions.map((pc) => (
                         <TableRow key={pc.id} hover>
                           <TableCell>
                             <Typography variant="body2" sx={{ fontWeight: 500 }}>

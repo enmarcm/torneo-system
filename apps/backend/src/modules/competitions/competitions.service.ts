@@ -170,6 +170,29 @@ export const competitionsService = {
       orderBy: { team: { name: 'asc' } },
     }),
 
+  publicRoster: async (registrationId: string) => {
+    const registration = await prisma.teamRegistration.findUnique({
+      where: { id: registrationId },
+      select: {
+        status: true,
+        roster: {
+          where: { status: 'ACTIVE', player: { status: 'ACTIVE' } },
+          orderBy: [{ player: { lastName: 'asc' } }, { player: { firstName: 'asc' } }],
+          select: {
+            id: true,
+            jerseyNumber: true,
+            player: { select: { id: true, firstName: true, lastName: true, photoUrl: true, position: true } },
+            stats: { select: { goals: true, matchesPlayed: true } },
+          },
+        },
+      },
+    });
+    if (!registration || registration.status !== 'ACTIVE') {
+      throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
+    }
+    return registration.roster;
+  },
+
   get: async (id: string) => {
     const c = await prisma.competition.findUnique({
       where: { id },

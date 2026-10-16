@@ -185,7 +185,7 @@ export const useAddRoster = () => {
   return useMutation({
     mutationFn: ({ registrationId, data }: { registrationId: string; data: { playerId: string; jerseyNumber?: number } }) =>
       rostersApi.add(registrationId, data),
-    onSuccess: (_d, vars) => invalidate(qc, [['roster', vars.registrationId], ['teams'], ['match-attendance']]),
+    onSuccess: (_d, vars) => invalidate(qc, [['roster', vars.registrationId], ['roster-candidates', vars.registrationId], ['public', 'roster', vars.registrationId], ['players'], ['competitions'], ['teams'], ['match-attendance']]),
   });
 };
 /** Copia la plantilla del torneo anterior a esta inscripción. */
@@ -194,7 +194,7 @@ export const useImportPreviousRoster = () => {
   return useMutation({
     mutationFn: (registrationId: string) => rostersApi.importPrevious(registrationId),
     onSuccess: (_d, registrationId) =>
-      invalidate(qc, [['roster', registrationId], ['roster'], ['teams']]),
+      invalidate(qc, [['roster', registrationId], ['roster'], ['roster-candidates'], ['public', 'roster', registrationId], ['players'], ['competitions'], ['teams']]),
   });
 };
 export const useUpdateRoster = () => {
@@ -202,7 +202,7 @@ export const useUpdateRoster = () => {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: { jerseyNumber?: number; status?: 'ACTIVE' | 'INACTIVE' } }) =>
       rostersApi.update(id, data),
-    onSuccess: () => invalidate(qc, [['roster'], ['teams'], ['match-attendance']]),
+    onSuccess: () => invalidate(qc, [['roster'], ['roster-candidates'], ['public', 'roster'], ['players'], ['competitions'], ['teams'], ['match-attendance']]),
   });
 };
 export const useSetEligibility = () => {
@@ -216,7 +216,7 @@ export const useRemoveRoster = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: rostersApi.remove,
-    onSuccess: () => invalidate(qc, [['roster'], ['teams'], ['match-attendance']]),
+    onSuccess: () => invalidate(qc, [['roster'], ['roster-candidates'], ['public', 'roster'], ['players'], ['competitions'], ['teams'], ['match-attendance']]),
   });
 };
 
@@ -512,6 +512,6 @@ export const useCreateRosterPlayer = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ registrationId, data }: { registrationId: string; data: CreateRosterPlayerInput }) => rostersApi.createPlayer(registrationId, data),
-    onSuccess: (_entry, { registrationId }) => invalidate(qc, [['roster', registrationId], ['teams'], ['players'], ['match-attendance']]),
+    onSuccess: (_entry, { registrationId }) => invalidate(qc, [['roster', registrationId], ['roster-candidates'], ['public', 'roster', registrationId], ['competitions'], ['teams'], ['players'], ['match-attendance']]),
   });
 };

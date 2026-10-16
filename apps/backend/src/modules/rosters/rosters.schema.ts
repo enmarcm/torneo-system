@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { createPlayerSchema } from '../players/players.schema';
 
+export const rosterCandidatesQuerySchema = z.object({ search: z.string().trim().min(2).max(100) });
+
 export const addRosterSchema = z.object({
   playerId: z.string().uuid(),
   jerseyNumber: z.number().int().optional(),

@@ -256,16 +256,16 @@ const AdminTeams: React.FC = () => {
           <Button variant="contained" startIcon={<AddRounded />} onClick={onOpenCreate}>Nuevo equipo</Button>
         }
       />
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 3 }} flexWrap="wrap">
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} useFlexGap sx={{ mb: 3 }} flexWrap="wrap">
         <TextField
           size="small"
           placeholder="Buscar equipo…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           InputProps={{ startAdornment: <InputAdornment position="start"><SearchRounded sx={{ fontSize: 18 }} /></InputAdornment> }}
-          sx={{ minWidth: 220 }}
+          sx={{ minWidth: 0, flex: { sm: '1 1 220px' }, width: { xs: '100%', sm: 'auto' } }}
         />
-        <FormControl size="small" sx={{ minWidth: 160 }}>
+        <FormControl size="small" sx={{ minWidth: 0, flex: { sm: '1 1 160px' }, width: { xs: '100%', sm: 'auto' } }}>
           <InputLabel>Estado</InputLabel>
           <Select label="Estado" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as string)}>
             <MenuItem value="">Todos</MenuItem>
@@ -273,7 +273,7 @@ const AdminTeams: React.FC = () => {
             <MenuItem value="INACTIVE">Inactivo</MenuItem>
           </Select>
         </FormControl>
-        <FormControl size="small" sx={{ minWidth: 180 }}>
+        <FormControl size="small" sx={{ minWidth: 0, flex: { sm: '1 1 180px' }, width: { xs: '100%', sm: 'auto' } }}>
           <InputLabel>Competición</InputLabel>
           <Select label="Competición" value={filterCompetition} onChange={(e) => setFilterCompetition(e.target.value as string)}>
             <MenuItem value="">Todas</MenuItem>
@@ -303,7 +303,7 @@ const AdminTeams: React.FC = () => {
               label="Subir logo del equipo"
               hint="512 × 512 px (cuadrado, preferí PNG con fondo transparente)"
             />
-            <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
+            <Stack direction={{ xs: 'column-reverse', sm: 'row' }} spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
               <Button onClick={() => { setOpen(null); setEditingTeam(null); }}>Cancelar</Button>
               <SaveButton onClick={submit} loading={update.isPending} error={update.isError} disabled={!editForm.name}>
                 {update.isPending ? 'Guardando…' : 'Guardar cambios'}
@@ -326,10 +326,10 @@ const AdminTeams: React.FC = () => {
               onChange={(e) => setForm({ ...form, leaderUsername: e.target.value.toLowerCase().replace(/\s+/g, '') })}
               helperText="Con esto entra al sistema. Letras sin acentos, números, punto, guion y guion bajo."
             />
-            <TextField label="Contraseña del delegado" type="text" fullWidth value={form.leaderPassword} onChange={(e) => setForm({ ...form, leaderPassword: e.target.value })} helperText="Mínimo 12 caracteres. Entregásela al delegado junto con el usuario." />
-            <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
+            <TextField label="Contraseña del delegado" type="text" fullWidth value={form.leaderPassword} onChange={(e) => setForm({ ...form, leaderPassword: e.target.value })} inputProps={{ minLength: 6 }} helperText="Mínimo 6 caracteres, sin combinaciones obligatorias. Entregásela al delegado junto con el usuario." />
+            <Stack direction={{ xs: 'column-reverse', sm: 'row' }} spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
               <Button onClick={() => { setOpen(null); setEditingTeam(null); }}>Cancelar</Button>
-              <SaveButton onClick={submit} loading={create.isPending} error={create.isError} disabled={!form.name || !form.leaderUsername || !form.leaderPassword}>
+              <SaveButton onClick={submit} loading={create.isPending} error={create.isError} disabled={!form.name || !form.leaderUsername || form.leaderPassword.length < 6}>
                 {create.isPending ? 'Creando…' : 'Crear equipo'}
               </SaveButton>
             </Stack>
@@ -465,7 +465,7 @@ const AdminTeams: React.FC = () => {
                 )}
               </Card>
             )}
-            <Stack direction="row" spacing={1.5} justifyContent="flex-end">
+            <Stack direction={{ xs: 'column-reverse', sm: 'row' }} spacing={1.5} justifyContent="flex-end">
               <Button onClick={() => setRegOpen(null)}>Cancelar</Button>
               <SaveButton loading={register.isPending} error={register.isError} disabled={!regOpen.competitionId} onClick={async () => {
                 try {

@@ -96,8 +96,8 @@ export const LiveScoreboard: React.FC<Props> = ({ match, showFeed = true, size =
   const scoreSize = size === 'lg' ? 64 : size === 'md' ? 48 : 32;
 
   return (
-    <Card sx={{ p: 3, overflow: 'hidden' }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+    <Card sx={{ p: { xs: 2, sm: 3 }, overflow: 'hidden' }}>
+      <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
         <Box sx={{ minWidth: 0 }}>
           {match.competition && (
             <Typography
@@ -162,15 +162,15 @@ export const LiveScoreboard: React.FC<Props> = ({ match, showFeed = true, size =
         )}
       </Stack>
 
-      <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
-        <Stack alignItems="center" sx={{ flex: 1 }}>
-          <Crest alt={match.homeRegistration.team.name} src={match.homeRegistration.team.logoUrl ?? undefined} sx={{ width: 64, height: 64, mb: 1 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto minmax(0, 1fr)', gap: { xs: 1, sm: 2 }, alignItems: 'center' }}>
+        <Stack alignItems="center" sx={{ minWidth: 0 }}>
+          <Crest alt={match.homeRegistration.team.name} src={match.homeRegistration.team.logoUrl ?? undefined} sx={{ width: { xs: 44, sm: 64 }, height: { xs: 44, sm: 64 }, mb: 1 }}>
             {match.homeRegistration.team.name[0]}
           </Crest>
-          <Typography sx={{ fontWeight: 600, textAlign: 'center' }}>{match.homeRegistration.team.name}</Typography>
+          <Typography sx={{ fontWeight: 600, textAlign: 'center', fontSize: { xs: 13, sm: 15 }, overflowWrap: 'anywhere' }}>{match.homeRegistration.team.name}</Typography>
         </Stack>
 
-        <Stack alignItems="center" sx={{ minWidth: 120 }}>
+        <Stack alignItems="center" sx={{ minWidth: { xs: 0, sm: 120 }, width: { xs: 104, sm: 'auto' }, overflowWrap: 'anywhere' }}>
           {/*
             El marcador cambia solo por socket. Sin `aria-live` el cambio ocurre
             en silencio: quien escucha la pantalla nunca se entera del gol.
@@ -205,7 +205,8 @@ export const LiveScoreboard: React.FC<Props> = ({ match, showFeed = true, size =
               sx={{
                 fontFamily: '"Plus Jakarta Sans", sans-serif',
                 fontWeight: 800,
-                fontSize: scoreSize,
+                fontSize: { xs: Math.min(scoreSize, 28), sm: scoreSize },
+                whiteSpace: 'nowrap',
                 fontVariantNumeric: 'tabular-nums',
                 color: isLive ? 'var(--live)' : 'text.primary',
                 lineHeight: 1,
@@ -231,13 +232,13 @@ export const LiveScoreboard: React.FC<Props> = ({ match, showFeed = true, size =
           {isFinished && <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>Final</Typography>}
         </Stack>
 
-        <Stack alignItems="center" sx={{ flex: 1 }}>
-          <Crest alt={match.awayRegistration.team.name} src={match.awayRegistration.team.logoUrl ?? undefined} sx={{ width: 64, height: 64, mb: 1 }}>
+        <Stack alignItems="center" sx={{ minWidth: 0 }}>
+          <Crest alt={match.awayRegistration.team.name} src={match.awayRegistration.team.logoUrl ?? undefined} sx={{ width: { xs: 44, sm: 64 }, height: { xs: 44, sm: 64 }, mb: 1 }}>
             {match.awayRegistration.team.name[0]}
           </Crest>
-          <Typography sx={{ fontWeight: 600, textAlign: 'center' }}>{match.awayRegistration.team.name}</Typography>
+          <Typography sx={{ fontWeight: 600, textAlign: 'center', fontSize: { xs: 13, sm: 15 }, overflowWrap: 'anywhere' }}>{match.awayRegistration.team.name}</Typography>
         </Stack>
-      </Stack>
+      </Box>
 
       {showFeed && events.length > 0 && (
         <Box sx={{ mt: 3, borderTop: '1px solid', borderColor: 'divider', pt: 2 }}>

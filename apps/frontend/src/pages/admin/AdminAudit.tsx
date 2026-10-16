@@ -16,9 +16,9 @@ const AdminAudit: React.FC = () => {
   return (
     <Box>
       <PageHeader title="Auditoría" subtitle="Registro de acciones sensibles del sistema." />
-      <Card sx={{ p: 3 }}>
+      <Card sx={{ p: { xs: 2, sm: 3 } }}>
         <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-          <TextField select size="small" label="Entidad" value={entity} onChange={(e) => setEntity(e.target.value)} sx={{ minWidth: 200 }}>
+          <TextField select size="small" label="Entidad" value={entity} onChange={(e) => setEntity(e.target.value)} sx={{ minWidth: 0, width: { xs: '100%', sm: 200 } }}>
             <MenuItem value="">Todas</MenuItem>
             {['User', 'Edition', 'Category', 'Competition', 'Team', 'Player', 'RosterEntry', 'Match'].map((e) => (
               <MenuItem key={e} value={e}>{e}</MenuItem>
@@ -35,7 +35,7 @@ const AdminAudit: React.FC = () => {
                 <Typography variant="caption" color="text.secondary" sx={{ minWidth: 160 }}>{formatDateTime(row.createdAt)}</Typography>
                 <Chip size="small" label={row.action} variant="outlined" />
                 <Chip size="small" label={row.entity} variant="outlined" color="primary" />
-                <Typography variant="body2" color="text.secondary" noWrap sx={{ flex: 1 }}>{row.userId ?? 'sistema'}</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>{row.userId ?? 'sistema'}</Typography>
               </Stack>
             ))}
           </Stack>

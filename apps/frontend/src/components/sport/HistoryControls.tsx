@@ -14,7 +14,7 @@ export const HistoryControls: React.FC<{ value: HistoryFilters; onChange: (filte
   const teams = useQuery({ queryKey: ['history', 'team-options', settledTeamSearch], queryFn: () => historyApi.report('teams', { q: settledTeamSearch, sort: 'name', limit: 25 }), enabled: teamFilter, staleTime: 30000 });
   const set = (key: keyof HistoryFilters, next: unknown) => onChange({ ...value, [key]: next || undefined, page: 1 });
   const available = competitions.filter((c) => (!value.ageGroup || c.ageGroup === value.ageGroup));
-  return <Card sx={{ p: 2.5, mb: 3 }}><Stack direction="row" useFlexGap flexWrap="wrap" gap={2}>
+  return <Card sx={{ p: { xs: 2, sm: 2.5 }, mb: 3 }}><Stack direction="row" useFlexGap flexWrap="wrap" gap={2} sx={{ '& > .MuiFormControl-root, & > .MuiAutocomplete-root': { minWidth: 0, maxWidth: '100%' } }}>
     {report && <TextField size="small" label="Buscar por nombre o documento" value={value.q ?? ''} onChange={(e) => set('q', e.target.value)} sx={{ flex: '1 1 230px' }} />}
     <TextField select size="small" label="Año" value={value.year ?? ''} onChange={(e) => onChange({ ...value, year: e.target.value ? Number(e.target.value) : undefined, editionId: undefined, competitionId: undefined, page: 1 })} sx={{ flex: '1 1 120px' }}>
       <MenuItem value="">Todos</MenuItem>{[...new Set(editions.map((e) => e.year))].sort((a, b) => b - a).map((year) => <MenuItem key={year} value={year}>{year}</MenuItem>)}

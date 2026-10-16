@@ -4,10 +4,10 @@ import { extractErrorMessage } from '../src/utils/apiErrors';
 
 test('shows all backend validation details instead of the generic message', () => {
   assert.equal(extractErrorMessage({ response: { data: { message: 'Datos inválidos', errors: [
-    { field: 'password', message: 'Contraseña: Mínimo 12 caracteres' },
+    { field: 'password', message: 'Contraseña: Mínimo 6 caracteres' },
     { field: 'email', message: 'Correo: Ingresa un correo válido' },
-  ] } } }), 'Contraseña: Mínimo 12 caracteres. Correo: Ingresa un correo válido');
-  assert.equal(extractErrorMessage({ response: { data: { message: 'Datos inválidos', fields: { password: ['Mínimo 12 caracteres'], email: ['Correo inválido'] } } } }), 'Mínimo 12 caracteres. Correo inválido');
+  ] } } }), 'Contraseña: Mínimo 6 caracteres. Correo: Ingresa un correo válido');
+  assert.equal(extractErrorMessage({ response: { data: { message: 'Datos inválidos', fields: { password: ['Mínimo 6 caracteres'], email: ['Correo inválido'] } } } }), 'Mínimo 6 caracteres. Correo inválido');
 });
 
 test('retains business errors, network failures and fallbacks', () => {

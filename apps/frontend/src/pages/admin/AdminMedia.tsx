@@ -107,6 +107,9 @@ const AdminMedia: React.FC = () => {
       />
 
       <Tabs
+        variant="scrollable"
+        scrollButtons="auto"
+        allowScrollButtonsMobile
         value={tab}
         onChange={(_, v) => {
           setTab(v as Kind);
@@ -196,7 +199,7 @@ const AdminMedia: React.FC = () => {
             label="Subir imagen"
             hint={HINTS[tab]}
           />
-          <Stack direction="row" spacing={1.5} justifyContent="flex-end">
+          <Stack direction={{ xs: 'column-reverse', sm: 'row' }} spacing={1.5} justifyContent="flex-end">
             <Button onClick={() => setEditing(null)}>Cancelar</Button>
             <Button variant="contained" onClick={save} disabled={saving}>
               Guardar

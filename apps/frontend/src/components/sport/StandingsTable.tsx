@@ -1,4 +1,4 @@
-import { Card, Box, Typography, Stack, Tooltip, Collapse, IconButton, Chip, useTheme, useMediaQuery } from '@mui/material';
+import { Card, Box, Typography, Stack, Tooltip, Collapse, IconButton, Chip, ButtonBase, useTheme, useMediaQuery } from '@mui/material';
 import { Crest } from '@/components/ui/Crest';
 import type { StandingRow } from '@/api/standings.api';
 import { ShieldRounded, ExpandMoreRounded, ExpandLessRounded } from '@mui/icons-material';
@@ -13,8 +13,15 @@ interface Props {
    * pantalla en blanco se muestran en orden alfabético con guiones, y la tabla
    * se ordena sola con el primer partido finalizado.
    */
-  ghostTeams?: Array<{ id: string; name: string; logoUrl: string | null }>;
+  ghostTeams?: Array<{ id: string; name: string; logoUrl: string | null; registrationId?: string }>;
+  onTeamClick?: (registrationId: string, teamName: string) => void;
 }
+
+const TeamName: React.FC<{ name: string; onClick?: () => void }> = ({ name, onClick }) => onClick ? (
+  <ButtonBase onClick={(event) => { event.stopPropagation(); onClick(); }} aria-label={`Ver jugadores de ${name}`} sx={{ font: 'inherit', fontWeight: 600, color: 'primary.main', textAlign: 'left', overflowWrap: 'anywhere', minWidth: 0, minHeight: 44, borderRadius: 1, '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main' } }}>
+    {name}
+  </ButtonBase>
+) : <Typography className="llf-row-name" sx={{ fontWeight: 600 }}>{name}</Typography>;
 
 /** Franja lateral que marca en qué zona de la tabla quedó el equipo. */
 const zoneColor = (zone: StandingRow['zone']) => {
@@ -52,7 +59,7 @@ const TeamCrest: React.FC<{ row: StandingRow; size: number }> = ({ row, size }) 
   </Crest>
 );
 
-export const StandingsTable: React.FC<Props> = ({ rows, ghostTeams }) => {
+export const StandingsTable: React.FC<Props> = ({ rows, ghostTeams, onTeamClick }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const hasQualify = (rows ?? []).some((r) => r.zone === 'QUALIFY');
@@ -96,7 +103,7 @@ export const StandingsTable: React.FC<Props> = ({ rows, ghostTeams }) => {
                 <Box component="td" sx={{ p: 1.5, pr: 0 }}>
                   <TeamCrest row={{ teamName: t.name, logoUrl: t.logoUrl } as StandingRow} size={28} />
                 </Box>
-                <Box component="td" sx={{ p: 1.5, fontWeight: 600 }}>{t.name}</Box>
+                <Box component="td" sx={{ p: 1.5, fontWeight: 600 }}><TeamName name={t.name} onClick={onTeamClick && t.registrationId ? () => onTeamClick(t.registrationId!, t.name) : undefined} /></Box>
                 <Box component="td" className="tabular" sx={{ p: 1.5, textAlign: 'right', color: 'text.disabled' }}>0</Box>
                 <Box component="td" className="tabular" sx={{ p: 1.5, textAlign: 'right', color: 'text.disabled' }}>–</Box>
               </Box>
@@ -128,7 +135,7 @@ export const StandingsTable: React.FC<Props> = ({ rows, ghostTeams }) => {
         {isMobile ? (
           <Stack spacing={1}>
             {rows.map((r) => (
-              <MobileStandingRow key={r.registrationId} row={r} />
+              <MobileStandingRow key={r.registrationId} row={r} onTeamClick={onTeamClick} />
             ))}
           </Stack>
         ) : (
@@ -164,7 +171,7 @@ export const StandingsTable: React.FC<Props> = ({ rows, ghostTeams }) => {
                     <Box component="td" sx={{ p: 1.5 }}>
                       <Stack direction="row" alignItems="center" spacing={1.5}>
                         <TeamCrest row={r} size={28} />
-                        <Typography className="llf-row-name" sx={{ fontWeight: 600 }}>{r.teamName}</Typography>
+                        <TeamName name={r.teamName} onClick={onTeamClick ? () => onTeamClick(r.registrationId, r.teamName) : undefined} />
                         {r.outcome !== 'NONE' && (
                           <Chip
                             size="small"
@@ -228,7 +235,7 @@ export const StandingsTable: React.FC<Props> = ({ rows, ghostTeams }) => {
   );
 };
 
-const MobileStandingRow: React.FC<{ row: StandingRow }> = ({ row }) => {
+const MobileStandingRow: React.FC<{ row: StandingRow; onTeamClick?: Props['onTeamClick'] }> = ({ row, onTeamClick }) => {
   const [open, setOpen] = useState(false);
   return (
     <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 3, overflow: 'hidden' }}>
@@ -238,7 +245,7 @@ const MobileStandingRow: React.FC<{ row: StandingRow }> = ({ row }) => {
       >
         <Typography sx={{ fontWeight: 700, width: 24, fontSize: 14 }}>{row.position}</Typography>
         <TeamCrest row={row} size={24} />
-        <Typography sx={{ fontWeight: 600, flex: 1, fontSize: 14 }} noWrap>{row.teamName}</Typography>
+        <Box sx={{ flex: 1, minWidth: 0, fontSize: 14 }}><TeamName name={row.teamName} onClick={onTeamClick ? () => onTeamClick(row.registrationId, row.teamName) : undefined} /></Box>
         <Stack direction="row" spacing={1.5} alignItems="center">
           <Typography variant="caption" color="text.secondary">{row.pj}PJ</Typography>
           <Typography sx={{ fontWeight: 800, fontVariantNumeric: 'tabular-nums', minWidth: 28, textAlign: 'right', fontSize: 16 }}>{row.pts}</Typography>

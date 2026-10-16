@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import { z } from 'zod';
+import { validate } from '@/middlewares/validate.middleware';
 import { asyncHandler } from '@/utils/async-handler';
 import { ok, fail } from '@/utils/http.util';
 import { editionsService } from '@/modules/editions/editions.service';
@@ -16,6 +18,9 @@ import { leagueSystemsService } from '@/modules/league-systems/league-systems.se
 import rateLimit from 'express-rate-limit';
 
 export const publicRouter = Router();
+publicRouter.get('/registrations/:id/roster', validate(z.object({ id: z.string().uuid() }), 'params'), asyncHandler(async (req, res) =>
+  ok(res, await competitionsService.publicRoster(req.params.id)),
+));
 
 publicRouter.get('/editions', asyncHandler(async (_req, res) => ok(res, await editionsService.list())));
 publicRouter.get('/competitions', asyncHandler(async (req, res) =>
