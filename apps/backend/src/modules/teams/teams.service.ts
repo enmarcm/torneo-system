@@ -81,9 +81,8 @@ export const teamsService = {
     prisma.team.update({ where: { id }, data: { status } }),
 
   /**
-   * Borrado definitivo y en cascada: inscripciones, partidos jugados, plantillas,
-   * sanciones y el usuario del líder, que existe solo para este equipo. Los
-   * partidos contra sus rivales también desaparecen, y con ellos sus tablas.
+   * Solo se elimina un equipo sin inscripciones históricas. Desactivar
+   * conserva su trayectoria y la de sus rivales; purgeTeam aplica la regla.
    */
   remove: async (id: string) => {
     const team = await prisma.team.findUnique({ where: { id }, include: { leader: true } });

@@ -174,7 +174,9 @@ export const matchesService = {
     prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const match = await tx.match.findUnique({ where: { id }, include: { events: true } });
       if (!match) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
-      await tx.match.update({ where: { id }, data: { status: 'FINISHED' } });
+      // A repeated or concurrent finish must not add the same stats twice.
+      const finalized = await tx.match.updateMany({ where: { id, status: { not: 'FINISHED' } }, data: { status: 'FINISHED' } });
+      if (!finalized.count) return tx.match.findUnique({ where: { id }, include: matchInclude });
 
       const goals: Record<string, number> = {};
       const yellows: Record<string, number> = {};
@@ -217,7 +219,7 @@ export const matchesService = {
         awayScore: match.awayScore,
       });
       return tx.match.findUnique({ where: { id }, include: matchInclude });
-    }),
+    }, { maxWait: 10_000, timeout: 20_000 }),
 
   /**
    * Designa el MVP de un partido ya finalizado y guarda su foto.
@@ -263,6 +265,11 @@ export const matchesService = {
   /** Borrado definitivo: los goles y tarjetas del partido se van con él. */
   remove: async (id: string) => {
     const res = await prisma.$transaction(async (tx) => {
+      const current = await tx.match.findUnique({ where: { id } });
+      if (!current) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
+      if (current.status === 'LIVE' || current.status === 'FINISHED') {
+        throw new AppError(409, 'El partido tiene historial deportivo y no se puede eliminar.', 'HISTORY_PROTECTED');
+      }
       await tx.matchEvent.deleteMany({ where: { matchId: id } });
       await tx.match.delete({ where: { id } });
       return { id };

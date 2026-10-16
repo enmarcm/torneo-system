@@ -217,8 +217,8 @@ export const playersService = {
     }),
 
   /**
-   * Borrado definitivo y en cascada: se lleva sus plantillas, estadísticas,
-   * los goles y las tarjetas que registró en partidos ya jugados.
+   * Solo se elimina un perfil sin trayectoria. Los perfiles con historial
+   * deben desactivarse; purgePlayer protege sus plantillas y estadísticas.
    */
   remove: async (id: string) => {
     const player = await prisma.player.findUnique({ where: { id } });

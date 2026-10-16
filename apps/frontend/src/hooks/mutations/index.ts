@@ -14,7 +14,7 @@ import { usersApi, type CreateUserPayload, type ManagedUser, type UpdateUserPayl
 import { useAuthStore } from '@/store/useAuthStore';
 
 const invalidate = (qc: ReturnType<typeof useQueryClient>, keys: string[][]) => {
-  return Promise.all(keys.map((key) => qc.invalidateQueries({ queryKey: key })));
+  return Promise.all([...keys, ['history']].map((key) => qc.invalidateQueries({ queryKey: key })));
 };
 
 export const useLoginMutation = () => {

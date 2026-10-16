@@ -48,7 +48,7 @@ const NAV: NavItem[] = [
   { label: 'Bloqueos', icon: <BlockRounded />, to: ROUTES.admin.teamBlocks, roles: ADMIN_ONLY },
   { label: 'Jugadores', icon: <PersonRounded />, to: ROUTES.admin.players, roles: ADMIN_ONLY },
   { label: 'Programación', icon: <CalendarMonthRounded />, to: ROUTES.admin.schedule, roles: SCORING },
-  { label: 'Estadísticas', icon: <BarChartRounded />, to: ROUTES.admin.stats, roles: ADMIN_ONLY },
+  { label: 'Historial y estadísticas', icon: <BarChartRounded />, to: ROUTES.admin.stats, roles: ADMIN_ONLY },
   { label: 'Publicidad', icon: <CampaignRounded />, to: ROUTES.admin.ads, roles: MEDIA },
   { label: 'Noticias', icon: <NewspaperRounded />, to: ROUTES.admin.news, roles: MEDIA },
   { label: 'Imágenes', icon: <PhotoLibraryRounded />, to: ROUTES.admin.media, roles: MEDIA },

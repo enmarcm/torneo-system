@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { CompetitionSectionTabs } from '@/components/sport/CompetitionSectionTabs';
+import { CompetitionOverviewModal } from '@/components/sport/CompetitionOverviewModal';
 import { AGE_GROUP_LABELS, getCompetitionAgeGroup, sortCompetitions } from '@/utils/competitionMeta';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -283,6 +284,7 @@ const AdminCompetitions: React.FC = () => {
   const editionId = selectedEditionId ?? editions[0]?.id;
   const { data: competitions = [], isLoading, error, refetch } = useCompetitionsQuery(editionId);
   const [ageGroup, setAgeGroup] = useState<Competition['ageGroup']>('ADULT');
+  const [viewingCompetition, setViewingCompetition] = useState<Competition | null>(null);
   const visibleCompetitions = sortCompetitions(competitions.filter((c) => getCompetitionAgeGroup(c) === ageGroup));
   const toast = useToast();
   const create = useCreateCompetition();
@@ -456,7 +458,22 @@ const AdminCompetitions: React.FC = () => {
           ) : (
             visibleCompetitions.map((c) => (
               <Grid size={{ xs: 12, md: 6 }} key={c.id}>
-                <Card component={motion.div} whileHover={{ y: -2 }} sx={{ p: 3 }}>
+                <Card
+                  component={motion.div}
+                  whileHover={{ y: -2 }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Ver equipos y posiciones de ${c.name}${getDivisionLabel(c.divisionLevel) ? ` · ${getDivisionLabel(c.divisionLevel)}` : ''}`}
+                  aria-haspopup="dialog"
+                  onClick={() => setViewingCompetition(c)}
+                  onKeyDown={(event) => {
+                    if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) {
+                      event.preventDefault();
+                      setViewingCompetition(c);
+                    }
+                  }}
+                  sx={{ p: 3, cursor: 'pointer', '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 3 } }}
+                >
                   <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
                     <Stack direction="row" alignItems="center" spacing={1.5}>
                       <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: 'primary.soft', color: 'primary.main', display: 'grid', placeItems: 'center' }}>
@@ -467,7 +484,7 @@ const AdminCompetitions: React.FC = () => {
                       </Box>
                     </Stack>
                     <Tooltip title="Ver más opciones">
-                      <IconButton size="small" onClick={(e) => setAnchor({ el: e.currentTarget, c })}>
+                      <IconButton aria-label={`Opciones de ${c.name}`} size="small" onClick={(e) => { e.stopPropagation(); setAnchor({ el: e.currentTarget, c }); }}>
                         <MoreVertRounded fontSize="small" />
                       </IconButton>
                     </Tooltip>
@@ -515,6 +532,10 @@ const AdminCompetitions: React.FC = () => {
             ))
           )}
         </Grid>
+      )}
+
+      {viewingCompetition && viewingCompetition.editionId === editionId && (
+        <CompetitionOverviewModal key={viewingCompetition.id} competition={viewingCompetition} onClose={() => setViewingCompetition(null)} />
       )}
 
       <Menu anchorEl={anchor?.el ?? null} open={!!anchor} onClose={() => setAnchor(null)}>

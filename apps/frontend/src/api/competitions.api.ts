@@ -49,10 +49,19 @@ export interface CompetitionSummary {
   editionId: string;
 }
 
+export interface CompetitionDetail extends Competition {
+  registrations: Array<{
+    id: string;
+    status: string;
+    team: { id: string; name: string; logoUrl: string | null };
+    roster: Array<{ id: string }>;
+  }>;
+}
+
 export const competitionsApi = {
   list: async (editionId?: string): Promise<Competition[]> =>
     (await api.get('/competitions', { params: { editionId } })).data.data,
-  get: async (id: string): Promise<Competition> => (await api.get(`/competitions/${id}`)).data.data,
+  get: async (id: string): Promise<CompetitionDetail> => (await api.get(`/competitions/${id}`)).data.data,
   create: async (data: Partial<Competition>): Promise<Competition> =>
     (await api.post('/competitions', data)).data.data,
   update: async (id: string, data: Partial<Competition>): Promise<Competition> =>
