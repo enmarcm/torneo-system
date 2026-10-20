@@ -1,4 +1,4 @@
-import { Box, Card, Stack, Typography, Button, Avatar, TextField, FormControl, InputLabel, Select, MenuItem, Chip, InputAdornment, FormHelperText } from '@mui/material';
+import { Box, Card, Stack, Typography, Button, Avatar, TextField, FormControl, InputLabel, Select, MenuItem, Chip, InputAdornment, Autocomplete, Checkbox, Alert } from '@mui/material';
 import { SaveButton } from '@/components/ui/SaveButton';
 import {
   AddRounded,
@@ -31,6 +31,7 @@ import {
 import { getStatusLabel, getStatusColor } from '@/utils/statusLabels';
 import { extractErrorMessage } from '@/api/axios';
 import { useToast } from '@/hooks/common/useToast';
+import { conflictsWithSelectedDivision, divisionSystemKey, registerSelectedCompetitions } from '@/utils/batchRegistrations';
 
 /** Rango de edad de la competición, dicho como lo diría el reglamento. */
 const getAgeRule = (c: Competition): string => {
@@ -62,7 +63,7 @@ const AdminTeams: React.FC = () => {
   const navigate = useNavigate();
   const deleteTeam = useDeleteTeam();
   const { data: teams = [], isLoading, refetch, error } = useTeamsQuery();
-  const { data: competitions = [] } = useCompetitionsQuery();
+  const { data: competitions = [], isLoading: loadingCompetitions, error: competitionsError, refetch: refetchCompetitions } = useCompetitionsQuery();
   const toast = useToast();
   const create = useCreateTeam();
   const update = useUpdateTeam();
@@ -71,7 +72,9 @@ const AdminTeams: React.FC = () => {
   const [open, setOpen] = useState<'create' | 'edit' | null>(null);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
   const [anchor, setAnchor] = useState<{ el: HTMLElement; t: Team } | null>(null);
-  const [regOpen, setRegOpen] = useState<{ team: Team; competitionId: string } | null>(null);
+  const [regOpen, setRegOpen] = useState<{ team: Team; competitionIds: string[] } | null>(null);
+  const [registering, setRegistering] = useState(false);
+  const [registrationFailures, setRegistrationFailures] = useState<Array<{ name: string; message: string }>>([]);
   const [form, setForm] = useState({ name: '', leaderUsername: '', leaderPassword: '', logoUrl: '' });
   const [editForm, setEditForm] = useState({ name: '', logoUrl: '' });
   const [deletingTeam, setDeletingTeam] = useState<Team | null>(null);
@@ -137,7 +140,7 @@ const AdminTeams: React.FC = () => {
     a qué no puede entrar, en vez de dejar que el administrador elija y se coma
     un error del servidor recién al apretar "Inscribir".
   */
-  const { data: teamRegs = [] } = useTeamRegistrationsQuery(regOpen?.team.id);
+  const { data: teamRegs = [], isLoading: loadingTeamRegs, error: teamRegsError, refetch: refetchTeamRegs } = useTeamRegistrationsQuery(regOpen?.team.id, true);
   const registeredIds = useMemo(
     () => new Set(teamRegs.map((r) => r.competitionId)),
     [teamRegs],
@@ -158,7 +161,7 @@ const AdminTeams: React.FC = () => {
               r.status === 'ACTIVE' &&
               r.outcome !== 'WITHDRAWN',
           )
-          .map((r) => r.competition.leagueSystemId ?? `${r.competition.editionId}:${r.competition.ageGroup}`),
+          .map((r) => divisionSystemKey(r.competition)),
       ),
     [teamRegs],
   );
@@ -166,15 +169,34 @@ const AdminTeams: React.FC = () => {
   /** Por qué no se puede inscribir en esta competición, o null si sí se puede. */
   const blockedReason = (c: (typeof competitions)[number]): string | null => {
     if (registeredIds.has(c.id)) return 'Ya inscrito';
-    if (c.kind === 'LEAGUE_DIVISION' && takenDivisionSystems.has(c.leagueSystemId ?? `${c.editionId}:${c.ageGroup}`)) {
+    if (c.kind === 'LEAGUE_DIVISION' && takenDivisionSystems.has(divisionSystemKey(c))) {
       return 'Ya tiene división en esta liga';
     }
+    if (conflictsWithSelectedDivision(c, selectedCompetitions)) return 'Ya seleccionaste otra división de esta liga';
     return null;
   };
-  const regCompetition = useMemo(
-    () => competitions.find((c) => c.id === regOpen?.competitionId) ?? null,
-    [competitions, regOpen?.competitionId],
+  const selectedCompetitions = useMemo(
+    () => regCompetitions.filter((c) => regOpen?.competitionIds.includes(c.id)),
+    [regCompetitions, regOpen?.competitionIds],
   );
+  const submitRegistrations = async () => {
+    if (!regOpen || registering || !selectedCompetitions.length || selectedCompetitions.some(blockedReason)) return;
+    setRegistering(true);
+    setRegistrationFailures([]);
+    try {
+      const { succeeded, failed } = await registerSelectedCompetitions(regOpen.competitionIds,
+        (competitionId) => register.mutateAsync({ id: regOpen.team.id, competitionId }));
+      if (succeeded.length) toast.success(`Equipo inscrito en ${succeeded.length} ${succeeded.length === 1 ? 'categoría' : 'categorías'}`);
+      if (!failed.length) setRegOpen(null);
+      else {
+        setRegOpen({ ...regOpen, competitionIds: failed.map(({ id }) => id) });
+        setRegistrationFailures(failed.map(({ id, error }) => ({ name: competitions.find((c) => c.id === id)?.name ?? id, message: extractErrorMessage(error) })));
+        await refetchTeamRegs();
+      }
+    } finally {
+      setRegistering(false);
+    }
+  };
 
   const columns: DataTableColumn<Team>[] = [
     {
@@ -223,7 +245,7 @@ const AdminTeams: React.FC = () => {
     {
       label: 'Inscribir en competición',
       icon: <PlaylistAddRounded fontSize="small" />,
-      onClick: (t) => setRegOpen({ team: t, competitionId: competitions[0]?.id ?? '' }),
+      onClick: (t) => { setRegistrationFailures([]); setRegOpen({ team: t, competitionIds: [] }); },
     },
     {
       label: (t) => (t.status === 'ACTIVE' ? 'Desactivar' : 'Activar'),
@@ -243,6 +265,7 @@ const AdminTeams: React.FC = () => {
       label: 'Eliminar definitivamente',
       icon: <DeleteForeverRounded fontSize="small" />,
       color: 'error',
+      divider: true,
       onClick: (t) => setPurgingTeam(t),
     },
   ];
@@ -337,146 +360,75 @@ const AdminTeams: React.FC = () => {
         )}
       </AppDrawer>
 
-      <AppDrawer open={!!regOpen} onClose={() => setRegOpen(null)} title={`Inscribir a ${regOpen?.team.name ?? ''}`}>
+      <AppDrawer open={!!regOpen} onClose={() => { if (!registering) setRegOpen(null); }} title={`Inscribir a ${regOpen?.team.name ?? ''}`} subtitle="Selecciona todas las categorías en las que participará el equipo. Cada una tendrá su propia plantilla." width={560}>
         {regOpen && (
           <Stack spacing={2}>
-            <FormControl fullWidth>
-              <InputLabel>Competición</InputLabel>
-              <Select
-                label="Competición"
-                value={regOpen.competitionId}
-                onChange={(e) => setRegOpen({ ...regOpen, competitionId: e.target.value as string })}
-                /*
-                  El campo cerrado no puede dibujar las dos líneas del item: se
-                  descuadra. Va el nombre y su división en un renglón.
-                */
-                renderValue={(value) => {
-                  const c = competitions.find((x) => x.id === value);
-                  if (!c) return '';
-                  const subtitle = getCompetitionSubtitle(c);
-                  return subtitle ? `${c.name} · ${subtitle}` : c.name;
-                }}
-              >
-                {regCompetitions.map((c) => {
-                  const blocked = blockedReason(c);
-                  return (
-                  <MenuItem
-                    key={c.id}
-                    value={c.id}
-                    disabled={!!blocked}
-                    sx={{ display: 'block', py: 1.25 }}
-                  >
-                    <Typography sx={{ fontWeight: 600, fontSize: 14, lineHeight: 1.3 }}>
-                      {c.name}
-                    </Typography>
-                    <Stack direction="row" useFlexGap sx={{ mt: 0.625, flexWrap: 'wrap', gap: 0.5 }}>
-                      {getCompetitionTags(c).map((t) => (
-                        <Chip
-                          key={t.label}
-                          size="small"
-                          label={t.label}
-                          color={t.color}
-                          variant="outlined"
-                          sx={{ height: 20, fontSize: 11, fontWeight: 600 }}
-                        />
-                      ))}
-                      {/* Una competición en borrador o finalizada no se inscribe sola: hay que verlo. */}
-                      {c.status !== 'ACTIVE' && (
-                        <Chip
-                          size="small"
-                          label={getStatusLabel(c.status)}
-                          color={getStatusColor(c.status)}
-                          sx={{ height: 20, fontSize: 11, fontWeight: 700 }}
-                        />
-                      )}
-                      {/*
-                        Una opción apagada sin motivo se lee como una falla del
-                        sistema; con el motivo, se lee como una regla.
-                      */}
-                      {blocked && (
-                        <Chip
-                          size="small"
-                          label={blocked}
-                          variant="outlined"
-                          sx={{ height: 20, fontSize: 11, fontWeight: 700 }}
-                        />
-                      )}
-                    </Stack>
-                  </MenuItem>
-                  );
-                })}
-              </Select>
-              {takenDivisionSystems.size > 0 && (
-                <FormHelperText>
-                  Un equipo juega una sola división por edición. Para moverlo, marcá su
-                  inscripción actual como &quot;No participa&quot;.
-                </FormHelperText>
-              )}
-            </FormControl>
-
-            {/*
-              Las reglas que el sistema va a aplicar cuando se arme la plantilla.
-              Leerlas acá evita inscribir a un equipo en un torneo cuyo rango de
-              edad o cupo no le sirve y descubrirlo recién al rostear.
-            */}
-            {regCompetition && (
-              <Card variant="outlined" sx={{ p: 2, bgcolor: 'var(--surface2)', boxShadow: 'none' }}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    display: 'block',
-                    mb: 1.25,
-                    fontWeight: 700,
-                    letterSpacing: 1,
-                    textTransform: 'uppercase',
-                    color: 'text.secondary',
-                  }}
-                >
-                  Reglas de inscripción
-                </Typography>
-
+            {(competitionsError || teamRegsError) && (
+              <Alert severity="error" action={<Button color="inherit" onClick={() => { void refetchCompetitions(); void refetchTeamRegs(); }}>Reintentar</Button>}>
+                No pudimos cargar las categorías o las inscripciones del equipo.
+              </Alert>
+            )}
+            <Autocomplete
+              multiple
+              disableCloseOnSelect
+              options={regCompetitions}
+              value={selectedCompetitions}
+              loading={loadingCompetitions || loadingTeamRegs}
+              disabled={registering || loadingCompetitions || loadingTeamRegs || !!competitionsError || !!teamRegsError}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              getOptionLabel={(c) => [c.name, getCompetitionSubtitle(c)].filter(Boolean).join(' · ')}
+              getOptionDisabled={(c) => !!blockedReason(c)}
+              onChange={(_event, selected) => { setRegOpen({ ...regOpen, competitionIds: selected.map((c) => c.id) }); setRegistrationFailures([]); }}
+              noOptionsText="No hay categorías disponibles"
+              loadingText="Cargando categorías…"
+              renderInput={(params) => <TextField {...params} label="Categorías" placeholder={selectedCompetitions.length ? '' : 'Selecciona una o varias'} helperText="Puedes buscar por nombre, división o apartado." />}
+              renderOption={(props, c, { selected }) => {
+                const { key, ...optionProps } = props;
+                const blocked = blockedReason(c);
+                return (
+                  <Box component="li" key={c.id} {...optionProps} sx={{ alignItems: 'flex-start' }}>
+                    <Checkbox checked={selected} tabIndex={-1} disableRipple sx={{ mt: 0.25, pointerEvents: 'none' }} />
+                    <Box sx={{ minWidth: 0, py: 1 }}>
+                      <Typography sx={{ fontWeight: 600, fontSize: 14, overflowWrap: 'anywhere' }}>{c.name}</Typography>
+                      <Stack direction="row" useFlexGap sx={{ mt: 0.5, flexWrap: 'wrap', gap: 0.5 }}>
+                        {getCompetitionTags(c).map((tag) => <Chip key={tag.label} size="small" label={tag.label} color={tag.color} variant="outlined" />)}
+                        {c.status !== 'ACTIVE' && <Chip size="small" label={getStatusLabel(c.status)} color={getStatusColor(c.status)} />}
+                      </Stack>
+                      {blocked && <Typography variant="caption" sx={{ display: 'block', mt: 0.5 }}>{blocked}</Typography>}
+                    </Box>
+                  </Box>
+                );
+              }}
+              sx={{ '& .MuiAutocomplete-tag': { maxWidth: 'calc(100% - 8px)', height: 'auto', '& .MuiChip-label': { whiteSpace: 'normal', py: 0.5 } } }}
+            />
+            <Typography variant="body2" color="text.secondary">
+              Puedes combinar liga, copa, menores y torneos especiales. Solo se permite una división por liga y apartado en cada edición.
+            </Typography>
+            {registrationFailures.length > 0 && (
+              <Alert severity="error">
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>Estas categorías no pudieron inscribirse. Las inscripciones completadas se conservaron.</Typography>
+                {registrationFailures.map((failure, index) => <Typography key={index} variant="body2" sx={{ mt: 1 }}>{failure.name}: {failure.message}</Typography>)}
+              </Alert>
+            )}
+            {selectedCompetitions.map((competition) => (
+              <Card key={competition.id} variant="outlined" sx={{ p: 2, bgcolor: 'var(--surface2)', boxShadow: 'none' }}>
+                <Typography sx={{ fontWeight: 600, mb: 1 }}>{competition.name} · {getCompetitionSubtitle(competition)}</Typography>
                 <Stack spacing={1}>
-                  {getInscriptionRules(regCompetition).map((r) => (
-                    <Stack key={r.label} direction="row" spacing={2} justifyContent="space-between">
-                      <Typography variant="body2" color="text.secondary">
-                        {r.label}
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 600, textAlign: 'right' }}>
-                        {r.value}
-                      </Typography>
+                  {getInscriptionRules(competition).map((rule) => (
+                    <Stack key={rule.label} direction="row" spacing={2} justifyContent="space-between">
+                      <Typography variant="body2" color="text.secondary">{rule.label}</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, textAlign: 'right' }}>{rule.value}</Typography>
                     </Stack>
                   ))}
                 </Stack>
-
-                {regCompetition.requiresAdminEligibility && (
-                  <Typography variant="body2" sx={{ mt: 1.5, color: 'warning.main', fontWeight: 600 }}>
-                    Cada jugador necesita tu habilitación antes de entrar a la plantilla.
-                  </Typography>
-                )}
-
-                {regCompetition.status !== 'ACTIVE' && (
-                  <Typography variant="body2" sx={{ mt: 1.5, color: 'text.secondary' }}>
-                    Esta competición está en{' '}
-                    <Box component="span" sx={{ fontWeight: 700 }}>
-                      {getStatusLabel(regCompetition.status).toLowerCase()}
-                    </Box>
-                    . La inscripción se registra igual.
-                  </Typography>
-                )}
+                {competition.requiresAdminEligibility && <Typography variant="body2" sx={{ mt: 1.5, color: 'warning.main' }}>Cada jugador necesita tu habilitación antes de entrar a la plantilla.</Typography>}
+                {competition.status !== 'ACTIVE' && <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>Esta competición está en {getStatusLabel(competition.status).toLowerCase()}. La inscripción se registra igual.</Typography>}
               </Card>
-            )}
+            ))}
             <Stack direction={{ xs: 'column-reverse', sm: 'row' }} spacing={1.5} justifyContent="flex-end">
-              <Button onClick={() => setRegOpen(null)}>Cancelar</Button>
-              <SaveButton loading={register.isPending} error={register.isError} disabled={!regOpen.competitionId} onClick={async () => {
-                try {
-                  await register.mutateAsync({ id: regOpen.team.id, competitionId: regOpen.competitionId });
-                  setRegOpen(null);
-                  toast.success('Equipo inscrito en la competición');
-                } catch (e) {
-                  toast.error(extractErrorMessage(e));
-                }
-              }}>
-                Inscribir
+              <Button disabled={registering} onClick={() => setRegOpen(null)}>Cancelar</Button>
+              <SaveButton loading={registering} busyLabel="Inscribiendo…" error={registrationFailures.length > 0} disabled={!selectedCompetitions.length || loadingCompetitions || loadingTeamRegs || !!competitionsError || !!teamRegsError || selectedCompetitions.some(blockedReason)} onClick={submitRegistrations}>
+                Inscribir en {selectedCompetitions.length} {selectedCompetitions.length === 1 ? 'categoría' : 'categorías'}
               </SaveButton>
             </Stack>
           </Stack>

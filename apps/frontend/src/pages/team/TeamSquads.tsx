@@ -13,6 +13,7 @@ import { RosterEditor } from '@/components/sport/RosterEditor';
 import { getCompetitionAgeGroup, getCompetitionShortLabel, getCompetitionSubtitle, sortCompetitions } from '@/utils/competitionMeta';
 import { canManageRoster, getVisibleTeamRegistrations, getTeamCompetitions } from '@/utils/teamRegistrations';
 import type { Competition } from '@/api/competitions.api';
+import { RefreshRounded } from '@mui/icons-material';
 
 const TeamSquads: React.FC = () => {
   const teamId = useAuthStore((state) => state.user?.teamId);
@@ -28,7 +29,7 @@ const TeamSquads: React.FC = () => {
 
   return (
     <Box>
-      <PageHeader title="Mis torneos" subtitle="El administrador inscribe a tu equipo. Aquí agregas jugadores y gestionas una plantilla independiente para cada torneo." />
+      <PageHeader title="Mis torneos" subtitle="El administrador inscribe a tu equipo. Aquí agregas jugadores y gestionas una plantilla independiente para cada torneo." action={<Button startIcon={<RefreshRounded />} onClick={() => void refetch()} disabled={!teamId || isLoading}>Actualizar</Button>} />
       {!teamId ? <EmptyState title="No tienes equipo asignado" description="Contacta al administrador para vincular tu cuenta de delegado con un equipo." />
         : isLoading ? <LoadingState rows={3} />
         : error ? <ErrorState onRetry={() => void refetch()} />

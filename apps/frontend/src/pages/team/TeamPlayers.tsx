@@ -12,6 +12,7 @@ import {
   EditRounded,
   VisibilityRounded,
   PowerSettingsNewRounded,
+  PlaylistAddRounded,
 } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
@@ -19,6 +20,7 @@ import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/routes/routes';
 import { PlayerPhotoFields } from '@/components/sport/PlayerPhotoFields';
 import { NewRosterPlayer } from '@/components/sport/NewRosterPlayer';
+import { AssignPlayerTournaments } from '@/components/sport/AssignPlayerTournaments';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatCard } from '@/components/ui/StatCard';
 import { DataTable, type DataTableAction, type DataTableColumn } from '@/components/ui/DataTable';
@@ -98,6 +100,7 @@ const TeamPlayers: React.FC = () => {
   const toast = useToast();
   const updatePlayer = useUpdatePlayer();
   const updateRoster = useUpdateRoster();
+  const [assigningPlayer, setAssigningPlayer] = useState<PlayerRow | null>(null);
   const [pickedAgeGroup, setAgeGroup] = useState<'ADULT' | 'YOUTH' | null>(null);
   const ageGroup = pickedAgeGroup ?? (registrations.some((r) => getCompetitionAgeGroup(r.competition) === 'ADULT') ? 'ADULT' : 'YOUTH');
   const sectionRegistrations = useMemo(() => registrations.filter((r) => getCompetitionAgeGroup(r.competition) === ageGroup), [registrations, ageGroup]);
@@ -251,6 +254,7 @@ const TeamPlayers: React.FC = () => {
   const actions: DataTableAction<PlayerRow>[] = [
     { label: 'Ver detalle', icon: <VisibilityRounded fontSize="small" />, onClick: (r) => openDetail(r.id) },
     { label: 'Editar', icon: <EditRounded fontSize="small" />, onClick: (r) => openEdit(r.id) },
+    { label: 'Inscribir en torneos', icon: <PlaylistAddRounded fontSize="small" />, onClick: setAssigningPlayer },
     {
       label: (r) => {
         const anyActive = r.registrations.some((reg) => reg.entryStatus === 'ACTIVE');
@@ -326,6 +330,7 @@ const TeamPlayers: React.FC = () => {
         </Card>
       )}
 
+      {assigningPlayer && teamId && <AssignPlayerTournaments player={assigningPlayer} teamId={teamId} onClose={() => setAssigningPlayer(null)} />}
       {/* Edit Player Drawer */}
       <AppDrawer
         open={editOpen}

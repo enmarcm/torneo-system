@@ -2,8 +2,9 @@ import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Divider, Button, Ava
 import { SaveButton } from '@/components/ui/SaveButton';
 import { GroupsRounded, SportsSoccerRounded, BarChartRounded, EditRounded, MailOutlineRounded } from '@mui/icons-material';
 import { useState } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useTeamQuery, useTeamHistoryQuery, useTeamStatsQuery } from '@/hooks/queries';
+import { useTeamQuery, useTeamHistoryQuery, useTeamStatsQuery, useTeamRegistrationsQuery } from '@/hooks/queries';
 import { useUpdateTeam, useUpdateMe } from '@/hooks/mutations';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatCard } from '@/components/ui/StatCard';
@@ -12,11 +13,20 @@ import { MatchCard } from '@/components/sport/MatchCard';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { extractErrorMessage } from '@/api/axios';
 import { useToast } from '@/hooks/common/useToast';
+import { ROUTES } from '@/routes/routes';
+import { LoadingState } from '@/components/ui/LoadingState';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { StatusBadge } from '@/components/ui/StatusBadge';
+import { getCompetitionShortLabel, getCompetitionSubtitle } from '@/utils/competitionMeta';
+import { getVisibleTeamRegistrations } from '@/utils/teamRegistrations';
 
 const TeamHome: React.FC = () => {
   const user = useAuthStore((s) => s.user);
   const teamId = user?.teamId;
   const { data: team } = useTeamQuery(teamId ?? '');
+  const { data: registrations = [], isLoading: loadingRegistrations, error: registrationsError, refetch: refetchRegistrations } = useTeamRegistrationsQuery(teamId ?? undefined, true);
+  const currentRegistrations = getVisibleTeamRegistrations(registrations);
   const updateTeam = useUpdateTeam();
   const updateMe = useUpdateMe();
   const toast = useToast();
@@ -154,7 +164,7 @@ const TeamHome: React.FC = () => {
 
       <Grid container spacing={2} sx={{ mt: 1 }}>
         <Grid size={{ xs: 6, md: 4 }}>
-          <StatCard label="Inscripciones" value={team?._count?.registrations ?? 0} icon={<GroupsRounded />} tint="primary" />
+          <StatCard label="Inscripciones" value={registrations.length} icon={<GroupsRounded />} tint="primary" />
         </Grid>
         <Grid size={{ xs: 6, md: 4 }}>
           <StatCard label="Partidos" value={stats?.totalPlayed ?? 0} icon={<SportsSoccerRounded />} tint="info" />
@@ -209,6 +219,42 @@ const TeamHome: React.FC = () => {
           </Card>
         </Grid>
       </Grid>
+      <Box sx={{ mt: 3 }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2} sx={{ mb: 2 }}>
+          <Typography variant="h4">Tus torneos</Typography>
+          <Button component={RouterLink} to={ROUTES.team.squads}>Mis torneos</Button>
+        </Stack>
+        {!teamId ? (
+          <EmptyState title="No tienes equipo asignado" description="Contacta al administrador para vincular tu cuenta con un equipo." />
+        ) : loadingRegistrations ? (
+          <LoadingState rows={2} />
+        ) : registrationsError ? (
+          <ErrorState onRetry={() => void refetchRegistrations()} />
+        ) : currentRegistrations.length === 0 ? (
+          <EmptyState
+            title={registrations.length ? 'No tienes torneos actuales' : 'Tu equipo aún no está inscrito en torneos'}
+            description={registrations.length ? 'Puedes consultar tus inscripciones anteriores en Mis torneos, seleccionando el historial.' : 'Cuando el administrador inscriba a tu equipo, el torneo aparecerá aquí.'}
+          />
+        ) : (
+          <Card>
+            <Stack divider={<Divider />}>
+              {currentRegistrations.map(({ id, competition }) => (
+                <Stack key={id} direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'flex-start', sm: 'center' }} justifyContent="space-between" spacing={2} sx={{ p: 2 }}>
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography sx={{ fontWeight: 600, overflowWrap: 'anywhere' }}>{getCompetitionShortLabel(competition)}</Typography>
+                    <Typography variant="body2" color="text.secondary">{getCompetitionSubtitle(competition)}</Typography>
+                    {competition.edition && <Typography variant="caption" color="text.secondary">{competition.edition.name} · {competition.edition.year}</Typography>}
+                  </Box>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <StatusBadge status={competition.status} />
+                    <Button component={RouterLink} to={ROUTES.team.squads} size="small" variant="outlined">Ver plantilla</Button>
+                  </Stack>
+                </Stack>
+              ))}
+            </Stack>
+          </Card>
+        )}
+      </Box>
       <Box sx={{ mt: 3 }}>
         <Typography variant="h4" sx={{ mb: 2 }}>Tus próximos partidos</Typography>
         {upcoming.length === 0 ? (

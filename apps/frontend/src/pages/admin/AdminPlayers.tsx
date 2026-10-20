@@ -1,5 +1,7 @@
 import { Box, Stack, Typography, Button, Avatar, Chip, TextField, MenuItem, Tabs, Tab } from '@mui/material';
 import { PlayerPhotoFields } from '@/components/sport/PlayerPhotoFields';
+import { AssignPlayerTournaments } from '@/components/sport/AssignPlayerTournaments';
+import { PlaylistAddRounded } from '@mui/icons-material';
 import { SaveButton } from '@/components/ui/SaveButton';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { AddRounded, EditRounded, VerifiedRounded, VerifiedOutlined, PowerSettingsNewRounded, DeleteForeverRounded } from '@mui/icons-material';
@@ -36,6 +38,7 @@ const AdminPlayers: React.FC = () => {
   const [deletingPlayer, setDeletingPlayer] = useState<Player | null>(null);
   const [purgingPlayer, setPurgingPlayer] = useState<Player | null>(null);
   const deletePlayer = useDeletePlayer();
+  const [assigningPlayer, setAssigningPlayer] = useState<Player | null>(null);
 
   const submit = async () => {
     try {
@@ -68,6 +71,7 @@ const AdminPlayers: React.FC = () => {
     { key: 'status', label: 'Estado', render: (r) => <StatusBadge status={r.status} /> },
   ];
   const actions: DataTableAction<Player>[] = [
+    { label: 'Inscribir en torneos', icon: <PlaylistAddRounded fontSize="small" />, onClick: setAssigningPlayer },
     { label: 'Editar jugador y fotos', icon: <EditRounded fontSize="small" />, onClick: (player) => {
       setEditingId(player.id); setForm({ documentType: player.documentType, documentNumber: player.documentNumber, firstName: player.firstName, lastName: player.lastName, birthDate: player.birthDate.slice(0, 10), photoUrl: player.photoUrl ?? '', identityPhotoKey: player.identityPhotoKey ?? '' }); setOpen(true);
     } },
@@ -149,6 +153,7 @@ const AdminPlayers: React.FC = () => {
         </Stack>
       </AppDrawer>
 
+      {assigningPlayer && <AssignPlayerTournaments player={assigningPlayer} onClose={() => setAssigningPlayer(null)} />}
       <ConfirmDialog
         open={!!deletingPlayer}
         onClose={() => setDeletingPlayer(null)}

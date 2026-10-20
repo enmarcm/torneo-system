@@ -15,6 +15,15 @@ test('the delegate competition list contains only assigned divisions', () => {
   assert.equal(competitions.some((competition) => competition.divisionLevel === 2 || competition.divisionLevel === 3), false);
 });
 
+test('a new registration appears before its tournament starts or players are added', () => {
+  const assigned = registration('new-tournament', 1);
+  assigned.competition.status = 'DRAFT';
+  const visible = getVisibleTeamRegistrations([assigned]);
+  assert.equal(visible.length, 1);
+  assert.equal(visible[0].roster.length, 0);
+  assert.deepEqual(getTeamCompetitions(visible).map((competition) => competition.id), ['new-tournament']);
+});
+
 test('withdrawn and finished division registrations stay in history, without appearing as current tournaments', () => {
   const primera = registration('primera', 1);
   const segunda = { ...registration('segunda', 2), outcome: 'WITHDRAWN' as const };

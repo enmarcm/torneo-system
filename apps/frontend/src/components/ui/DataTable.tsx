@@ -1,4 +1,4 @@
-import { Card, Box, Stack, IconButton, Typography, Tooltip, useTheme, useMediaQuery } from '@mui/material';
+import { Card, Box, Stack, IconButton, Typography, Tooltip, Menu, MenuItem, ListItemIcon, ListItemText, Divider, useTheme, useMediaQuery } from '@mui/material';
 import {
   EditRounded,
   DeleteRounded,
@@ -6,7 +6,7 @@ import {
   VisibilityRounded,
   MoreHorizRounded,
 } from '@mui/icons-material';
-import type { ReactNode } from 'react';
+import { useId, useState, type ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { TableSkeleton } from './LoadingState';
 import { EmptyState } from './EmptyState';
@@ -128,7 +128,7 @@ export function DataTable<T>({
                 </Box>
               ))}
               {actions && actions.length > 0 && (
-                <Box component="th" sx={{ width: 48, p: 1.5 }} />
+                <Box component="th" sx={{ width: 128, p: 1.5, textAlign: 'right', fontSize: 13, fontWeight: 600, color: 'text.secondary' }}>Acciones</Box>
               )}
             </Box>
           </Box>
@@ -153,6 +153,7 @@ export function DataTable<T>({
                       borderColor: 'divider',
                       textAlign: c.align ?? 'left',
                       fontSize: 14,
+                      verticalAlign: 'middle',
                     }}
                   >
                     {c.render(row)}
@@ -161,7 +162,7 @@ export function DataTable<T>({
                 {actions && actions.length > 0 && (
                   <Box
                     component="td"
-                    sx={{ p: 0.5, borderTop: '1px solid', borderColor: 'divider', textAlign: 'right', whiteSpace: 'nowrap' }}
+                    sx={{ px: 1.5, py: 1, borderTop: '1px solid', borderColor: 'divider', textAlign: 'right', whiteSpace: 'nowrap', verticalAlign: 'middle' }}
                   >
                     <RowActionsIcons actions={actions} row={row} />
                   </Box>
@@ -176,6 +177,10 @@ export function DataTable<T>({
 }
 
 function RowActionsIcons<T>({ actions, row }: { actions: DataTableAction<T>[]; row: T }) {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const menuId = useId();
+  const visibleActions = actions.length > 3 ? actions.slice(0, 2) : actions;
+  const overflowActions = actions.length > 3 ? actions.slice(2) : [];
   /**
    * Lo correcto es que cada acción traiga su `icon`. Esto es solo una red de
    * seguridad por si alguna se define sin él: antes cualquier etiqueta
@@ -201,14 +206,49 @@ function RowActionsIcons<T>({ actions, row }: { actions: DataTableAction<T>[]; r
   const getColor = (a: DataTableAction<T>): DataTableActionColor =>
     (typeof a.color === 'function' ? a.color(row) : a.color) ?? 'inherit';
   return (
-    <Stack direction="row" spacing={0.25} useFlexGap flexWrap="wrap" justifyContent="flex-end" onClick={(event) => event.stopPropagation()}>
-      {actions.map((a, i) => (
+    <Stack direction="row" spacing={0.5} useFlexGap sx={{ width: 'max-content', ml: 'auto', flexWrap: 'nowrap' }} justifyContent="flex-end" onClick={(event) => event.stopPropagation()}>
+      {visibleActions.map((a, i) => (
         <Tooltip key={i} title={typeof a.label === 'function' ? a.label(row) : a.label}>
-          <IconButton aria-label={typeof a.label === 'function' ? a.label(row) : a.label} size="small" color={getColor(a)} onClick={() => a.onClick(row)} sx={{ p: 0.5, minWidth: { xs: 44, md: 28 }, minHeight: { xs: 44, md: 28 } }}>
+          <IconButton aria-label={typeof a.label === 'function' ? a.label(row) : a.label} size="small" color={getColor(a)} onClick={() => a.onClick(row)} sx={{ p: 0.75, flexShrink: 0, minWidth: { xs: 44, md: 32 }, minHeight: { xs: 44, md: 32 } }}>
             {getIcon(a)}
           </IconButton>
         </Tooltip>
       ))}
+      {overflowActions.length > 0 && (
+        <>
+          <Tooltip title="Más acciones">
+            <IconButton
+              id={`${menuId}-trigger`}
+              aria-label="Más acciones"
+              aria-haspopup="menu"
+              aria-controls={anchorEl ? menuId : undefined}
+              aria-expanded={anchorEl ? true : undefined}
+              onClick={(event) => setAnchorEl(event.currentTarget)}
+              size="small"
+              sx={{ p: 0.75, flexShrink: 0, minWidth: { xs: 44, md: 32 }, minHeight: { xs: 44, md: 32 } }}
+            >
+              <MoreHorizRounded fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Menu
+            id={menuId}
+            anchorEl={anchorEl}
+            open={!!anchorEl}
+            onClose={() => setAnchorEl(null)}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            MenuListProps={{ 'aria-labelledby': `${menuId}-trigger` }}
+          >
+            {overflowActions.flatMap((action, index) => [
+                ...(action.divider && index > 0 ? [<Divider key={`divider-${index}`} />] : []),
+                <MenuItem key={index} onClick={() => { setAnchorEl(null); action.onClick(row); }} sx={{ minHeight: 44, color: getColor(action) === 'inherit' ? 'text.primary' : `${getColor(action)}.main` }}>
+                  <ListItemIcon sx={{ color: 'inherit' }}>{getIcon(action)}</ListItemIcon>
+                  <ListItemText>{typeof action.label === 'function' ? action.label(row) : action.label}</ListItemText>
+                </MenuItem>,
+            ])}
+          </Menu>
+        </>
+      )}
     </Stack>
   );
 }
