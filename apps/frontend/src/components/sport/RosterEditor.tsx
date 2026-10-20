@@ -56,7 +56,8 @@ export const RosterEditor: React.FC<Props> = ({
   allowCreatePlayer = false,
   canApproveEligibility = true,
 }) => {
-  const { data: roster = [], isLoading, isFetching, error, refetch } = useRosterQuery(registrationId, allowCreatePlayer);
+  const { data: rosterData, isLoading, isFetching, error, refetch } = useRosterQuery(registrationId, allowCreatePlayer);
+  const roster = rosterData ?? [];
   const [search, setSearch] = useState('');
   /* Lo que quedó afuera en la última importación, para poder resolverlo a mano. */
   const [skipped, setSkipped] = useState<Array<{ name: string; reason: string }> | null>(null);
@@ -143,11 +144,15 @@ export const RosterEditor: React.FC<Props> = ({
     }
   };
 
-  if (isLoading || (isFetching && roster.length === 0)) return <RosterSkeleton rows={4} />;
-  if (error) return <ErrorState onRetry={() => void refetch()} />;
+  // An empty roster is loaded data. Background polling must keep the creation form mounted.
+  if (isLoading) return <RosterSkeleton rows={4} />;
+  if (error && rosterData === undefined) return <ErrorState onRetry={() => void refetch()} />;
 
   return (
     <Stack spacing={2}>
+      {error && <Alert severity="warning" action={<Button color="inherit" disabled={isFetching} onClick={() => void refetch()}>Reintentar</Button>}>
+        No pudimos actualizar la plantilla. Puedes seguir completando el formulario.
+      </Alert>}
       <Typography variant="body2" color="text.secondary">
         {active.length} {active.length === 1 ? 'jugador' : 'jugadores'} en plantilla
         {maxPlayers != null ? ` · cupo ${maxPlayers}` : ''}

@@ -1,0 +1,173 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap">
+<div id="llf-mobile-preview">
+  <style>
+    #llf-mobile-preview { --llf-bg:light-dark(#f4f6fb,#0f1525);--llf-paper:light-dark(#fff,#1a2236);--llf-ink:light-dark(#1a2138,#eff3ff);--llf-muted:light-dark(#63708a,#a6b2cc);--llf-line:light-dark(#e6e9f2,#33415b);--llf-soft:light-dark(#e9f0fa,#243756);--llf-blue:light-dark(#034292,#8abaff);--llf-onblue:light-dark(#fff,#122744);--llf-active:light-dark(#187444,#84d9aa);--llf-activebg:light-dark(#eaf7ee,#153c2b);--llf-hero:#1b2237;--llf-herotext:#fff; font-family:Inter,system-ui,sans-serif;color:var(--llf-ink); }
+    #llf-mobile-preview * { box-sizing:border-box; }
+    #llf-mobile-preview [hidden] { display:none!important; }
+    #llf-mobile-preview .llf-stage { min-height:1180px;padding:24px 8px 32px; }
+    #llf-mobile-preview .llf-phone { max-width:390px;width:100%;min-height:1120px;margin:0 auto;background:var(--llf-bg);border:1px solid var(--llf-line);border-radius:24px;overflow:hidden;display:flex;flex-direction:column;color:var(--llf-ink);box-shadow:0 14px 40px color-mix(in srgb,var(--llf-ink) 9%,transparent);font-size:14px;line-height:1.5; }
+    #llf-mobile-preview button,#llf-mobile-preview select,#llf-mobile-preview input { font:inherit;color:inherit; }
+    #llf-mobile-preview button { cursor:pointer; }
+    #llf-mobile-preview button:focus-visible,#llf-mobile-preview select:focus-visible,#llf-mobile-preview summary:focus-visible,#llf-mobile-preview input:focus-visible { outline:2px solid var(--llf-blue);outline-offset:3px; }
+    #llf-mobile-preview .llf-top { background:var(--llf-paper);padding:10px 12px 12px;border-bottom:1px solid var(--llf-line); }
+    #llf-mobile-preview .llf-topline { display:flex;align-items:center;gap:4px; }
+    #llf-mobile-preview .llf-icon { width:44px;min-width:44px;min-height:44px;padding:10px;border:0;background:transparent;border-radius:10px;display:inline-flex;align-items:center;justify-content:center; }
+    #llf-mobile-preview .llf-icon svg { width:20px;height:20px; }
+    #llf-mobile-preview .llf-greeting { flex:1;min-width:0;font-size:16px;font-weight:600; }
+    #llf-mobile-preview .llf-avatar { width:34px;height:34px;display:grid;place-items:center;background:var(--llf-blue);color:var(--llf-onblue);border-radius:50%;font-weight:600;margin:0 4px; }
+    #llf-mobile-preview .llf-edition { display:flex;align-items:center;gap:9px;margin:7px 4px 0;padding:0 11px;border:1px solid var(--llf-line);border-radius:10px;background:var(--llf-bg); }
+    #llf-mobile-preview .llf-edition svg { width:16px;min-width:16px;color:var(--llf-muted); }
+    #llf-mobile-preview .llf-edition select { width:100%;min-width:0;min-height:42px;font-size:14px;border:0;background:transparent; }
+    #llf-mobile-preview .llf-main { flex:1;padding:16px; }
+    #llf-mobile-preview h2,#llf-mobile-preview h3,#llf-mobile-preview p { margin:0; }
+    #llf-mobile-preview h2 { font:700 21px/1.3 'Plus Jakarta Sans',Inter,sans-serif;letter-spacing:-.4px;overflow-wrap:anywhere; }
+    #llf-mobile-preview h3 { font:600 16px/1.35 'Plus Jakarta Sans',Inter,sans-serif; }
+    #llf-mobile-preview .llf-sub { color:var(--llf-muted);font-size:12px; }
+    #llf-mobile-preview .llf-hero { padding:18px;border-radius:14px;background:var(--llf-hero);color:var(--llf-herotext); }
+    #llf-mobile-preview .llf-herotop { display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px; }
+    #llf-mobile-preview .llf-hero .llf-sub { color:#c5cde0; }
+    #llf-mobile-preview .llf-status { display:inline-flex;gap:5px;align-items:center;color:var(--llf-active);background:var(--llf-activebg);border-radius:999px;font-size:11px;font-weight:600;padding:3px 8px;white-space:nowrap; }
+    #llf-mobile-preview .llf-hero .llf-status { color:#b6edcb;background:#284c40; }
+    #llf-mobile-preview .llf-textbutton { display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:8px 10px;border:0;border-radius:9px;background:transparent;color:var(--llf-blue);font-size:12px;font-weight:600;text-decoration:none; }
+    #llf-mobile-preview .llf-textbutton svg { width:15px;height:15px; }
+    #llf-mobile-preview .llf-hero .llf-textbutton { color:var(--llf-herotext);padding:2px;min-height:32px; }
+    #llf-mobile-preview .llf-stats { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:var(--llf-paper);border:1px solid var(--llf-line);border-radius:12px;margin:14px 0 0;padding:12px 0; }
+    #llf-mobile-preview .llf-stats.llf-pair { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    #llf-mobile-preview .llf-stat { text-align:center;min-width:0;padding:0 6px; }
+    #llf-mobile-preview .llf-stat+.llf-stat { border-left:1px solid var(--llf-line); }
+    #llf-mobile-preview .llf-stat strong { display:block;font:700 23px/1.25 'Plus Jakarta Sans',sans-serif;font-variant-numeric:tabular-nums; }
+    #llf-mobile-preview .llf-stat span { display:block;font-size:11px;color:var(--llf-muted);margin-top:3px;overflow-wrap:anywhere; }
+    #llf-mobile-preview .llf-performance { display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;padding:12px 2px;font-size:12px;color:var(--llf-muted); }
+    #llf-mobile-preview .llf-performance b { color:var(--llf-ink);font-weight:500;word-spacing:6px;font-variant-numeric:tabular-nums; }
+    #llf-mobile-preview .llf-sectionhead { display:flex;justify-content:space-between;align-items:center;gap:8px;margin:18px 0 8px; }
+    #llf-mobile-preview .llf-list { background:var(--llf-paper);border:1px solid var(--llf-line);border-radius:12px;overflow:hidden; }
+    #llf-mobile-preview .llf-entry+.llf-entry { border-top:1px solid var(--llf-line); }
+    #llf-mobile-preview .llf-entry summary { list-style:none;min-height:80px;display:flex;align-items:center;gap:9px;padding:12px;cursor:pointer; }
+    #llf-mobile-preview .llf-entry summary::-webkit-details-marker { display:none; }
+    #llf-mobile-preview .llf-entry summary svg { width:18px;min-width:18px;height:18px;color:var(--llf-muted); }
+    #llf-mobile-preview .llf-entry[open] summary .llf-chevron { transform:rotate(90deg); }
+    #llf-mobile-preview .llf-rowtext { flex:1;min-width:0; }
+    #llf-mobile-preview .llf-rowtext strong { display:block;font-size:13px;font-weight:600;line-height:1.4;overflow-wrap:anywhere; }
+    #llf-mobile-preview .llf-meta { display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-top:4px;font-size:11px;color:var(--llf-muted); }
+    #llf-mobile-preview .llf-count { white-space:nowrap;min-width:37px;font-size:12px;font-variant-numeric:tabular-nums;text-align:right;color:var(--llf-muted); }
+    #llf-mobile-preview .llf-detail { padding:0 12px 12px;display:grid;gap:10px; }
+    #llf-mobile-preview .llf-detail .llf-sub { font-size:12px; }
+    #llf-mobile-preview .llf-primary { display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 13px;min-height:44px;border:0;border-radius:9px;background:var(--llf-blue);color:var(--llf-onblue);font-weight:600;font-size:12px; }
+    #llf-mobile-preview .llf-primary svg { width:17px;height:17px; }
+    #llf-mobile-preview .llf-next { margin-top:18px; }
+    #llf-mobile-preview .llf-emptyline { display:flex;gap:10px;align-items:center;padding:15px 0;color:var(--llf-muted);font-size:12px; }
+    #llf-mobile-preview .llf-emptyline svg { width:20px;min-width:20px; }
+    #llf-mobile-preview .llf-nav { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:7px 8px 10px;border-top:1px solid var(--llf-line);background:var(--llf-paper); }
+    #llf-mobile-preview .llf-nav button { min-height:54px;border:0;background:transparent;color:var(--llf-muted);font-size:11px;display:grid;justify-items:center;align-content:center;gap:3px;border-radius:10px; }
+    #llf-mobile-preview .llf-nav button[aria-current="page"] { color:var(--llf-blue);background:var(--llf-soft);font-weight:600; }
+    #llf-mobile-preview .llf-nav svg { width:19px;height:19px; }
+    #llf-mobile-preview .llf-titlebar { display:flex;align-items:center;justify-content:space-between;gap:8px; }
+    #llf-mobile-preview .llf-help { font-size:12px;color:var(--llf-muted);margin:8px 0 14px; }
+    #llf-mobile-preview .llf-help summary { min-height:34px;cursor:pointer; }
+    #llf-mobile-preview .llf-help p { padding:4px 0 10px; }
+    #llf-mobile-preview .llf-tabs { display:flex;border-bottom:1px solid var(--llf-line);margin:14px 0 0; }
+    #llf-mobile-preview .llf-tabs button { flex:1;min-height:44px;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--llf-muted);font-weight:500;font-size:13px; }
+    #llf-mobile-preview .llf-tabs button[aria-pressed="true"] { color:var(--llf-blue);border-color:var(--llf-blue); }
+    #llf-mobile-preview .llf-empty { padding:30px 12px;text-align:center;display:grid;justify-items:center;gap:10px; }
+    #llf-mobile-preview .llf-empty svg { width:30px;height:30px;color:var(--llf-blue); }
+    #llf-mobile-preview .llf-empty p { max-width:29ch;color:var(--llf-muted);font-size:12px; }
+    #llf-mobile-preview .llf-filter { margin:14px 0;display:flex;gap:8px;align-items:center;color:var(--llf-muted);font-size:12px; }
+    #llf-mobile-preview .llf-filter select { flex:1;min-width:0;min-height:44px;border:1px solid var(--llf-line);border-radius:9px;background:var(--llf-paper);padding:8px; }
+    #llf-mobile-preview .llf-sheet { margin-top:14px;padding:16px;border:1px solid var(--llf-line);border-radius:12px;background:var(--llf-paper);display:grid;gap:12px; }
+    #llf-mobile-preview .llf-sheet label { display:grid;gap:4px;font-size:12px; }
+    #llf-mobile-preview .llf-sheet input { min-width:0;max-width:100%;min-height:44px;border:1px solid var(--llf-line);border-radius:8px;background:var(--llf-bg);padding:8px;font-size:16px; }
+    #llf-mobile-preview .llf-menu { background:var(--llf-paper);border-bottom:1px solid var(--llf-line);padding:8px 12px; }
+    #llf-mobile-preview .llf-menu button { border:0;background:transparent;min-height:44px;text-align:left;display:block;width:100%; }
+    #llf-mobile-preview .llf-cards .llf-list { border:0;border-radius:0;background:transparent;display:grid;gap:10px;overflow:visible; }
+    #llf-mobile-preview .llf-cards .llf-entry { border:1px solid var(--llf-line);border-radius:12px;background:var(--llf-paper);overflow:hidden; }
+    #llf-mobile-preview .llf-cards .llf-entry summary { min-height:103px;padding:14px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px; }
+    #llf-mobile-preview .llf-cards .llf-entry summary>.llf-chevron { display:none; }
+    #llf-mobile-preview .llf-cards .llf-count { padding:7px 9px;border-radius:8px;background:var(--llf-soft);color:var(--llf-blue);font-weight:500; }
+    #llf-mobile-preview .llf-cards .llf-detail { padding:0 14px 14px; }
+    #llf-mobile-preview .llf-notice { padding:8px 16px;font-size:12px;color:var(--llf-muted);background:var(--llf-paper);border-top:1px solid var(--llf-line); }
+    @media(max-width:360px) { #llf-mobile-preview .llf-stage{padding:12px 0 30px;min-height:1280px} #llf-mobile-preview .llf-phone{min-height:1220px;border-radius:16px} #llf-mobile-preview .llf-main{padding:12px} #llf-mobile-preview .llf-top{padding-left:8px;padding-right:8px} #llf-mobile-preview .llf-count{min-width:30px} }
+  </style>
+  <div class="viz-carousel viz-dotted-background" aria-label="Propuestas de diseño móvil" data-previous-label="Anterior" data-next-label="Siguiente">
+    <section class="llf-stage" data-variant="Listas compactas" aria-label="Propuesta con listas compactas">
+      <div class="llf-phone" data-design="list"></div>
+    </section>
+    <section class="llf-stage" data-variant="Tarjetas horizontales" aria-label="Propuesta con tarjetas horizontales" hidden>
+      <div class="llf-phone llf-cards" data-design="cards"></div>
+    </section>
+  </div>
+  <script>
+    (() => {
+      const root = document.getElementById('llf-mobile-preview');
+      const tournaments = [
+        { id:'menores',name:'Liga 1 MENORES',group:'YOUTH',edition:'trimestre',editionName:'2 trimestre · 2026',age:'Desde 10 años · Hasta 19 años' },
+        { id:'sub9',name:'LIGA LAGO SUB 9',group:'YOUTH',edition:'apertura',editionName:'Apertura 2026',age:'Sin edad mínima' },
+        { id:'sub11',name:'LIGA LAGO SUB 11',group:'YOUTH',edition:'apertura',editionName:'Apertura 2026',age:'Sin edad mínima' },
+        { id:'primera',name:'Torneo de liga · Primera División',group:'ADULT',edition:'apertura',editionName:'Apertura 2026',age:'Sin edad mínima' }
+      ];
+      const saved = window.openai?.widgetState?.modelContent;
+      const states = {};
+      const icon = (name) => `<i data-lucide="${name}" aria-hidden="true"></i>`;
+      const persist = (design) => {
+        const state = states[design];
+        window.openai?.setWidgetState({modelContent:{design,screen:state.screen,group:state.group,edition:state.edition},privateContent:null})?.catch(() => {});
+      };
+      const filtered = (state) => tournaments.filter(t => state.edition==='all' || t.edition===state.edition);
+      function rows(items, screen) {
+        return `<div class="llf-list">${items.map(t => `<details class="llf-entry"><summary><span class="llf-rowtext"><strong>${t.name}</strong><span class="llf-meta">${t.group==='YOUTH'?'Menores':'Adultos'} · ${t.editionName}</span><span class="llf-meta"><span class="llf-status">Activo</span></span></span><span class="llf-count">0 / 25</span>${icon('chevron-right').replace('aria-hidden','class="llf-chevron" aria-hidden')}</summary><div class="llf-detail"><p class="llf-sub">${t.age} · ${t.group==='ADULT'?'Primera División':'Liga sin divisiones'}</p><button class="llf-primary" data-roster="${t.id}">${icon('users')} ${screen==='home'?'Ver plantilla':'Gestionar jugadores'}</button></div></details>`).join('')}</div>`;
+      }
+      function stats(values, pair=false) {
+        return `<div class="llf-stats ${pair?'llf-pair':''}">${values.map(([value,label])=>`<div class="llf-stat"><strong>${value}</strong><span>${label}</span></div>`).join('')}</div>`;
+      }
+      function content(state) {
+        const all=filtered(state), section=all.filter(t=>t.group===state.group);
+        if(state.roster) {
+          const tournament=tournaments.find(t=>t.id===state.roster);
+          return `<button class="llf-textbutton" data-back>${icon('arrow-left')} Volver</button><h2>${tournament.name}</h2><p class="llf-sub">${tournament.editionName}</p>${stats([[0,'Jugadores'],[25,'Cupo máximo']],true)}<div class="llf-empty">${icon('users')}<h3>Esta plantilla está vacía</h3><p>Agrega un jugador existente o registra uno nuevo en este torneo.</p><button class="llf-primary" data-new>${icon('plus')} Agregar jugador</button></div>`;
+        }
+        if(state.newPlayer) return `<button class="llf-textbutton" data-back>${icon('arrow-left')} Volver</button><h2>Nuevo jugador</h2><div class="llf-sheet"><label>Nombre<input placeholder="Nombre del jugador" autocomplete="off"></label><label>Apellido<input placeholder="Apellido del jugador" autocomplete="off"></label><label>Documento<input placeholder="Número de documento" inputmode="numeric" autocomplete="off"></label><p class="llf-sub">Vista previa del formulario. No se guardan datos.</p><button class="llf-primary" data-back>Volver a jugadores</button></div>`;
+        if(state.screen==='home') return `<div class="llf-hero"><div class="llf-herotop"><p class="llf-sub">Tu equipo</p><span class="llf-status">Activo</span></div><h2>Roblesfutsal1</h2><button class="llf-textbutton" data-logo>${icon('pencil')} Cambiar logo</button></div>${stats([[all.length,'Inscripciones'],[0,'Partidos']],true)}<div class="llf-performance"><span>Rendimiento</span><b>V 0 · E 0 · D 0 · P 0</b></div><div class="llf-sectionhead"><h3>Tus torneos <span class="llf-sub">(${all.length})</span></h3><button class="llf-textbutton" data-go="squads">Ver todos ${icon('arrow-right')}</button></div>${rows(all,'home')}<section class="llf-next"><h3>Próximos partidos</h3><div class="llf-emptyline">${icon('calendar-days')}<span>Aún no tienes partidos asignados.</span></div></section>`;
+        const tabs=`<div class="llf-tabs" aria-label="Apartado"><button aria-pressed="${state.group==='ADULT'}" data-group="ADULT">Adultos (${all.filter(t=>t.group==='ADULT').length})</button><button aria-pressed="${state.group==='YOUTH'}" data-group="YOUTH">Menores (${all.filter(t=>t.group==='YOUTH').length})</button></div>`;
+        if(state.screen==='players') return `<div class="llf-titlebar"><h2>Jugadores</h2><button class="llf-primary" data-new>${icon('plus')} Nuevo</button></div><details class="llf-help"><summary>Cómo funcionan las plantillas</summary><p>Adultos y Menores tienen plantillas independientes. La baja en un apartado no afecta al otro.</p></details>${tabs}${stats([[0,'Jugadores'],[section.length,'Torneos'],[0,'Inactivos']])}<div class="llf-empty">${icon('users')}<h3>Sin jugadores en ${state.group==='ADULT'?'Adultos':'Menores'}</h3><p>${section.length?'Registra un jugador y selecciona los torneos donde participará.':'Tu equipo no tiene torneos en este apartado para la edición seleccionada.'}</p>${section.length?'<button class="llf-primary" data-new>Agregar jugador</button>':''}</div>`;
+        return `<div class="llf-titlebar"><h2>Mis torneos</h2><button class="llf-icon" aria-label="Actualizar torneos" data-refresh>${icon('refresh-cw')}</button></div><p class="llf-sub" style="margin-top:5px">Gestiona una plantilla por torneo.</p>${tabs}<div class="llf-filter"><span>Inscripciones</span><select aria-label="Inscripciones"><option>Torneos actuales</option><option>Todas, incluido el historial</option></select></div>${section.length?rows(section,'squads'):'<div class="llf-empty"><h3>Sin torneos en este apartado</h3><p>Selecciona otra edición o cambia entre Adultos y Menores.</p></div>'}`;
+      }
+      function render(phone) {
+        const design=phone.dataset.design,state=states[design];
+        phone.innerHTML=`<header class="llf-top"><div class="llf-topline"><button class="llf-icon" data-menu aria-label="Abrir menú" aria-expanded="${state.menu}">${icon('menu')}</button><span class="llf-greeting">Hola, ROBIN</span><button class="llf-icon" data-theme aria-label="Cambiar tema">${icon('moon')}</button><button class="llf-icon" data-alerts aria-label="Notificaciones">${icon('bell')}</button><div class="llf-avatar" aria-label="Usuario ROBIN">R</div></div><label class="llf-edition">${icon('calendar-days')}<select data-edition aria-label="Edición"><option value="all">Todas las ediciones</option><option value="trimestre">2 trimestre · 2026</option><option value="apertura">Apertura 2026</option></select></label></header>${state.menu?'<div class="llf-menu"><button data-go="home">Inicio</button><button data-go="players">Jugadores</button><button data-go="squads">Mis torneos</button><button data-info="Partidos">Partidos</button><button data-info="Estadísticas">Estadísticas</button><button data-info="Historial">Historial</button></div>':''}<main class="llf-main">${content(state)}</main>${state.notice?`<p class="llf-notice" role="status">${state.notice}</p>`:''}<nav class="llf-nav" aria-label="Navegación principal">${[['home','house','Inicio'],['players','users','Jugadores'],['squads','trophy','Mis torneos']].map(([id,symbol,label])=>`<button data-go="${id}" ${state.screen===id?'aria-current="page"':''}>${icon(symbol)}${label}</button>`).join('')}</nav>`;
+        phone.querySelector('[data-edition]').value=state.edition;
+        phone.querySelector('[data-edition]').addEventListener('change',event=>{state.edition=event.target.value;state.roster=null;state.notice='';render(phone);persist(design)});
+        phone.querySelectorAll('[data-go]').forEach(button=>button.addEventListener('click',()=>{Object.assign(state,{screen:button.dataset.go,menu:false,newPlayer:false,roster:null,notice:''});render(phone);persist(design)}));
+        phone.querySelectorAll('[data-group]').forEach(button=>button.addEventListener('click',()=>{state.group=button.dataset.group;render(phone);persist(design)}));
+        phone.querySelectorAll('[data-roster]').forEach(button=>button.addEventListener('click',()=>{state.roster=button.dataset.roster;render(phone)}));
+        phone.querySelectorAll('[data-back]').forEach(button=>button.addEventListener('click',()=>{state.newPlayer=false;state.roster=null;render(phone)}));
+        phone.querySelectorAll('[data-new]').forEach(button=>button.addEventListener('click',()=>{state.newPlayer=true;state.roster=null;render(phone)}));
+        phone.querySelector('[data-menu]').addEventListener('click',()=>{state.menu=!state.menu;render(phone)});
+        phone.querySelector('[data-theme]').addEventListener('click',()=>{state.dark=!state.dark;phone.style.colorScheme=state.dark?'dark':'light'});
+        phone.querySelector('[data-alerts]').addEventListener('click',()=>{state.notice='No hay notificaciones para mostrar en esta vista previa.';render(phone)});
+        phone.querySelectorAll('[data-logo]').forEach(button=>button.addEventListener('click',()=>{state.notice='Cambiar logo abrirá el selector de imágenes del equipo.';render(phone)}));
+        phone.querySelectorAll('[data-refresh]').forEach(button=>button.addEventListener('click',()=>{state.notice='Vista previa: los torneos mostrados son los de tus capturas.';render(phone)}));
+        phone.querySelectorAll('[data-info]').forEach(button=>button.addEventListener('click',()=>{state.notice=`${button.dataset.info}: se conserva el acceso desde el menú.`;state.menu=false;render(phone)}));
+        if(globalThis.lucide) lucide.createIcons({attrs:{width:18,height:18}});
+      }
+      root.querySelectorAll('[data-design]').forEach(phone=>{
+        states[phone.dataset.design]={screen:['home','players','squads'].includes(saved?.screen)?saved.screen:'home',group:saved?.group==='ADULT'?'ADULT':'YOUTH',edition:['all','trimestre','apertura'].includes(saved?.edition)?saved.edition:'all',menu:false,newPlayer:false,roster:null,notice:'',dark:false};
+        render(phone);
+      });
+      window.addEventListener('openai:set_globals',event=>{
+        const incoming=event.detail?.globals?.widgetState?.modelContent;
+        if(!incoming) return;
+        root.querySelectorAll('[data-design]').forEach(phone=>{
+          const state=states[phone.dataset.design];
+          if(['home','players','squads'].includes(incoming.screen)) state.screen=incoming.screen;
+          if(['ADULT','YOUTH'].includes(incoming.group)) state.group=incoming.group;
+          if(['all','trimestre','apertura'].includes(incoming.edition)) state.edition=incoming.edition;
+          render(phone);
+        });
+      });
+      if(globalThis.Tweak) root.querySelectorAll('[data-design]').forEach(phone=>{
+        const settings={spacing:16};
+        const tweak=new Tweak({container:phone,onChange:()=>{phone.querySelector('.llf-main').style.padding=settings.spacing+'px';}});
+        tweak.addSlider(settings,'spacing',{label:'Margen del contenido',min:12,max:24,step:4,unit:'px'});
+      });
+    })();
+  </script>
+</div>

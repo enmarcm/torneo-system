@@ -43,7 +43,7 @@ export const Topbar: React.FC<Props> = ({ onOpenSidebar }) => {
       }}
     >
       <RouteProgress />
-      <Toolbar sx={{ minHeight: 72, gap: { xs: 1, md: 1.5 }, flexWrap: { xs: 'wrap', sm: 'nowrap' }, py: { xs: 1, sm: 0 }, px: { xs: 2, md: 3 }, '& > .MuiIconButton-root': { flexShrink: 0 } }}>
+      <Toolbar sx={{ minHeight: { xs: 'auto', sm: 72 }, gap: { xs: 0.5, md: 1.5 }, rowGap: 0.75, flexWrap: { xs: 'wrap', sm: 'nowrap' }, py: { xs: 0.75, sm: 0 }, px: { xs: 1.5, md: 3 }, '& .MuiIconButton-root': { flexShrink: 0, minWidth: 44, minHeight: 44 }, '& .MuiIconButton-root > .MuiSvgIcon-root': { fontSize: { xs: 22, md: 24 } } }}>
         <IconButton onClick={handleHamburger} aria-label="Abrir menú">
           <MenuRounded />
         </IconButton>
@@ -61,6 +61,7 @@ export const Topbar: React.FC<Props> = ({ onOpenSidebar }) => {
             value={selectedEditionId ?? ''}
             onChange={(e) => setSelectedEditionId(e.target.value || null)}
             displayEmpty
+            sx={{ '& .MuiSelect-select': { py: { xs: 1, md: 1.25 }, fontSize: { xs: 14, md: 15 } } }}
             inputProps={{ 'aria-label': 'Edición' }}
           >
             <MuiMenuItem value="">
@@ -87,7 +88,7 @@ export const Topbar: React.FC<Props> = ({ onOpenSidebar }) => {
         </Tooltip>
 
         <IconButton onClick={(e) => setAnchor(e.currentTarget)} aria-label="Menú de usuario" sx={{ p: 0.5 }}>
-          <Avatar sx={{ width: 36, height: 36, bgcolor: 'primary.main', fontWeight: 700 }}>
+          <Avatar sx={{ width: { xs: 32, md: 36 }, height: { xs: 32, md: 36 }, bgcolor: 'primary.main', fontWeight: 700 }}>
             {user?.username?.[0]?.toUpperCase()}
           </Avatar>
         </IconButton>

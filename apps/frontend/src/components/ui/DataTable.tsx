@@ -47,6 +47,7 @@ interface Props<T> {
   actions?: DataTableAction<T>[];
   getRowKey: (row: T) => string;
   onRowClick?: (row: T) => void;
+  mobileLayout?: 'cards' | 'list';
 }
 
 export function DataTable<T>({
@@ -60,6 +61,7 @@ export function DataTable<T>({
   actions,
   getRowKey,
   onRowClick,
+  mobileLayout = 'cards',
 }: Props<T>) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -70,6 +72,21 @@ export function DataTable<T>({
     return <EmptyState title={emptyTitle} description={emptyDescription} />;
 
   if (isMobile) {
+    if (mobileLayout === 'list') {
+      const visibleColumns = columns.filter((column) => !column.hideInMobile);
+      return <Card variant="outlined" sx={{ boxShadow: 'none', overflow: 'hidden' }}>
+        {rows.map((row, index) => <Box key={getRowKey(row)} sx={{ p: 1.5, minWidth: 0, borderTop: index ? '1px solid' : undefined, borderColor: 'divider' }}>
+          <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
+            <Box sx={{ flex: 1, minWidth: 0 }} onClick={() => onRowClick?.(row)}>{visibleColumns[0]?.render(row)}</Box>
+            {actions && actions.length > 0 && <RowActionsIcons actions={actions} row={row} compact />}
+          </Stack>
+          {visibleColumns.slice(1).map((column) => <Stack key={column.key} direction="row" alignItems="flex-start" spacing={1.5} sx={{ mt: 1, minWidth: 0 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ minWidth: 76 }}>{column.label}</Typography>
+            <Box sx={{ flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>{column.render(row)}</Box>
+          </Stack>)}
+        </Box>)}
+      </Card>;
+    }
     return (
       <Stack spacing={1.5}>
         {rows.map((row, i) => (
@@ -176,11 +193,11 @@ export function DataTable<T>({
   );
 }
 
-function RowActionsIcons<T>({ actions, row }: { actions: DataTableAction<T>[]; row: T }) {
+function RowActionsIcons<T>({ actions, row, compact = false }: { actions: DataTableAction<T>[]; row: T; compact?: boolean }) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const menuId = useId();
-  const visibleActions = actions.length > 3 ? actions.slice(0, 2) : actions;
-  const overflowActions = actions.length > 3 ? actions.slice(2) : [];
+  const visibleActions = compact ? [] : actions.length > 3 ? actions.slice(0, 2) : actions;
+  const overflowActions = compact ? actions : actions.length > 3 ? actions.slice(2) : [];
   /**
    * Lo correcto es que cada acción traiga su `icon`. Esto es solo una red de
    * seguridad por si alguna se define sin él: antes cualquier etiqueta

@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { SaveButton } from '@/components/ui/SaveButton';
 import {
-  Box, Card, Typography, Avatar, Chip, Stack, Button, TextField, MenuItem,
+  Box, Card, Typography, Avatar, Chip, Stack, Button, TextField, MenuItem, Alert,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Tabs, Tab,
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
@@ -23,6 +23,7 @@ import { NewRosterPlayer } from '@/components/sport/NewRosterPlayer';
 import { AssignPlayerTournaments } from '@/components/sport/AssignPlayerTournaments';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatCard } from '@/components/ui/StatCard';
+import { MobileStatStrip } from '@/components/ui/MobileStatStrip';
 import { DataTable, type DataTableAction, type DataTableColumn } from '@/components/ui/DataTable';
 import { AppDrawer } from '@/components/ui/AppDrawer';
 import { AppModal } from '@/components/ui/AppModal';
@@ -96,13 +97,17 @@ const TeamPlayers: React.FC = () => {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const teamId = user?.teamId;
-  const { data: registrations = [], isLoading, error, refetch } = useTeamRegistrationsQuery(teamId ?? undefined, true);
+  const { data: registrationsData, isLoading, isFetching, error, refetch } = useTeamRegistrationsQuery(teamId ?? undefined, true);
+  const registrations = registrationsData ?? [];
   const toast = useToast();
   const updatePlayer = useUpdatePlayer();
   const updateRoster = useUpdateRoster();
   const [assigningPlayer, setAssigningPlayer] = useState<PlayerRow | null>(null);
   const [pickedAgeGroup, setAgeGroup] = useState<'ADULT' | 'YOUTH' | null>(null);
   const ageGroup = pickedAgeGroup ?? (registrations.some((r) => getCompetitionAgeGroup(r.competition) === 'ADULT') ? 'ADULT' : 'YOUTH');
+  useEffect(() => {
+    if (pickedAgeGroup === null && registrationsData?.length) setAgeGroup(ageGroup);
+  }, [pickedAgeGroup, registrationsData, ageGroup]);
   const sectionRegistrations = useMemo(() => registrations.filter((r) => getCompetitionAgeGroup(r.competition) === ageGroup), [registrations, ageGroup]);
 
   // Edit drawer
@@ -276,12 +281,13 @@ const TeamPlayers: React.FC = () => {
   ];
 
   if (isLoading) return <RosterSkeleton rows={6} />;
-  if (error) return <ErrorState onRetry={refetch} />;
+  if (error && registrationsData === undefined) return <ErrorState onRetry={refetch} />;
 
   return (
     <Box>
       <PageHeader
         title="Jugadores"
+        compactMobile
         subtitle="Adultos y Menores tienen plantillas independientes. Las bajas de un apartado no afectan al otro."
         action={<NewRosterPlayer key={ageGroup} registrations={sectionRegistrations} />}
       />
@@ -291,7 +297,11 @@ const TeamPlayers: React.FC = () => {
         <Tab value="YOUTH" label="Menores" />
       </Tabs>
 
-      <Grid container spacing={2} sx={{ mb: 3 }}>
+      {error && <Alert severity="warning" sx={{ mb: 2 }} action={<Button color="inherit" disabled={isFetching} onClick={() => void refetch()}>Reintentar</Button>}>
+        No pudimos actualizar los torneos. El formulario y los datos cargados se conservan.
+      </Alert>}
+      <MobileStatStrip items={[{ label: 'Jugadores', value: players.length }, { label: 'Torneos', value: sectionRegistrations.length }, { label: 'Inactivos', value: inactiveCount }]} />
+      <Grid container spacing={2} sx={{ mb: 3, display: { xs: 'none', md: 'flex' } }}>
         <Grid size={{ xs: 6, md: 4 }}>
           <StatCard label="Jugadores" value={players.length} icon={<PersonRounded />} tint="primary" />
         </Grid>
@@ -306,6 +316,7 @@ const TeamPlayers: React.FC = () => {
       {players.length === 0 ? (
         <EmptyState
           variant="bench"
+          compact
           seats={5}
           filled={0}
           title="Tu plantilla está vacía"
@@ -315,11 +326,12 @@ const TeamPlayers: React.FC = () => {
           onAction={() => navigate(ROUTES.team.squads)}
         />
       ) : (
-        <Card sx={{ p: { xs: 2, md: 3 } }}>
-          <Typography variant="h3" sx={{ mb: 2 }}>
+        <Card sx={{ p: { xs: 0, md: 3 }, bgcolor: { xs: 'transparent', md: 'background.paper' }, boxShadow: { xs: 'none', md: undefined } }}>
+          <Typography variant="h3" sx={{ mb: 2, display: { xs: 'none', md: 'block' } }}>
             Lista de jugadores
           </Typography>
           <DataTable
+            mobileLayout="list"
             columns={columns}
             rows={players}
             getRowKey={(r) => r.id}

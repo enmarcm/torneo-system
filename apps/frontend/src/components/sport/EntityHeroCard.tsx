@@ -17,10 +17,11 @@ export const EntityHeroCard: React.FC<Props> = ({ title, subtitle, chips, right 
       background: 'var(--heroGradient)',
       display: 'flex',
       justifyContent: 'space-between',
-      alignItems: 'center',
-      gap: 3,
+      flexDirection: { xs: 'column', sm: 'row' },
+      alignItems: { xs: 'stretch', sm: 'center' },
+      gap: { xs: 1.5, md: 3 },
       flexWrap: 'wrap',
-      minHeight: 150,
+      minHeight: { xs: 'auto', md: 150 },
     }}
   >
     <Box sx={{ flex: 1, minWidth: 0, width: { xs: '100%', sm: 'auto' } }}>
@@ -40,6 +41,6 @@ export const EntityHeroCard: React.FC<Props> = ({ title, subtitle, chips, right 
         <Typography sx={{ color: 'rgba(255,255,255,0.65)', mt: 1 }}>{subtitle}</Typography>
       )}
     </Box>
-    {right && <Box sx={{ minWidth: 0, maxWidth: '100%' }}>{right}</Box>}
+    {right && <Box sx={{ minWidth: 0, maxWidth: '100%', alignSelf: { xs: 'flex-start', sm: 'auto' } }}>{right}</Box>}
   </Box>
 );

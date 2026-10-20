@@ -2,7 +2,7 @@ import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Divider, Button, Ava
 import { SaveButton } from '@/components/ui/SaveButton';
 import { GroupsRounded, SportsSoccerRounded, BarChartRounded, EditRounded, MailOutlineRounded } from '@mui/icons-material';
 import { useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useTeamQuery, useTeamHistoryQuery, useTeamStatsQuery, useTeamRegistrationsQuery } from '@/hooks/queries';
 import { useUpdateTeam, useUpdateMe } from '@/hooks/mutations';
@@ -20,8 +20,12 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { getCompetitionShortLabel, getCompetitionSubtitle } from '@/utils/competitionMeta';
 import { getVisibleTeamRegistrations } from '@/utils/teamRegistrations';
+import { getStatusLabel } from '@/utils/statusLabels';
+import { MobileStatStrip } from '@/components/ui/MobileStatStrip';
+import { TeamTournamentList } from '@/components/sport/TeamTournamentList';
 
 const TeamHome: React.FC = () => {
+  const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const teamId = user?.teamId;
   const { data: team } = useTeamQuery(teamId ?? '');
@@ -63,7 +67,7 @@ const TeamHome: React.FC = () => {
 
   return (
     <Box>
-      <PageHeader title="Inicio" subtitle={`Bienvenido, ${user?.username ?? ''}`} />
+      <Box sx={{ display: { xs: 'none', md: 'block' } }}><PageHeader title="Inicio" subtitle={`Bienvenido, ${user?.username ?? ''}`} /></Box>
 
       {/*
         Aviso mientras no haya correo cargado: es la única vía que tiene la liga
@@ -92,7 +96,7 @@ const TeamHome: React.FC = () => {
             chips={
               <Stack direction="row" spacing={1} alignItems="center">
                 {team.logoUrl && <Avatar src={team.logoUrl} sx={{ width: 32, height: 32, border: '2px solid rgba(255,255,255,0.5)' }} />}
-                <Chip size="small" label={team.status} variant="outlined" sx={{ color: '#fff', borderColor: 'rgba(255,255,255,0.4)' }} />
+                <Chip size="small" label={getStatusLabel(team.status)} variant="outlined" sx={{ color: '#fff', borderColor: 'rgba(255,255,255,0.4)' }} />
               </Stack>
             }
             right={
@@ -162,7 +166,12 @@ const TeamHome: React.FC = () => {
         </Stack>
       )}
 
-      <Grid container spacing={2} sx={{ mt: 1 }}>
+      <MobileStatStrip items={[{ label: 'Inscripciones', value: registrations.length }, { label: 'Partidos', value: stats?.totalPlayed ?? 0 }]} />
+      <Stack direction="row" useFlexGap flexWrap="wrap" justifyContent="space-between" spacing={1} sx={{ display: { xs: 'flex', md: 'none' }, mb: 2 }}>
+        <Typography variant="caption" color="text.secondary">Rendimiento</Typography>
+        <Stack direction="row" spacing={1.5}>{[{ label: 'V', value: wins, title: 'Victorias' }, { label: 'E', value: draws, title: 'Empates' }, { label: 'D', value: losses, title: 'Derrotas' }, { label: 'P', value: pending, title: 'Partidos pendientes' }].map((item) => <Typography key={item.label} variant="caption" aria-label={`${item.title}: ${item.value}`} sx={{ fontVariantNumeric: 'tabular-nums' }}>{item.label} {item.value}</Typography>)}</Stack>
+      </Stack>
+      <Grid container spacing={2} sx={{ mt: 1, display: { xs: 'none', md: 'flex' } }}>
         <Grid size={{ xs: 6, md: 4 }}>
           <StatCard label="Inscripciones" value={registrations.length} icon={<GroupsRounded />} tint="primary" />
         </Grid>
@@ -236,7 +245,9 @@ const TeamHome: React.FC = () => {
             description={registrations.length ? 'Puedes consultar tus inscripciones anteriores en Mis torneos, seleccionando el historial.' : 'Cuando el administrador inscriba a tu equipo, el torneo aparecerá aquí.'}
           />
         ) : (
-          <Card>
+          <>
+          <TeamTournamentList registrations={currentRegistrations} onManage={(id) => navigate(`${ROUTES.team.squads}?plantilla=${encodeURIComponent(id)}`)} />
+          <Card sx={{ display: { xs: 'none', md: 'block' } }}>
             <Stack divider={<Divider />}>
               {currentRegistrations.map(({ id, competition }) => (
                 <Stack key={id} direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'flex-start', sm: 'center' }} justifyContent="space-between" spacing={2} sx={{ p: 2 }}>
@@ -253,12 +264,13 @@ const TeamHome: React.FC = () => {
               ))}
             </Stack>
           </Card>
+          </>
         )}
       </Box>
       <Box sx={{ mt: 3 }}>
         <Typography variant="h4" sx={{ mb: 2 }}>Tus próximos partidos</Typography>
         {upcoming.length === 0 ? (
-          <Card sx={{ p: 4, textAlign: 'center' }}>
+          <Card sx={{ p: { xs: 2, md: 4 }, textAlign: 'center', boxShadow: { xs: 'none', md: undefined } }}>
             <Typography color="text.secondary">Aún no tienes partidos asignados.</Typography>
           </Card>
         ) : (

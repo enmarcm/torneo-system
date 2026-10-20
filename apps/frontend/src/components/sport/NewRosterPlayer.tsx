@@ -38,6 +38,9 @@ export const NewRosterPlayer: React.FC<{
   const busy = saving || create.isPending || add.isPending;
   const formLocked = busy || !!createdPlayerId;
   const set = (key: keyof typeof EMPTY, value: string) => setForm((current) => ({ ...current, [key]: value }));
+  const dismiss = (reason?: 'backdropClick' | 'escapeKeyDown' | 'closeButton') => {
+    if (reason !== 'backdropClick' && !busy && !uploadingPhotos) setOpen(false);
+  };
   const close = () => { if (!busy && !uploadingPhotos) { setOpen(false); setForm(EMPTY); setPickedRegistrationIds([]); setCreatedPlayerId(undefined); setFailures([]); } };
   const save = async () => {
     if (!selectedIds.length || busy || selectedBlocked) return;
@@ -68,7 +71,7 @@ export const NewRosterPlayer: React.FC<{
   return (
     <>
       <Button variant="contained" startIcon={<AddRounded />} disabled={disabled || (!registrationId && options.length === 0)} onClick={() => setOpen(true)}>Nuevo jugador</Button>
-      <AppDrawer open={open} onClose={close} title={createdPlayerId ? 'Completar inscripciones' : 'Nuevo jugador'} subtitle="Selecciona los torneos de destino. El jugador conserva una sola ficha y una plantilla independiente en cada torneo." width={560}>
+      <AppDrawer open={open} onClose={dismiss} title={createdPlayerId ? 'Completar inscripciones' : 'Nuevo jugador'} subtitle="Selecciona los torneos de destino. El jugador conserva una sola ficha y una plantilla independiente en cada torneo." width={560}>
         <Stack spacing={2}>
           {!registrationId && <PlayerTournamentSelect registrations={registrations} value={selectedIds} onChange={(ids) => { setPickedRegistrationIds(ids); setFailures([]); }} playerId={createdPlayerId} disabled={busy} />}
           {!!failures.length && <Alert severity="error">

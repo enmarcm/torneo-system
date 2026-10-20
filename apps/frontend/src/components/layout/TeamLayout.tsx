@@ -1,5 +1,6 @@
 import { Box, Drawer, useMediaQuery, useTheme } from '@mui/material';
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { TeamMobileNavigation } from './TeamMobileNavigation';
 import { Outlet, useLocation } from 'react-router-dom';
 import { TeamSidebar } from './TeamSidebar';
 import { Topbar } from './Topbar';
@@ -14,6 +15,7 @@ export const TeamLayout: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
   const { pathname } = useLocation();
+  useEffect(() => { setMobileOpen(false); }, [pathname]);
   const { sidebarCollapsed } = useGlobalStore();
   const sidebarWidth = sidebarCollapsed ? 64 : 264;
 
@@ -41,7 +43,7 @@ export const TeamLayout: React.FC = () => {
       >
         <Topbar onOpenSidebar={() => setMobileOpen(true)} />
         {/* Cada ruta monta de cero y entra en cascada; ver `.llf-page` en el tema. */}
-        <Box className="llf-page" key={pathname} sx={{ p: { xs: 2, md: 4 }, flex: 1 }}>
+        <Box className="llf-page" key={pathname} sx={{ p: { xs: 2, md: 4 }, pb: { xs: 'calc(88px + env(safe-area-inset-bottom))', md: 4 }, flex: 1 }}>
           <Suspense
             fallback={
               <>
@@ -54,6 +56,7 @@ export const TeamLayout: React.FC = () => {
           </Suspense>
         </Box>
       </Box>
+      <TeamMobileNavigation />
     </Box>
   );
 };

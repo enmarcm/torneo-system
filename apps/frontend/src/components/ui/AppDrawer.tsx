@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 
 interface Props {
   open: boolean;
-  onClose: () => void;
+  onClose: (reason?: 'backdropClick' | 'escapeKeyDown' | 'closeButton') => void;
   title: string;
   subtitle?: string;
   children: ReactNode;
@@ -18,7 +18,7 @@ export const AppDrawer: React.FC<Props> = ({ open, onClose, title, subtitle, chi
     <Drawer
       anchor="right"
       open={open}
-      onClose={onClose}
+      onClose={(_event, reason) => onClose(reason)}
       sx={{ zIndex: theme.zIndex.modal }}
       PaperProps={{
         sx: {
@@ -46,7 +46,7 @@ export const AppDrawer: React.FC<Props> = ({ open, onClose, title, subtitle, chi
               </Typography>
             )}
           </Box>
-          <IconButton onClick={onClose} aria-label="Cerrar" size="small" sx={{ flexShrink: 0 }}>
+          <IconButton onClick={() => onClose('closeButton')} aria-label="Cerrar" size="small" sx={{ flexShrink: 0 }}>
             <CloseRounded />
           </IconButton>
         </Stack>

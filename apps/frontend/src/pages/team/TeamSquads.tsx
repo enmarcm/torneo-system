@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { TeamTournamentList } from '@/components/sport/TeamTournamentList';
 import { Box, Button, Card, Chip, Divider, Grid2 as Grid, Stack, Typography, TextField, MenuItem } from '@mui/material';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useTeamRegistrationsQuery } from '@/hooks/queries';
@@ -16,32 +18,40 @@ import type { Competition } from '@/api/competitions.api';
 import { RefreshRounded } from '@mui/icons-material';
 
 const TeamSquads: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const teamId = useAuthStore((state) => state.user?.teamId);
   const { data: registrations = [], isLoading, error, refetch } = useTeamRegistrationsQuery(teamId ?? undefined, true);
   const [pickedAgeGroup, setAgeGroup] = useState<Competition['ageGroup'] | null>(null);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selectedId = searchParams.get('plantilla');
+  const setSelectedId = (id: string | null) => setSearchParams((current) => {
+    const next = new URLSearchParams(current);
+    if (id) next.set('plantilla', id); else next.delete('plantilla');
+    return next;
+  });
   const [showHistory, setShowHistory] = useState(false);
   const displayedRegistrations = getVisibleTeamRegistrations(registrations, showHistory);
   const selected = displayedRegistrations.find((registration) => registration.id === selectedId);
   const competitions = getTeamCompetitions(displayedRegistrations);
-  const ageGroup = pickedAgeGroup ?? (competitions.some((competition) => getCompetitionAgeGroup(competition) === 'ADULT') ? 'ADULT' : 'YOUTH');
+  const ageGroup = pickedAgeGroup ?? (selected ? getCompetitionAgeGroup(selected.competition) : competitions.some((competition) => getCompetitionAgeGroup(competition) === 'ADULT') ? 'ADULT' : 'YOUTH');
   const visible = sortCompetitions(competitions.filter((competition) => getCompetitionAgeGroup(competition) === ageGroup));
 
   return (
     <Box>
-      <PageHeader title="Mis torneos" subtitle="El administrador inscribe a tu equipo. Aquí agregas jugadores y gestionas una plantilla independiente para cada torneo." action={<Button startIcon={<RefreshRounded />} onClick={() => void refetch()} disabled={!teamId || isLoading}>Actualizar</Button>} />
+      <PageHeader compactMobile title="Mis torneos" subtitle="El administrador inscribe a tu equipo. Aquí agregas jugadores y gestionas una plantilla independiente para cada torneo." action={<Button startIcon={<RefreshRounded />} onClick={() => void refetch()} disabled={!teamId || isLoading}>Actualizar</Button>} />
       {!teamId ? <EmptyState title="No tienes equipo asignado" description="Contacta al administrador para vincular tu cuenta de delegado con un equipo." />
         : isLoading ? <LoadingState rows={3} />
         : error ? <ErrorState onRetry={() => void refetch()} />
         : registrations.length === 0 ? <EmptyState title="Tu equipo aún no está inscrito en torneos" description="Cuando el administrador inscriba a tu equipo, el torneo aparecerá aquí para que agregues jugadores." />
         : <>
-          <TextField select size="small" label="Inscripciones" value={showHistory ? 'all' : 'current'} sx={{ mb: 2, minWidth: 240 }} onChange={(event) => { setShowHistory(event.target.value === 'all'); setSelectedId(null); }}>
+          <TextField select size="small" label="Inscripciones" value={showHistory ? 'all' : 'current'} sx={{ mb: 2, minWidth: 0, width: { xs: '100%', sm: 260 } }} onChange={(event) => { setShowHistory(event.target.value === 'all'); setSelectedId(null); }}>
             <MenuItem value="current">Torneos actuales</MenuItem>
             <MenuItem value="all">Todas, incluido el historial</MenuItem>
           </TextField>
           <CompetitionSectionTabs value={ageGroup} onChange={setAgeGroup} competitions={competitions} />
           {visible.length === 0 ? <EmptyState title={showHistory ? 'No hay inscripciones en este apartado' : 'No hay torneos actuales en este apartado'} description="Aquí aparecen las inscripciones de tu equipo. Puedes consultar las anteriores seleccionando el historial." />
-            : <Grid container spacing={2}>
+            : <>
+            <TeamTournamentList registrations={visible.map((competition) => displayedRegistrations.find((registration) => registration.competitionId === competition.id)!)} onManage={setSelectedId} />
+            <Grid container spacing={2} sx={{ display: { xs: 'none', md: 'flex' } }}>
               {visible.map((competition) => {
                 const registration = registrations.find((r) => r.competition.id === competition.id)!;
                 const editable = canManageRoster(registration);
@@ -63,7 +73,7 @@ const TeamSquads: React.FC = () => {
                   </Card>
                 </Grid>;
               })}
-            </Grid>}
+            </Grid></>}
         </>}
       <AppDrawer open={!!selected} onClose={() => setSelectedId(null)} title={selected ? getCompetitionShortLabel(selected.competition) : 'Plantilla'} subtitle="Plantilla de tu equipo en este torneo." width={560}>
         {selected && (canManageRoster(selected)
