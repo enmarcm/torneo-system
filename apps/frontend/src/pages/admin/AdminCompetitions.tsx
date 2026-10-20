@@ -280,8 +280,8 @@ const StructureFields: React.FC<{
 
 const AdminCompetitions: React.FC = () => {
   const selectedEditionId = useGlobalStore((s) => s.selectedEditionId);
-  const { data: editions = [] } = useEditionsQuery();
-  const editionId = selectedEditionId ?? editions[0]?.id;
+  const { data: editions = [], isLoading: loadingEditions } = useEditionsQuery();
+  const editionId = selectedEditionId ?? undefined;
   const { data: competitions = [], isLoading, error, refetch } = useCompetitionsQuery(editionId);
   const [ageGroup, setAgeGroup] = useState<Competition['ageGroup']>('ADULT');
   const [viewingCompetition, setViewingCompetition] = useState<Competition | null>(null);
@@ -314,7 +314,7 @@ const AdminCompetitions: React.FC = () => {
     .map((c) => c.divisionLevel as number);
 
   const takenLevelsForEdit = competitions
-    .filter((c) => c.kind === 'LEAGUE_DIVISION' && getCompetitionAgeGroup(c) === editForm.ageGroup && c.divisionLevel != null && c.id !== editingComp?.id)
+    .filter((c) => c.editionId === editingComp?.editionId && c.kind === 'LEAGUE_DIVISION' && getCompetitionAgeGroup(c) === editForm.ageGroup && c.divisionLevel != null && c.id !== editingComp?.id)
     .map((c) => c.divisionLevel as number);
 
   const submit = async () => {
@@ -420,28 +420,28 @@ const AdminCompetitions: React.FC = () => {
         subtitle={
           currentEdition
             ? `Torneos que se juegan en ${currentEdition.name} (${currentEdition.year}). Cambiá de edición desde el selector de arriba.`
-            : 'Crea y configura los torneos directamente dentro de cada edición.'
+            : 'Torneos de todas las ediciones. Selecciona una edición arriba para filtrar el listado.'
         }
         action={
-          <Button variant="contained" startIcon={<AddRounded />} onClick={onOpenCreate} disabled={!editionId}>
+          <Button variant="contained" startIcon={<AddRounded />} onClick={onOpenCreate} disabled={editions.length === 0}>
             Nueva competición
           </Button>
         }
       />
 
-      {editionId && <CompetitionSectionTabs value={ageGroup} onChange={setAgeGroup} competitions={competitions} />}
+      <CompetitionSectionTabs value={ageGroup} onChange={setAgeGroup} competitions={competitions} />
 
-      {!editionId && (
+      {!loadingEditions && editions.length === 0 && (
         <Card sx={{ p: { xs: 2, sm: 3 }, textAlign: 'center' }}>
-          <Typography color="text.secondary">Selecciona una edición para ver sus competiciones.</Typography>
+          <Typography color="text.secondary">Crea una edición para empezar a organizar sus competiciones.</Typography>
         </Card>
       )}
 
-      {editionId && isLoading && <Typography color="text.secondary">Cargando…</Typography>}
+      {isLoading && <Typography color="text.secondary">Cargando…</Typography>}
 
-      {editionId && error && <ErrorState onRetry={() => void refetch()} />}
+      {error && <ErrorState onRetry={() => void refetch()} />}
 
-      {editionId && !isLoading && !error && (
+      {!isLoading && !error && (editions.length > 0 || competitions.length > 0) && (
         <Grid container spacing={2}>
           {visibleCompetitions.length === 0 ? (
             <Grid size={{ xs: 12 }}>
@@ -481,6 +481,9 @@ const AdminCompetitions: React.FC = () => {
                       </Box>
                       <Box sx={{ minWidth: 0 }}>
                         <Typography variant="h4">{c.name}</Typography>
+                        {!editionId && <Typography variant="body2" color="text.secondary">
+                          {editions.find((edition) => edition.id === c.editionId)?.name ?? 'Edición no disponible'}
+                        </Typography>}
                       </Box>
                     </Stack>
                     <Tooltip title="Ver más opciones">
@@ -534,7 +537,7 @@ const AdminCompetitions: React.FC = () => {
         </Grid>
       )}
 
-      {viewingCompetition && viewingCompetition.editionId === editionId && (
+      {viewingCompetition && (!editionId || viewingCompetition.editionId === editionId) && (
         <CompetitionOverviewModal key={viewingCompetition.id} competition={viewingCompetition} onClose={() => setViewingCompetition(null)} />
       )}
 

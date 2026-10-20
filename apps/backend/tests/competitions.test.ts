@@ -16,6 +16,23 @@ const stub = (t: TestContext, delegate: object, method: string, implementation: 
 
 const editionId = '11111111-1111-4111-8111-111111111111';
 
+test('all editions returns every competition and selecting an edition restricts the list', async (t) => {
+  const records = [
+    { id: 'first', editionId, name: 'Liga', _count: { registrations: 2, matches: 1 } },
+    { id: 'second', editionId: 'second-edition', name: 'Liga', _count: { registrations: 3, matches: 4 } },
+  ];
+  const list = stub(t, prisma.competition, 'findMany', async ({ where, include }) => {
+    assert.equal(include._count.select.registrations, true);
+    assert.equal(include._count.select.matches, true);
+    return records.filter((competition) => !where.editionId || competition.editionId === where.editionId);
+  });
+  assert.deepEqual((await competitionsService.list()).map((competition) => competition.id), ['first', 'second']);
+  assert.deepEqual(list.mock.calls[0].arguments[0].where, {});
+  assert.deepEqual((await competitionsService.list(editionId)).map((competition) => competition.id), ['first']);
+  assert.deepEqual(list.mock.calls[1].arguments[0].where, { editionId });
+  assert.deepEqual((await competitionsService.list()).map((competition) => competition.id), ['first', 'second']);
+});
+
 test('create a competition directly and retain its rules without a category', async (t) => {
   const input = createCompetitionSchema.parse({ editionId, name: '  Veteranos  ', ageMin: 35, requiresAdminEligibility: true, description: 'Reglamento', minPlayers: 7, maxPlayers: 20 });
   const create = stub(t, prisma.competition, 'create', async ({ data }: { data: Record<string, unknown> }) => data);
