@@ -6,7 +6,6 @@ export const MESSAGES = {
   unauthorized: 'No autenticado',
   badCredentials: 'Usuario o contraseña incorrectos',
   rosterFull: 'La plantilla ya alcanzó el cupo máximo de jugadores',
-  notEligibleAge: 'El jugador no cumple el rango de edad de esta competición',
   notEligibleAdmin: 'El jugador debe ser habilitado por el administrador para esta competición',
   duplicatePlayer: 'Ya existe un jugador con ese documento',
   fileTooLarge: 'El archivo supera el tamaño máximo permitido',

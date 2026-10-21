@@ -6,7 +6,7 @@ export interface Competition {
   name: string;
   description?: string | null;
   format: 'LEAGUE' | 'GROUPS_KNOCKOUT';
-  /** Apartado independiente de la estructura y del rango de edad del torneo. */
+  /** Apartado independiente de la estructura, sin restricciones por edad. */
   ageGroup: 'ADULT' | 'YOUTH';
   kind: 'STANDALONE_LEAGUE' | 'LEAGUE_DIVISION' | 'CUP' | 'YOUTH' | 'SPECIAL';
   imageUrl: string | null;
@@ -20,6 +20,7 @@ export interface Competition {
   twoLeggedStages: Array<'R16' | 'QUARTER' | 'SEMI' | 'THIRD' | 'FINAL'>;
   promotionSpots: number;
   relegationSpots: number;
+  /** Legacy fields; age limits are no longer enforced or configured. */
   ageMin: number | null;
   ageMax: number | null;
   requiresAdminEligibility: boolean;

@@ -38,7 +38,7 @@ test('create a competition directly and retain its rules without a category', as
   const create = stub(t, prisma.competition, 'create', async ({ data }: { data: Record<string, unknown> }) => data);
   const result = await competitionsService.create(input);
   assert.equal(result.name, 'Veteranos');
-  assert.equal(result.ageMin, 35);
+  assert.equal(result.ageMin, null);
   assert.equal(result.requiresAdminEligibility, true);
   assert.equal(result.description, 'Reglamento');
   assert.equal(result.minPlayers, 7);
@@ -66,8 +66,7 @@ test('blank names are rejected; image-only updates and clearing ages remain vali
   assert.deepEqual(updateCompetitionSchema.parse({ imageUrl: null }), { imageUrl: null });
 });
 
-test('invalid age and roster ranges are rejected before persistence', async () => {
-  await assert.rejects(competitionsService.create({ editionId, name: 'Torneo', ageMin: 18, ageMax: 12 }), { code: 'INVALID_AGE_RANGE' });
+test('roster ranges are still validated before persistence', async () => {
   await assert.rejects(competitionsService.create({ editionId, name: 'Torneo', minPlayers: 30, maxPlayers: 20 }), { code: 'INVALID_ROSTER_LIMITS' });
 });
 
@@ -78,7 +77,16 @@ test('partial edits can remove age restrictions and eligibility directly', async
   assert.equal(result.ageMin, null);
   assert.equal(result.ageMax, null);
   assert.equal(result.requiresAdminEligibility, false);
-  await assert.rejects(competitionsService.update('competition', { ageMin: 60 }), { code: 'INVALID_AGE_RANGE' });
+  const legacyUpdate = await competitionsService.update('competition', { ageMin: 60 });
+  assert.equal(legacyUpdate.ageMin, null);
+  assert.equal(legacyUpdate.ageMax, null);
+});
+
+test('legacy age inputs are ignored when creating a competition', async (t) => {
+  stub(t, prisma.competition, 'create', async ({ data }) => data);
+  const result = await competitionsService.create(createCompetitionSchema.parse({ editionId, name: 'Sin restricción', ageMin: 180, ageMax: -5 }));
+  assert.equal(result.ageMin, null);
+  assert.equal(result.ageMax, null);
 });
 
 

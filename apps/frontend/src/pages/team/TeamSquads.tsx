@@ -66,9 +66,6 @@ const TeamSquads: React.FC = () => {
                       <StatusBadge status={competition.status} />
                       {!editable && <Chip size="small" label="Solo consulta" variant="outlined" />}
                     </Stack>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-                      {competition.ageMin != null ? `Desde ${competition.ageMin} años` : 'Sin edad mínima'}{competition.ageMax != null ? ` · Hasta ${competition.ageMax} años` : ''}
-                    </Typography>
                     <Button variant={editable ? 'contained' : 'outlined'} onClick={() => setSelectedId(registration.id)}>{editable ? 'Gestionar jugadores' : 'Ver plantilla'}</Button>
                   </Card>
                 </Grid>;

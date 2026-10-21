@@ -26,17 +26,16 @@ export function PlayerTournamentSelect({ registrations, value, onChange, playerI
       getOptionDisabled={(registration) => !!playerTournamentBlockedReason(registration, playerId)}
       onChange={(_event, selected) => onChange(selected.map((registration) => registration.id))}
       noOptionsText="Este equipo no tiene torneos inscritos"
-      renderInput={(params) => <TextField {...params} label="Torneos" placeholder={value.length ? '' : 'Selecciona uno o varios'} helperText="Cada torneo valida su edad, cupo y habilitación por separado." />}
+      renderInput={(params) => <TextField {...params} label="Torneos" placeholder={value.length ? '' : 'Selecciona uno o varios'} helperText="Cada torneo valida su cupo y habilitación por separado." />}
       renderOption={(props, registration, { selected }) => {
         const { key, ...optionProps } = props;
         const reason = playerTournamentBlockedReason(registration, playerId);
-        const competition = registration.competition;
         return (
           <Box component="li" key={registration.id} {...optionProps}>
             <Checkbox checked={selected} tabIndex={-1} disableRipple inputProps={{ 'aria-label': label(registration) }} sx={{ pointerEvents: 'none' }} />
             <Box sx={{ minWidth: 0 }}>
               <Typography variant="body2" sx={{ fontWeight: 600, overflowWrap: 'anywhere' }}>{label(registration)}</Typography>
-              <Typography variant="caption" color="text.secondary">{reason ?? `${competition.ageMin != null ? `Desde ${competition.ageMin} años` : 'Sin edad mínima'}${competition.ageMax != null ? ` · Hasta ${competition.ageMax} años` : ''}`}</Typography>
+              {reason && <Typography variant="caption" color="text.secondary">{reason}</Typography>}
             </Box>
           </Box>
         );

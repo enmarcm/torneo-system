@@ -124,7 +124,7 @@ export const RosterEditor: React.FC<Props> = ({
   /*
     Traer la plantilla del torneo anterior. Es un botón y no algo automático:
     quién juega el torneo que viene es una decisión del equipo, no un arrastre
-    del anterior. Lo que no entra (edad, cupo, ya cargado) se dice, no se
+    del anterior. Lo que no entra (cupo, ya cargado) se dice, no se
     descarta en silencio.
   */
   const bringPrevious = async () => {
@@ -222,7 +222,7 @@ export const RosterEditor: React.FC<Props> = ({
       />
 
       <Typography variant="caption" color="text.secondary">
-        Cada torneo tiene su propia plantilla. Puedes agregar a un jugador que ya esté en otro equipo de Adultos o Menores, si cumple la edad de esta competición.
+        Cada torneo tiene su propia plantilla. Puedes reutilizar la ficha de un jugador de Adultos o Menores.
       </Typography>
       {search.trim().length >= 2 && (
         <Stack spacing={0.5}>
@@ -251,13 +251,12 @@ export const RosterEditor: React.FC<Props> = ({
                   <Typography variant="caption" color="text.secondary">
                     {p.documentType === 'CEDULA' ? 'C.I.' : 'P.N.'} {p.documentMasked}
                   </Typography>
-                  {!p.eligible && <Typography variant="caption" color="error.main">No cumple la edad de esta competición</Typography>}
                 </Box>
                 <Button
                   size="small"
                   startIcon={<AddRounded />}
                   onClick={() => addPlayer(p.id)}
-                  disabled={add.isPending || full || !p.eligible}
+                  disabled={add.isPending || full}
                 >
                   Agregar
                 </Button>

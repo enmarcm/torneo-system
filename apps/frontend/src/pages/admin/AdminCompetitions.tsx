@@ -26,8 +26,6 @@ type CompForm = {
   description: string;
   requiresAdminEligibility: boolean;
   division: string;
-  ageMin: string;
-  ageMax: string;
   minPlayers: number;
   maxPlayers: number;
   format: 'LEAGUE' | 'GROUPS_KNOCKOUT';
@@ -46,8 +44,6 @@ const EMPTY_FORM: CompForm = {
   description: '',
   requiresAdminEligibility: false,
   division: '',
-  ageMin: '',
-  ageMax: '',
   minPlayers: 11,
   maxPlayers: 25,
   format: 'LEAGUE',
@@ -328,8 +324,6 @@ const AdminCompetitions: React.FC = () => {
             description: editForm.description.trim() || null,
             requiresAdminEligibility: editForm.requiresAdminEligibility,
             division: editForm.division || null,
-            ageMin: editForm.ageMin ? Number(editForm.ageMin) : null,
-            ageMax: editForm.ageMax ? Number(editForm.ageMax) : null,
             minPlayers: Number(editForm.minPlayers) || undefined,
             maxPlayers: Number(editForm.maxPlayers) || undefined,
             format: editForm.format,
@@ -355,8 +349,6 @@ const AdminCompetitions: React.FC = () => {
           description: form.description.trim() || null,
           requiresAdminEligibility: form.requiresAdminEligibility,
           division: form.division || undefined,
-          ageMin: form.ageMin ? Number(form.ageMin) : undefined,
-          ageMax: form.ageMax ? Number(form.ageMax) : undefined,
           minPlayers: Number(form.minPlayers) || undefined,
           maxPlayers: Number(form.maxPlayers) || undefined,
           format: form.format,
@@ -387,8 +379,6 @@ const AdminCompetitions: React.FC = () => {
       description: c.description ?? '',
       requiresAdminEligibility: c.requiresAdminEligibility,
       division: c.division ?? '',
-      ageMin: c.ageMin?.toString() ?? '',
-      ageMax: c.ageMax?.toString() ?? '',
       minPlayers: c.minPlayers ?? 11,
       maxPlayers: c.maxPlayers ?? 25,
       format: c.format,
@@ -523,12 +513,7 @@ const AdminCompetitions: React.FC = () => {
                       <Typography variant="caption" color="text.secondary">Partidos</Typography>
                       <Typography sx={{ fontWeight: 700, fontFamily: '"Plus Jakarta Sans"' }}>{c._count?.matches ?? 0}</Typography>
                     </Box>
-                    <Box>
-                      <Typography variant="caption" color="text.secondary">Edad</Typography>
-                      <Typography sx={{ fontWeight: 700, fontFamily: '"Plus Jakarta Sans"' }}>
-                        {c.ageMin ?? '—'}-{c.ageMax ?? '∞'}
-                      </Typography>
-                    </Box>
+
                   </Stack>
                 </Card>
               </Grid>
@@ -609,16 +594,7 @@ const AdminCompetitions: React.FC = () => {
                 <MenuItem value="GROUPS_KNOCKOUT">Copa (grupos + eliminatoria)</MenuItem>
               </Select>
             </FormControl>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-              <Box sx={{ flex: 1 }}>
-                <Typography variant="caption" color="text.secondary">Edad mín.</Typography>
-                <input type="number" value={editForm.ageMin} onChange={(e) => setEditForm({ ...editForm, ageMin: e.target.value })} style={{ width: '100%', padding: 10, borderRadius: 12, border: '1px solid var(--border)', fontSize: 14 }} />
-              </Box>
-              <Box sx={{ flex: 1 }}>
-                <Typography variant="caption" color="text.secondary">Edad máx.</Typography>
-                <input type="number" value={editForm.ageMax} onChange={(e) => setEditForm({ ...editForm, ageMax: e.target.value })} style={{ width: '100%', padding: 10, borderRadius: 12, border: '1px solid var(--border)', fontSize: 14 }} />
-              </Box>
-            </Stack>
+
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="caption" color="text.secondary">Cupo mín.</Typography>
@@ -664,16 +640,7 @@ const AdminCompetitions: React.FC = () => {
                 <MenuItem value="GROUPS_KNOCKOUT">Copa (grupos + eliminatoria)</MenuItem>
               </Select>
             </FormControl>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-              <Box sx={{ flex: 1 }}>
-                <Typography variant="caption" color="text.secondary">Edad mín.</Typography>
-                <input type="number" value={form.ageMin} onChange={(e) => setForm({ ...form, ageMin: e.target.value })} style={{ width: '100%', padding: 10, borderRadius: 12, border: '1px solid var(--border)', fontSize: 14 }} />
-              </Box>
-              <Box sx={{ flex: 1 }}>
-                <Typography variant="caption" color="text.secondary">Edad máx.</Typography>
-                <input type="number" value={form.ageMax} onChange={(e) => setForm({ ...form, ageMax: e.target.value })} style={{ width: '100%', padding: 10, borderRadius: 12, border: '1px solid var(--border)', fontSize: 14 }} />
-              </Box>
-            </Stack>
+
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="caption" color="text.secondary">Cupo mín.</Typography>

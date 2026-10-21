@@ -134,10 +134,7 @@ const validateStructure = (kind: CompetitionKind, format: string, divisionLevel:
   }
 };
 
-const validateRules = (rules: { ageMin?: number | null; ageMax?: number | null; minPlayers?: number; maxPlayers?: number }) => {
-  if (rules.ageMin != null && rules.ageMax != null && rules.ageMin > rules.ageMax) {
-    throw new AppError(422, 'La edad mínima no puede superar la máxima', 'INVALID_AGE_RANGE');
-  }
+const validateRules = (rules: { minPlayers?: number; maxPlayers?: number }) => {
   if ((rules.minPlayers ?? 11) > (rules.maxPlayers ?? 25)) {
     throw new AppError(422, 'El cupo mínimo no puede superar el máximo', 'INVALID_ROSTER_LIMITS');
   }
@@ -241,8 +238,8 @@ export const competitionsService = {
         ...(kind === 'LEAGUE_DIVISION'
           ? clampSpots(divisionLevel ?? null, d.promotionSpots ?? 0, d.relegationSpots ?? 0)
           : { promotionSpots: 0, relegationSpots: 0 }),
-        ageMin: d.ageMin ?? null,
-        ageMax: d.ageMax ?? null,
+        ageMin: null,
+        ageMax: null,
         requiresAdminEligibility: d.requiresAdminEligibility ?? false,
         minPlayers: d.minPlayers ?? 11,
         maxPlayers: d.maxPlayers ?? 25,
@@ -284,6 +281,8 @@ export const competitionsService = {
       where: { id },
       data: {
         ...data,
+        ageMin: null,
+        ageMax: null,
         kind,
         ageGroup,
         division: kind === 'LEAGUE_DIVISION' ? (data.division !== undefined ? data.division : current.division) : null,

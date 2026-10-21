@@ -1,7 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/utils/app-error';
 import { MESSAGES } from '@/config/constants';
-import { calcAge } from '@/utils/date.util';
 import { Prisma } from '@prisma/client';
 import { validatePlayerPhotos } from '../players/player-photos';
 import type { CreateRosterPlayerDto } from './rosters.schema';
@@ -20,17 +19,13 @@ const rosterTransaction = async <T>(work: (tx: Prisma.TransactionClient) => Prom
   }
 };
 
-const checkRegistration = async (tx: Prisma.TransactionClient, id: string, birthDate: Date) => {
+const checkRegistration = async (tx: Prisma.TransactionClient, id: string) => {
   const registration = await tx.teamRegistration.findUnique({ where: { id }, include: { competition: true } });
   if (!registration) throw new AppError(404, 'Inscripción no encontrada', 'NOT_FOUND');
   if (registration.status !== 'ACTIVE' || registration.outcome === 'WITHDRAWN' || registration.competition.status === 'FINISHED') {
     throw new AppError(422, 'Esta inscripción no admite nuevos jugadores', 'REGISTRATION_CLOSED');
   }
   const competition = registration.competition;
-  const age = calcAge(birthDate);
-  if ((competition.ageMin != null && age < competition.ageMin) || (competition.ageMax != null && age > competition.ageMax)) {
-    throw new AppError(422, MESSAGES.notEligibleAge, 'AGE');
-  }
   const count = await tx.rosterEntry.count({ where: { teamRegistrationId: id, status: 'ACTIVE' } });
   if (count >= competition.maxPlayers) throw new AppError(422, MESSAGES.rosterFull, 'FULL');
   return registration;
@@ -62,11 +57,9 @@ export const rostersService = {
       orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
       take: 20,
     });
-    const { ageMin, ageMax } = registration.competition;
-    return players.map(({ birthDate, documentNumber, ...player }) => {
-      const age = calcAge(birthDate);
-      return { ...player, documentMasked: `***${documentNumber.slice(-4)}`, eligible: (ageMin == null || age >= ageMin) && (ageMax == null || age <= ageMax) };
-    });
+    return players.map(({ birthDate, documentNumber, ...player }) => ({
+      ...player, documentMasked: `***${documentNumber.slice(-4)}`, eligible: true,
+    }));
   },
   list: (teamRegistrationId: string) =>
     prisma.rosterEntry.findMany({
@@ -81,13 +74,13 @@ export const rostersService = {
     if (player.status !== 'ACTIVE') throw new AppError(422, 'Este jugador está inactivo', 'PLAYER_INACTIVE');
     const duplicate = await tx.rosterEntry.findUnique({ where: { playerId_teamRegistrationId: { playerId, teamRegistrationId } } });
     if (duplicate) throw new AppError(409, 'Este jugador ya pertenece a esta plantilla', 'DUPLICATE');
-    const registration = await checkRegistration(tx, teamRegistrationId, player.birthDate);
+    const registration = await checkRegistration(tx, teamRegistrationId);
     return insertRoster(tx, registration, playerId, jerseyNumber);
   }),
 
   createPlayer: (teamRegistrationId: string, data: CreateRosterPlayerDto) => rosterTransaction(async (tx) => {
     const { jerseyNumber, ...profile } = data;
-    const registration = await checkRegistration(tx, teamRegistrationId, profile.birthDate);
+    const registration = await checkRegistration(tx, teamRegistrationId);
     await validatePlayerPhotos(profile);
     const existing = await tx.player.findUnique({ where: { documentType_documentNumber: {
       documentType: profile.documentType, documentNumber: profile.documentNumber,
@@ -143,11 +136,7 @@ export const rostersService = {
     });
     const already = new Set(current.map((c) => c.playerId));
 
-    const comp = reg.competition;
     const players = source.roster.map((e) => {
-      const age = calcAge(e.player.birthDate);
-      const outOfAge =
-        (comp.ageMin != null && age < comp.ageMin) || (comp.ageMax != null && age > comp.ageMax);
       return {
         playerId: e.player.id,
         firstName: e.player.firstName,
@@ -157,8 +146,8 @@ export const rostersService = {
         photosComplete: !!e.player.photoUrl && !!e.player.identityPhotoKey,
         jerseyNumber: e.jerseyNumber,
         alreadyInRoster: already.has(e.player.id),
-        // Se avisa antes de importar, no después de que el servidor rechace.
-        outOfAge,
+        // Compatibility with older clients: age no longer excludes players.
+        outOfAge: false,
       };
     });
 
@@ -171,15 +160,15 @@ export const rostersService = {
         editionYear: source.competition.edition?.year ?? null,
       },
       players,
-      importable: players.filter((p) => !p.alreadyInRoster && !p.outOfAge && p.photosComplete).length,
+      importable: players.filter((p) => !p.alreadyInRoster && p.photosComplete).length,
     };
   },
 
   /**
    * Copia la plantilla del torneo anterior a esta inscripción.
    *
-   * Salta a quien ya esté cargado y a quien no cumpla la edad de la
-   * competición, y se detiene en el cupo. Devuelve qué entró y qué quedó
+   * Salta a quien ya esté cargado y se detiene en el cupo.
+   * Devuelve qué entró y qué quedó
    * afuera con su motivo: importar a medias en silencio deja al administrador
    * creyendo que la plantilla está completa.
    */
@@ -213,10 +202,6 @@ export const rostersService = {
         skipped.push({ name, reason: 'Ya estaba en la plantilla' });
         continue;
       }
-      if (p.outOfAge) {
-        skipped.push({ name, reason: 'No cumple el rango de edad de esta competición' });
-        continue;
-      }
       if (slots <= 0) {
         skipped.push({ name, reason: 'La plantilla llegó al cupo' });
         continue;
@@ -241,7 +226,7 @@ export const rostersService = {
       const entry = await tx.rosterEntry.findUnique({ where: { id }, include: { player: true } });
       if (!entry) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
       await validatePlayerPhotos(entry.player);
-      if (entry.status !== 'ACTIVE') await checkRegistration(tx, entry.teamRegistrationId, entry.player.birthDate);
+      if (entry.status !== 'ACTIVE') await checkRegistration(tx, entry.teamRegistrationId);
       return tx.rosterEntry.update({ where: { id }, data });
     });
     return prisma.rosterEntry.update({ where: { id }, data });

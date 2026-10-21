@@ -28,7 +28,6 @@ export function TeamTournamentList({ registrations, onManage }: {
         </Box>
         <Stack spacing={1.5} sx={{ px: 1.5, pb: 1.5 }}>
           <Typography variant="body2" color="text.secondary">{getCompetitionSubtitle(competition)}</Typography>
-          <Typography variant="caption" color="text.secondary">{competition.ageMin != null ? `Desde ${competition.ageMin} años` : 'Sin edad mínima'}{competition.ageMax != null ? ` · Hasta ${competition.ageMax} años` : ''}</Typography>
           <Button variant={editable ? 'contained' : 'outlined'} onClick={() => onManage(registration.id)} sx={{ minHeight: 44, boxShadow: 'none' }}>{editable ? 'Gestionar jugadores' : 'Ver plantilla'}</Button>
         </Stack>
       </Box>;

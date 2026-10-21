@@ -115,7 +115,6 @@ const AdminCompetitionDetail: React.FC = () => {
       <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mb: 3 }}>
         <StatusBadge status={comp.status} />
         {comp.division && <Chip size="small" label={comp.division} variant="outlined" />}
-        <Chip size="small" label={`Edad: ${comp.ageMin ?? '—'}-${comp.ageMax ?? '∞'}`} variant="outlined" />
         <Chip size="small" label={`Cupo: ${comp.minPlayers}-${comp.maxPlayers}`} variant="outlined" />
       </Stack>
       <Grid container spacing={2} sx={{ mb: 3 }}>

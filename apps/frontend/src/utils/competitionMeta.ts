@@ -57,8 +57,7 @@ const normalize = (v: string) =>
  * división de la liga (y cuál), si es la copa, si es de menores o un torneo
  * especial como el gremial.
  *
- * El rango de edad queda fuera a propósito: es una regla de inscripción que le
- * sirve al administrador, no algo que el visitante necesite leer en cada tarjeta.
+ * Adultos y Menores son apartados independientes; no imponen límites de edad.
  */
 export const getCompetitionTags = (c: CompetitionLike): CompetitionTag[] => {
   const tags: CompetitionTag[] = [];

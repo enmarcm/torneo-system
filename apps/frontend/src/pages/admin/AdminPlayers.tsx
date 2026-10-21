@@ -108,7 +108,7 @@ const AdminPlayers: React.FC = () => {
     <Box>
       <PageHeader
         title="Jugadores"
-        subtitle="Una ficha por jugador, con plantillas independientes. Un menor puede jugar en un equipo de Menores y en otro de Adultos si cumple el rango de edad."
+        subtitle="Una ficha por jugador, con plantillas independientes en Adultos y Menores."
         search={{ value: search, onChange: setSearch, placeholder: 'Buscar por nombre o documento…' }}
         action={<Button variant="contained" startIcon={<AddRounded />} onClick={() => { setEditingId(null); setForm({ documentType: 'CEDULA', documentNumber: '', firstName: '', lastName: '', birthDate: '', photoUrl: '', identityPhotoKey: '' }); setOpen(true); }}>Nuevo jugador</Button>}
       />

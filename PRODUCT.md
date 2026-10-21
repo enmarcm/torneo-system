@@ -34,7 +34,7 @@ discusión se cierre abriendo el sitio.
 
 Lo publicado no es una transcripción de otra planilla: **sale del mismo sistema
 que arbitra la inscripción**. El jugador es un registro único por documento, la
-elegibilidad se resuelve por edad y por habilitación del administrador antes de
+elegibilidad se resuelve por habilitación del administrador antes de
 que entre a una plantilla, y el marcador que se ve en vivo es el que consolida
 las estadísticas de la temporada. Una cuenta de Instagram o un grupo de WhatsApp
 pueden publicar el mismo resultado, pero no pueden respaldarlo con el registro
@@ -68,12 +68,11 @@ Confirmado en el código:
   la regla — ahí sí puede jugar en paralelo. La salida es explícita: marcar la
   inscripción actual como "No participa" libera al equipo.
 - **Plantillas de Adultos y Menores independientes.** Una ficha única por
-  documento puede estar en un club de Menores y otro club de Adultos. El rango
-  de edad lo define cada competición, sin un corte global obligatorio de 18
-  años. La baja de una inscripción no desactiva al jugador en las demás. Al
+  documento puede estar en un club de Menores y otro club de Adultos. No se
+  validan edades mínimas o máximas para inscribir jugadores. La baja de una
+  inscripción no desactiva al jugador en las demás. Al
   traer una plantilla anterior se conserva el apartado de destino.
-- **Elegibilidad al rostear**: rango de edad (calculado en zona horaria de
-  Caracas) y, cuando la competición lo exige, habilitación explícita del
+- **Elegibilidad al rostear**: cuando la competición lo exige, habilitación explícita del
   administrador. Cupos mínimo y máximo de plantilla.
 - **Posiciones**: victoria 3, empate 1, derrota 0. Orden: puntos → diferencia de
   gol → goles a favor.

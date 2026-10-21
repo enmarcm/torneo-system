@@ -53,7 +53,7 @@ export interface PreviousRoster {
     photoUrl: string | null;
     jerseyNumber: number | null;
     alreadyInRoster: boolean;
-    /** No cumple el rango de edad de la competición de destino. */
+    /** Legacy compatibility field; age limits no longer apply. */
     outOfAge: boolean;
   }>;
   /** Cuántos entrarían realmente si se importa ahora. */

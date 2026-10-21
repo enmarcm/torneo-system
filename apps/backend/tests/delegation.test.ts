@@ -62,9 +62,8 @@ test('new players are created and linked to the selected tournament in one trans
   assert.equal(entry.eligibilityApproved, false);
 });
 
-test('age, capacity and closed registration reject the addition before a profile is created', async (t) => {
+test('capacity and closed registration reject the addition before a profile is created', async (t) => {
   const state = setup(t);
-  await assert.rejects(rostersService.createPlayer(registrationId, { ...input, birthDate: new Date('2020-01-01') }), { code: 'AGE' });
   state.competition.maxPlayers = 1;
   state.entries.push({ teamRegistrationId: registrationId, status: 'ACTIVE' });
   await assert.rejects(rostersService.createPlayer(registrationId, input), { code: 'FULL' });
@@ -74,6 +73,44 @@ test('age, capacity and closed registration reject the addition before a profile
   await assert.rejects(rostersService.createPlayer(registrationId, input), { code: 'REGISTRATION_CLOSED' });
   assert.equal(state.createProfile.mock.callCount(), 0);
   assert.equal(state.createEntry.mock.callCount(), 0);
+});
+
+test('creating players ignores legacy minimum and maximum ages', async (t) => {
+  const state = setup(t);
+  state.competition.ageMin = 35;
+  state.competition.ageMax = 50;
+  const young = await rostersService.createPlayer(registrationId, { ...input, birthDate: new Date('2020-01-01') });
+  const older = await rostersService.createPlayer(registrationId, { ...input, documentNumber: '99887766', birthDate: new Date('1940-01-01') });
+  assert.equal(young.status, 'ACTIVE');
+  assert.equal(older.status, 'ACTIVE');
+  assert.equal(state.profiles.length, 2);
+});
+
+test('reactivating a player ignores legacy age limits', async (t) => {
+  const state = setup(t);
+  const entry = await rostersService.createPlayer(registrationId, { ...input, birthDate: new Date('2020-01-01') });
+  entry.status = 'INACTIVE';
+  stub(t, prisma.rosterEntry, 'findUnique', async () => entry);
+  stub(t, prisma.rosterEntry, 'update', async ({ data }) => Object.assign(entry, data));
+  const restored = await rostersService.update(entry.id, { status: 'ACTIVE' });
+  assert.equal(restored.status, 'ACTIVE');
+});
+
+test('previous roster preview and import ignore legacy age limits', async (t) => {
+  const state = setup(t);
+  state.competition.ageMin = 35;
+  state.competition.ageMax = 50;
+  const player = { ...input, id: 'previous-player', status: 'ACTIVE', birthDate: new Date('2020-01-01') };
+  state.profiles.push(player);
+  stub(t, prisma.teamRegistration, 'findMany', async () => [{ id: 'previous', createdAt: new Date(), competition: { name: 'Anterior', ageGroup: 'ADULT', edition: { name: 'Anterior', year: 2025 } }, roster: [{ player, jerseyNumber: 9 }] }]);
+  stub(t, prisma.rosterEntry, 'findMany', async () => []);
+  const preview = await rostersService.previous(registrationId);
+  assert.equal(preview?.importable, 1);
+  assert.equal(preview?.players[0].outOfAge, false);
+  const imported = await rostersService.importPrevious(registrationId);
+  assert.equal(imported.added.length, 1);
+  assert.equal(imported.skipped.length, 0);
+  assert.equal(state.entries[0].playerId, player.id);
 });
 
 test('missing registrations and duplicate documents do not leave unassigned profiles', async (t) => {
@@ -182,13 +219,14 @@ test('a minor can play for different youth and adult clubs with independent entr
   assert.equal(state.profiles[0].status, 'ACTIVE');
 });
 
-test('an adult outside the youth competition age range cannot enter its roster', async (t) => {
+test('legacy age limits do not prevent an adult entering another roster', async (t) => {
   const state = setup(t);
   const adult = await rostersService.createPlayer(registrationId, input);
   state.registrations.push({ ...state.registration, id: 'youth-registration', teamId: 'youth-club', competition: { ...state.competition, ageGroup: 'YOUTH', ageMin: 12, ageMax: 17 } });
-  await assert.rejects(rostersService.add('youth-registration', adult.playerId), { code: 'AGE' });
+  const added = await rostersService.add('youth-registration', adult.playerId);
+  assert.equal(added.playerId, adult.playerId);
   assert.equal(state.profiles.length, 1);
-  assert.equal(state.entries.length, 1);
+  assert.equal(state.entries.length, 2);
   assert.equal(adult.status, 'ACTIVE');
 });
 
@@ -204,7 +242,7 @@ test('candidate search finds another club player without returning birth dates o
   });
   const candidates = await rostersService.candidates(registrationId, 'Ana');
   assert.equal(candidates[0].eligible, true);
-  assert.equal(candidates[1].eligible, false);
+  assert.equal(candidates[1].eligible, true);
   assert.equal(candidates[0].documentMasked, '***5678');
   assert.equal('birthDate' in candidates[0], false);
   assert.equal('documentNumber' in candidates[0], false);

@@ -12,8 +12,9 @@ export const createCompetitionSchema = z.object({
   divisionLevel: z.number().int().min(1).max(10).nullable().optional(),
   leagueSystemId: z.string().uuid().nullable().optional(),
   sourceLeagueSystemId: z.string().uuid().nullable().optional(),
-  ageMin: z.number().int().min(0).max(120).nullish(),
-  ageMax: z.number().int().min(0).max(120).nullish(),
+  // Legacy fields accepted for compatibility; the service ignores age limits.
+  ageMin: z.number().nullish(),
+  ageMax: z.number().nullish(),
   requiresAdminEligibility: z.boolean().optional(),
   minPlayers: z.number().int().min(1).optional(),
   maxPlayers: z.number().int().min(1).optional(),

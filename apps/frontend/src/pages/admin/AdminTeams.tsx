@@ -33,13 +33,7 @@ import { extractErrorMessage } from '@/api/axios';
 import { useToast } from '@/hooks/common/useToast';
 import { conflictsWithSelectedDivision, divisionSystemKey, registerSelectedCompetitions } from '@/utils/batchRegistrations';
 
-/** Rango de edad de la competición, dicho como lo diría el reglamento. */
-const getAgeRule = (c: Competition): string => {
-  if (c.ageMin != null && c.ageMax != null) return `${c.ageMin} a ${c.ageMax} años`;
-  if (c.ageMin != null) return `Desde ${c.ageMin} años`;
-  if (c.ageMax != null) return `Hasta ${c.ageMax} años`;
-  return 'Sin límite de edad';
-};
+
 
 /**
  * Lo que decide si un equipo puede entrar a esta competición. Son las reglas
@@ -47,7 +41,6 @@ const getAgeRule = (c: Competition): string => {
  * antes de inscribir y no después, cuando el rechazo ya no se explica solo.
  */
 const getInscriptionRules = (c: Competition): Array<{ label: string; value: string }> => [
-  { label: 'Edad', value: getAgeRule(c) },
   { label: 'Plantilla', value: `${c.minPlayers} a ${c.maxPlayers} jugadores` },
   {
     label: 'Formato',
