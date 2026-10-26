@@ -14,3 +14,4 @@ coverage/
 .cache/
 prisma/migrations/dev.db*
 *.tsbuildinfo
+cyber-neo-report-*.md
