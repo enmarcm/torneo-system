@@ -85,6 +85,7 @@ model User {
   team         Team?        @relation("TeamLeader", fields: [teamId], references: [id])
   teamId       String?      @unique
   auditLogs    AuditLog[]
+  documents    Document[]
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 }
@@ -298,6 +299,16 @@ model Transfer {
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
   @@index([editionId])
+}
+
+model Document {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  bucket    String
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  @@index([userId])
 }
 
 model Advertisement {

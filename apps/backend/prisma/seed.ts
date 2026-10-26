@@ -1,8 +1,14 @@
 import 'dotenv/config';
+import crypto from 'crypto';
 import { PrismaClient, Prisma } from '@prisma/client';
 import argon2 from 'argon2';
 
 const prisma = new PrismaClient();
+
+if (process.env.NODE_ENV === 'production') {
+  console.error('❌ Seed no debe ejecutarse en producción');
+  process.exit(1);
+}
 
 const CATEGORIES: Prisma.CategoryCreateInput[] = [
   { name: 'Sub-12', defaultAgeMin: 0, defaultAgeMax: 12, defaultMinPlayers: 7, defaultMaxPlayers: 20 },
@@ -18,7 +24,11 @@ const CATEGORIES: Prisma.CategoryCreateInput[] = [
 
 async function main() {
   const adminEmail = process.env.ADMIN_EMAIL || 'admin@torneo.com';
-  const adminPassword = process.env.ADMIN_PASSWORD || 'Admin1234';
+  if (!process.env.ADMIN_PASSWORD) {
+    console.error('❌ ADMIN_PASSWORD requerida en .env para ejecutar seed');
+    process.exit(1);
+  }
+  const adminPassword = process.env.ADMIN_PASSWORD;
   const adminHash = await argon2.hash(adminPassword);
 
   await prisma.user.upsert({
@@ -78,10 +88,12 @@ async function main() {
   const regs: string[] = [];
   for (const td of teamData) {
     const team = await prisma.team.create({ data: { name: td.name } });
+    const teamPassword = crypto.randomBytes(16).toString('hex');
+    console.log(`🔑 ${td.name} — password: ${teamPassword}`);
     await prisma.user.create({
       data: {
         email: td.email,
-        passwordHash: await argon2.hash('Team1234'),
+        passwordHash: await argon2.hash(teamPassword),
         role: 'TEAM_LEADER',
         teamId: team.id,
       },

@@ -25,7 +25,7 @@ export const authMiddleware: RequestHandler = (req, _res, next) => {
     return next(new AppError(401, MESSAGES.unauthorized, 'NO_AUTH'));
   }
   try {
-    const decoded = jwt.verify(header.slice(7), env.JWT_ACCESS_SECRET) as AuthUser;
+    const decoded = jwt.verify(header.slice(7), env.JWT_ACCESS_SECRET, { algorithms: ['HS256'] }) as AuthUser;
     req.user = { id: decoded.id, role: decoded.role, teamId: decoded.teamId ?? null };
     next();
   } catch {

@@ -15,11 +15,25 @@ export const createApp = () => {
   app.use(
     helmet({
       crossOriginResourcePolicy: { policy: 'cross-origin' },
-      contentSecurityPolicy: false,
+      contentSecurityPolicy: {
+        useDefaults: false,
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'", 'data:', 'https:'],
+          connectSrc: ["'self'", env.CORS_ORIGIN],
+          fontSrc: ["'self'"],
+          frameAncestors: ["'none'"],
+          baseUri: ["'self'"],
+          formAction: ["'self'"],
+          upgradeInsecureRequests: [],
+        },
+      },
     }),
   );
   app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
-  app.use(express.json({ limit: '10mb' }));
+  app.use(express.json({ limit: '1mb' }));
   app.use(cookieParser());
   app.use(
     morgan('combined', {

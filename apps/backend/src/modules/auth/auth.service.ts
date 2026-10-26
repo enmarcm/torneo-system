@@ -42,7 +42,7 @@ export const authService = {
   refresh: async (token?: string) => {
     if (!token) throw new AppError(401, 'Sin refresh token', 'NO_REFRESH');
     try {
-      const { id } = jwt.verify(token, env.JWT_REFRESH_SECRET) as { id: string };
+      const { id } = jwt.verify(token, env.JWT_REFRESH_SECRET, { algorithms: ['HS256'] }) as { id: string };
       const user = await prisma.user.findUnique({ where: { id } });
       if (!user) throw new Error('user not found');
       return { user: publicUser(user), ...sign(user) };

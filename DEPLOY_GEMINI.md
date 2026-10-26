@@ -54,13 +54,13 @@ torneo-system/
 
 ```bash
 # Ejemplo de cómo debe verse el .env (usar valores reales solo localmente)
-POSTGRES_PASSWORD=cambia_esta_clave
+POSTGRES_PASSWORD=<generar-con-openssl-rand-hex-24>
 DATABASE_URL=postgresql://torneo:$POSTGRES_PASSWORD@postgres:5432/torneo_db?schema=public
-JWT_ACCESS_SECRET=pon_un_secreto_largo_aleatorio_1
-JWT_REFRESH_SECRET=pon_un_secreto_largo_aleatorio_2
+JWT_ACCESS_SECRET=<generar-con-openssl-rand-hex-32>
+JWT_REFRESH_SECRET=<generar-con-openssl-rand-hex-32>
 ADMIN_EMAIL=admin@torneo.com
-ADMIN_PASSWORD=Admin1234
-MINIO_ROOT_PASSWORD=minioadmin123
+ADMIN_PASSWORD=<generar-con-openssl-rand-hex-16>
+MINIO_ROOT_PASSWORD=<generar-con-openssl-rand-hex-24>
 ```
 
 ## Configuración de nginx (frontend)
