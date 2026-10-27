@@ -1,4 +1,4 @@
-import { Box, Typography, Stack, Container, Drawer } from '@mui/material';
+import { Box, Typography, Stack, Container, Drawer, Link } from '@mui/material';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { PlaceRounded, PhoneRounded, MailRounded, ScheduleRounded } from '@mui/icons-material';
 import { useState, useEffect, Suspense } from 'react';
@@ -296,7 +296,26 @@ export const PublicLayout: React.FC = () => {
                   © {new Date().getFullYear()} LLF — Liga Lago Futsal
                 </Typography>
                 <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.55)' }}>
-                  Developed with Colina and Merchan
+                  Developed with{' '}
+                  <Link
+                    href="https://www.instagram.com/enmarcm?cplk=OXFremx5NzJyNThs"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    color="inherit"
+                    underline="hover"
+                  >
+                    Colina
+                  </Link>{' '}
+                  and{' '}
+                  <Link
+                    href="https://www.instagram.com/royermerchan17?xtok=cnJ6dXFwYng3Zmk1"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    color="inherit"
+                    underline="hover"
+                  >
+                    Merchan
+                  </Link>
                 </Typography>
               </Stack>
             </Stack>
