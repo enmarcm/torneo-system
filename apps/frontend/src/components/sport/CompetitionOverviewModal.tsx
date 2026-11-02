@@ -1,5 +1,5 @@
 import { Box, Button, ButtonBase, Stack, Typography } from '@mui/material';
-import { ArrowBackRounded } from '@mui/icons-material';
+import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded';
 import { useState } from 'react';
 import type { Competition } from '@/api/competitions.api';
 import { useCompetitionQuery, useStandingsQuery } from '@/hooks/queries';

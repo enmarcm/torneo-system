@@ -12,14 +12,12 @@ import {
   Alert,
   Divider,
 } from '@mui/material';
-import {
-  AddRounded,
-  DeleteOutlineRounded,
-  VerifiedRounded,
-  VerifiedOutlined,
-  RestoreRounded,
-  HistoryRounded,
-} from '@mui/icons-material';
+import AddRounded from '@mui/icons-material/AddRounded';
+import DeleteOutlineRounded from '@mui/icons-material/DeleteOutlineRounded';
+import VerifiedRounded from '@mui/icons-material/VerifiedRounded';
+import VerifiedOutlined from '@mui/icons-material/VerifiedOutlined';
+import RestoreRounded from '@mui/icons-material/RestoreRounded';
+import HistoryRounded from '@mui/icons-material/HistoryRounded';
 import { useRosterCandidatesQuery, useRosterQuery, usePreviousRosterQuery } from '@/hooks/queries';
 import { useDebouncedValue } from '@/hooks/common/useDebouncedValue';
 import {

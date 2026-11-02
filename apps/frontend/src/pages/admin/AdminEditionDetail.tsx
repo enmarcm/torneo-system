@@ -1,6 +1,9 @@
 import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Button } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowBackRounded, EmojiEventsRounded, GroupsRounded, SportsSoccerRounded } from '@mui/icons-material';
+import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded';
+import EmojiEventsRounded from '@mui/icons-material/EmojiEventsRounded';
+import GroupsRounded from '@mui/icons-material/GroupsRounded';
+import SportsSoccerRounded from '@mui/icons-material/SportsSoccerRounded';
 import { useEditionQuery, useCompetitionsQuery, useDashboardMetricsQuery } from '@/hooks/queries';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatusBadge } from '@/components/ui/StatusBadge';

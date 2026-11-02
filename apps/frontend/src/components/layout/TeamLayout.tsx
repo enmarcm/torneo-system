@@ -17,7 +17,7 @@ export const TeamLayout: React.FC = () => {
   const { pathname } = useLocation();
   useEffect(() => { setMobileOpen(false); }, [pathname]);
   const { sidebarCollapsed } = useGlobalStore();
-  const sidebarWidth = sidebarCollapsed ? 64 : 264;
+  const sidebarWidth = sidebarCollapsed ? 64 : 240;
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
@@ -42,8 +42,8 @@ export const TeamLayout: React.FC = () => {
         }}
       >
         <Topbar onOpenSidebar={() => setMobileOpen(true)} />
-        {/* Cada ruta monta de cero y entra en cascada; ver `.llf-page` en el tema. */}
-        <Box className="llf-page" key={pathname} sx={{ p: { xs: 2, md: 4 }, pb: { xs: 'calc(88px + env(safe-area-inset-bottom))', md: 4 }, flex: 1 }}>
+        {/* Retícula: ancho disponible = ventana − sidebar; márgenes iguales de 32px. */}
+        <Box component="main" id="main-content" tabIndex={-1} className="llf-page" key={pathname} sx={{ minWidth: 0, width: '100%', p: { xs: 2, md: 4 }, pb: { xs: 'calc(88px + env(safe-area-inset-bottom))', md: 4 }, flex: 1 }}>
           <Suspense
             fallback={
               <>

@@ -12,13 +12,11 @@ import {
   Chip,
   Divider,
 } from '@mui/material';
-import {
-  SearchRounded,
-  BadgeRounded,
-  SportsSoccerRounded,
-  StyleRounded,
-  EmojiEventsRounded,
-} from '@mui/icons-material';
+import SearchRounded from '@mui/icons-material/SearchRounded';
+import BadgeRounded from '@mui/icons-material/BadgeRounded';
+import SportsSoccerRounded from '@mui/icons-material/SportsSoccerRounded';
+import StyleRounded from '@mui/icons-material/StyleRounded';
+import EmojiEventsRounded from '@mui/icons-material/EmojiEventsRounded';
 import { useQuery } from '@tanstack/react-query';
 import { publicApi } from '@/api/public.api';
 import { StatCard } from '@/components/ui/StatCard';
@@ -54,7 +52,7 @@ const PublicPlayerSearch: React.FC = () => {
 
   return (
     <Box>
-      <Typography variant="h2" sx={{ mb: 0.5 }}>
+      <Typography component="h1" variant="h2" sx={{ mb: 0.5 }}>
         Ficha del jugador
       </Typography>
       <Typography color="text.secondary" sx={{ mb: 3 }}>

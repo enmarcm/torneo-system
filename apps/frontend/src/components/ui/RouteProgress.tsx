@@ -102,7 +102,7 @@ export const RouteProgress: React.FC = () => {
         height: 3,
         borderRadius: '0 3px 3px 0',
         bgcolor: 'var(--accent)',
-        boxShadow: '0 0 10px 1px rgba(255,138,76,0.7)',
+        boxShadow: 'none',
         pointerEvents: 'none',
         zIndex: 1,
         width: phase === 'run' ? '72%' : '100%',

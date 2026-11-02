@@ -12,9 +12,8 @@ interface Props {
   label?: string;
 }
 
-export const MatchLoader: React.FC<Props> = ({ minHeight = 240, label = 'Encendiendo la cancha' }) => {
+export const MatchLoader: React.FC<Props> = ({ minHeight = 240, label = 'Cargando partidos' }) => {
   const dark = useTheme().palette.mode === 'dark';
-  const cone = dark ? 'rgba(255,138,76,0.55)' : 'rgba(3,66,146,0.28)';
   const lamp = dark ? 'var(--accent)' : 'var(--primary)';
   return (
     <Box role="status" aria-label="Cargando" sx={{ minHeight, display: 'grid', placeItems: 'center', py: 4 }}>
@@ -56,7 +55,7 @@ export const MatchLoader: React.FC<Props> = ({ minHeight = 240, label = 'Encendi
                 width: 90,
                 height: 84,
                 opacity: 0,
-                background: `radial-gradient(ellipse at 50% 0%, ${cone}, transparent 70%)`,
+                bgcolor: 'var(--primarySoft)',
                 animation: 'llfLampOn 2.4s ease-in-out infinite',
                 animationDelay: `${i * 300}ms`,
                 // La lámpara: una pastilla en el borde superior.
@@ -75,7 +74,7 @@ export const MatchLoader: React.FC<Props> = ({ minHeight = 240, label = 'Encendi
             />
           ))}
         </Box>
-        <Typography sx={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary' }}>
+        <Typography sx={{ fontSize: 12, fontWeight: 600, color: 'text.secondary' }}>
           {label}
         </Typography>
       </Box>

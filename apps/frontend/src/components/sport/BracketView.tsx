@@ -1,6 +1,6 @@
 import { Box, Card, Stack, Typography, Chip } from '@mui/material';
 import { Crest } from '@/components/ui/Crest';
-import { EmojiEventsRounded } from '@mui/icons-material';
+import EmojiEventsRounded from '@mui/icons-material/EmojiEventsRounded';
 import { motion } from 'framer-motion';
 import { getStatusLabel } from '@/utils/statusLabels';
 import type { BracketRound, KnockoutTie, TieSide } from '@/api/knockout.api';
@@ -133,7 +133,7 @@ export const BracketView: React.FC<Props> = ({ rounds, onTieClick }) => {
                   <Card
                     key={tie.id}
                     component={motion.div}
-                    initial={{ opacity: 0, x: -8 }}
+
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.2, delay: Math.min(i * 0.03, 0.2) }}
                     whileHover={onTieClick ? { y: -2 } : undefined}

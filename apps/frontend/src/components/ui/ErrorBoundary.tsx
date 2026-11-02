@@ -1,6 +1,8 @@
 import React from 'react';
 import { Box, Button, Stack, Typography } from '@mui/material';
-import { ErrorOutlineRounded, RefreshRounded, HomeRounded } from '@mui/icons-material';
+import ErrorOutlineRounded from '@mui/icons-material/ErrorOutlineRounded';
+import RefreshRounded from '@mui/icons-material/RefreshRounded';
+import HomeRounded from '@mui/icons-material/HomeRounded';
 
 interface Props {
   children: React.ReactNode;

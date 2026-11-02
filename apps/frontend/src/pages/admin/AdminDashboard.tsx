@@ -1,5 +1,8 @@
-import { Grid2 as Grid, Box, Card, Stack, Typography } from '@mui/material';
-import { GroupsRounded, PersonRounded, SportsSoccerRounded, FiberManualRecordRounded } from '@mui/icons-material';
+import { Grid2 as Grid, Box, Card, Stack, Typography, Button } from '@mui/material';
+import GroupsRounded from '@mui/icons-material/GroupsRounded';
+import PersonRounded from '@mui/icons-material/PersonRounded';
+import SportsSoccerRounded from '@mui/icons-material/SportsSoccerRounded';
+import FiberManualRecordRounded from '@mui/icons-material/FiberManualRecordRounded';
 import { useEditionsQuery, useDashboardMetricsQuery, useMatchesQuery, usePublicStandingsQuery, useCompetitionsQuery } from '@/hooks/queries';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatCard } from '@/components/ui/StatCard';
@@ -10,8 +13,12 @@ import { LoadingState, SkeletonCard } from '@/components/ui/LoadingState';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import { useMemo } from 'react';
 import { formatDateTime } from '@/utils/formatDate';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/routes/routes';
 
 const AdminDashboard: React.FC = () => {
+  const navigate = useNavigate();
   const { data: editions = [], isLoading: loadingEd } = useEditionsQuery();
   const selectedEditionId = useGlobalStore((s) => s.selectedEditionId);
   const activeEdition = useMemo(() => {
@@ -19,8 +26,8 @@ const AdminDashboard: React.FC = () => {
     return editions.find((e) => e.status === 'ACTIVE') ?? editions[0];
   }, [editions, selectedEditionId]);
 
-  const { data: metrics, isLoading: loadingMetrics } = useDashboardMetricsQuery(activeEdition?.id ?? '');
-  const { data: matches = [], isLoading: loadingMatches } = useMatchesQuery(undefined, 'SCHEDULED');
+  const { data: metrics, isLoading: loadingMetrics, isError: metricsError, refetch: retryMetrics } = useDashboardMetricsQuery(activeEdition?.id ?? '');
+  const { data: matches = [], isLoading: loadingMatches, isError: matchesError, refetch: retryMatches } = useMatchesQuery(undefined, 'SCHEDULED');
   const { data: comps = [] } = useCompetitionsQuery(activeEdition?.id);
   const firstCompId = comps[0]?.id;
   const { data: standings = [], isLoading: loadingStandings } = usePublicStandingsQuery(firstCompId ?? '');
@@ -28,8 +35,9 @@ const AdminDashboard: React.FC = () => {
   return (
     <Box>
       <PageHeader
-        title="Dashboard"
+        title="Resumen de la liga"
         subtitle={activeEdition ? `Resumen de ${activeEdition.name}` : 'Resumen general del sistema'}
+        action={<Button variant="contained" onClick={() => navigate(ROUTES.admin.schedule)}>Programar partidos</Button>}
       />
 
       {activeEdition && (
@@ -39,7 +47,7 @@ const AdminDashboard: React.FC = () => {
             subtitle={activeEdition.startDate ? formatDateTime(activeEdition.startDate) : ''}
             chips={
               <Stack direction="row" spacing={1}>
-                <Box sx={{ px: 1.5, py: 0.5, borderRadius: 999, bgcolor: 'rgba(255,255,255,0.12)', fontSize: 12, fontWeight: 600 }}>
+                <Box sx={{ px: 1.5, py: 0.5, borderRadius: 999, bgcolor: 'var(--primarySoft)', fontSize: 12, fontWeight: 600 }}>
                   Temporada {activeEdition.seasonNumber}
                 </Box>
               </Stack>
@@ -48,11 +56,11 @@ const AdminDashboard: React.FC = () => {
         </Box>
       )}
 
-      <Grid container spacing={2} sx={{ mb: 3 }}>
+      {metricsError ? <Box sx={{ mb: 3 }}><ErrorState title="No pudimos cargar el resumen" onRetry={() => void retryMetrics()} /></Box> : <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid size={{ xs: 6, md: 3 }}>
           <StatCard
             label="Equipos inscritos"
-            value={metrics?.teams ?? 0}
+            value={metrics?.teams ?? '—'}
             icon={<GroupsRounded />}
             tint="primary"
             loading={loadingMetrics}
@@ -61,7 +69,7 @@ const AdminDashboard: React.FC = () => {
         <Grid size={{ xs: 6, md: 3 }}>
           <StatCard
             label="Jugadores activos"
-            value={metrics?.players ?? 0}
+            value={metrics?.players ?? '—'}
             icon={<PersonRounded />}
             tint="info"
             loading={loadingMetrics}
@@ -70,7 +78,7 @@ const AdminDashboard: React.FC = () => {
         <Grid size={{ xs: 6, md: 3 }}>
           <StatCard
             label="Partidos jugados"
-            value={metrics?.matchesPlayed ?? 0}
+            value={metrics?.matchesPlayed ?? '—'}
             icon={<SportsSoccerRounded />}
             tint="success"
             loading={loadingMetrics}
@@ -79,28 +87,28 @@ const AdminDashboard: React.FC = () => {
         <Grid size={{ xs: 6, md: 3 }}>
           <StatCard
             label="En vivo ahora"
-            value={metrics?.matchesLive ?? 0}
+            value={metrics?.matchesLive ?? '—'}
             icon={<FiberManualRecordRounded />}
             tint="danger"
             loading={loadingMetrics}
           />
         </Grid>
-      </Grid>
+      </Grid>}
 
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 6 }}>
-          <Card sx={{ p: 3, height: '100%' }}>
-            <Typography variant="h4" sx={{ mb: 2 }}>Próximos partidos</Typography>
-            {loadingMatches ? <LoadingState rows={3} /> : matches.length === 0 ? (
+          <Box component="section">
+            <Typography variant="h4" component="h2" sx={{ mb: 2 }}>Próximos partidos</Typography>
+            {matchesError ? <ErrorState title="No pudimos cargar los partidos" onRetry={() => void retryMatches()} /> : loadingMatches ? <LoadingState rows={3} /> : matches.length === 0 ? (
               <Typography variant="body2" color="text.secondary">
                 No hay partidos programados.
               </Typography>
             ) : (
               <Stack spacing={1.5}>
-                {matches.slice(0, 5).map((m) => <MatchCard key={m.id} match={m} />)}
+                {matches.slice(0, 5).map((m) => <MatchCard key={m.id} match={m} onClick={() => navigate(ROUTES.admin.matchDetail.replace(':id', m.id))} />)}
               </Stack>
             )}
-          </Card>
+          </Box>
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           {loadingStandings ? (
@@ -110,7 +118,7 @@ const AdminDashboard: React.FC = () => {
               <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
                 {comps[0]?.name}
               </Typography>
-              <StandingsTable rows={standings.slice(0, 6)} />
+              <StandingsTable rows={standings.slice(0, 6)} compact />
             </Box>
           ) : (
             <Card sx={{ p: 3, textAlign: 'center' }}>

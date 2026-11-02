@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import { RefreshRounded } from '@mui/icons-material';
+import RefreshRounded from '@mui/icons-material/RefreshRounded';
 import { SaveButton } from './SaveButton';
 
 interface Props {
@@ -21,14 +21,15 @@ export const ErrorState: React.FC<Props> = ({
   retrying = false,
 }) => (
   <Box
+    role="alert"
     sx={{
       textAlign: 'center',
-      py: 6,
+      py: 3,
       px: 3,
-      border: '1px dashed',
-      borderColor: 'error.main',
-      borderRadius: 4,
-      bgcolor: 'background.default',
+      border: '1px solid',
+      borderColor: 'divider',
+      borderRadius: 1.5,
+      bgcolor: 'background.paper',
       display: 'grid',
       justifyItems: 'center',
       gap: 1,

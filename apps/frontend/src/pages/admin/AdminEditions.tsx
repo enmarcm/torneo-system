@@ -1,7 +1,9 @@
 import { Box, Grid2 as Grid, Card, Stack, Typography, IconButton, Menu, MenuItem, Chip, Button, TextField, Tooltip, Divider } from '@mui/material';
 import { SaveButton } from '@/components/ui/SaveButton';
 import { getStatusLabel, getStatusColor } from '@/utils/statusLabels';
-import { AddRounded, MoreVertRounded, EmojiEventsRounded } from '@mui/icons-material';
+import AddRounded from '@mui/icons-material/AddRounded';
+import MoreVertRounded from '@mui/icons-material/MoreVertRounded';
+import EmojiEventsRounded from '@mui/icons-material/EmojiEventsRounded';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';

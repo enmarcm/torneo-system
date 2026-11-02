@@ -1,363 +1,42 @@
-import { Box, Button, Stack, Typography } from '@mui/material';
-import {
-  CalendarMonthRounded,
-  TableChartRounded,
-  KeyboardArrowDownRounded,
-} from '@mui/icons-material';
-import { motion, useReducedMotion } from 'framer-motion';
-import { useEffect } from 'react';
+import { Box, Button, Container, Stack, Typography } from '@mui/material';
+import CalendarMonthRounded from '@mui/icons-material/CalendarMonthRounded';
+import TableChartRounded from '@mui/icons-material/TableChartRounded';
+import ArrowForwardRounded from '@mui/icons-material/ArrowForwardRounded';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/routes/routes';
 import { TeamCrestStrip } from './TeamCrestStrip';
-import { useGlobalStore } from '@/store/useGlobalStore';
-import { PUBLIC_TOPBAR_H } from '@/components/layout/PublicTopbar';
 import hero1600 from '@/assets/hero-cancha-1600.jpg';
 import hero900 from '@/assets/hero-cancha-900.jpg';
 
-/* ───────────────────────── Ajustes del fondo ─────────────────────────
-   Los valores que hacen falta tocar para reencuadrar la portada. Están
-   sueltos y arriba a propósito: cambiar el fondo no debería obligar a leer
-   el resto del componente.
-──────────────────────────────────────────────────────────────────────── */
-
-/**
- * Qué parte de la imagen se ve.
- *
- * La foto es cuadrada y la portada es apaisada, así que siempre sobra imagen
- * a los costados o arriba. El primer valor mueve el recorte en horizontal y el
- * segundo en vertical: `50% 50%` centra, bajar el segundo sube la imagen.
- */
-const ENCUADRE = '50% 45%';
-
-/**
- * Cuánto se oscurece la foto, de 0 a 1.
- *
- * El backing es claro y está lleno de recuadros blancos: sin velo, el texto de
- * encima no se lee. Por debajo de 0.7 el contraste deja de ser suficiente.
- */
-const VELO = 0.82;
-
-/**
- * Alto de la portada: la primera pantalla, entera.
- *
- * `svh` y no `vh`: en el teléfono, `100vh` se mide con la barra del navegador
- * escondida, así que la portada quedaba más alta que la pantalla y el botón de
- * abajo nacía cortado.
- */
-const ALTO = '100svh';
-
 interface Props {
-  /** Nombre de la edición en curso, tal como está cargado en el sistema. */
   editionName: string;
   seasonNumber: number;
   liveCount: number;
-  /**
-   * Va al pie del bloque central, debajo de los botones. Es donde entra la
-   * publicidad de la portada: la marca y los accesos van primero, el anuncio
-   * abajo, dentro de la misma pantalla.
-   */
   children?: React.ReactNode;
 }
 
-/**
- * Portada del sitio público.
- *
- * Ocupa la primera pantalla entera: el monograma, en qué edición estamos, si
- * hay algo en vivo y los dos accesos que responden a qué vino el visitante
- * —qué se juega y cómo va la tabla—.
- *
- * Como se lleva la pantalla completa, abajo del todo va una flecha que avisa
- * que hay más: sin ella, una portada a pantalla llena parece el sitio entero y
- * los partidos, que son el contenido, no existen para quien no baja.
- */
-export const PublicHero: React.FC<Props> = ({
-  editionName,
-  seasonNumber,
-  liveCount,
-  children,
-}) => {
+/** La edición y sus accesos primero; la jornada comienza en el primer viewport. */
+export const PublicHero: React.FC<Props> = ({ editionName, seasonNumber, liveCount, children }) => {
   const navigate = useNavigate();
-  const reduceMotion = useReducedMotion();
-  const setHeroActive = useGlobalStore((s) => s.setPublicHeroActive);
-  const isLive = liveCount > 0;
-
-  /*
-    Se avisa a la barra superior de que hay portada debajo. Se apaga al salir de
-    la pantalla: si quedara encendido, la barra seguiría transparente sobre el
-    calendario y el texto blanco caería sobre fondo blanco.
-  */
-  useEffect(() => {
-    setHeroActive(true);
-    return () => setHeroActive(false);
-  }, [setHeroActive]);
-
-  const bajar = () =>
-    window.scrollBy({ top: window.innerHeight * 0.85, behavior: reduceMotion ? 'auto' : 'smooth' });
-
   return (
-    <Box
-      sx={{
-        position: 'relative',
-        isolation: 'isolate',
-        overflow: 'hidden',
-        height: ALTO,
-        /*
-          Sube por detrás de la barra superior, que es fija y transparente
-          mientras esté acá. El desplazamiento que el layout deja para no tapar
-          el contenido se cancela: la foto tiene que empezar arriba de todo.
-        */
-        mt: { xs: `-${PUBLIC_TOPBAR_H.xs}px`, md: `-${PUBLIC_TOPBAR_H.md}px` },
-        color: '#fff',
-        // Se ve mientras la imagen carga, así el texto nunca queda sobre blanco.
-        background: 'var(--heroGradient)',
-        display: 'grid',
-        placeItems: 'center',
-        textAlign: 'center',
-      }}
-    >
-      <Box
-        component="img"
-        src={hero1600}
-        srcSet={`${hero900} 900w, ${hero1600} 1600w`}
-        sizes="100vw"
-        alt=""
-        aria-hidden
-        loading="eager"
-        // Es lo primero que se ve: bajarlo tarde deja la portada en degradado plano.
-        fetchPriority="high"
-        sx={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: -2,
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          objectPosition: ENCUADRE,
-        }}
-      />
-
-      {/*
-        Velo en dos capas: uno parejo que baja el brillo general del backing y un
-        degradado que carga la tinta arriba y abajo, donde se apoyan el contenido
-        y la flecha.
-      */}
-      <Box
-        aria-hidden
-        sx={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: -1,
-          background: `linear-gradient(180deg,
-            rgba(3, 24, 60, ${VELO}) 0%,
-            rgba(3, 24, 60, ${VELO * 0.82}) 40%,
-            rgba(3, 24, 60, ${VELO * 0.82}) 60%,
-            rgba(3, 24, 60, ${VELO}) 100%)`,
-        }}
-      />
-
-      {/*
-        Los escudos de los equipos, justo debajo de la barra superior. Van
-        arriba y sueltos, no dentro del bloque central: son la orla de la
-        portada, no una de las cosas que el visitante vino a hacer.
-      */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: { xs: PUBLIC_TOPBAR_H.xs, md: PUBLIC_TOPBAR_H.md },
-          left: 0,
-          right: 0,
-          py: { xs: 1.25, md: 1.75 },
-        }}
-      >
-        <TeamCrestStrip onDark />
-      </Box>
-
-      <Stack
-        alignItems="center"
-        spacing={{ xs: 2, md: 2.5 }}
-        sx={{ px: { xs: 2, md: 3 }, width: '100%', maxWidth: 720 }}
-      >
-        {/*
-          El monograma respira: crece y flota despacio, el mismo pulso que tiene
-          en el pie. Con `prefers-reduced-motion` se queda quieto — el bucle
-          infinito es justo el tipo de movimiento que esa preferencia apaga.
-        */}
-        <Box
-          component={motion.img}
-          src="/llf-removebg-preview.png"
-          alt="Liga Lago Futsal"
-          initial={reduceMotion ? undefined : { opacity: 0, scale: 0.9 }}
-          animate={
-            reduceMotion
-              ? undefined
-              : { opacity: 1, scale: [1, 1.06, 1], y: [0, -8, 0] }
-          }
-          transition={{
-            opacity: { duration: 0.5 },
-            scale: { duration: 3.2, repeat: Infinity, ease: 'easeInOut' },
-            y: { duration: 3.2, repeat: Infinity, ease: 'easeInOut' },
-          }}
-          sx={{
-            height: { xs: 100, sm: 140, md: 170 },
-            width: 'auto',
-            display: 'block',
-            filter: 'drop-shadow(0 12px 32px rgba(0,0,0,0.45))',
-          }}
-        />
-
-        <Stack
-          direction="row"
-          alignItems="center"
-          spacing={1}
-          flexWrap="wrap"
-          useFlexGap
-          justifyContent="center"
-        >
-          {/* El nombre de la edición: es el dato que ubica todo lo que viene abajo. */}
-          <Stack
-            direction="row"
-            alignItems="center"
-            spacing={0.75}
-            sx={{
-              px: 1.75,
-              py: 0.7,
-              borderRadius: 999,
-              bgcolor: 'rgba(255,255,255,0.16)',
-              backdropFilter: 'blur(6px)',
-              border: '1px solid rgba(255,255,255,0.22)',
-              minWidth: 0,
-            }}
-          >
-            <Typography
-              component="h1"
-              noWrap
-              sx={{
-                fontFamily: '"Plus Jakarta Sans", sans-serif',
-                fontWeight: 800,
-                fontSize: { xs: 15, md: 17 },
-                lineHeight: 1.2,
-              }}
-            >
-              {editionName}
-            </Typography>
-            <Typography
-              sx={{
-                fontSize: 13,
-                opacity: 0.75,
-                whiteSpace: 'nowrap',
-                display: { xs: 'none', sm: 'block' },
-              }}
-            >
-              · Temporada {seasonNumber}
-            </Typography>
-          </Stack>
-
-          {/* En rojo solo cuando hay algo que mirar: un "0 EN VIVO" en rojo miente. */}
-          <Stack
-            direction="row"
-            alignItems="center"
-            spacing={0.75}
-            sx={{
-              px: 1.25,
-              py: 0.5,
-              borderRadius: 999,
-              fontSize: 12,
-              fontWeight: 700,
-              flexShrink: 0,
-              bgcolor: isLive ? 'var(--live)' : 'rgba(255,255,255,0.16)',
-              color: isLive ? 'var(--liveOn)' : 'inherit',
-              border: isLive ? 'none' : '1px solid rgba(255,255,255,0.22)',
-            }}
-          >
-            <Box
-              sx={{
-                width: 7,
-                height: 7,
-                borderRadius: '50%',
-                bgcolor: 'currentColor',
-                ...(isLive ? { animation: 'pulse 1.4s infinite' } : { opacity: 0.5 }),
-              }}
-            />
-            <Box component="span">{liveCount} EN VIVO</Box>
-          </Stack>
+    <Box component="section" aria-labelledby="edition-title" sx={{ position: 'relative', isolation: 'isolate', overflow: 'hidden', color: 'var(--photoText)', bgcolor: 'var(--brandSurface)' }}>
+      <Box component="img" src={hero1600} srcSet={`${hero900} 900w, ${hero1600} 1600w`} sizes="100vw" alt="" aria-hidden loading="eager" fetchPriority="high" sx={{ position: 'absolute', inset: 0, zIndex: -2, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 45%' }} />
+      <Box aria-hidden sx={{ position: 'absolute', inset: 0, zIndex: -1, bgcolor: 'var(--photoScrim)' }} />
+      <Container maxWidth="xl" sx={{ py: { xs: 3, md: 4 } }}>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 2.5, md: 4 }} alignItems={{ xs: 'stretch', md: 'center' }} justifyContent="space-between">
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography id="edition-title" component="h1" sx={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700, fontSize: { xs: 28, sm: 32, md: 38 }, lineHeight: 1.2, textWrap: 'balance', maxWidth: '24ch' }}>{editionName}</Typography>
+            <Typography sx={{ mt: 1, color: 'var(--photoText)', fontSize: { xs: 14, md: 15 } }}>Temporada {seasonNumber} · Liga Lago Futsal</Typography>
+            <Stack direction="row" useFlexGap flexWrap="wrap" spacing={1} sx={{ mt: 2.5 }}>
+              <Button variant="contained" startIcon={<CalendarMonthRounded />} onClick={() => navigate(ROUTES.public.schedule)} sx={{ bgcolor: 'var(--photoText)', color: 'var(--brandInk)', '&:hover': { bgcolor: 'var(--primarySoft)' } }}>Ver partidos</Button>
+              <Button variant="outlined" startIcon={<TableChartRounded />} onClick={() => navigate(ROUTES.public.competitions)} sx={{ color: 'var(--photoText)', borderColor: 'var(--photoText)', '&:hover': { borderColor: 'var(--photoText)', bgcolor: 'var(--photoScrim)' } }}>Ver tablas</Button>
+              {liveCount > 0 && <Button endIcon={<ArrowForwardRounded />} onClick={() => navigate(ROUTES.public.live)} sx={{ color: 'var(--photoText)' }}><Box component="span" sx={{ width: 7, height: 7, mr: 1, borderRadius: '50%', bgcolor: 'var(--live)' }} />{liveCount} en vivo</Button>}
+            </Stack>
+          </Box>
+          {children && <Box sx={{ width: { xs: '100%', md: 360 }, maxWidth: '100%', flexShrink: 0 }}>{children}</Box>}
         </Stack>
-
-        {/*
-          Los dos accesos que responden por qué alguien entra al sitio. Sólidos
-          sobre la foto: un botón de contorno sobre una imagen con logos se
-          pierde en cuanto el recorte cae sobre una zona clara.
-        */}
-        <Stack direction="row" spacing={1.25} flexWrap="wrap" useFlexGap justifyContent="center">
-          <Button
-            size="large"
-            variant="contained"
-            startIcon={<CalendarMonthRounded />}
-            onClick={() => navigate(ROUTES.public.schedule)}
-            sx={{
-              bgcolor: '#fff',
-              color: 'var(--primary)',
-              fontWeight: 700,
-              '&:hover': { bgcolor: 'rgba(255,255,255,0.88)' },
-            }}
-          >
-            Ver partidos
-          </Button>
-          <Button
-            size="large"
-            variant="contained"
-            startIcon={<TableChartRounded />}
-            onClick={() => navigate(ROUTES.public.competitions)}
-            sx={{
-              bgcolor: 'rgba(255,255,255,0.16)',
-              color: '#fff',
-              fontWeight: 700,
-              backdropFilter: 'blur(6px)',
-              border: '1px solid rgba(255,255,255,0.28)',
-              boxShadow: 'none',
-              '&:hover': { bgcolor: 'rgba(255,255,255,0.26)', boxShadow: 'none' },
-            }}
-          >
-            Ver tablas
-          </Button>
-        </Stack>
-
-        {/* La publicidad cierra el bloque: debajo de la marca y de los accesos. */}
-        {children ? <Box sx={{ width: '100%', pt: { xs: 0.5, md: 1 } }}>{children}</Box> : null}
-      </Stack>
-
-      {/*
-        La portada se lleva la pantalla entera, así que hay que decir que abajo
-        hay partidos. Es un botón de verdad, no un adorno: quien no puede usar
-        el mouse también tiene que poder bajar desde acá.
-      */}
-      <Box
-        component={motion.button}
-        type="button"
-        onClick={bajar}
-        aria-label="Ver los partidos"
-        animate={reduceMotion ? undefined : { y: [0, 7, 0] }}
-        transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-        sx={{
-          position: 'absolute',
-          bottom: 14,
-          left: '50%',
-          translate: '-50% 0',
-          display: 'grid',
-          placeItems: 'center',
-          width: 40,
-          height: 40,
-          borderRadius: '50%',
-          border: '1px solid rgba(255,255,255,0.28)',
-          bgcolor: 'rgba(255,255,255,0.12)',
-          backdropFilter: 'blur(6px)',
-          color: '#fff',
-          cursor: 'pointer',
-          p: 0,
-          '&:hover': { bgcolor: 'rgba(255,255,255,0.22)' },
-        }}
-      >
-        <KeyboardArrowDownRounded />
-      </Box>
+        <Box sx={{ mt: 3 }}><TeamCrestStrip onDark /></Box>
+      </Container>
     </Box>
   );
 };

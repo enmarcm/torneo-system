@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import { ArrowForwardRounded } from '@mui/icons-material';
+import ArrowForwardRounded from '@mui/icons-material/ArrowForwardRounded';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import { usePublicMatchesQuery } from '@/hooks/queries';

@@ -3,30 +3,27 @@ import logoAzul from '@/assets/logo_azul.PNG';
 import logoBlanco from '@/assets/logo.PNG';
 import { useLocation, useNavigate, matchPath } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import {
-  GridViewRounded,
-  EmojiEventsRounded,
-  SportsSoccerRounded,
-  GroupsRounded,
-  PersonRounded,
-  CalendarMonthRounded,
-  BarChartRounded,
-  CampaignRounded,
-  NewspaperRounded,
-  BlockRounded,
-  FactCheckRounded,
-  ManageAccountsRounded,
-  PhotoLibraryRounded,
-  LightModeRounded,
-  DarkModeRounded,
-  LogoutRounded,
-} from '@mui/icons-material';
+import GridViewRounded from '@mui/icons-material/GridViewRounded';
+import EmojiEventsRounded from '@mui/icons-material/EmojiEventsRounded';
+import SportsSoccerRounded from '@mui/icons-material/SportsSoccerRounded';
+import GroupsRounded from '@mui/icons-material/GroupsRounded';
+import PersonRounded from '@mui/icons-material/PersonRounded';
+import CalendarMonthRounded from '@mui/icons-material/CalendarMonthRounded';
+import BarChartRounded from '@mui/icons-material/BarChartRounded';
+import CampaignRounded from '@mui/icons-material/CampaignRounded';
+import NewspaperRounded from '@mui/icons-material/NewspaperRounded';
+import BlockRounded from '@mui/icons-material/BlockRounded';
+import FactCheckRounded from '@mui/icons-material/FactCheckRounded';
+import ManageAccountsRounded from '@mui/icons-material/ManageAccountsRounded';
+import PhotoLibraryRounded from '@mui/icons-material/PhotoLibraryRounded';
+import LightModeRounded from '@mui/icons-material/LightModeRounded';
+import DarkModeRounded from '@mui/icons-material/DarkModeRounded';
+import LogoutRounded from '@mui/icons-material/LogoutRounded';
 import { ROUTES } from '@/routes/routes';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { getRoleLabel, type UserRole } from '@/utils/roles';
 import { useMemo, useRef, type ReactNode } from 'react';
-import { RailIndicator } from './RailIndicator';
 
 interface NavItem {
   label: string;
@@ -41,7 +38,7 @@ const MEDIA: UserRole[] = ['ADMIN', 'COMMUNITY_MANAGER'];
 const SCORING: UserRole[] = ['ADMIN', 'SCOREKEEPER'];
 
 const NAV: NavItem[] = [
-  { label: 'Dashboard', icon: <GridViewRounded />, to: ROUTES.admin.dashboard, roles: ADMIN_ONLY },
+  { label: 'Resumen', icon: <GridViewRounded />, to: ROUTES.admin.dashboard, roles: ADMIN_ONLY },
   { label: 'Ediciones', icon: <EmojiEventsRounded />, to: ROUTES.admin.editions, roles: ADMIN_ONLY },
   { label: 'Competiciones', icon: <SportsSoccerRounded />, to: ROUTES.admin.competitions, roles: ADMIN_ONLY },
   { label: 'Equipos', icon: <GroupsRounded />, to: ROUTES.admin.teams, roles: ADMIN_ONLY },
@@ -82,7 +79,7 @@ export const Sidebar: React.FC<{ onNavigate?: () => void }> = ({ onNavigate }) =
   const sidebarContent = (
     <Box
         sx={{
-          width: expanded ? 264 : 64,
+          width: expanded ? 240 : 64,
           maxWidth: '85vw',
           height: '100%',
           display: 'flex',
@@ -99,6 +96,7 @@ export const Sidebar: React.FC<{ onNavigate?: () => void }> = ({ onNavigate }) =
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: expanded ? 2 : 1, py: 2, minHeight: 64, justifyContent: expanded ? 'flex-start' : 'center' }}>
           <Box
             component="img"
+            alt="Liga Lago Futsal"
             src={logoSrc}
             sx={{
               width: 36,
@@ -114,15 +112,15 @@ export const Sidebar: React.FC<{ onNavigate?: () => void }> = ({ onNavigate }) =
           )}
         </Box>
 
-        {/* El riel naranja viaja entre ítems: un solo indicador, no uno que se apaga y otro que se prende. */}
         <List ref={listRef} sx={{ position: 'relative', flex: 1, overflow: 'auto', px: expanded ? 1 : 0.5, '&::-webkit-scrollbar': { width: 3 }, '&::-webkit-scrollbar-thumb': { bgcolor: 'var(--sidebarBorder)', borderRadius: 4 } }}>
-          <RailIndicator containerRef={listRef} deps={[pathname, expanded]} />
           {nav.map((item) => {
             const active = isActive(item);
             const btn = (
               <ListItemButton
                 key={item.to}
                 onClick={() => { navigate(item.to); onNavigate?.(); }}
+                aria-label={item.label}
+                aria-current={active ? 'page' : undefined}
                 data-nav-active={active ? 'true' : undefined}
                 sx={{
                   borderRadius: expanded ? 1.5 : 1,
@@ -131,11 +129,10 @@ export const Sidebar: React.FC<{ onNavigate?: () => void }> = ({ onNavigate }) =
                   px: expanded ? 1.5 : 0.75,
                   minHeight: { xs: 44, md: 40 },
                   justifyContent: expanded ? 'flex-start' : 'center',
-                  color: active ? 'var(--primary)' : 'var(--sidebarText)',
+                  color: active ? 'var(--text)' : 'var(--sidebarText)',
                   bgcolor: active ? 'var(--sidebarActiveBg)' : 'transparent',
                   transition: 'background-color 0.2s, color 0.2s',
                   '&:hover': { bgcolor: active ? 'var(--sidebarActiveBg)' : 'var(--sidebarHover)' },
-                  '&:hover .MuiListItemIcon-root': { transform: 'translateX(2px)' },
                 }}
               >
                 <ListItemIcon
@@ -152,7 +149,7 @@ export const Sidebar: React.FC<{ onNavigate?: () => void }> = ({ onNavigate }) =
                 {expanded && (
                   <ListItemText
                     primary={item.label}
-                    primaryTypographyProps={{ fontWeight: active ? 700 : 500, fontSize: 14, fontFamily: '"Inter", system-ui, sans-serif', noWrap: true }}
+                    primaryTypographyProps={{ fontWeight: active ? 600 : 400, fontSize: 14, fontFamily: '"Inter", system-ui, sans-serif', noWrap: true }}
                   />
                 )}
               </ListItemButton>
@@ -186,12 +183,13 @@ export const Sidebar: React.FC<{ onNavigate?: () => void }> = ({ onNavigate }) =
                   <Typography sx={{ color: 'var(--logo)', fontSize: 12, fontWeight: 600, fontFamily: '"Inter", system-ui, sans-serif' }} noWrap>
                     {user.username.toUpperCase()}
                   </Typography>
-                  <Typography sx={{ fontSize: 10, color: 'var(--sidebarText)' }}>
+                  <Typography sx={{ fontSize: 12, color: 'var(--sidebarText)' }}>
                     {getRoleLabel(user.role)}
                   </Typography>
                 </Box>
                 <Tooltip title="Cerrar sesi\u00f3n" placement="right" arrow>
                   <IconButton
+                    aria-label="Cerrar sesión"
                     onClick={logout}
                     size="small"
                     sx={{ color: 'var(--sidebarText)', '&:hover': { color: 'var(--danger)', bgcolor: 'var(--sidebarHover)' }, flexShrink: 0, minWidth: 28, minHeight: 28 }}
@@ -210,7 +208,7 @@ export const Sidebar: React.FC<{ onNavigate?: () => void }> = ({ onNavigate }) =
 
   return (
     <motion.div
-      animate={{ width: expanded ? 264 : 64 }}
+      animate={{ width: expanded ? 240 : 64 }}
       transition={{ duration: 0.15, ease: 'easeInOut' }}
       initial={false}
       style={{

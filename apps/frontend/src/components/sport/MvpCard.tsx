@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Card, Box, Stack, Typography, Button, Avatar, CircularProgress } from '@mui/material';
-import { MilitaryTechRounded, DownloadRounded } from '@mui/icons-material';
+import MilitaryTechRounded from '@mui/icons-material/MilitaryTechRounded';
+import DownloadRounded from '@mui/icons-material/DownloadRounded';
 import { motion } from 'framer-motion';
 import type { Match } from '@/api/matches.api';
 import { downloadFile } from '@/utils/downloadFile';
@@ -36,20 +37,17 @@ export const MvpCard: React.FC<Props> = ({ match, compact = false }) => {
   return (
     <Card
       component={motion.div}
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25 }}
       sx={{
         p: compact ? 2 : 2.5,
-        background: 'linear-gradient(135deg, rgba(255,193,7,0.12), transparent 65%)',
+        bgcolor: 'background.paper',
         border: '1px solid',
         borderColor: 'warning.light',
       }}
     >
       <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1.5 }}>
         <MilitaryTechRounded sx={{ fontSize: 18, color: 'warning.main' }} />
-        <Typography variant="caption" sx={{ fontWeight: 800, letterSpacing: 0.5 }}>
-          FIGURA DEL PARTIDO
+        <Typography variant="caption" sx={{ fontWeight: 600 }}>
+          Figura del partido
         </Typography>
       </Stack>
 

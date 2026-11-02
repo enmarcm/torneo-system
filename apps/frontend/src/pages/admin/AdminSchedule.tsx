@@ -1,7 +1,15 @@
 import { Box, Grid2 as Grid, Card, Stack, Typography, Button, FormControl, InputLabel, Select, MenuItem, IconButton, TextField, Menu, Tooltip, Tabs, Tab, Chip, FormControlLabel, Checkbox, Avatar, FormHelperText } from '@mui/material';
 import { SaveButton } from '@/components/ui/SaveButton';
 import { MatchLoader } from '@/components/ui/MatchLoader';
-import { AddRounded, PlayArrowRounded, StopRounded, SportsSoccerRounded, StyleRounded, ChevronLeftRounded, ChevronRightRounded, MoreVertRounded, CasinoRounded } from '@mui/icons-material';
+import AddRounded from '@mui/icons-material/AddRounded';
+import PlayArrowRounded from '@mui/icons-material/PlayArrowRounded';
+import StopRounded from '@mui/icons-material/StopRounded';
+import SportsSoccerRounded from '@mui/icons-material/SportsSoccerRounded';
+import StyleRounded from '@mui/icons-material/StyleRounded';
+import ChevronLeftRounded from '@mui/icons-material/ChevronLeftRounded';
+import ChevronRightRounded from '@mui/icons-material/ChevronRightRounded';
+import MoreVertRounded from '@mui/icons-material/MoreVertRounded';
+import CasinoRounded from '@mui/icons-material/CasinoRounded';
 import { useState, useMemo } from 'react';
 import { ROUTES } from '@/routes/routes';
 import { useNavigate } from 'react-router-dom';

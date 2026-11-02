@@ -1,5 +1,6 @@
 import { Container, Grid2 as Grid, Typography, Button } from '@mui/material';
-import { ArrowBackRounded, ArrowForwardRounded } from '@mui/icons-material';
+import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded';
+import ArrowForwardRounded from '@mui/icons-material/ArrowForwardRounded';
 import { useNavigate } from 'react-router-dom';
 import { usePublicEditionsQuery, usePublicMatchesQuery } from '@/hooks/queries';
 import { LiveScoreboard } from '@/components/sport/LiveScoreboard';
@@ -22,7 +23,7 @@ const PublicLive: React.FC = () => {
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Button startIcon={<ArrowBackRounded />} onClick={() => navigate(ROUTES.public.home)} sx={{ mb: 1, color: 'text.secondary' }}>Volver</Button>
-      <Typography variant="h2" sx={{ mb: 3 }}>En vivo</Typography>
+      <Typography component="h1" variant="h2" sx={{ mb: 3 }}>En vivo</Typography>
       {isLoading ? (
         <MatchLoader />
       ) : live.length === 0 ? (

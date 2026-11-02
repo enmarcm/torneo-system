@@ -1,13 +1,17 @@
 import { Card, Box, Typography, Stack, Tooltip, Collapse, IconButton, Chip, ButtonBase, useTheme, useMediaQuery } from '@mui/material';
 import { Crest } from '@/components/ui/Crest';
 import type { StandingRow } from '@/api/standings.api';
-import { ShieldRounded, ExpandMoreRounded, ExpandLessRounded } from '@mui/icons-material';
+import ShieldRounded from '@mui/icons-material/ShieldRounded';
+import ExpandMoreRounded from '@mui/icons-material/ExpandMoreRounded';
+import ExpandLessRounded from '@mui/icons-material/ExpandLessRounded';
 import { useState } from 'react';
 import { getStatusLabel, getStatusColor } from '@/utils/statusLabels';
 import { EmptyState } from '@/components/ui/EmptyState';
 
 interface Props {
   rows: StandingRow[];
+  /** Resumen en una columna estrecha, por ejemplo junto a los partidos del panel. */
+  compact?: boolean;
   /**
    * Equipos inscritos, para cuando todavía no hay resultados: en vez de una
    * pantalla en blanco se muestran en orden alfabético con guiones, y la tabla
@@ -59,7 +63,7 @@ const TeamCrest: React.FC<{ row: StandingRow; size: number }> = ({ row, size }) 
   </Crest>
 );
 
-export const StandingsTable: React.FC<Props> = ({ rows, ghostTeams, onTeamClick }) => {
+export const StandingsTable: React.FC<Props> = ({ rows, ghostTeams, onTeamClick, compact = false }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const hasQualify = (rows ?? []).some((r) => r.zone === 'QUALIFY');
@@ -79,7 +83,7 @@ export const StandingsTable: React.FC<Props> = ({ rows, ghostTeams, onTeamClick 
     return (
       <Card sx={{ overflow: 'hidden' }}>
         <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse' }}>
-          <Box component="thead" sx={{ bgcolor: 'background.default' }}>
+          <Box component="thead" sx={{ bgcolor: 'background.paper' }}>
             <Box component="tr">
               {['#', '', 'Equipo', 'PJ', 'PTS'].map((h, i) => (
                 <Box
@@ -132,7 +136,7 @@ export const StandingsTable: React.FC<Props> = ({ rows, ghostTeams, onTeamClick 
           </Tooltip>
         </Stack>
 
-        {isMobile ? (
+        {isMobile || compact ? (
           <Stack spacing={1}>
             {rows.map((r) => (
               <MobileStandingRow key={r.registrationId} row={r} onTeamClick={onTeamClick} />
@@ -142,12 +146,13 @@ export const StandingsTable: React.FC<Props> = ({ rows, ghostTeams, onTeamClick 
           <Box sx={{ overflowX: 'auto' }}>
             <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse' }}>
               <Box component="thead">
-                <Box component="tr" sx={{ bgcolor: 'background.default' }}>
+                <Box component="tr">
                   {['#', 'Equipo', 'PJ', 'G', 'E', 'P', 'GF', 'GC', 'DG', 'Pts'].map((h, i) => (
                     <Box
                       component="th"
                       key={h}
-                      sx={{ p: 1.5, fontSize: 12, fontWeight: 600, color: 'text.secondary', textAlign: i <= 1 ? 'left' : 'right' }}
+                      scope="col"
+                      sx={{ p: 1.5, fontSize: 12, fontWeight: 500, whiteSpace: 'nowrap', color: 'text.secondary', textAlign: i <= 1 ? 'left' : 'right' }}
                     >
                       {h}
                     </Box>

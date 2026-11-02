@@ -26,8 +26,8 @@ export const buildTheme = (mode: 'light' | 'dark') => {
       h5: { fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 600, fontSize: '1rem' },
       h6: { fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 600, fontSize: '0.9375rem' },
       button: { textTransform: 'none', fontWeight: 600, fontFamily: '"Plus Jakarta Sans", sans-serif' },
-      body1: { fontSize: '0.9375rem' },
-      body2: { fontSize: '0.875rem' },
+      body1: { fontSize: '0.9375rem', lineHeight: 1.6 },
+      body2: { fontSize: '0.875rem', lineHeight: 1.5 },
       caption: { fontSize: '0.75rem' },
     },
     components: {
@@ -39,6 +39,15 @@ export const buildTheme = (mode: 'light' | 'dark') => {
             oscuro. Es una línea y arregla todo lo que el navegador dibuja solo.
           */
           ':root': { colorScheme: mode },
+          body: { fontVariantNumeric: 'tabular-nums' },
+          'h1, h2, h3, h4, h5, h6': { textWrap: 'balance' },
+          'main': { minWidth: 0 },
+          '.llf-skip-link': {
+            position: 'fixed', top: 8, left: 16, zIndex: 1600,
+            padding: '10px 16px', backgroundColor: t.surface, color: t.text,
+            borderRadius: 8, transform: 'translateY(-160%)',
+            '&:focus': { transform: 'none' },
+          },
           '::selection': { backgroundColor: t.selectionBg, color: t.selectionText },
           // La caret y el foco también son parte del sistema, no del navegador.
           'input, textarea': { caretColor: t.primary },
@@ -55,13 +64,13 @@ export const buildTheme = (mode: 'light' | 'dark') => {
           '*::-webkit-scrollbar': { width: 10, height: 10 },
           '*::-webkit-scrollbar-track': { background: 'transparent' },
           '*::-webkit-scrollbar-thumb': {
-            background: '#FFFFFF',
+            background: t.scrollThumb,
             borderRadius: 999,
             border: '2px solid transparent',
             backgroundClip: 'padding-box',
           },
-          '*::-webkit-scrollbar-thumb:hover': { background: '#FFFFFF' },
-          '*': { scrollbarWidth: 'thin', scrollbarColor: '#FFFFFF transparent' },
+          '*::-webkit-scrollbar-thumb:hover': { background: t.textMuted },
+          '*': { scrollbarWidth: 'thin', scrollbarColor: `${t.scrollThumb} transparent` },
           /*
             El carril del sitio público, en navy.
 
@@ -75,9 +84,9 @@ export const buildTheme = (mode: 'light' | 'dark') => {
             Va atado a una clase que solo pone el sitio público: en el panel de
             administración un riel oscuro al borde no tendría con qué combinar.
           */
-          'html.llf-publico': { scrollbarColor: `#FFFFFF ${t.publicRail}` },
-          'html.llf-publico::-webkit-scrollbar-track': { background: t.publicRail },
-          'html.llf-publico ::-webkit-scrollbar-track': { background: t.publicRail },
+          'html.llf-publico': { scrollbarColor: `${t.scrollThumb} ${t.bg}` },
+          'html.llf-publico::-webkit-scrollbar-track': { background: t.bg },
+          'html.llf-publico ::-webkit-scrollbar-track': { background: t.bg },
           /*
             Regla del Número Tabular del sistema: los marcadores y puntajes se
             comparan entre filas, y un dígito que cambia de ancho al actualizarse
@@ -138,23 +147,23 @@ export const buildTheme = (mode: 'light' | 'dark') => {
           },
           '@keyframes llfLetter1': {
             '0%': { opacity: 0.5 },
-            '9%': { opacity: 1, textShadow: `0 0 18px ${t.accent}99` },
-            '22%': { opacity: 0.18, textShadow: '0 0 0 transparent' },
+            '9%': { opacity: 1 },
+            '22%': { opacity: 0.18 },
             '78%': { opacity: 0.18 },
-            '91%': { opacity: 1, textShadow: `0 0 18px ${t.accent}99` },
-            '100%': { opacity: 0.5, textShadow: '0 0 0 transparent' },
+            '91%': { opacity: 1 },
+            '100%': { opacity: 0.5 },
           },
           '@keyframes llfLetter2': {
             '0%, 13%': { opacity: 0.18 },
-            '25%': { opacity: 1, textShadow: `0 0 18px ${t.accent}99` },
-            '38%, 62%': { opacity: 0.18, textShadow: '0 0 0 transparent' },
-            '75%': { opacity: 1, textShadow: `0 0 18px ${t.accent}99` },
-            '88%, 100%': { opacity: 0.18, textShadow: '0 0 0 transparent' },
+            '25%': { opacity: 1 },
+            '38%, 62%': { opacity: 0.18 },
+            '75%': { opacity: 1 },
+            '88%, 100%': { opacity: 0.18 },
           },
           '@keyframes llfLetter3': {
             '0%, 29%': { opacity: 0.18 },
-            '41%, 59%': { opacity: 1, textShadow: `0 0 18px ${t.accent}99` },
-            '72%, 100%': { opacity: 0.18, textShadow: '0 0 0 transparent' },
+            '41%, 59%': { opacity: 1 },
+            '72%, 100%': { opacity: 0.18 },
           },
           // Pantalla de acceso: los reflectores respiran, la tarjeta se sacude
           // con un error y el balón entra rodando con el saludo.
@@ -195,23 +204,7 @@ export const buildTheme = (mode: 'light' | 'dark') => {
             from: { opacity: 0, filter: 'blur(12px)', transform: 'scale(1.06)' },
             to: { opacity: 1, filter: 'blur(0)', transform: 'none' },
           },
-          /*
-            Entrada de página en cascada. Los layouts envuelven el <Outlet> con
-            `.llf-page` y `key={pathname}`, así cada ruta monta de cero y sus
-            bloques suben 6px con 50 ms de diferencia. Se anima al nivel de los
-            nietos porque el hijo directo es casi siempre el Container de la
-            página; animarlo a él sería un fundido único, no una cascada.
-          */
-          '.llf-page > * > *': {
-            animation: 'llfRise 0.3s cubic-bezier(.2,.7,.2,1) both',
-          },
-          '.llf-page > * > :nth-child(2)': { animationDelay: '50ms' },
-          '.llf-page > * > :nth-child(3)': { animationDelay: '100ms' },
-          '.llf-page > * > :nth-child(4)': { animationDelay: '150ms' },
-          '.llf-page > * > :nth-child(5)': { animationDelay: '200ms' },
-          '.llf-page > * > :nth-child(n+6)': { animationDelay: '250ms' },
-          /* Contenido de una pestaña recién elegida: mismo ascenso, más corto. */
-          '.llf-rise': { animation: 'llfRise 0.26s cubic-bezier(.2,.7,.2,1) both' },
+          '.llf-rise': { animation: 'none' },
           /*
             Tarjeta que lleva a otro lado. No cambia de color: sube 2px, el
             borde toma el primario, el escudo crece apenas y, si tiene flecha,
@@ -228,8 +221,8 @@ export const buildTheme = (mode: 'light' | 'dark') => {
           },
           '.llf-cardlink:hover': {
             borderColor: t.primary,
-            transform: 'translateY(-2px)',
-            boxShadow: t.shadowPrimary,
+
+            boxShadow: 'none',
             '& .llf-crest': { transform: 'scale(1.06)' },
             '& .llf-cardlink-arrow': { opacity: 1, transform: 'none' },
           },
@@ -285,6 +278,8 @@ export const buildTheme = (mode: 'light' | 'dark') => {
           },
         },
       },
+      MuiDialog: { styleOverrides: { paper: { boxShadow: t.floatingShadow } } },
+      MuiPopover: { styleOverrides: { paper: { boxShadow: t.floatingShadow, border: `1px solid ${t.border}` } } },
       MuiPaper: {
         styleOverrides: {
           root: { backgroundImage: 'none', borderRadius: 12 },
@@ -305,7 +300,8 @@ export const buildTheme = (mode: 'light' | 'dark') => {
         styleOverrides: {
           root: {
             borderRadius: 10,
-            padding: '9px 18px',
+            padding: '8px 16px',
+            minHeight: 40,
             fontWeight: 600,
             /*
               Las flechas se adelantan al pasar el cursor: la de "Volver" hacia
@@ -327,7 +323,7 @@ export const buildTheme = (mode: 'light' | 'dark') => {
             },
           },
           containedPrimary: {
-            boxShadow: t.shadowPrimary,
+            boxShadow: 'none',
             '&:hover': { boxShadow: t.shadowPrimaryHover },
           },
         },
@@ -337,13 +333,9 @@ export const buildTheme = (mode: 'light' | 'dark') => {
         la cancha de noche tiene que verse como parte de la cancha.
       */
       MuiSkeleton: {
+        defaultProps: { animation: false },
         styleOverrides: {
-          root: {
-            backgroundColor: mode === 'dark' ? '#131E36' : '#E6EBF5',
-            '&::after': {
-              background: `linear-gradient(90deg, transparent, ${mode === 'dark' ? '#1C2B4D' : '#F5F7FC'}, transparent)`,
-            },
-          },
+          root: { backgroundColor: t.border, '&::after': { display: 'none' } },
         },
       },
       /* El indicador viaja y se estira hasta la pestaña nueva, con la curva del sistema. */
@@ -379,18 +371,18 @@ export const buildTheme = (mode: 'light' | 'dark') => {
       },
       MuiOutlinedInput: {
         styleOverrides: {
-          root: { borderRadius: 10, backgroundColor: t.surface2 },
-          notchedOutline: { borderColor: t.border },
+          root: { borderRadius: 8, backgroundColor: t.surface },
+          notchedOutline: { borderColor: t.controlBorder },
         },
       },
       MuiInputBase: {
         styleOverrides: {
-          input: { fontSize: '0.9375rem' },
+          input: { fontSize: '0.9375rem', '&::placeholder': { color: t.textMuted, opacity: 1 } },
         },
       },
       MuiChip: {
         styleOverrides: {
-          root: { borderRadius: 999, fontWeight: 600 },
+          root: { borderRadius: 999, fontWeight: 500, flexShrink: 0, maxWidth: '100%' },
         },
       },
       MuiTooltip: {
@@ -410,12 +402,13 @@ export const buildTheme = (mode: 'light' | 'dark') => {
       },
       MuiTableHead: {
         styleOverrides: {
-          root: { backgroundColor: t.surface2 },
+          root: { backgroundColor: 'transparent' },
         },
       },
       MuiTableCell: {
         styleOverrides: {
-          head: { fontWeight: 600, color: t.textMuted, fontSize: '0.8125rem' },
+          head: { fontWeight: 500, color: t.textMuted, fontSize: '0.8125rem', backgroundColor: t.surface },
+          root: { borderColor: t.rowBorder, fontVariantNumeric: 'tabular-nums' },
         },
       },
     },

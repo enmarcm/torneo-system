@@ -9,12 +9,10 @@ import {
   IconButton,
   ThemeProvider,
 } from '@mui/material';
-import {
-  VisibilityRounded,
-  VisibilityOffRounded,
-  ArrowBackRounded,
-  ArrowForwardRounded,
-} from '@mui/icons-material';
+import VisibilityRounded from '@mui/icons-material/VisibilityRounded';
+import VisibilityOffRounded from '@mui/icons-material/VisibilityOffRounded';
+import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded';
+import ArrowForwardRounded from '@mui/icons-material/ArrowForwardRounded';
 import logoBlanco from '@/assets/logo.PNG';
 import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -22,7 +20,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { useLoginMutation } from '@/hooks/mutations';
-import { NightCourt } from '@/components/sport/NightCourt';
 import { useAuthStore } from '@/store/useAuthStore';
 import { extractErrorMessage } from '@/api/axios';
 import { homeRouteFor } from '@/routes/RoleGuard';
@@ -101,20 +98,20 @@ const Login: React.FC = () => {
   return (
     <ThemeProvider theme={nightTheme}>
       <Box
+        component="main" id="main-content" tabIndex={-1}
         sx={{
           position: 'relative',
           isolation: 'isolate',
-          minHeight: '100vh',
+          minHeight: '100dvh',
           display: 'grid',
           placeItems: 'center',
           px: 2,
           py: { xs: 9, md: 8 },
           color: '#fff',
-          background: 'radial-gradient(120% 90% at 50% 0%, #10203F 0%, #070B16 60%)',
+          bgcolor: 'background.default',
           overflow: 'hidden',
         }}
       >
-        <NightCourt />
 
         {/* Marca, arriba a la izquierda */}
         <Stack
@@ -139,7 +136,7 @@ const Login: React.FC = () => {
             component="img"
             src="/llf-removebg-preview.png"
             alt="LLF"
-            sx={{ width: { xs: 110, md: 150 }, height: 'auto', filter: 'drop-shadow(0 10px 30px rgba(77,147,255,0.35))' }}
+            sx={{ width: { xs: 110, md: 150 }, height: 'auto', objectFit: 'contain' }}
           />
 
           {/* El ascenso de entrada va en el contenedor; la sacudida del error, en la tarjeta. */}
@@ -154,18 +151,16 @@ const Login: React.FC = () => {
               width: '100%',
               p: { xs: 3, md: '30px 30px 26px' },
               borderRadius: 4,
-              bgcolor: 'rgba(16,24,40,0.78)',
-              backdropFilter: 'blur(18px) saturate(140%)',
-              WebkitBackdropFilter: 'blur(18px) saturate(140%)',
+              bgcolor: 'background.paper',
               border: '1px solid rgba(255,255,255,0.12)',
-              boxShadow: '0 40px 80px -30px rgba(0,0,0,0.8)',
+              boxShadow: 'none',
               display: 'grid',
               gap: 1.75,
               animation: shaking ? 'llfShake 0.45s cubic-bezier(.36,.07,.19,.97)' : 'none',
             }}
           >
             <Box>
-              <Typography sx={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 800, fontSize: 26, lineHeight: 1.15, letterSpacing: '-0.02em' }}>
+              <Typography component="h1" sx={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 800, fontSize: 26, lineHeight: 1.15, letterSpacing: '-0.02em' }}>
                 Entrá a tu panel
               </Typography>
               <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
@@ -273,7 +268,7 @@ const Login: React.FC = () => {
                   animation: 'llfRise 0.3s cubic-bezier(.2,.7,.2,1) both',
                 }}
               >
-                <Box sx={{ mb: 1, animation: 'llfRollIn 0.9s cubic-bezier(.2,.7,.2,1) both', filter: 'drop-shadow(0 6px 6px rgba(0,0,0,0.35))' }}>
+                <Box sx={{ mb: 1, animation: 'llfRollIn 0.9s cubic-bezier(.2,.7,.2,1) both' }}>
                   <Ball size={64} />
                 </Box>
                 <Typography sx={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 800, fontSize: 24 }}>
@@ -302,7 +297,6 @@ const Login: React.FC = () => {
             display: { xs: 'none', md: 'block' },
             zIndex: 1,
             p: 2,
-            filter: 'drop-shadow(0 14px 10px rgba(0,0,0,0.55))',
             '& .llf-ball-x': { transition: 'transform 0.3s' },
             '& .llf-ball-r': { transition: 'transform 0.3s' },
             cursor: 'default',
@@ -336,8 +330,8 @@ const Login: React.FC = () => {
               sx={{
                 fontSize: 11,
                 fontWeight: 600,
-                letterSpacing: '0.04em',
-                textTransform: 'uppercase',
+                letterSpacing: 0,
+                textTransform: 'none',
                 color: 'rgba(255,255,255,0.65)',
                 border: '1px solid rgba(255,255,255,0.18)',
                 px: 1.125,

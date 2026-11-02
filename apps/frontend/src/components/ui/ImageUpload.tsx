@@ -1,5 +1,7 @@
 import { Alert, Box, ButtonBase, Typography, Stack, CircularProgress, IconButton } from '@mui/material';
-import { CloudUploadRounded, DeleteRounded, InfoOutlined } from '@mui/icons-material';
+import CloudUploadRounded from '@mui/icons-material/CloudUploadRounded';
+import DeleteRounded from '@mui/icons-material/DeleteRounded';
+import InfoOutlined from '@mui/icons-material/InfoOutlined';
 import { useEffect, useRef, useState } from 'react';
 import { uploadsApi } from '@/api/uploads.api';
 import { extractErrorMessage } from '@/api/axios';

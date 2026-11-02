@@ -4,9 +4,9 @@ export const lightTokens = {
   primarySoft: '#E0E8F4',
   accent: '#FF8A4C',
   accentSoft: '#FFEDE1',
-  sidebar: '#FFFFFF',
+  sidebar: '#F4F6FB',
   sidebarHover: '#F4F6FB',
-  sidebarText: '#6B7494',
+  sidebarText: '#58647C',
   sidebarActiveBg: '#E0E8F4',
   sidebarBorder: '#E6E9F2',
   logo: '#1A2138',
@@ -15,20 +15,20 @@ export const lightTokens = {
   surface2: '#F8FAFD',
   border: '#E6E9F2',
   text: '#1A2138',
-  textMuted: '#6B7494',
+  textMuted: '#58647C',
   /*
     Sin este valor regía el default de MUI (rgba(0,0,0,0.38)): ~2.9:1 sobre
     blanco, por debajo de AA. Carga el "VS" y el separador del marcador, o sea
     lo único que distingue un partido futuro, en una pantalla que se lee al sol.
   */
-  textDisabled: '#8A92AD',
-  success: '#22C55E',
+  textDisabled: '#647087',
+  success: '#187545',
   successSoft: '#E7F8EE',
-  warning: '#F59E0B',
+  warning: '#946000',
   warningSoft: '#FEF3E2',
-  danger: '#EF4444',
+  danger: '#C52F3D',
   dangerSoft: '#FDECEC',
-  info: '#3B82F6',
+  info: '#245EAF',
   infoSoft: '#E8F1FE',
   live: '#FF3B53',
   /*
@@ -41,12 +41,21 @@ export const lightTokens = {
   liveOn: '#2B0710',
   /* Tinta de lo que va encima del relleno primario. */
   primaryOn: '#FFFFFF',
-  heroGradient: 'linear-gradient(135deg,#2A3352 0%,#1B2237 100%)',
-  brandGradient: 'linear-gradient(135deg,#034292 0%,#2563EB 100%)',
+  heroSurface: '#E0E8F4',
+  heroText: '#183B68',
+  heroMuted: '#455F80',
+  brandSurface: '#034292',
+  photoScrim: 'rgba(4,16,34,0.76)',
+  photoText: '#FFFFFF',
+  brandInk: '#034292',
+  footerSurface: '#101828',
+  controlBorder: '#BCC6D5',
+  rowBorder: '#EDF0F5',
+  floatingShadow: '0 16px 48px rgba(27,34,55,0.16)',
   /* Sombras: en claro despegan del papel; en oscuro tienen que ser negro real. */
-  shadowSurface: '0 4px 16px rgba(27,34,55,0.06)',
-  shadowPrimary: '0 6px 16px rgba(3,66,146,0.25)',
-  shadowPrimaryHover: '0 8px 22px rgba(3,66,146,0.35)',
+  shadowSurface: 'none',
+  shadowPrimary: 'none',
+  shadowPrimaryHover: 'none',
   /* Superficies de navegación traslúcidas sobre el lienzo. */
   scrollThumb: '#CBD2E4',
   /*
@@ -63,9 +72,9 @@ export const lightTokens = {
     — tarjeta blanca, panel héroe oscuro o la foto de una competición. Es el
     caso para el que existe `backdrop-filter`, no decoración.
   */
-  railScrim: 'rgba(255,255,255,0.55)',
+  railScrim: '#FFFFFF',
   /* Sin soporte de desenfoque el velo tiene que tapar más para seguir sirviendo. */
-  railScrimSolid: 'rgba(255,255,255,0.88)',
+  railScrimSolid: '#FFFFFF',
 };
 
 /*
@@ -118,17 +127,26 @@ export const darkTokens = {
     una luz encendida y no como otra superficie más.
   */
   primaryOn: '#08122A',
-  heroGradient: 'linear-gradient(135deg,#16294F 0%,#080D1B 100%)',
-  brandGradient: 'linear-gradient(135deg,#1E4FA8 0%,#4D93FF 100%)',
-  shadowSurface: '0 10px 28px rgba(0,0,0,0.55)',
-  shadowPrimary: '0 6px 18px rgba(77,147,255,0.30)',
-  shadowPrimaryHover: '0 10px 26px rgba(77,147,255,0.42)',
+  heroSurface: '#17243A',
+  heroText: '#E6EEFA',
+  heroMuted: '#B4C3DA',
+  brandSurface: '#163A68',
+  photoScrim: 'rgba(4,16,34,0.76)',
+  photoText: '#FFFFFF',
+  brandInk: '#034292',
+  footerSurface: '#101828',
+  controlBorder: '#46536A',
+  rowBorder: '#1B2638',
+  floatingShadow: '0 16px 48px rgba(0,0,0,0.40)',
+  shadowSurface: 'none',
+  shadowPrimary: 'none',
+  shadowPrimaryHover: 'none',
   scrollThumb: '#26314C',
   publicRail: '#080D1B',
   selectionBg: 'rgba(77,147,255,0.32)',
   selectionText: '#F2F5FC',
-  railScrim: 'rgba(9,13,26,0.55)',
-  railScrimSolid: 'rgba(9,13,26,0.88)',
+  railScrim: '#101828',
+  railScrimSolid: '#101828',
 };
 
 export type Tokens = typeof lightTokens;

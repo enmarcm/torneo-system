@@ -9,7 +9,8 @@ import {
   Alert,
   Divider,
 } from '@mui/material';
-import { MilitaryTechRounded, DeleteOutlineRounded } from '@mui/icons-material';
+import MilitaryTechRounded from '@mui/icons-material/MilitaryTechRounded';
+import DeleteOutlineRounded from '@mui/icons-material/DeleteOutlineRounded';
 import { useSnackbar } from 'notistack';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { MvpCard } from '@/components/sport/MvpCard';

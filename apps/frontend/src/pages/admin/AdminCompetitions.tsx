@@ -1,7 +1,9 @@
 import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Button, IconButton, Menu, MenuItem, FormControl, Select, InputLabel, Tooltip, TextField, Divider, ListItemText, Checkbox, OutlinedInput, FormHelperText, FormControlLabel, Switch, Alert } from '@mui/material';
 import { SaveButton } from '@/components/ui/SaveButton';
 import { getStatusLabel, getDivisionLabel } from '@/utils/statusLabels';
-import { AddRounded, MoreVertRounded, EmojiEventsRounded } from '@mui/icons-material';
+import AddRounded from '@mui/icons-material/AddRounded';
+import MoreVertRounded from '@mui/icons-material/MoreVertRounded';
+import EmojiEventsRounded from '@mui/icons-material/EmojiEventsRounded';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { PageHeader } from '@/components/ui/PageHeader';

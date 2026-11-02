@@ -7,12 +7,10 @@ import {
   IconButton,
   Tooltip,
 } from '@mui/material';
-import {
-  MenuRounded,
-  MenuOpenRounded,
-  LightModeRounded,
-  DarkModeRounded,
-} from '@mui/icons-material';
+import MenuRounded from '@mui/icons-material/MenuRounded';
+import MenuOpenRounded from '@mui/icons-material/MenuOpenRounded';
+import LightModeRounded from '@mui/icons-material/LightModeRounded';
+import DarkModeRounded from '@mui/icons-material/DarkModeRounded';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -165,7 +163,7 @@ export const PublicTopbar: React.FC<Props> = ({ onToggleNav, navExpanded }) => {
               color: sobreHero ? '#fff' : 'var(--logo)',
               transition: 'color 0.25s ease',
               // Sobre la foto el blanco necesita apoyo para no diluirse.
-              textShadow: sobreHero ? '0 1px 10px rgba(0,0,0,0.45)' : 'none',
+              textShadow: 'none',
             }}
           >
             {/* En teléfono la sigla; el nombre entero empuja al botón de sesión fuera. */}

@@ -1,5 +1,7 @@
 import { Card, Box, Typography, Stack } from '@mui/material';
-import { SportsSoccerRounded, StyleRounded, SwapHorizRounded } from '@mui/icons-material';
+import SportsSoccerRounded from '@mui/icons-material/SportsSoccerRounded';
+import StyleRounded from '@mui/icons-material/StyleRounded';
+import SwapHorizRounded from '@mui/icons-material/SwapHorizRounded';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -121,7 +123,7 @@ export const LiveScoreboard: React.FC<Props> = ({ match, showFeed = true, size =
         {isLive ? (
           <Box
             component={motion.div}
-            animate={reduceMotion ? undefined : { opacity: [1, 0.4, 1] }}
+            animate={undefined}
             transition={{ duration: 1.4, repeat: Infinity }}
             sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75, pl: 1.25, pr: 0.875, py: 0.5, borderRadius: 999, bgcolor: 'var(--live)', color: 'var(--liveOn)', fontSize: 12, fontWeight: 700 }}
           >

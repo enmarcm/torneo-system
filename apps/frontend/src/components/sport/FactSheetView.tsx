@@ -1,6 +1,6 @@
 import { Box, Card, Stack, Typography, Avatar, Chip, Divider, useTheme } from '@mui/material';
 import { BarChart } from '@mui/x-charts/BarChart';
-import { InsightsRounded } from '@mui/icons-material';
+import InsightsRounded from '@mui/icons-material/InsightsRounded';
 import { motion } from 'framer-motion';
 import type { FactSheet } from '@/api/news.api';
 
@@ -90,7 +90,7 @@ export const FactSheetView: React.FC<Props> = ({ sheet, compact = false }) => {
             <Card
               key={h.label}
               component={motion.div}
-              initial={{ opacity: 0, y: 10 }}
+
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2, delay: i * 0.03 }}
               sx={{ p: 1.75, textAlign: 'center' }}

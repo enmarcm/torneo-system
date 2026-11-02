@@ -1,5 +1,6 @@
 import { Box, Card, Stack, Typography } from '@mui/material';
-import { SportsSoccerRounded, GroupsRounded } from '@mui/icons-material';
+import SportsSoccerRounded from '@mui/icons-material/SportsSoccerRounded';
+import GroupsRounded from '@mui/icons-material/GroupsRounded';
 import { motion } from 'framer-motion';
 import { CompetitionTags } from './CompetitionTags';
 import type { CompetitionLike } from '@/utils/competitionMeta';
@@ -51,7 +52,7 @@ export const CompetitionCard: React.FC<Props> = ({ competition, onClick, compact
         overflow: 'hidden',
         height: compact ? { xs: 130, md: 148 } : { xs: 200, md: 240 },
         color: '#fff',
-        background: 'var(--heroGradient)',
+        background: 'var(--brandSurface)',
         cursor: onClick ? 'pointer' : 'default',
         '&:hover .competition-card__bg': { transform: 'scale(1.04)' },
       }}
@@ -92,8 +93,7 @@ export const CompetitionCard: React.FC<Props> = ({ competition, onClick, compact
         sx={{
           position: 'absolute',
           inset: 0,
-          background:
-            'linear-gradient(180deg, rgba(12,16,28,0.10) 0%, rgba(12,16,28,0.55) 45%, rgba(12,16,28,0.90) 100%)',
+          bgcolor: 'var(--photoScrim)',
         }}
       />
 
@@ -113,7 +113,6 @@ export const CompetitionCard: React.FC<Props> = ({ competition, onClick, compact
             fontWeight: 800,
             fontSize: compact ? { xs: 16, md: 18 } : { xs: 20, md: 26 },
             lineHeight: 1.15,
-            textShadow: '0 1px 12px rgba(0,0,0,0.45)',
           }}
         >
           {competition.name}

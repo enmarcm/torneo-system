@@ -15,7 +15,7 @@ import { RosterEditor } from '@/components/sport/RosterEditor';
 import { getCompetitionAgeGroup, getCompetitionShortLabel, getCompetitionSubtitle, sortCompetitions } from '@/utils/competitionMeta';
 import { canManageRoster, getVisibleTeamRegistrations, getTeamCompetitions } from '@/utils/teamRegistrations';
 import type { Competition } from '@/api/competitions.api';
-import { RefreshRounded } from '@mui/icons-material';
+import RefreshRounded from '@mui/icons-material/RefreshRounded';
 
 const TeamSquads: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();

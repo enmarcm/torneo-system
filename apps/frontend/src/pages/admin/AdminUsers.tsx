@@ -14,14 +14,12 @@ import {
   Tooltip,
 } from '@mui/material';
 import { SaveButton } from '@/components/ui/SaveButton';
-import {
-  AddRounded,
-  EditRounded,
-  DeleteRounded,
-  KeyRounded,
-  VisibilityRounded,
-  VisibilityOffRounded,
-} from '@mui/icons-material';
+import AddRounded from '@mui/icons-material/AddRounded';
+import EditRounded from '@mui/icons-material/EditRounded';
+import DeleteRounded from '@mui/icons-material/DeleteRounded';
+import KeyRounded from '@mui/icons-material/KeyRounded';
+import VisibilityRounded from '@mui/icons-material/VisibilityRounded';
+import VisibilityOffRounded from '@mui/icons-material/VisibilityOffRounded';
 import { useMemo, useState } from 'react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { DataTable, type DataTableColumn, type DataTableAction } from '@/components/ui/DataTable';
@@ -453,7 +451,7 @@ const AdminUsers: React.FC = () => {
           <Stack direction={{ xs: 'column-reverse', sm: 'row' }} spacing={1.5} justifyContent="flex-end">
             <Button onClick={() => setPasswordFor(null)}>Cancelar</Button>
             <SaveButton
-             
+
               onClick={submitPassword}
               loading={setPassword.isPending} error={setPassword.isError} disabled={newPassword.length < 6}
             >

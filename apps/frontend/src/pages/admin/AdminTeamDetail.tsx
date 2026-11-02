@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Box, Button, Avatar, Stack, Typography, Grid2 as Grid, TablePagination } from '@mui/material';
-import { ArrowBackRounded, PersonRounded, SportsSoccerRounded, EmojiEventsRounded } from '@mui/icons-material';
+import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded';
+import PersonRounded from '@mui/icons-material/PersonRounded';
+import SportsSoccerRounded from '@mui/icons-material/SportsSoccerRounded';
+import EmojiEventsRounded from '@mui/icons-material/EmojiEventsRounded';
 import { useParams, useNavigate } from 'react-router-dom';
 import { historyApi, type HistoryFilters } from '@/api/history.api';
 import { PageHeader } from '@/components/ui/PageHeader';
@@ -44,10 +47,10 @@ const AdminTeamDetail: React.FC = () => {
       { key: 'competition', label: 'Torneo', render: (r) => <Button onClick={() => navigate(`/admin/competiciones/${r.competition.id}`)}>{r.competition.name}</Button> },
       { key: 'status', label: 'Inscripción', render: (r) => <StatusBadge status={r.status} /> },
       { key: 'outcome', label: 'Resultado de edición', render: (r) => ({ NONE: 'Sin decisión', PROMOTED: 'Ascendido', RELEGATED: 'Descendido', WITHDRAWN: 'No participa' }[r.outcome] ?? r.outcome) },
-      { key: 'players', label: 'Jugadores', render: (r) => r.roster.length },
-      { key: 'matches', label: 'PJ', render: (r) => r.totals.matchesPlayed },
-      { key: 'results', label: 'G / E / P', render: (r) => `${r.totals.wins} / ${r.totals.draws} / ${r.totals.losses}` },
-      { key: 'goals', label: 'GF / GC', render: (r) => `${r.totals.goalsFor} / ${r.totals.goalsAgainst}` },
+      { key: 'players', label: 'Jugadores', align: 'right', render: (r) => r.roster.length },
+      { key: 'matches', label: 'PJ', align: 'right', render: (r) => r.totals.matchesPlayed },
+      { key: 'results', label: 'G / E / P', align: 'right', render: (r) => `${r.totals.wins} / ${r.totals.draws} / ${r.totals.losses}` },
+      { key: 'goals', label: 'GF / GC', align: 'right', render: (r) => `${r.totals.goalsFor} / ${r.totals.goalsAgainst}` },
       { key: 'roster', label: 'Plantilla', render: (r) => <Button onClick={() => setRosterOf({ id: r.id, label: `${r.competition.name} · ${r.competition.edition.name}`, max: r.competition.maxPlayers })}>Consultar / editar</Button> },
     ]} />
     <Typography variant="h4" sx={{ mt: 4, mb: 2 }}>Jugadores por torneo</Typography>
@@ -56,9 +59,9 @@ const AdminTeamDetail: React.FC = () => {
         { key: 'player', label: 'Jugador', render: (r) => <Button onClick={() => navigate(`/admin/jugadores/${r.player.id}`)}>{r.player.firstName} {r.player.lastName}</Button> },
         { key: 'competition', label: 'Torneo', render: (r) => `${r.competition.name} · ${r.competition.edition.year}` },
         { key: 'status', label: 'Plantilla', render: (r) => <StatusBadge status={r.status} /> },
-        { key: 'matches', label: 'PJ', render: (r) => r.stats?.matchesPlayed ?? 0 },
-        { key: 'goals', label: 'Goles', render: (r) => r.stats?.goals ?? 0 },
-        { key: 'cards', label: 'TA / TR', render: (r) => `${r.stats?.yellowCards ?? 0} / ${r.stats?.redCards ?? 0}` },
+        { key: 'matches', label: 'PJ', align: 'right', render: (r) => r.stats?.matchesPlayed ?? 0 },
+        { key: 'goals', label: 'Goles', align: 'right', render: (r) => r.stats?.goals ?? 0 },
+        { key: 'cards', label: 'TA / TR', align: 'right', render: (r) => `${r.stats?.yellowCards ?? 0} / ${r.stats?.redCards ?? 0}` },
       ]} />
     <TablePagination component="div" count={historicalPlayers.length} page={rosterPage} rowsPerPage={25} rowsPerPageOptions={[]} onPageChange={(_e, page) => setRosterPage(page)} labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count}`} />
     <Box sx={{ mt: 4 }}><HistoryMatches matches={data.matches} total={data.totalMatches} page={filters.page ?? 1} limit={filters.limit ?? 25} onPage={(page) => setFilters({ ...filters, page })} /></Box>

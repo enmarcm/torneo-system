@@ -1,5 +1,5 @@
 import { Box, Typography, Button } from '@mui/material';
-import { InboxRounded } from '@mui/icons-material';
+import InboxRounded from '@mui/icons-material/InboxRounded';
 import type { ReactNode } from 'react';
 
 /*
@@ -174,11 +174,11 @@ export const EmptyState: React.FC<Props> = ({
     <Box
       sx={{
         textAlign: 'center',
-        py: compact ? 3 : 6,
+        py: compact ? 2.5 : 4,
         px: 3,
         border: '1px dashed',
         borderColor: 'divider',
-        borderRadius: 4,
+        borderRadius: 1.5,
         bgcolor: 'background.default',
         display: 'grid',
         justifyItems: 'center',
@@ -194,8 +194,8 @@ export const EmptyState: React.FC<Props> = ({
             borderRadius: '50%',
             display: 'grid',
             placeItems: 'center',
-            bgcolor: 'primary.soft',
-            color: 'primary.main',
+            bgcolor: 'transparent',
+            color: 'text.secondary',
           }}
         >
           {icon ?? <InboxRounded sx={{ fontSize: 32 }} />}

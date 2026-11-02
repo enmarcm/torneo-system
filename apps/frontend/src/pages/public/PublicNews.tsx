@@ -9,7 +9,9 @@ import {
   Button,
   Chip,
 } from '@mui/material';
-import { ArrowBackRounded, NewspaperRounded, InsightsRounded } from '@mui/icons-material';
+import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded';
+import NewspaperRounded from '@mui/icons-material/NewspaperRounded';
+import InsightsRounded from '@mui/icons-material/InsightsRounded';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { usePublicNewsQuery } from '@/hooks/queries';
@@ -103,7 +105,7 @@ const PublicNews: React.FC = () => {
       >
         Volver
       </Button>
-      <Typography variant="h2" sx={{ mb: 0.5 }}>
+      <Typography component="h1" variant="h2" sx={{ mb: 0.5 }}>
         Noticias
       </Typography>
       <Typography color="text.secondary" sx={{ mb: 3 }}>
@@ -138,7 +140,7 @@ const PublicNews: React.FC = () => {
         <Stack spacing={3}>
           <Card
             component={motion.div}
-            initial={{ opacity: 0, y: 12 }}
+
             animate={{ opacity: 1, y: 0 }}
             className="llf-cardlink"
             transition={{ duration: 0.25 }}
@@ -170,7 +172,7 @@ const PublicNews: React.FC = () => {
                 <Grid size={{ xs: 12, sm: 6, md: 4 }} key={a.id}>
                   <Card
                     component={motion.div}
-                    initial={{ opacity: 0, y: 10 }}
+
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.2, delay: Math.min(i * 0.04, 0.24) }}
                     className="llf-cardlink"

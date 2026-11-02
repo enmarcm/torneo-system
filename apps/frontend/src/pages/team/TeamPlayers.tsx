@@ -5,15 +5,13 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Tabs, Tab,
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import {
-  PersonRounded,
-  FlagRounded,
-  AddRounded,
-  EditRounded,
-  VisibilityRounded,
-  PowerSettingsNewRounded,
-  PlaylistAddRounded,
-} from '@mui/icons-material';
+import PersonRounded from '@mui/icons-material/PersonRounded';
+import FlagRounded from '@mui/icons-material/FlagRounded';
+import AddRounded from '@mui/icons-material/AddRounded';
+import EditRounded from '@mui/icons-material/EditRounded';
+import VisibilityRounded from '@mui/icons-material/VisibilityRounded';
+import PowerSettingsNewRounded from '@mui/icons-material/PowerSettingsNewRounded';
+import PlaylistAddRounded from '@mui/icons-material/PlaylistAddRounded';
 import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
@@ -391,7 +389,7 @@ const TeamPlayers: React.FC = () => {
             <Stack direction="row" spacing={1.5} justifyContent="flex-end">
               <Button disabled={uploadingPhotos || updatePlayer.isPending} onClick={() => { setEditOpen(false); setEditId(null); }}>Cancelar</Button>
               <SaveButton
-               
+
                 onClick={handleEdit}
                 loading={updatePlayer.isPending} error={updatePlayer.isError} disabled={uploadingPhotos || !editForm.photoUrl || !editForm.identityPhotoKey || !editForm.firstName || !editForm.lastName || !editForm.documentNumber || !editForm.birthDate}
               >

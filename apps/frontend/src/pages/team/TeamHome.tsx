@@ -1,6 +1,9 @@
 import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Divider, Button, Avatar, Dialog, DialogTitle, DialogContent, TextField, Alert } from '@mui/material';
 import { SaveButton } from '@/components/ui/SaveButton';
-import { GroupsRounded, SportsSoccerRounded, BarChartRounded, EditRounded, MailOutlineRounded } from '@mui/icons-material';
+import GroupsRounded from '@mui/icons-material/GroupsRounded';
+import SportsSoccerRounded from '@mui/icons-material/SportsSoccerRounded';
+import EditRounded from '@mui/icons-material/EditRounded';
+import MailOutlineRounded from '@mui/icons-material/MailOutlineRounded';
 import { useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -67,7 +70,7 @@ const TeamHome: React.FC = () => {
 
   return (
     <Box>
-      <Box sx={{ display: { xs: 'none', md: 'block' } }}><PageHeader title="Inicio" subtitle={`Bienvenido, ${user?.username ?? ''}`} /></Box>
+      <PageHeader compactMobile title="Mi equipo" subtitle={`Gestión de ${team?.name ?? user?.username ?? 'tu club'}`} />
 
       {/*
         Aviso mientras no haya correo cargado: es la única vía que tiene la liga
@@ -96,7 +99,7 @@ const TeamHome: React.FC = () => {
             chips={
               <Stack direction="row" spacing={1} alignItems="center">
                 {team.logoUrl && <Avatar src={team.logoUrl} sx={{ width: 32, height: 32, border: '2px solid rgba(255,255,255,0.5)' }} />}
-                <Chip size="small" label={getStatusLabel(team.status)} variant="outlined" sx={{ color: '#fff', borderColor: 'rgba(255,255,255,0.4)' }} />
+                <Chip size="small" label={getStatusLabel(team.status)} variant="outlined" sx={{ color: 'var(--heroText)', borderColor: 'var(--controlBorder)' }} />
               </Stack>
             }
             right={
@@ -105,7 +108,7 @@ const TeamHome: React.FC = () => {
                 variant="outlined"
                 startIcon={<EditRounded />}
                 onClick={() => setLogoOpen(true)}
-                sx={{ color: '#fff', borderColor: 'rgba(255,255,255,0.4)', '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.1)' } }}
+                sx={{ color: 'var(--heroText)', borderColor: 'var(--controlBorder)', '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.1)' } }}
               >
                 Cambiar logo
               </Button>
@@ -179,51 +182,14 @@ const TeamHome: React.FC = () => {
           <StatCard label="Partidos" value={stats?.totalPlayed ?? 0} icon={<SportsSoccerRounded />} tint="info" />
         </Grid>
         <Grid size={{ xs: 6, md: 4 }}>
-          <Card sx={{ p: { xs: 2, md: 3 }, height: '100%', borderRadius: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Box
-                sx={{
-                  width: 46,
-                  height: 46,
-                  borderRadius: 3,
-                  display: 'grid',
-                  placeItems: 'center',
-                  bgcolor: 'rgba(3, 66, 146, 0.08)',
-                  color: '#034292',
-                  '& svg': { fontSize: 24 },
-                }}
-              >
-                <BarChartRounded />
-              </Box>
-            </Box>
-            <Typography
-              sx={{
-                fontFamily: '"Plus Jakarta Sans", sans-serif',
-                fontWeight: 800,
-                fontSize: 14,
-                color: 'text.secondary',
-                mb: 1.5,
-              }}
-            >
-              Rendimiento
-            </Typography>
-            <Stack direction="row" spacing={0.5} divider={<Divider orientation="vertical" flexItem />}>
-              <Box sx={{ flex: 1, textAlign: 'center' }}>
-                <Typography sx={{ fontWeight: 700, fontSize: 22, lineHeight: 1.1, color: 'success.main' }}>{wins}</Typography>
-                <Typography variant="caption" color="text.secondary">V</Typography>
-              </Box>
-              <Box sx={{ flex: 1, textAlign: 'center' }}>
-                <Typography sx={{ fontWeight: 700, fontSize: 22, lineHeight: 1.1, color: 'warning.main' }}>{draws}</Typography>
-                <Typography variant="caption" color="text.secondary">E</Typography>
-              </Box>
-              <Box sx={{ flex: 1, textAlign: 'center' }}>
-                <Typography sx={{ fontWeight: 700, fontSize: 22, lineHeight: 1.1, color: 'error.main' }}>{losses}</Typography>
-                <Typography variant="caption" color="text.secondary">D</Typography>
-              </Box>
-              <Box sx={{ flex: 1, textAlign: 'center' }}>
-                <Typography sx={{ fontWeight: 700, fontSize: 22, lineHeight: 1.1, color: 'info.main' }}>{pending}</Typography>
-                <Typography variant="caption" color="text.secondary">P</Typography>
-              </Box>
+          <Card sx={{ p: { xs: 2, md: 2.5 }, height: '100%' }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>Rendimiento</Typography>
+            <Stack direction="row" spacing={1.5} justifyContent="space-between">
+              {[{ label: 'V', title: 'Victorias', value: wins }, { label: 'E', title: 'Empates', value: draws }, { label: 'D', title: 'Derrotas', value: losses }, { label: 'P', title: 'Pendientes', value: pending }].map((item) => (
+                <Typography key={item.label} aria-label={`${item.title}: ${item.value}`} sx={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontSize: 30, fontWeight: 600, lineHeight: 1.2, fontVariantNumeric: 'tabular-nums' }}>
+                  {item.value}<Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>{item.label}</Typography>
+                </Typography>
+              ))}
             </Stack>
           </Card>
         </Grid>

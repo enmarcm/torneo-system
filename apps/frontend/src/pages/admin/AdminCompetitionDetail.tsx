@@ -2,7 +2,11 @@ import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Button, Tabs, Tab, A
 import { AppModal } from '@/components/ui/AppModal';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { ArrowBackRounded, GroupsRounded, SportsSoccerRounded, TableChartRounded, PeopleAltRounded } from '@mui/icons-material';
+import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded';
+import GroupsRounded from '@mui/icons-material/GroupsRounded';
+import SportsSoccerRounded from '@mui/icons-material/SportsSoccerRounded';
+import TableChartRounded from '@mui/icons-material/TableChartRounded';
+import PeopleAltRounded from '@mui/icons-material/PeopleAltRounded';
 import { useCompetitionQuery, useStandingsQuery, useMatchesQuery } from '@/hooks/queries';
 import { useSetRegistrationOutcome } from '@/hooks/mutations';
 import { useToast } from '@/hooks/common/useToast';

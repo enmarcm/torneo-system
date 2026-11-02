@@ -170,7 +170,6 @@ export const TeamCrestStrip: React.FC<Props> = ({
           display: 'block',
           opacity: onDark ? 0.72 : 0.85,
           transition: 'opacity 0.2s ease, transform 0.2s ease',
-          ...(onDark && { filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.45))' }),
           '&:hover': { opacity: 1, transform: 'translateY(-2px)' },
         }}
       />
@@ -218,10 +217,6 @@ export const TeamCrestStrip: React.FC<Props> = ({
           desaparecen de golpe contra el borde, y se ve el corte en vez del
           movimiento.
         */
-        maskImage:
-          'linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%)',
-        WebkitMaskImage:
-          'linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%)',
         // Aparece cuando ya están todas: a medio cargar la tira se ve a pedazos.
         opacity: listo ? 1 : 0,
         transition: 'opacity 0.4s ease',

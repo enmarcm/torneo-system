@@ -15,12 +15,10 @@ import {
   Divider,
   Tooltip,
 } from '@mui/material';
-import {
-  BlockRounded,
-  LockOpenRounded,
-  GppMaybeRounded,
-  HistoryRounded,
-} from '@mui/icons-material';
+import BlockRounded from '@mui/icons-material/BlockRounded';
+import LockOpenRounded from '@mui/icons-material/LockOpenRounded';
+import GppMaybeRounded from '@mui/icons-material/GppMaybeRounded';
+import HistoryRounded from '@mui/icons-material/HistoryRounded';
 import { useSnackbar } from 'notistack';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { AppModal } from '@/components/ui/AppModal';

@@ -1,5 +1,5 @@
 import { Box, Container, Card, Stack, Typography, Avatar, Button, Divider } from '@mui/material';
-import { ArrowBackRounded } from '@mui/icons-material';
+import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded';
 import { MatchLoader } from '@/components/ui/MatchLoader';
 import { useNavigate } from 'react-router-dom';
 import { useMemo } from 'react';
@@ -115,7 +115,7 @@ const PublicStats: React.FC = () => {
       >
         Volver
       </Button>
-      <Typography variant="h2" sx={{ mb: 0.5 }}>
+      <Typography component="h1" variant="h2" sx={{ mb: 0.5 }}>
         Estadísticas
       </Typography>
       <Typography color="text.secondary" sx={{ mb: 3 }}>

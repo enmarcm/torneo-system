@@ -1,5 +1,6 @@
 import { Box, Container, Card, Stack, Typography, Button, Chip } from '@mui/material';
-import { ArrowBackRounded, NewspaperRounded } from '@mui/icons-material';
+import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded';
+import NewspaperRounded from '@mui/icons-material/NewspaperRounded';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { usePublicNewsBySlugQuery } from '@/hooks/queries';
@@ -41,7 +42,7 @@ const PublicNewsDetail: React.FC = () => {
         <Stack
           spacing={3}
           component={motion.div}
-          initial={{ opacity: 0, y: 12 }}
+
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25 }}
         >

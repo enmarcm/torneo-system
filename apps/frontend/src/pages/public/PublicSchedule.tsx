@@ -10,7 +10,9 @@ import {
   Chip,
   Divider,
 } from '@mui/material';
-import { ArrowBackRounded, ArrowForwardRounded, PendingActionsRounded } from '@mui/icons-material';
+import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded';
+import ArrowForwardRounded from '@mui/icons-material/ArrowForwardRounded';
+import PendingActionsRounded from '@mui/icons-material/PendingActionsRounded';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { MatchLoader } from '@/components/ui/MatchLoader';
 import { useState, useMemo } from 'react';
@@ -119,7 +121,7 @@ const PublicSchedule: React.FC = () => {
       >
         Volver
       </Button>
-      <Typography variant="h2" sx={{ mb: 0.5 }}>
+      <Typography component="h1" variant="h2" sx={{ mb: 0.5 }}>
         Calendario
       </Typography>
       <Typography color="text.secondary" sx={{ mb: 3 }}>
@@ -223,7 +225,7 @@ const PublicSchedule: React.FC = () => {
                   <Box
                     key={m.id}
                     component={motion.div}
-                    initial={{ opacity: 0, y: 10 }}
+
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.2, delay: Math.min(i * 0.03, 0.24) }}
                   >

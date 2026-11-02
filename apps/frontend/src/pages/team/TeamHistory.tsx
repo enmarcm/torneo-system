@@ -1,5 +1,6 @@
 import { Box, Grid2 as Grid, Card, Stack, Typography, Chip } from '@mui/material';
-import { EmojiEventsRounded, ChevronRightRounded } from '@mui/icons-material';
+import EmojiEventsRounded from '@mui/icons-material/EmojiEventsRounded';
+import ChevronRightRounded from '@mui/icons-material/ChevronRightRounded';
 import { useNavigate } from 'react-router-dom';
 import { useEditionsQuery } from '@/hooks/queries';
 import { PageHeader } from '@/components/ui/PageHeader';
@@ -24,7 +25,7 @@ const TeamHistory: React.FC = () => {
           {editions.map((ed) => (
             <Grid size={{ xs: 12, md: 6, lg: 4 }} key={ed.id}>
               <Card
-                sx={{ p: 3, cursor: 'pointer', transition: '0.15s', '&:hover': { boxShadow: 6, transform: 'translateY(-2px)' } }}
+                sx={{ p: 3, cursor: 'pointer', transition: 'border-color 0.15s', '&:hover': { borderColor: 'primary.main' } }}
                 onClick={() => navigate(ROUTES.team.historyDetail.replace(':id', ed.id))}
               >
                 <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>

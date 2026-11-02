@@ -8,7 +8,8 @@ import {
   Button,
   Chip,
 } from '@mui/material';
-import { ArrowBackRounded, GroupsRounded } from '@mui/icons-material';
+import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded';
+import GroupsRounded from '@mui/icons-material/GroupsRounded';
 import { Crest } from '@/components/ui/Crest';
 import { useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
@@ -60,7 +61,7 @@ const PublicTeams: React.FC = () => {
       >
         Volver
       </Button>
-      <Typography variant="h2" sx={{ mb: 0.5 }}>
+      <Typography component="h1" variant="h2" sx={{ mb: 0.5 }}>
         Equipos
       </Typography>
       <Typography color="text.secondary" sx={{ mb: 3 }}>
@@ -115,7 +116,7 @@ const PublicTeams: React.FC = () => {
                     <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={r.id}>
                       <Card
                         component={motion.div}
-                        initial={{ opacity: 0, y: 10 }}
+
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.2, delay: Math.min(i * 0.03, 0.2) }}
                         className="llf-cardlink"

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useLayoutEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom/client';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { SnackbarProvider } from 'notistack';
@@ -10,7 +10,6 @@ import { queryClient } from '@/lib/queryClient';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import { AppRouter } from '@/routes/AppRouter';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
-import { SplashGate } from '@/components/ui/SplashGate';
 
 const allTokenKeys = new Set([
   ...Object.keys(lightTokens),
@@ -19,7 +18,7 @@ const allTokenKeys = new Set([
 
 const CssVarsInjector: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const mode = useGlobalStore((s) => s.mode);
-  useEffect(() => {
+  useLayoutEffect(() => {
     const t = mode === 'light' ? lightTokens : darkTokens;
     const r = document.documentElement.style;
     allTokenKeys.forEach((k) => r.removeProperty(`--${k}`));
@@ -30,8 +29,9 @@ const CssVarsInjector: React.FC<{ children: React.ReactNode }> = ({ children }) 
 
 const Root: React.FC = () => {
   const mode = useGlobalStore((s) => s.mode);
+  const theme = useMemo(() => buildTheme(mode), [mode]);
   return (
-    <ThemeProvider theme={buildTheme(mode)}>
+    <ThemeProvider theme={theme}>
       <CssBaseline />
       <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} autoHideDuration={2500}>
         <CssVarsInjector>
@@ -41,11 +41,9 @@ const Root: React.FC = () => {
                 Red de contención: un error de render dejaba la aplicación en
                 blanco, sin manera de volver salvo recargar.
               */}
+              <a className="llf-skip-link" href="#main-content">Ir al contenido</a>
               <ErrorBoundary>
-                {/* Portada de carga: el balón se ve tres segundos en cada carga de la página. */}
-                <SplashGate>
-                  <AppRouter />
-                </SplashGate>
+                <AppRouter />
               </ErrorBoundary>
             </BrowserRouter>
           </QueryClientProvider>

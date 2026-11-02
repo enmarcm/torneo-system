@@ -1,5 +1,7 @@
 import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
-import { HomeRounded, GroupsRounded, EmojiEventsRounded } from '@mui/icons-material';
+import HomeRounded from '@mui/icons-material/HomeRounded';
+import GroupsRounded from '@mui/icons-material/GroupsRounded';
+import EmojiEventsRounded from '@mui/icons-material/EmojiEventsRounded';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { ROUTES } from '@/routes/routes';
 

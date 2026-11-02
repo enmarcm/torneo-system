@@ -1,15 +1,13 @@
 import { Box, Card, Stack, Typography, Button, Avatar, TextField, FormControl, InputLabel, Select, MenuItem, Chip, InputAdornment, Autocomplete, Checkbox, Alert } from '@mui/material';
 import { SaveButton } from '@/components/ui/SaveButton';
-import {
-  AddRounded,
-  SearchRounded,
-  EditRounded,
-  VisibilityRounded,
-  PlaylistAddRounded,
-  PowerSettingsNewRounded,
-  BlockRounded,
-  DeleteForeverRounded,
-} from '@mui/icons-material';
+import AddRounded from '@mui/icons-material/AddRounded';
+import SearchRounded from '@mui/icons-material/SearchRounded';
+import EditRounded from '@mui/icons-material/EditRounded';
+import VisibilityRounded from '@mui/icons-material/VisibilityRounded';
+import PlaylistAddRounded from '@mui/icons-material/PlaylistAddRounded';
+import PowerSettingsNewRounded from '@mui/icons-material/PowerSettingsNewRounded';
+import BlockRounded from '@mui/icons-material/BlockRounded';
+import DeleteForeverRounded from '@mui/icons-material/DeleteForeverRounded';
 import { useNavigate } from 'react-router-dom';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { ROUTES } from '@/routes/routes';
@@ -221,7 +219,7 @@ const AdminTeams: React.FC = () => {
         ),
       hideInMobile: true,
     },
-    { key: 'regs', label: 'Inscripciones', render: (r) => r._count?.registrations ?? 0 },
+    { key: 'regs', label: 'Inscripciones', align: 'right', render: (r) => r._count?.registrations ?? 0 },
     { key: 'active', label: 'Estado', render: (r) => <StatusBadge status={r.status} /> },
   ];
   const actions: DataTableAction<Team>[] = [

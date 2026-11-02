@@ -1,6 +1,6 @@
 import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Button } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowBackRounded } from '@mui/icons-material';
+import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded';
 import { useMatchQuery } from '@/hooks/queries';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatusBadge } from '@/components/ui/StatusBadge';

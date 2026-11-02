@@ -14,13 +14,11 @@ import {
   Divider,
 } from '@mui/material';
 import { SaveButton } from '@/components/ui/SaveButton';
-import {
-  AddRounded,
-  EditRounded,
-  DeleteRounded,
-  PowerSettingsNewRounded,
-  OpenInNewRounded,
-} from '@mui/icons-material';
+import AddRounded from '@mui/icons-material/AddRounded';
+import EditRounded from '@mui/icons-material/EditRounded';
+import DeleteRounded from '@mui/icons-material/DeleteRounded';
+import PowerSettingsNewRounded from '@mui/icons-material/PowerSettingsNewRounded';
+import OpenInNewRounded from '@mui/icons-material/OpenInNewRounded';
 import { useMemo, useState } from 'react';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { PageHeader } from '@/components/ui/PageHeader';
@@ -356,7 +354,7 @@ const AdminAds: React.FC = () => {
           <Stack direction={{ xs: 'column-reverse', sm: 'row' }} spacing={1.5} justifyContent="flex-end">
             <Button onClick={() => setOpen(false)}>Cancelar</Button>
             <SaveButton
-             
+
               onClick={submit}
               loading={create.isPending || update.isPending} error={create.isError || update.isError} disabled={!canSubmit}
             >

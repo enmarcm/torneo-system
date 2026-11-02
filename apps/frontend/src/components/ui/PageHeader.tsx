@@ -1,5 +1,5 @@
-import { Box, Stack, Typography, Button, TextField } from '@mui/material';
-import { SearchRounded } from '@mui/icons-material';
+import { Box, Stack, Typography, TextField } from '@mui/material';
+import SearchRounded from '@mui/icons-material/SearchRounded';
 
 interface Props {
   title: string;
@@ -19,7 +19,7 @@ export const PageHeader: React.FC<Props> = ({ title, subtitle, action, search, c
     sx={{ mb: compactMobile ? { xs: 1, md: 3 } : 3, gap: compactMobile ? 1 : undefined }}
   >
     <Box sx={{ minWidth: 0 }}>
-      <Typography variant="h2" sx={{ mb: 0.5, overflowWrap: 'anywhere', fontSize: compactMobile ? { xs: 22, md: 24 } : undefined }}>
+      <Typography component="h1" variant="h2" sx={{ mb: 0.75, overflowWrap: 'anywhere', textWrap: 'balance', fontSize: { xs: 22, md: 24 } }}>
         {title}
       </Typography>
       {subtitle && (

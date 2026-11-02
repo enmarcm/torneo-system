@@ -3,22 +3,19 @@ import logoAzul from '@/assets/logo_azul.PNG';
 import logoBlanco from '@/assets/logo.PNG';
 import { useLocation, useNavigate, matchPath } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import {
-  HomeRounded,
-  PersonRounded,
-  GroupRounded,
-  BarChartRounded,
-  HistoryRounded,
-  SportsSoccerRounded,
-  LightModeRounded,
-  DarkModeRounded,
-  LogoutRounded,
-} from '@mui/icons-material';
+import HomeRounded from '@mui/icons-material/HomeRounded';
+import PersonRounded from '@mui/icons-material/PersonRounded';
+import GroupRounded from '@mui/icons-material/GroupRounded';
+import BarChartRounded from '@mui/icons-material/BarChartRounded';
+import HistoryRounded from '@mui/icons-material/HistoryRounded';
+import SportsSoccerRounded from '@mui/icons-material/SportsSoccerRounded';
+import LightModeRounded from '@mui/icons-material/LightModeRounded';
+import DarkModeRounded from '@mui/icons-material/DarkModeRounded';
+import LogoutRounded from '@mui/icons-material/LogoutRounded';
 import { ROUTES } from '@/routes/routes';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRef, type ReactNode } from 'react';
-import { RailIndicator } from './RailIndicator';
 
 interface NavItem {
   label: string;
@@ -44,7 +41,7 @@ export const TeamSidebar: React.FC = () => {
   const logoSrc = mode === 'dark' ? logoBlanco : logoAzul;
   const logout = useAuthStore((s) => s.logout);
   const user = useAuthStore((s) => s.user);
-  const expanded = !sidebarCollapsed;
+  const expanded = isMobile || !sidebarCollapsed;
   const listRef = useRef<HTMLUListElement>(null);
 
   const isActive = (item: NavItem) => {
@@ -56,7 +53,7 @@ export const TeamSidebar: React.FC = () => {
   const sidebarContent = (
     <Box
         sx={{
-          width: expanded ? 264 : 64,
+          width: expanded ? 240 : 64,
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
@@ -72,6 +69,7 @@ export const TeamSidebar: React.FC = () => {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: expanded ? 2 : 1, py: 2, minHeight: 64, justifyContent: expanded ? 'flex-start' : 'center' }}>
           <Box
             component="img"
+            alt="Liga Lago Futsal"
             src={logoSrc}
             sx={{
               width: 36,
@@ -82,33 +80,32 @@ export const TeamSidebar: React.FC = () => {
           />
           {expanded && (
             <Typography sx={{ color: 'var(--logo)', fontWeight: 700, fontFamily: '"Inter", system-ui, sans-serif', fontSize: 16 }} noWrap>
-              Mi Equipo
+              Liga Lago Futsal
             </Typography>
           )}
         </Box>
 
-        {/* El riel naranja viaja entre ítems: un solo indicador, no uno que se apaga y otro que se prende. */}
         <List ref={listRef} sx={{ position: 'relative', flex: 1, overflow: 'auto', px: expanded ? 1 : 0.5, '&::-webkit-scrollbar': { width: 3 }, '&::-webkit-scrollbar-thumb': { bgcolor: 'var(--sidebarBorder)', borderRadius: 4 } }}>
-          <RailIndicator containerRef={listRef} deps={[pathname, expanded]} />
           {NAV.map((item) => {
             const active = isActive(item);
             const btn = (
               <ListItemButton
                 key={item.to}
                 onClick={() => navigate(item.to)}
+                aria-label={item.label}
+                aria-current={active ? 'page' : undefined}
                 data-nav-active={active ? 'true' : undefined}
                 sx={{
                   borderRadius: expanded ? 1.5 : 1,
                   mb: 0.25,
                   py: 0.75,
                   px: expanded ? 1.5 : 0.75,
-                  minHeight: 40,
+                  minHeight: 44,
                   justifyContent: expanded ? 'flex-start' : 'center',
-                  color: active ? 'var(--primary)' : 'var(--sidebarText)',
+                  color: active ? 'var(--text)' : 'var(--sidebarText)',
                   bgcolor: active ? 'var(--sidebarActiveBg)' : 'transparent',
                   transition: 'background-color 0.2s, color 0.2s',
                   '&:hover': { bgcolor: active ? 'var(--sidebarActiveBg)' : 'var(--sidebarHover)' },
-                  '&:hover .MuiListItemIcon-root': { transform: 'translateX(2px)' },
                 }}
               >
                 <ListItemIcon
@@ -125,7 +122,7 @@ export const TeamSidebar: React.FC = () => {
                 {expanded && (
                   <ListItemText
                     primary={item.label}
-                    primaryTypographyProps={{ fontWeight: active ? 700 : 500, fontSize: 14, fontFamily: '"Inter", system-ui, sans-serif', noWrap: true }}
+                    primaryTypographyProps={{ fontWeight: active ? 600 : 400, fontSize: 14, fontFamily: '"Inter", system-ui, sans-serif', noWrap: true }}
                   />
                 )}
               </ListItemButton>
@@ -159,10 +156,11 @@ export const TeamSidebar: React.FC = () => {
                   <Typography sx={{ color: 'var(--logo)', fontSize: 12, fontWeight: 600, fontFamily: '"Inter", system-ui, sans-serif' }} noWrap>
                     {user.username.toUpperCase()}
                   </Typography>
-                  <Typography sx={{ fontSize: 10, color: 'var(--sidebarText)' }}>Líder de equipo</Typography>
+                  <Typography sx={{ fontSize: 12, color: 'var(--sidebarText)' }}>Líder de equipo</Typography>
                 </Box>
                 <Tooltip title="Cerrar sesión" placement="right" arrow>
                   <IconButton
+                    aria-label="Cerrar sesión"
                     onClick={logout}
                     size="small"
                     sx={{ color: 'var(--sidebarText)', '&:hover': { color: 'var(--danger)', bgcolor: 'var(--sidebarHover)' }, flexShrink: 0, minWidth: 28, minHeight: 28 }}
@@ -181,7 +179,7 @@ export const TeamSidebar: React.FC = () => {
 
   return (
     <motion.div
-      animate={{ width: expanded ? 264 : 64 }}
+      animate={{ width: expanded ? 240 : 64 }}
       transition={{ duration: 0.15, ease: 'easeInOut' }}
       initial={false}
       style={{

@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Box, Stack, Avatar, Tabs, Tab, Typography, Grid2 as Grid, TablePagination } from '@mui/material';
-import { GroupsRounded, SportsSoccerRounded, PersonRounded } from '@mui/icons-material';
+import GroupsRounded from '@mui/icons-material/GroupsRounded';
+import SportsSoccerRounded from '@mui/icons-material/SportsSoccerRounded';
+import PersonRounded from '@mui/icons-material/PersonRounded';
 import { useNavigate } from 'react-router-dom';
 import { historyApi, type HistoryFilters, type HistoryReportRow } from '@/api/history.api';
 import { PageHeader } from '@/components/ui/PageHeader';

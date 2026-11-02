@@ -1,5 +1,7 @@
 import { AppBar, Toolbar, Box, Typography, Stack, IconButton, Menu, MenuItem, Avatar, Tooltip, Select, FormControl, MenuItem as MuiMenuItem, useMediaQuery, useTheme } from '@mui/material';
-import { LightModeRounded, DarkModeRounded, NotificationsNoneRounded, MenuRounded } from '@mui/icons-material';
+import LightModeRounded from '@mui/icons-material/LightModeRounded';
+import DarkModeRounded from '@mui/icons-material/DarkModeRounded';
+import MenuRounded from '@mui/icons-material/MenuRounded';
 import { useState } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useGlobalStore } from '@/store/useGlobalStore';
@@ -34,7 +36,7 @@ export const Topbar: React.FC<Props> = ({ onOpenSidebar }) => {
       position="sticky"
       elevation={0}
       sx={{
-        bgcolor: 'background.paper',
+        bgcolor: 'background.default',
         color: 'text.primary',
         borderBottom: '1px solid',
         borderColor: 'divider',
@@ -43,13 +45,13 @@ export const Topbar: React.FC<Props> = ({ onOpenSidebar }) => {
       }}
     >
       <RouteProgress />
-      <Toolbar sx={{ minHeight: { xs: 'auto', sm: 72 }, gap: { xs: 0.5, md: 1.5 }, rowGap: 0.75, flexWrap: { xs: 'wrap', sm: 'nowrap' }, py: { xs: 0.75, sm: 0 }, px: { xs: 1.5, md: 3 }, '& .MuiIconButton-root': { flexShrink: 0, minWidth: 44, minHeight: 44 }, '& .MuiIconButton-root > .MuiSvgIcon-root': { fontSize: { xs: 22, md: 24 } } }}>
+      <Toolbar sx={{ minHeight: { xs: 'auto', sm: 64 }, gap: { xs: 0.5, md: 1.5 }, rowGap: 0.75, flexWrap: { xs: 'wrap', sm: 'nowrap' }, py: { xs: 0.75, sm: 0 }, px: { xs: 1.5, md: 3 }, '& .MuiIconButton-root': { flexShrink: 0, minWidth: 44, minHeight: 44 }, '& .MuiIconButton-root > .MuiSvgIcon-root': { fontSize: { xs: 22, md: 24 } } }}>
         <IconButton onClick={handleHamburger} aria-label="Abrir menú">
           <MenuRounded />
         </IconButton>
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography variant="h4" sx={{ lineHeight: 1.1, fontSize: { xs: 16, md: 20 } }} noWrap>
-            Hola, {user?.username?.toUpperCase() ?? 'EQUIPO'}
+          <Typography variant="h4" sx={{ lineHeight: 1.1, fontSize: { xs: 15, md: 16 } }} noWrap>
+            {user?.role === 'TEAM_LEADER' ? 'Panel de equipo' : 'Administración'}
           </Typography>
           <Typography variant="caption" color="text.secondary" noWrap sx={{ textTransform: 'capitalize', display: { xs: 'none', sm: 'block' } }}>
             {todayLong()}
@@ -81,11 +83,6 @@ export const Topbar: React.FC<Props> = ({ onOpenSidebar }) => {
           </IconButton>
         </Tooltip>
 
-        <Tooltip title="Notificaciones">
-          <IconButton aria-label="Notificaciones">
-            <NotificationsNoneRounded />
-          </IconButton>
-        </Tooltip>
 
         <IconButton onClick={(e) => setAnchor(e.currentTarget)} aria-label="Menú de usuario" sx={{ p: 0.5 }}>
           <Avatar sx={{ width: { xs: 32, md: 36 }, height: { xs: 32, md: 36 }, bgcolor: 'primary.main', fontWeight: 700 }}>

@@ -1,12 +1,12 @@
 import { useState, useMemo } from 'react';
-import { Box, Card, FormControl, InputLabel, Select, MenuItem, Typography, Avatar, Chip, Stack } from '@mui/material';
+import { Box, Card, FormControl, InputLabel, Select, MenuItem, Typography, Avatar, Chip, Stack, useTheme } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import {
-  GroupRounded, SportsSoccerRounded, AssistantRounded,
-  SquareRounded, FlagRounded,
-} from '@mui/icons-material';
+import GroupRounded from '@mui/icons-material/GroupRounded';
+import SportsSoccerRounded from '@mui/icons-material/SportsSoccerRounded';
+import AssistantRounded from '@mui/icons-material/AssistantRounded';
+import SquareRounded from '@mui/icons-material/SquareRounded';
+import FlagRounded from '@mui/icons-material/FlagRounded';
 import { BarChart } from '@mui/x-charts/BarChart';
-import { PieChart } from '@mui/x-charts/PieChart';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatCard } from '@/components/ui/StatCard';
 import { DataTable } from '@/components/ui/DataTable';
@@ -29,6 +29,7 @@ interface PlayerStatItem {
 }
 
 const TeamStats: React.FC = () => {
+  const theme = useTheme();
   const user = useAuthStore((s) => s.user);
   const teamId = user?.teamId;
   const { data: registrations = [], isLoading, error, refetch } = useTeamRegistrationsQuery(teamId ?? undefined);
@@ -164,24 +165,23 @@ const TeamStats: React.FC = () => {
             id: r.competitionId,
             name: r.competition.name,
             goals: r.roster.reduce((s, e) => s + (e.stats?.goals ?? 0), 0),
-            color: r.competitionId === registrations[0]?.competitionId ? '#034292' : '#22C55E',
+
           }))
           .filter((c) => c.goals > 0);
         if (byComp.length > 0) {
-          const colors = ['#034292', '#22C55E', '#F59E0B', '#EF4444', '#3B82F6', '#8B5CF6', '#EC4899', '#14B8A6'];
+
           return (
             <Grid container spacing={2} sx={{ mb: 3 }}>
               <Grid size={{ xs: 12, md: 6 }}>
                 <Card sx={{ p: { xs: 2, md: 3 } }}>
                   <Typography variant="h3" sx={{ mb: 2 }}>Goles por Competición</Typography>
                   <Box sx={{ width: '100%', height: 280 }}>
-                    <PieChart
-                      series={[{
-                        data: byComp.map((c, i) => ({ id: c.id, value: c.goals, label: c.name, color: colors[i % colors.length] })),
-                        arcLabel: (v) => `${v.label}`,
-                        arcLabelMinAngle: 30,
-                      }]}
-                      margin={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    <BarChart
+                      layout="horizontal"
+                      yAxis={[{ scaleType: 'band', data: byComp.map((c) => c.name) }]}
+                      xAxis={[{ min: 0, tickMinStep: 1 }]}
+                      series={[{ data: byComp.map((c) => c.goals), label: 'Goles', color: theme.palette.primary.main }]}
+                      margin={{ top: 10, bottom: 30, left: 120, right: 24 }}
                       slotProps={{ legend: { hidden: true } }}
                     />
                   </Box>
@@ -230,7 +230,7 @@ const TeamStats: React.FC = () => {
               <Box sx={{ width: '100%', height: 300 }}>
                 <BarChart
                   yAxis={[{ scaleType: 'band', data: topScorers.map((p) => p.name.split(' ')[0]) }]}
-                  series={[{ data: topScorers.map((p) => p.goals), label: 'Goles', color: '#22C55E' }]}
+                  series={[{ data: topScorers.map((p) => p.goals), label: 'Goles', color: theme.palette.primary.main }]}
                   layout="horizontal"
                   margin={{ left: 80, right: 20, top: 10, bottom: 30 }}
                   slotProps={{ legend: { hidden: true } }}
@@ -251,8 +251,8 @@ const TeamStats: React.FC = () => {
                 <BarChart
                   yAxis={[{ scaleType: 'band', data: topCards.map((p) => p.name.split(' ')[0]) }]}
                   series={[
-                    { data: topCards.map((p) => p.yellowCards), label: 'Amarillas', color: '#F59E0B', stack: 'cards' },
-                    { data: topCards.map((p) => p.redCards), label: 'Rojas', color: '#EF4444', stack: 'cards' },
+                    { data: topCards.map((p) => p.yellowCards), label: 'Amarillas', color: theme.palette.warning.main, stack: 'cards' },
+                    { data: topCards.map((p) => p.redCards), label: 'Rojas', color: theme.palette.error.main, stack: 'cards' },
                   ]}
                   layout="horizontal"
                   margin={{ left: 80, right: 20, top: 20, bottom: 30 }}

@@ -16,15 +16,15 @@ const stagger = (i: number) => ({
 export const LoadingState: React.FC<{ rows?: number; height?: number }> = ({ rows = 4, height = 56 }) => (
   <Stack spacing={1.25}>
     {Array.from({ length: rows }).map((_, i) => (
-      <Skeleton key={i} variant="rounded" height={height} animation="wave" sx={stagger(i)} />
+      <Skeleton key={i} variant="rounded" height={height} animation={false} sx={stagger(i)} />
     ))}
   </Stack>
 );
 
 export const SkeletonCard: React.FC = () => (
   <Box sx={{ p: 3 }}>
-    <Skeleton variant="text" width="40%" height={32} animation="wave" />
-    <Skeleton variant="rounded" height={120} sx={{ mt: 2 }} animation="wave" />
+    <Skeleton variant="text" width="40%" height={32} animation={false} />
+    <Skeleton variant="rounded" height={120} sx={{ mt: 2 }} animation={false} />
   </Box>
 );
 
@@ -39,7 +39,7 @@ export const TableSkeleton: React.FC<{ rows?: number; columns?: number }> = ({ r
     <Card sx={{ overflow: 'hidden' }}>
       <Box sx={{ display: 'flex', gap: 2, px: 1.5, py: 1.25, bgcolor: 'background.default' }}>
         {Array.from({ length: columns }).map((_, c) => (
-          <Skeleton key={c} width={`${c === 0 ? 28 : 16}%`} height={10} animation="wave" />
+          <Skeleton key={c} width={`${c === 0 ? 28 : 16}%`} height={10} animation={false} />
         ))}
       </Box>
       {Array.from({ length: rows }).map((_, i) => (
@@ -58,7 +58,7 @@ export const TableSkeleton: React.FC<{ rows?: number; columns?: number }> = ({ r
         >
           {Array.from({ length: columns }).map((_, c) => (
             <Box key={c} sx={{ width: `${c === 0 ? 28 : 16}%` }}>
-              <Skeleton width={widths[(i + c) % widths.length]} height={12} animation="wave" />
+              <Skeleton width={widths[(i + c) % widths.length]} height={12} animation={false} />
             </Box>
           ))}
         </Box>
@@ -71,11 +71,11 @@ export const TableSkeleton: React.FC<{ rows?: number; columns?: number }> = ({ r
 export const StandingsSkeleton: React.FC<{ rows?: number }> = ({ rows = 8 }) => (
   <Card sx={{ overflow: 'hidden' }}>
     <Box sx={{ display: 'flex', gap: 1.5, px: 1.5, py: 1.25, bgcolor: 'background.default' }}>
-      <Skeleton width={14} height={10} animation="wave" />
-      <Skeleton width="30%" height={10} animation="wave" />
+      <Skeleton width={14} height={10} animation={false} />
+      <Skeleton width="30%" height={10} animation={false} />
       <Box sx={{ flex: 1 }} />
       {[0, 1, 2, 3].map((k) => (
-        <Skeleton key={k} width={22} height={10} animation="wave" />
+        <Skeleton key={k} width={22} height={10} animation={false} />
       ))}
     </Box>
     {Array.from({ length: rows }).map((_, i) => (
@@ -92,12 +92,12 @@ export const StandingsSkeleton: React.FC<{ rows?: number }> = ({ rows = 8 }) => 
           ...stagger(i),
         }}
       >
-        <Skeleton width={14} height={12} animation="wave" />
-        <Skeleton variant="rounded" width={28} height={28} animation="wave" />
-        <Skeleton width={`${34 + ((i * 17) % 28)}%`} height={12} animation="wave" />
+        <Skeleton width={14} height={12} animation={false} />
+        <Skeleton variant="rounded" width={28} height={28} animation={false} />
+        <Skeleton width={`${34 + ((i * 17) % 28)}%`} height={12} animation={false} />
         <Box sx={{ flex: 1 }} />
         {[0, 1, 2, 3].map((k) => (
-          <Skeleton key={k} width={22} height={12} animation="wave" />
+          <Skeleton key={k} width={22} height={12} animation={false} />
         ))}
       </Box>
     ))}
@@ -113,18 +113,18 @@ export const MatchCardSkeleton: React.FC<{ count?: number }> = ({ count = 3 }) =
     {Array.from({ length: count }).map((_, i) => (
       <Card key={i} sx={{ p: 2, ...stagger(i) }}>
         <Stack direction="row" justifyContent="space-between" sx={{ mb: 1.5 }}>
-          <Skeleton width="38%" height={10} animation="wave" />
-          <Skeleton width={56} height={18} animation="wave" sx={{ borderRadius: 999 }} />
+          <Skeleton width="38%" height={10} animation={false} />
+          <Skeleton width={56} height={18} animation={false} sx={{ borderRadius: 999 }} />
         </Stack>
         <Stack direction="row" alignItems="center" spacing={1.5}>
           <Stack alignItems="center" spacing={0.75} sx={{ flex: 1 }}>
-            <Skeleton variant="circular" width={44} height={44} animation="wave" />
-            <Skeleton width="60%" height={12} animation="wave" />
+            <Skeleton variant="circular" width={44} height={44} animation={false} />
+            <Skeleton width="60%" height={12} animation={false} />
           </Stack>
-          <Skeleton width={72} height={36} animation="wave" sx={{ borderRadius: 2 }} />
+          <Skeleton width={72} height={36} animation={false} sx={{ borderRadius: 2 }} />
           <Stack alignItems="center" spacing={0.75} sx={{ flex: 1 }}>
-            <Skeleton variant="circular" width={44} height={44} animation="wave" />
-            <Skeleton width="60%" height={12} animation="wave" />
+            <Skeleton variant="circular" width={44} height={44} animation={false} />
+            <Skeleton width="60%" height={12} animation={false} />
           </Stack>
         </Stack>
       </Card>
@@ -143,12 +143,12 @@ export const RosterSkeleton: React.FC<{ rows?: number }> = ({ rows = 6 }) => (
         spacing={1.5}
         sx={{ py: 1.25, borderBottom: '1px solid', borderColor: 'divider', ...stagger(i) }}
       >
-        <Skeleton variant="circular" width={36} height={36} animation="wave" />
+        <Skeleton variant="circular" width={36} height={36} animation={false} />
         <Box sx={{ flex: 1 }}>
-          <Skeleton width={`${40 + ((i * 13) % 30)}%`} height={12} animation="wave" />
-          <Skeleton width="24%" height={10} animation="wave" sx={{ mt: 0.75 }} />
+          <Skeleton width={`${40 + ((i * 13) % 30)}%`} height={12} animation={false} />
+          <Skeleton width="24%" height={10} animation={false} sx={{ mt: 0.75 }} />
         </Box>
-        <Skeleton width={48} height={20} animation="wave" sx={{ borderRadius: 999 }} />
+        <Skeleton width={48} height={20} animation={false} sx={{ borderRadius: 999 }} />
       </Stack>
     ))}
   </Stack>
@@ -159,11 +159,11 @@ export const NewsCardSkeleton: React.FC<{ count?: number }> = ({ count = 3 }) =>
   <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: 'repeat(3, 1fr)' }, gap: 2 }}>
     {Array.from({ length: count }).map((_, i) => (
       <Card key={i} sx={{ overflow: 'hidden', ...stagger(i) }}>
-        <Skeleton variant="rectangular" height={140} animation="wave" />
+        <Skeleton variant="rectangular" height={140} animation={false} />
         <Box sx={{ p: 2 }}>
-          <Skeleton width={64} height={20} animation="wave" sx={{ borderRadius: 999, mb: 1 }} />
-          <Skeleton width="90%" height={14} animation="wave" />
-          <Skeleton width="65%" height={14} animation="wave" sx={{ mt: 0.75 }} />
+          <Skeleton width={64} height={20} animation={false} sx={{ borderRadius: 999, mb: 1 }} />
+          <Skeleton width="90%" height={14} animation={false} />
+          <Skeleton width="65%" height={14} animation={false} sx={{ mt: 0.75 }} />
         </Box>
       </Card>
     ))}

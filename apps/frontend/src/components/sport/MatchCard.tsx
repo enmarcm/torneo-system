@@ -1,12 +1,10 @@
 import { Card, Box, Stack, Typography, Chip, Tooltip } from '@mui/material';
 import { Crest } from '@/components/ui/Crest';
-import {
-  ScheduleRounded,
-  PlaceRounded,
-  MilitaryTechRounded,
-  PendingActionsRounded,
-  StarRounded,
-} from '@mui/icons-material';
+import ScheduleRounded from '@mui/icons-material/ScheduleRounded';
+import PlaceRounded from '@mui/icons-material/PlaceRounded';
+import MilitaryTechRounded from '@mui/icons-material/MilitaryTechRounded';
+import PendingActionsRounded from '@mui/icons-material/PendingActionsRounded';
+import StarRounded from '@mui/icons-material/StarRounded';
 import { motion, useReducedMotion } from 'framer-motion';
 import { formatDateTimeOrPending } from '@/utils/formatDate';
 import { getStatusLabel } from '@/utils/statusLabels';
@@ -80,8 +78,6 @@ export const MatchCard: React.FC<Props> = ({
   return (
     <Card
       component={motion.div}
-      whileHover={onClick ? { y: -3 } : undefined}
-      transition={{ duration: 0.18 }}
       onClick={onClick}
       // Una tarjeta que se puede tocar tiene que poder alcanzarse con el teclado
       // y anunciarse como acción; un div con onClick no es ninguna de las dos.

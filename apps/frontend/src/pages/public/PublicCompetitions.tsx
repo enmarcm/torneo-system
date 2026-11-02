@@ -11,7 +11,7 @@ import {
   Chip,
   ButtonBase,
 } from '@mui/material';
-import { ArrowBackRounded } from '@mui/icons-material';
+import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded';
 import { Crest } from '@/components/ui/Crest';
 import { MatchLoader } from '@/components/ui/MatchLoader';
 import { useState, useMemo } from 'react';
@@ -88,6 +88,7 @@ const PublicCompetitions: React.FC = () => {
         "Volver", un título, un subtítulo y recién después los filtros. El nombre
         del torneo lo dice su propia portada, con la foto que cargó el admin.
       */}
+      <Typography component="h1" variant="h2" sx={{ mb: 1 }}>Competiciones</Typography>
       <Button
         startIcon={<ArrowBackRounded />}
         onClick={() => navigate(ROUTES.public.home)}

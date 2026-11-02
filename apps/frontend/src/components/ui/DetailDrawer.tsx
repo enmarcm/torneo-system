@@ -1,5 +1,5 @@
 import { Drawer, Box, IconButton, Typography, Divider } from '@mui/material';
-import { CloseRounded } from '@mui/icons-material';
+import CloseRounded from '@mui/icons-material/CloseRounded';
 import type { ReactNode } from 'react';
 
 interface Props {

@@ -1,5 +1,7 @@
 import { Box, Container, Grid2 as Grid, Card, Chip, Stack, Typography, Button } from '@mui/material';
-import { TodayRounded, StarRounded, ArrowForwardRounded } from '@mui/icons-material';
+import TodayRounded from '@mui/icons-material/TodayRounded';
+import StarRounded from '@mui/icons-material/StarRounded';
+import ArrowForwardRounded from '@mui/icons-material/ArrowForwardRounded';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import dayjs from 'dayjs';
@@ -154,7 +156,10 @@ const PublicHome: React.FC = () => {
             sx={{ width: '100%', mx: 'auto' }}
           />
         </PublicHero>
-      ) : null}
+      ) : <Container maxWidth="xl" sx={{ pt: 3 }}>
+        <Typography component="h1" variant="h2">Liga Lago Futsal</Typography>
+        <Typography color="text.secondary" variant="body2" sx={{ mt: 0.75 }}>Partidos, resultados y posiciones de la liga.</Typography>
+      </Container>}
 
       <Container maxWidth="xl" sx={{ pt: { xs: 2, md: 2.5 }, pb: { xs: 3, md: 4 } }}>
         {failed ? (

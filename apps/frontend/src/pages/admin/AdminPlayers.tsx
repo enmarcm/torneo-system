@@ -1,10 +1,15 @@
 import { Box, Stack, Typography, Button, Avatar, Chip, TextField, MenuItem, Tabs, Tab } from '@mui/material';
 import { PlayerPhotoFields } from '@/components/sport/PlayerPhotoFields';
 import { AssignPlayerTournaments } from '@/components/sport/AssignPlayerTournaments';
-import { PlaylistAddRounded } from '@mui/icons-material';
+import PlaylistAddRounded from '@mui/icons-material/PlaylistAddRounded';
 import { SaveButton } from '@/components/ui/SaveButton';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { AddRounded, EditRounded, VerifiedRounded, VerifiedOutlined, PowerSettingsNewRounded, DeleteForeverRounded } from '@mui/icons-material';
+import AddRounded from '@mui/icons-material/AddRounded';
+import EditRounded from '@mui/icons-material/EditRounded';
+import VerifiedRounded from '@mui/icons-material/VerifiedRounded';
+import VerifiedOutlined from '@mui/icons-material/VerifiedOutlined';
+import PowerSettingsNewRounded from '@mui/icons-material/PowerSettingsNewRounded';
+import DeleteForeverRounded from '@mui/icons-material/DeleteForeverRounded';
 import { useState, useEffect } from 'react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { DataTable, type DataTableColumn, type DataTableAction } from '@/components/ui/DataTable';
@@ -66,7 +71,7 @@ const AdminPlayers: React.FC = () => {
       ),
     },
     { key: 'doc', label: 'Documento', render: (r) => `${r.documentType === 'CEDULA' ? 'C.I.' : 'P.N.'} ${r.documentNumber}`, hideInMobile: true },
-    { key: 'age', label: 'Edad', render: (r) => calcAge(r.birthDate) },
+    { key: 'age', label: 'Edad', align: 'right', render: (r) => calcAge(r.birthDate) },
     { key: 'degree', label: 'Título', render: (r) => r.universityDegreeVerified ? <Chip size="small" color="success" label="Verificado" variant="outlined" icon={<VerifiedRounded sx={{ fontSize: 14 }} />} /> : <Chip size="small" label="Sin verificar" variant="outlined" /> },
     { key: 'status', label: 'Estado', render: (r) => <StatusBadge status={r.status} /> },
   ];

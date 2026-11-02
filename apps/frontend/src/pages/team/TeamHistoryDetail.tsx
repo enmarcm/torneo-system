@@ -12,7 +12,10 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useEditionQuery, useTeamRegistrationsQuery, useTeamHistoryQuery, useTeamStatsQuery } from '@/hooks/queries';
 import { getTeamCompetitions } from '@/utils/teamRegistrations';
 import { formatDate } from '@/utils/formatDate';
-import { EmojiEventsRounded, GroupsRounded, SportsSoccerRounded, BarChartRounded } from '@mui/icons-material';
+import EmojiEventsRounded from '@mui/icons-material/EmojiEventsRounded';
+import GroupsRounded from '@mui/icons-material/GroupsRounded';
+import SportsSoccerRounded from '@mui/icons-material/SportsSoccerRounded';
+import BarChartRounded from '@mui/icons-material/BarChartRounded';
 
 const TeamHistoryDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -48,7 +51,7 @@ const TeamHistoryDetail: React.FC = () => {
         subtitle={`Temporada ${edition.seasonNumber} · ${edition.year}`}
       />
 
-      <Card sx={{ p: { xs: 2, md: 3 }, mb: 3, background: 'var(--brandGradient)', color: '#fff', borderRadius: 3 }}>
+      <Card sx={{ p: { xs: 2, md: 3 }, mb: 3, background: 'var(--brandSurface)', color: '#fff', borderRadius: 3 }}>
         <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={2}>
           <Box sx={{ width: 56, height: 56, borderRadius: 2, bgcolor: 'rgba(255,255,255,0.15)', display: 'grid', placeItems: 'center' }}>
             <EmojiEventsRounded sx={{ fontSize: 32 }} />

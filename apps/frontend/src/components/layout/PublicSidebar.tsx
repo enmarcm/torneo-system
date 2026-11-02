@@ -10,18 +10,16 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import {
-  HomeRounded,
-  EmojiEventsRounded,
-  CalendarMonthRounded,
-  LiveTvRounded,
-  BarChartRounded,
-  GroupsRounded,
-  BadgeRounded,
-  NewspaperRounded,
-  MenuOpenRounded,
-  LoginRounded,
-} from '@mui/icons-material';
+import HomeRounded from '@mui/icons-material/HomeRounded';
+import EmojiEventsRounded from '@mui/icons-material/EmojiEventsRounded';
+import CalendarMonthRounded from '@mui/icons-material/CalendarMonthRounded';
+import LiveTvRounded from '@mui/icons-material/LiveTvRounded';
+import BarChartRounded from '@mui/icons-material/BarChartRounded';
+import GroupsRounded from '@mui/icons-material/GroupsRounded';
+import BadgeRounded from '@mui/icons-material/BadgeRounded';
+import NewspaperRounded from '@mui/icons-material/NewspaperRounded';
+import MenuOpenRounded from '@mui/icons-material/MenuOpenRounded';
+import LoginRounded from '@mui/icons-material/LoginRounded';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { PUBLIC_TOPBAR_H } from './PublicTopbar';
 import { useGlobalStore } from '@/store/useGlobalStore';
@@ -122,14 +120,10 @@ export const PublicSidebar: React.FC<Props> = ({ onNavigate, onClose }) => {
           rótulos quedaban grises sobre azul sin llegar a leerse.
         */
         bgcolor: 'var(--railScrimSolid)',
-        backdropFilter: 'blur(20px) saturate(150%)',
-        WebkitBackdropFilter: 'blur(20px) saturate(150%)',
+
+
         borderRight: '1px solid',
         borderColor: 'var(--sidebarBorder)',
-        '@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)))':
-          {
-            bgcolor: 'var(--railScrimSolid)',
-          },
       }}
     >
       {/*

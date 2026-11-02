@@ -36,6 +36,11 @@ prisma/migrations/dev.db*
 *.swp
 .pnpm-store/
 
+# Referencia externa y evidencias locales de la revisión visual
+/work/taste-reference/
+/output/taste/
+/.taste-skill/
+
 # --- Sistema operativo ---
 Thumbs.db
 desktop.ini

@@ -17,16 +17,14 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
-import {
-  AddRounded,
-  EditRounded,
-  DeleteRounded,
-  OpenInNewRounded,
-  AutorenewRounded,
-  PublicRounded,
-  DraftsRounded,
-  InsightsRounded,
-} from '@mui/icons-material';
+import AddRounded from '@mui/icons-material/AddRounded';
+import EditRounded from '@mui/icons-material/EditRounded';
+import DeleteRounded from '@mui/icons-material/DeleteRounded';
+import OpenInNewRounded from '@mui/icons-material/OpenInNewRounded';
+import AutorenewRounded from '@mui/icons-material/AutorenewRounded';
+import PublicRounded from '@mui/icons-material/PublicRounded';
+import DraftsRounded from '@mui/icons-material/DraftsRounded';
+import InsightsRounded from '@mui/icons-material/InsightsRounded';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { AppDrawer } from '@/components/ui/AppDrawer';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
@@ -438,7 +436,7 @@ const AdminNews: React.FC = () => {
           <Stack direction={{ xs: 'column-reverse', sm: 'row' }} spacing={1.5} justifyContent="flex-end">
             <Button onClick={() => setOpen(false)}>Cancelar</Button>
             <SaveButton
-             
+
               onClick={submit}
               loading={create.isPending || update.isPending} error={create.isError || update.isError} disabled={!canSubmit}
             >

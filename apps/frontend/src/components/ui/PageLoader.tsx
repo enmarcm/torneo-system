@@ -71,7 +71,6 @@ export const PageLoader: React.FC<Props> = ({ minHeight = '60vh' }) => (
               width: 44,
               height: 44,
               display: 'block',
-              filter: 'drop-shadow(0 4px 4px rgba(0,0,0,0.35))',
               animation: 'llfRollR 1.7s cubic-bezier(.45,0,.55,1) infinite alternate',
             }}
           />

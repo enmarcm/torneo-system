@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, Button, MenuItem, Stack, TextField, Typography } from '@mui/material';
-import { AddRounded } from '@mui/icons-material';
+import AddRounded from '@mui/icons-material/AddRounded';
 import { PlayerPhotoFields } from '@/components/sport/PlayerPhotoFields';
 import { AppDrawer } from '@/components/ui/AppDrawer';
 import { SaveButton } from '@/components/ui/SaveButton';

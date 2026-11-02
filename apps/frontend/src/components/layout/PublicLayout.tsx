@@ -1,6 +1,9 @@
 import { Box, Typography, Stack, Container, Drawer, Link } from '@mui/material';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { PlaceRounded, PhoneRounded, MailRounded, ScheduleRounded } from '@mui/icons-material';
+import PlaceRounded from '@mui/icons-material/PlaceRounded';
+import PhoneRounded from '@mui/icons-material/PhoneRounded';
+import MailRounded from '@mui/icons-material/MailRounded';
+import ScheduleRounded from '@mui/icons-material/ScheduleRounded';
 import { useState, useEffect, Suspense } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { PageLoader } from '@/components/ui/PageLoader';
@@ -110,7 +113,7 @@ export const PublicLayout: React.FC = () => {
           bloques entran en cascada (regla en el tema). El fallback avisa a la
           barra de ruta de la barra superior mientras baja el código.
         */}
-        <Box component="main" className="llf-page" key={pathname} sx={{ flex: 1 }}>
+        <Box component="main" id="main-content" tabIndex={-1} className="llf-page" key={pathname} sx={{ flex: 1 }}>
           <Suspense
             fallback={
               <>
@@ -132,7 +135,7 @@ export const PublicLayout: React.FC = () => {
           component="footer"
           sx={{
             py: { xs: 4, md: 5 },
-            background: 'var(--heroGradient)',
+            background: 'var(--footerSurface)',
             color: '#fff',
           }}
         >
@@ -187,8 +190,6 @@ export const PublicLayout: React.FC = () => {
                     component={motion.img}
                     src="/llf-removebg-preview.png"
                     alt=""
-                    animate={reduceMotion ? undefined : { scale: [1, 1.07, 1], y: [0, -5, 0] }}
-                    transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
                     sx={{ height: 104, width: 'auto', display: 'block' }}
                   />
                   {/*
@@ -219,9 +220,9 @@ export const PublicLayout: React.FC = () => {
                       display: 'block',
                       mb: 1.5,
                       fontWeight: 700,
-                      letterSpacing: 1,
-                      textTransform: 'uppercase',
-                      color: 'rgba(255,255,255,0.5)',
+                      letterSpacing: 0,
+                      textTransform: 'none',
+                      color: 'rgba(255,255,255,0.75)',
                     }}
                   >
                     Contacto
@@ -234,7 +235,7 @@ export const PublicLayout: React.FC = () => {
                       { icon: <ScheduleRounded sx={{ fontSize: 17 }} />, text: CONTACTO.horario },
                     ].map((item) => (
                       <Stack key={item.text} direction="row" spacing={1} alignItems="center">
-                        <Box sx={{ color: 'rgba(255,255,255,0.5)', display: 'flex' }}>{item.icon}</Box>
+                        <Box sx={{ color: 'rgba(255,255,255,0.75)', display: 'flex' }}>{item.icon}</Box>
                         <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
                           {item.text}
                         </Typography>
@@ -250,9 +251,9 @@ export const PublicLayout: React.FC = () => {
                       display: 'block',
                       mb: 1.5,
                       fontWeight: 700,
-                      letterSpacing: 1,
-                      textTransform: 'uppercase',
-                      color: 'rgba(255,255,255,0.5)',
+                      letterSpacing: 0,
+                      textTransform: 'none',
+                      color: 'rgba(255,255,255,0.75)',
                     }}
                   >
                     La liga

@@ -1,13 +1,10 @@
 import { Card, Box, Stack, IconButton, Typography, Tooltip, Menu, MenuItem, ListItemIcon, ListItemText, Divider, useTheme, useMediaQuery } from '@mui/material';
-import {
-  EditRounded,
-  DeleteRounded,
-  ToggleOnRounded,
-  VisibilityRounded,
-  MoreHorizRounded,
-} from '@mui/icons-material';
+import EditRounded from '@mui/icons-material/EditRounded';
+import DeleteRounded from '@mui/icons-material/DeleteRounded';
+import ToggleOnRounded from '@mui/icons-material/ToggleOnRounded';
+import VisibilityRounded from '@mui/icons-material/VisibilityRounded';
+import MoreHorizRounded from '@mui/icons-material/MoreHorizRounded';
 import { useId, useState, type ReactNode } from 'react';
-import { motion } from 'framer-motion';
 import { TableSkeleton } from './LoadingState';
 import { EmptyState } from './EmptyState';
 import { ErrorState } from './ErrorState';
@@ -61,7 +58,7 @@ export function DataTable<T>({
   actions,
   getRowKey,
   onRowClick,
-  mobileLayout = 'cards',
+  mobileLayout = 'list',
 }: Props<T>) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -77,7 +74,11 @@ export function DataTable<T>({
       return <Card variant="outlined" sx={{ boxShadow: 'none', overflow: 'hidden' }}>
         {rows.map((row, index) => <Box key={getRowKey(row)} sx={{ p: 1.5, minWidth: 0, borderTop: index ? '1px solid' : undefined, borderColor: 'divider' }}>
           <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
-            <Box sx={{ flex: 1, minWidth: 0 }} onClick={() => onRowClick?.(row)}>{visibleColumns[0]?.render(row)}</Box>
+            <Box
+              component={onRowClick ? 'button' : 'div'}
+              onClick={onRowClick ? () => onRowClick(row) : undefined}
+              sx={{ flex: 1, minWidth: 0, p: 0, border: 0, bgcolor: 'transparent', color: 'inherit', font: 'inherit', textAlign: 'left', cursor: onRowClick ? 'pointer' : undefined, borderRadius: 1 }}
+            >{visibleColumns[0]?.render(row)}</Box>
             {actions && actions.length > 0 && <RowActionsIcons actions={actions} row={row} compact />}
           </Stack>
           {visibleColumns.slice(1).map((column) => <Stack key={column.key} direction="row" alignItems="flex-start" spacing={1.5} sx={{ mt: 1, minWidth: 0 }}>
@@ -89,12 +90,10 @@ export function DataTable<T>({
     }
     return (
       <Stack spacing={1.5}>
-        {rows.map((row, i) => (
-          <motion.div
+        {rows.map((row) => (
+          <Box
             key={getRowKey(row)}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.18, delay: i * 0.03 }}
+
           >
             <Card
               sx={{ p: 2, minWidth: 0, cursor: onRowClick ? 'pointer' : undefined }}
@@ -112,11 +111,11 @@ export function DataTable<T>({
                 ))}
               {actions && actions.length > 0 && (
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1, pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
-                  <RowActionsIcons actions={actions} row={row} />
+                  <RowActionsIcons actions={actions} row={row} compact />
                 </Box>
               )}
             </Card>
-          </motion.div>
+          </Box>
         ))}
       </Stack>
     );
@@ -124,19 +123,20 @@ export function DataTable<T>({
 
   return (
     <Card sx={{ overflow: 'hidden' }}>
-      <Box sx={{ overflowX: 'auto' }}>
+      <Box sx={{ overflow: 'auto', maxHeight: '70dvh' }}>
         <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse' }}>
-          <Box component="thead" sx={{ bgcolor: 'background.default' }}>
+          <Box component="thead" sx={{ bgcolor: 'background.paper', position: 'sticky', top: 0, zIndex: 1 }}>
             <Box component="tr">
               {columns.map((c) => (
                 <Box
                   component="th"
                   key={c.key}
+                  scope="col"
                   sx={{
                     textAlign: c.align ?? 'left',
                     p: 1.5,
                     fontSize: 13,
-                    fontWeight: 600,
+                    fontWeight: 500,
                     color: 'text.secondary',
                     width: c.width,
                   }}
@@ -145,19 +145,24 @@ export function DataTable<T>({
                 </Box>
               ))}
               {actions && actions.length > 0 && (
-                <Box component="th" sx={{ width: 128, p: 1.5, textAlign: 'right', fontSize: 13, fontWeight: 600, color: 'text.secondary' }}>Acciones</Box>
+                <Box component="th" scope="col" sx={{ width: 80, p: 1.5, textAlign: 'right', fontSize: 13, fontWeight: 600, color: 'text.secondary' }}>Acciones</Box>
               )}
             </Box>
           </Box>
           <Box component="tbody">
-            {rows.map((row, i) => (
-              <motion.tr
+            {rows.map((row) => (
+              <Box component="tr"
                 key={getRowKey(row)}
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.18, delay: i * 0.02 }}
+
                 className={onRowClick ? 'llf-row' : undefined}
                 style={{ display: 'table-row', cursor: onRowClick ? 'pointer' : undefined }}
+                tabIndex={onRowClick ? 0 : undefined}
+                onKeyDown={(event) => {
+                  if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) {
+                    event.preventDefault();
+                    onRowClick?.(row);
+                  }
+                }}
                 onClick={() => onRowClick?.(row)}
               >
                 {columns.map((c) => (
@@ -167,7 +172,8 @@ export function DataTable<T>({
                     sx={{
                       p: 1.5,
                       borderTop: '1px solid',
-                      borderColor: 'divider',
+                      borderColor: 'var(--rowBorder)',
+                      fontVariantNumeric: 'tabular-nums',
                       textAlign: c.align ?? 'left',
                       fontSize: 14,
                       verticalAlign: 'middle',
@@ -181,10 +187,10 @@ export function DataTable<T>({
                     component="td"
                     sx={{ px: 1.5, py: 1, borderTop: '1px solid', borderColor: 'divider', textAlign: 'right', whiteSpace: 'nowrap', verticalAlign: 'middle' }}
                   >
-                    <RowActionsIcons actions={actions} row={row} />
+                    <RowActionsIcons actions={actions} row={row} compact />
                   </Box>
                 )}
-              </motion.tr>
+              </Box>
             ))}
           </Box>
         </Box>

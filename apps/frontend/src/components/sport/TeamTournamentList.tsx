@@ -1,5 +1,5 @@
 import { Box, Button, Card, Stack, Typography } from '@mui/material';
-import { ChevronRightRounded } from '@mui/icons-material';
+import ChevronRightRounded from '@mui/icons-material/ChevronRightRounded';
 import type { TeamRegistrationWithRoster } from '@/api/teams.api';
 import { AGE_GROUP_LABELS, getCompetitionShortLabel, getCompetitionSubtitle } from '@/utils/competitionMeta';
 import { canManageRoster } from '@/utils/teamRegistrations';

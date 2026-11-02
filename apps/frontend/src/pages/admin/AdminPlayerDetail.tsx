@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Box, Button, Avatar, Stack, Typography, Grid2 as Grid } from '@mui/material';
-import { ArrowBackRounded, GroupsRounded, SportsSoccerRounded, EmojiEventsRounded } from '@mui/icons-material';
+import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded';
+import GroupsRounded from '@mui/icons-material/GroupsRounded';
+import SportsSoccerRounded from '@mui/icons-material/SportsSoccerRounded';
+import EmojiEventsRounded from '@mui/icons-material/EmojiEventsRounded';
 import { useParams, useNavigate } from 'react-router-dom';
 import { historyApi, type HistoryFilters } from '@/api/history.api';
 import { PageHeader } from '@/components/ui/PageHeader';
@@ -43,7 +46,7 @@ const AdminPlayerDetail: React.FC = () => {
       { key: 'matches', label: 'PJ', align: 'right', render: (r) => r.stats?.matchesPlayed ?? 0 },
       { key: 'goals', label: 'Goles', align: 'right', render: (r) => r.stats?.goals ?? 0 },
       { key: 'assists', label: 'Asistencias', align: 'right', render: (r) => r.stats?.assists ?? 0 },
-      { key: 'cards', label: 'TA / TR', render: (r) => `${r.stats?.yellowCards ?? 0} / ${r.stats?.redCards ?? 0}` },
+      { key: 'cards', label: 'TA / TR', align: 'right', render: (r) => `${r.stats?.yellowCards ?? 0} / ${r.stats?.redCards ?? 0}` },
     ]} />
     <Box sx={{ mt: 4 }}><HistoryMatches player matches={data.matches} total={data.totalMatches} page={filters.page ?? 1} limit={filters.limit ?? 25} onPage={(page) => setFilters({ ...filters, page })} /></Box>
     <Typography variant="h4" sx={{ mt: 4, mb: 2 }}>Traspasos registrados</Typography>

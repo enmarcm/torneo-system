@@ -1,5 +1,5 @@
 import { Modal, Box, Typography, IconButton, Stack, useTheme } from '@mui/material';
-import { CloseRounded } from '@mui/icons-material';
+import CloseRounded from '@mui/icons-material/CloseRounded';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useId, type ReactNode } from 'react';
 
