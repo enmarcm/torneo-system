@@ -58,3 +58,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <Root />
   </React.StrictMode>,
 );
+
+// Registro del service worker: requisito para que el navegador ofrezca instalar.
+// Solo en producción; en desarrollo se cachearía código viejo.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}

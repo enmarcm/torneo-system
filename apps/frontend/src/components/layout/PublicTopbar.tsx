@@ -19,6 +19,7 @@ import logoBlanco from '@/assets/logo.PNG';
 import { ROUTES } from '@/routes/routes';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import { RouteProgress } from '@/components/ui/RouteProgress';
+import { InstallAppButton } from '@/components/ui/InstallAppButton';
 
 /** Alto de la barra. Es el desplazamiento de todo lo que va debajo, así que vive acá. */
 export const PUBLIC_TOPBAR_H = { xs: 60, md: 72 };
@@ -177,6 +178,8 @@ export const PublicTopbar: React.FC<Props> = ({ onToggleNav, navExpanded }) => {
         </Stack>
 
         <Box sx={{ flex: 1 }} />
+
+        <InstallAppButton color={tinta} />
 
         <Tooltip title={isDark ? 'Modo claro' : 'Modo oscuro'}>
           <IconButton

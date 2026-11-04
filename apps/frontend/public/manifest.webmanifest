@@ -1,0 +1,17 @@
+{
+  "name": "LLF — Liga Lago Futsal",
+  "short_name": "LLF",
+  "description": "Resultados, tabla de posiciones y calendario de la Liga Lago Futsal.",
+  "lang": "es",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#034292",
+  "theme_color": "#034292",
+  "icons": [
+    { "src": "/pwa-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
