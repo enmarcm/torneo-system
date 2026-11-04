@@ -22,6 +22,7 @@ import { teamBlocksRouter } from './team-blocks/team-blocks.routes';
 import { fixturesRouter } from './fixtures/fixtures.routes';
 import { knockoutRouter } from './knockout/knockout.routes';
 import { historyRouter } from './history/history.routes';
+import { siteAdminRouter } from './site/site.routes';
 
 export const apiRouter = Router();
 
@@ -42,6 +43,7 @@ apiRouter.use('/dashboard', dashboardRouter);
 apiRouter.use('/audit', auditRouter);
 apiRouter.use('/league-systems', leagueSystemsRouter);
 apiRouter.use('/team-blocks', teamBlocksRouter);
+apiRouter.use('/settings', siteAdminRouter);
 apiRouter.use('/public', publicRouter);
 apiRouter.use('/', groupsRouter);
 apiRouter.use('/', rostersRouter);

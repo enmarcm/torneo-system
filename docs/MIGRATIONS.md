@@ -21,3 +21,11 @@ Agrega asistencia por partido e inscripción del jugador en la plantilla (`Match
 Guarda la clave de la foto del documento en `Player.identityPhotoKey`. Los registros anteriores se conservan; no se inventan imágenes. El API exige foto del jugador y documento al crear, editar o agregar a una plantilla. El documento se sube al bucket privado y solo se sirve mediante el API autenticado a administradores o al delegado del equipo del jugador (y al usuario que acaba de subirlo, antes del alta). No se guarda una URL pública del documento. El formulario permite completar las fotos de registros anteriores.
 
 Verificación local del 13 de octubre de 2026: las 13 migraciones se aplicaron a PostgreSQL nuevo y se ejecutó el seed. No acredita migración de una base histórica ni aplicación en producción.
+
+## 20261104120000_site_settings_legal_pages
+
+Agrega `SiteSettings` (una sola fila, id `main`) con los datos de la liga que se muestran en el pie, y `LegalPage` con los documentos legales editables (términos, privacidad, cookies, derechos de imagen, aviso legal). No toca datos existentes.
+
+Las filas iniciales no se crean en SQL: la aplicación las siembra la primera vez que se lee la configuración (`site.service.ts`, textos en `site.defaults.ts`). Los textos legales por defecto son una base y deben ser revisados por un abogado antes de darlos por definitivos. Una página borrada por el admin no reaparece.
+
+Aplicar `npm --workspace apps/backend run prisma:deploy` antes de iniciar la nueva versión. Verificado: el SQL coincide con `prisma migrate diff` del schema anterior al nuevo; no se aplicó contra una base real.

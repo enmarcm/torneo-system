@@ -19,6 +19,7 @@ import PhotoLibraryRounded from '@mui/icons-material/PhotoLibraryRounded';
 import LightModeRounded from '@mui/icons-material/LightModeRounded';
 import DarkModeRounded from '@mui/icons-material/DarkModeRounded';
 import LogoutRounded from '@mui/icons-material/LogoutRounded';
+import SettingsRounded from '@mui/icons-material/SettingsRounded';
 import { ROUTES } from '@/routes/routes';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -50,6 +51,7 @@ const NAV: NavItem[] = [
   { label: 'Noticias', icon: <NewspaperRounded />, to: ROUTES.admin.news, roles: MEDIA },
   { label: 'Imágenes', icon: <PhotoLibraryRounded />, to: ROUTES.admin.media, roles: MEDIA },
   { label: 'Usuarios', icon: <ManageAccountsRounded />, to: ROUTES.admin.users, roles: ADMIN_ONLY },
+  { label: 'Configuración', icon: <SettingsRounded />, to: ROUTES.admin.settings, roles: ADMIN_ONLY },
   { label: 'Auditoría', icon: <FactCheckRounded />, to: ROUTES.admin.audit, roles: ADMIN_ONLY },
 ];
 

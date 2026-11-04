@@ -15,9 +15,11 @@ import { newsService } from '@/modules/news/news.service';
 import { groupsService } from '@/modules/groups/groups.service';
 import { knockoutService } from '@/modules/knockout/knockout.service';
 import { leagueSystemsService } from '@/modules/league-systems/league-systems.service';
+import { sitePublicRouter } from '@/modules/site/site.routes';
 import rateLimit from 'express-rate-limit';
 
 export const publicRouter = Router();
+publicRouter.use(sitePublicRouter);
 publicRouter.get('/registrations/:id/roster', validate(z.object({ id: z.string().uuid() }), 'params'), asyncHandler(async (req, res) =>
   ok(res, await competitionsService.publicRoster(req.params.id)),
 ));

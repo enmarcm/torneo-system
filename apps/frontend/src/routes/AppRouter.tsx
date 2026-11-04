@@ -20,6 +20,7 @@ const PublicPlayerSearch = lazy(() => import('@/pages/public/PublicPlayerSearch'
 const PublicTeams = lazy(() => import('@/pages/public/PublicTeams'));
 const PublicNews = lazy(() => import('@/pages/public/PublicNews'));
 const PublicNewsDetail = lazy(() => import('@/pages/public/PublicNewsDetail'));
+const PublicLegal = lazy(() => import('@/pages/public/PublicLegal'));
 
 // Auth
 const Login = lazy(() => import('@/pages/auth/Login'));
@@ -43,6 +44,7 @@ const AdminAds = lazy(() => import('@/pages/admin/AdminAds'));
 const AdminMedia = lazy(() => import('@/pages/admin/AdminMedia'));
 const AdminNews = lazy(() => import('@/pages/admin/AdminNews'));
 const AdminUsers = lazy(() => import('@/pages/admin/AdminUsers'));
+const AdminSettings = lazy(() => import('@/pages/admin/AdminSettings'));
 
 // Team
 const TeamHome = lazy(() => import('@/pages/team/TeamHome'));
@@ -81,6 +83,7 @@ export const AppRouter: React.FC = () => (
           <Route path={ROUTES.admin.stats} element={<AdminStats />} />
           <Route path={ROUTES.admin.audit} element={<AdminAudit />} />
           <Route path={ROUTES.admin.users} element={<AdminUsers />} />
+          <Route path={ROUTES.admin.settings} element={<AdminSettings />} />
         </Route>
       </Route>
 
@@ -125,6 +128,7 @@ export const AppRouter: React.FC = () => (
         <Route path={ROUTES.public.playerSearch} element={<PublicPlayerSearch />} />
         <Route path={ROUTES.public.news} element={<PublicNews />} />
         <Route path={ROUTES.public.newsDetail} element={<PublicNewsDetail />} />
+        <Route path={ROUTES.public.legal} element={<PublicLegal />} />
       </Route>
 
       <Route path="*" element={<Navigate to={ROUTES.public.home} replace />} />

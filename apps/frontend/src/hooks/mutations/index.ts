@@ -10,6 +10,7 @@ import { matchesApi, matchEventsApi, type Match, type AttendanceEntry } from '@/
 import { adsApi, type Ad } from '@/api/ads.api';
 import { newsApi, type ArticlePayload } from '@/api/news.api';
 import { authApi } from '@/api/auth.api';
+import { siteApi, type SiteSettings, type LegalPagePayload } from '@/api/site.api';
 import { usersApi, type CreateUserPayload, type ManagedUser, type UpdateUserPayload } from '@/api/users.api';
 import { useAuthStore } from '@/store/useAuthStore';
 
@@ -513,5 +514,40 @@ export const useCreateRosterPlayer = () => {
   return useMutation({
     mutationFn: ({ registrationId, data }: { registrationId: string; data: CreateRosterPlayerInput }) => rostersApi.createPlayer(registrationId, data),
     onSuccess: (_entry, { registrationId }) => invalidate(qc, [['roster', registrationId], ['roster-candidates'], ['public', 'roster', registrationId], ['competitions'], ['teams'], ['players'], ['match-attendance']]),
+  });
+};
+
+/*
+  Configuración del sitio y páginas legales. Además de la caché del panel se
+  refresca la pública: el pie y los textos legales dependen de estos datos.
+*/
+const SITE_KEYS = [['site-settings'], ['legal-pages'], ['public', 'site'], ['public', 'legal']];
+
+export const useUpdateSiteSettings = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: Partial<SiteSettings>) => siteApi.updateSettings(data),
+    onSuccess: () => invalidate(qc, SITE_KEYS),
+  });
+};
+export const useCreateLegalPage = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: LegalPagePayload) => siteApi.createLegal(data),
+    onSuccess: () => invalidate(qc, SITE_KEYS),
+  });
+};
+export const useUpdateLegalPage = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: LegalPagePayload }) => siteApi.updateLegal(id, data),
+    onSuccess: () => invalidate(qc, SITE_KEYS),
+  });
+};
+export const useDeleteLegalPage = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => siteApi.removeLegal(id),
+    onSuccess: () => invalidate(qc, SITE_KEYS),
   });
 };

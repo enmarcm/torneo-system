@@ -578,3 +578,44 @@ model MatchAttendance {
   @@unique([matchId, rosterEntryId])
   @@index([rosterEntryId])
 }
+
+/// Datos de la liga que el administrador edita desde el panel y que el sitio
+/// público muestra en el pie. Es una sola fila (id fija "main"): no hay varias
+/// "configuraciones", hay una.
+model SiteSettings {
+  id          String   @id @default("main")
+  /// Nombre comercial: aparece en el pie y en los textos legales.
+  siteName    String   @default("Liga Lago Futsal")
+  /// Razón social y documento fiscal de quien opera el sitio. Van en el aviso legal.
+  legalName   String   @default("")
+  taxId       String   @default("")
+  /// Frase corta bajo el logo del pie.
+  tagline     String   @default("")
+  address     String   @default("")
+  phone       String   @default("")
+  email       String   @default("")
+  schedule    String   @default("")
+  whatsapp    String   @default("")
+  instagramUrl String  @default("")
+  facebookUrl  String  @default("")
+  tiktokUrl    String  @default("")
+  updatedAt   DateTime @updatedAt
+}
+
+/// Documento legal del sitio (términos, privacidad, cookies…). El cuerpo es
+/// texto plano con "## " para los títulos de sección, igual de simple que las
+/// noticias, para que cualquiera del staff pueda editarlo sin conocer formato.
+model LegalPage {
+  id           String   @id @default(uuid())
+  /// Va en la URL pública: /legal/:slug. No cambia al renombrar el título.
+  slug         String   @unique
+  title        String
+  body         String   @default("")
+  /// Una página sin publicar da 404 al público pero se puede seguir editando.
+  published    Boolean  @default(true)
+  /// Si aparece como enlace en el pie del sitio.
+  showInFooter Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

@@ -1,29 +1,30 @@
-import { Box, Typography, Stack, Container, Drawer, Link } from '@mui/material';
+import { Box, Typography, Stack, Container, Drawer, Link, IconButton } from '@mui/material';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import PlaceRounded from '@mui/icons-material/PlaceRounded';
 import PhoneRounded from '@mui/icons-material/PhoneRounded';
 import MailRounded from '@mui/icons-material/MailRounded';
 import ScheduleRounded from '@mui/icons-material/ScheduleRounded';
+import InstagramIcon from '@mui/icons-material/Instagram';
+import FacebookIcon from '@mui/icons-material/Facebook';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import MusicNoteRounded from '@mui/icons-material/MusicNoteRounded';
 import { useState, useEffect, Suspense } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { MatchLoader } from '@/components/ui/MatchLoader';
 import { RouteProgressSignal } from '@/components/ui/RouteProgress';
-import { isMatchRoute } from '@/routes/routes';
+import { isMatchRoute, legalPath } from '@/routes/routes';
+import { usePublicSiteQuery } from '@/hooks/queries';
+import { FALLBACK_SETTINGS } from '@/api/site.api';
 import { AdSlot } from '@/components/ui/AdSlot';
 import { useLiveMatchSync } from '@/hooks/common/useLiveMatchSync';
 import { PublicSidebar, PUBLIC_NAV } from './PublicSidebar';
 import { PublicTopbar, PUBLIC_TOPBAR_H } from './PublicTopbar';
 
-/*
-  DATOS DE MUESTRA. Están puestos para poder ver el pie terminado; ninguno fue
-  confirmado por la liga. Reemplazar por los reales antes de publicar.
-*/
-const CONTACTO = {
-  sede: 'Colegio de Abogados del Estado Zulia · Maracaibo',
-  telefono: '+58 261 000 0000',
-  email: 'contacto@ligalagofutsal.com',
-  horario: 'Partidos: viernes y sábados, 18:00 a 23:00',
+/** WhatsApp se guarda como número; el enlace lo arma wa.me con solo los dígitos. */
+const whatsappUrl = (raw: string) => {
+  const digits = raw.replace(/\D/g, '');
+  return digits ? 'https://wa.me/' + digits : '';
 };
 
 export const PublicLayout: React.FC = () => {
@@ -31,6 +32,27 @@ export const PublicLayout: React.FC = () => {
   const { pathname } = useLocation();
   const [navOpen, setNavOpen] = useState(false);
   const reduceMotion = useReducedMotion();
+
+  /*
+    Los datos del pie los edita el administrador desde el panel. Mientras llegan
+    (o si el API no responde) se usa el valor de respaldo, para que el pie no
+    salte ni quede vacío.
+  */
+  const { data: site } = usePublicSiteQuery();
+  const settings = site?.settings ?? FALLBACK_SETTINGS;
+  const legalPages = site?.legalPages ?? [];
+  const contacto = [
+    { icon: <PlaceRounded sx={{ fontSize: 17 }} />, text: settings.address },
+    { icon: <PhoneRounded sx={{ fontSize: 17 }} />, text: settings.phone },
+    { icon: <MailRounded sx={{ fontSize: 17 }} />, text: settings.email },
+    { icon: <ScheduleRounded sx={{ fontSize: 17 }} />, text: settings.schedule },
+  ].filter((c) => c.text.trim());
+  const redes = [
+    { label: 'Instagram', icon: <InstagramIcon fontSize="small" />, href: settings.instagramUrl },
+    { label: 'Facebook', icon: <FacebookIcon fontSize="small" />, href: settings.facebookUrl },
+    { label: 'TikTok', icon: <MusicNoteRounded fontSize="small" />, href: settings.tiktokUrl },
+    { label: 'WhatsApp', icon: <WhatsAppIcon fontSize="small" />, href: whatsappUrl(settings.whatsapp) },
+  ].filter((r) => r.href);
 
   // Un solo oyente para todo el sitio público: sin esto los marcadores de las
   // listas quedan congelados en el valor con el que cargó la página.
@@ -205,12 +227,13 @@ export const PublicLayout: React.FC = () => {
                       lineHeight: 1.1,
                     }}
                   >
-                    Liga Lago Futsal
+                    {settings.siteName}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.65)' }}>
-                    Resultados, posiciones y calendario de la liga, al minuto y en un
-                    solo lugar.
-                  </Typography>
+                  {settings.tagline && (
+                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.65)' }}>
+                      {settings.tagline}
+                    </Typography>
+                  )}
                 </Stack>
 
                 <Box>
@@ -228,12 +251,7 @@ export const PublicLayout: React.FC = () => {
                     Contacto
                   </Typography>
                   <Stack spacing={1}>
-                    {[
-                      { icon: <PlaceRounded sx={{ fontSize: 17 }} />, text: CONTACTO.sede },
-                      { icon: <PhoneRounded sx={{ fontSize: 17 }} />, text: CONTACTO.telefono },
-                      { icon: <MailRounded sx={{ fontSize: 17 }} />, text: CONTACTO.email },
-                      { icon: <ScheduleRounded sx={{ fontSize: 17 }} />, text: CONTACTO.horario },
-                    ].map((item) => (
+                    {contacto.map((item) => (
                       <Stack key={item.text} direction="row" spacing={1} alignItems="center">
                         <Box sx={{ color: 'rgba(255,255,255,0.75)', display: 'flex' }}>{item.icon}</Box>
                         <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
@@ -241,6 +259,24 @@ export const PublicLayout: React.FC = () => {
                         </Typography>
                       </Stack>
                     ))}
+                    {redes.length > 0 && (
+                      <Stack direction="row" spacing={0.5} sx={{ pt: 0.5 }}>
+                        {redes.map((r) => (
+                          <IconButton
+                            key={r.label}
+                            component="a"
+                            href={r.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={r.label}
+                            size="small"
+                            sx={{ color: 'rgba(255,255,255,0.75)', '&:hover': { color: '#fff' } }}
+                          >
+                            {r.icon}
+                          </IconButton>
+                        ))}
+                      </Stack>
+                    )}
                   </Stack>
                 </Box>
 
@@ -286,15 +322,48 @@ export const PublicLayout: React.FC = () => {
                 </Box>
               </Box>
 
+              {/* Documentos legales: los administra el staff desde Configuración. */}
+              {legalPages.length > 0 && (
+                <Stack
+                  component="nav"
+                  aria-label="Información legal"
+                  direction="row"
+                  useFlexGap
+                  flexWrap="wrap"
+                  justifyContent={{ xs: 'center', md: 'flex-start' }}
+                  columnGap={2.5}
+                  rowGap={0.75}
+                  sx={{ pt: 2, borderTop: '1px solid rgba(255,255,255,0.12)' }}
+                >
+                  {legalPages.map((p) => (
+                    <Link
+                      key={p.slug}
+                      component="button"
+                      type="button"
+                      underline="hover"
+                      onClick={() => navigate(legalPath(p.slug))}
+                      sx={{
+                        color: 'rgba(255,255,255,0.75)',
+                        font: 'inherit',
+                        fontSize: 13,
+                        '&:hover': { color: '#fff' },
+                      }}
+                    >
+                      {p.title}
+                    </Link>
+                  ))}
+                </Stack>
+              )}
+
               <Stack
                 direction={{ xs: 'column', md: 'row' }}
                 alignItems="center"
                 justifyContent="space-between"
                 spacing={1}
-                sx={{ pt: 2, borderTop: '1px solid rgba(255,255,255,0.12)' }}
+                sx={legalPages.length > 0 ? undefined : { pt: 2, borderTop: '1px solid rgba(255,255,255,0.12)' }}
               >
                 <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.55)' }}>
-                  © {new Date().getFullYear()} LLF — Liga Lago Futsal
+                  © {new Date().getFullYear()} {settings.legalName || settings.siteName}
                 </Typography>
                 <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.55)' }}>
                   Developed with{' '}

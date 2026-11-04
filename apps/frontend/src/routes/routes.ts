@@ -19,6 +19,7 @@ export const ROUTES = {
     media: '/admin/imagenes',
     users: '/admin/usuarios',
     audit: '/admin/auditoria',
+    settings: '/admin/configuracion',
   },
   team: {
     home: '/equipo',
@@ -40,6 +41,8 @@ export const ROUTES = {
     live: '/en-vivo',
     /** Ficha de un jugador, buscada por su cédula. */
     playerSearch: '/jugador',
+    /** Páginas legales editables desde el panel: términos, privacidad, cookies… */
+    legal: '/legal/:slug',
   },
 } as const;
 
@@ -60,3 +63,6 @@ const MATCH_ROUTES: string[] = [
 ];
 export const isMatchRoute = (pathname: string) =>
   MATCH_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/'));
+
+/** URL pública de una página legal a partir de su slug. */
+export const legalPath = (slug: string) => ROUTES.public.legal.replace(':slug', slug);

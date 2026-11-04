@@ -14,6 +14,7 @@ import { knockoutApi, type BracketRound } from '@/api/knockout.api';
 import { teamBlocksApi, type TeamBlock } from '@/api/team-blocks.api';
 import { publicApi, type MatchListOpts, type NewsListParams } from '@/api/public.api';
 import { usersApi, type ManagedUser } from '@/api/users.api';
+import { siteApi } from '@/api/site.api';
 import type { UserRole } from '@/utils/roles';
 
 const REF_STALE = 5 * 60 * 1000;
@@ -301,3 +302,19 @@ export const useMatchAttendanceQuery = (matchId: string, enabled = true) =>
     enabled: enabled && !!matchId,
     staleTime: FRESH_STALE,
   });
+
+/* Configuración del sitio y páginas legales. */
+export const usePublicSiteQuery = () =>
+  useQuery({ queryKey: ['public', 'site'], queryFn: siteApi.public, staleTime: REF_STALE });
+export const usePublicLegalPageQuery = (slug?: string) =>
+  useQuery({
+    queryKey: ['public', 'legal', slug],
+    queryFn: () => siteApi.legalPage(slug as string),
+    enabled: !!slug,
+    staleTime: MID_STALE,
+    retry: false,
+  });
+export const useSiteSettingsQuery = () =>
+  useQuery({ queryKey: ['site-settings'], queryFn: siteApi.getSettings, staleTime: 0 });
+export const useLegalPagesQuery = () =>
+  useQuery({ queryKey: ['legal-pages'], queryFn: siteApi.listLegal, staleTime: 0 });
