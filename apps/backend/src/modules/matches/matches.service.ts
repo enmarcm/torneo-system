@@ -267,9 +267,6 @@ export const matchesService = {
     const res = await prisma.$transaction(async (tx) => {
       const current = await tx.match.findUnique({ where: { id } });
       if (!current) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
-      if (current.status === 'LIVE' || current.status === 'FINISHED') {
-        throw new AppError(409, 'El partido tiene historial deportivo y no se puede eliminar.', 'HISTORY_PROTECTED');
-      }
       await tx.matchEvent.deleteMany({ where: { matchId: id } });
       await tx.match.delete({ where: { id } });
       return { id };

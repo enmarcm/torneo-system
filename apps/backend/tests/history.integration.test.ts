@@ -8,7 +8,6 @@ import { prisma } from '../src/lib/prisma';
 import { historyService } from '../src/modules/history/history.service';
 import { historyFiltersSchema } from '../src/modules/history/history.schema';
 import { matchesService } from '../src/modules/matches/matches.service';
-import { purgeTeam, purgePlayer, purgeCompetitions } from '../src/utils/cascade.util';
 import { initSocket } from '../src/lib/socket';
 
 test('real historical reports keep old/inactive records, paginate beyond 200 and enforce admin access', { skip: process.env.RUN_HISTORY_INTEGRATION !== '1' }, async () => {
@@ -67,10 +66,6 @@ test('real historical reports keep old/inactive records, paginate beyond 200 and
     assert.equal(team.players, 206); assert.equal(team.career.length, 2); assert.equal(team.totalMatches, 4);
     assert.equal(team.totals.matchesPlayed, 2); assert.equal(team.totals.goalsFor, 5);
     assert.equal(JSON.stringify(player).includes('identityPhotoKey'), false);
-    await assert.rejects(prisma.$transaction((tx) => purgeTeam(tx, teamIds[0])), { code: 'HISTORY_PROTECTED' });
-    await assert.rejects(prisma.$transaction((tx) => purgePlayer(tx, playerIds[0])), { code: 'HISTORY_PROTECTED' });
-    await assert.rejects(prisma.$transaction((tx) => purgeCompetitions(tx, competitionIds)), { code: 'HISTORY_PROTECTED' });
-    await assert.rejects(matchesService.remove(matchIds[0]), { code: 'HISTORY_PROTECTED' });
     server = createApp().listen(0, '127.0.0.1');
     socket = initSocket(server);
     await new Promise<void>((resolve) => server!.once('listening', resolve));

@@ -455,7 +455,7 @@ const AdminTeams: React.FC = () => {
           }
         }}
         title="¿Eliminar definitivamente?"
-        message={`Solo se puede eliminar "${purgingTeam?.name}" si no tiene inscripciones históricas. Para retirar un equipo que ya participó, desactívalo: se conservan sus torneos, jugadores y resultados.`}
+        message={`Se eliminará "${purgingTeam?.name}" con sus inscripciones, plantillas, partidos y resultados. No se puede deshacer. Para conservar su historial, desactívalo en vez de eliminarlo.`}
         confirmLabel="Eliminar definitivamente"
         loading={deleteTeam.isPending}
       />

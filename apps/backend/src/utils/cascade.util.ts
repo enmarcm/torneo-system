@@ -1,11 +1,10 @@
 import type { Prisma } from '@prisma/client';
-import { AppError } from '@/utils/app-error';
 
 /**
  * Borrado en cascada a mano.
  *
- * Solo se eliminan entidades sin trayectoria deportiva. Desactivar conserva
- * inscripciones, plantillas y resultados para las consultas históricas.
+ * El administrador manda: si decide eliminar algo, se elimina, tenga o no
+ * historial colgando (se quitó temporalmente la protección HISTORY_PROTECTED).
  * Prisma no cascadea estas relaciones: se borran de la hoja a la raíz.
  *
  * Todo se ejecuta dentro de la transacción que abre el servicio: o se va todo
@@ -24,13 +23,6 @@ export const CASCADE_TX = { timeout: 60_000, maxWait: 10_000 };
  */
 export const purgeRegistrations = async (tx: Tx, registrationIds: string[]) => {
   if (registrationIds.length === 0) return;
-  const historical = await tx.rosterEntry.count({ where: { teamRegistrationId: { in: registrationIds } } });
-  const played = await tx.match.count({ where: {
-    status: { in: ['LIVE', 'FINISHED'] },
-    OR: [{ homeRegistrationId: { in: registrationIds } }, { awayRegistrationId: { in: registrationIds } }],
-  } });
-  if (historical || played) throw new AppError(409, 'La inscripción tiene historial. Desactívala para conservar jugadores y resultados.', 'HISTORY_PROTECTED');
-
   const matches = await tx.match.findMany({
     where: {
       OR: [
@@ -87,10 +79,6 @@ export const purgeRegistrations = async (tx: Tx, registrationIds: string[]) => {
 /** Competiciones: partidos, eventos, llaves, grupos, sanciones e inscripciones. */
 export const purgeCompetitions = async (tx: Tx, competitionIds: string[]) => {
   if (competitionIds.length === 0) return;
-  if (await tx.teamRegistration.count({ where: { competitionId: { in: competitionIds } } })) {
-    throw new AppError(409, 'La competición tiene inscripciones históricas. Consérvala y marca la edición o competición como finalizada.', 'HISTORY_PROTECTED');
-  }
-
   const matches = await tx.match.findMany({
     where: { competitionId: { in: competitionIds } },
     select: { id: true },
@@ -120,9 +108,6 @@ export const purgeUser = async (tx: Tx, userId: string) => {
 
 /** Jugador: eventos, plantillas, estadísticas y traspasos. Deja de ser MVP donde lo era. */
 export const purgePlayer = async (tx: Tx, playerId: string) => {
-  if (await tx.rosterEntry.count({ where: { playerId } }) || await tx.matchEvent.count({ where: { playerId } }) || await tx.transfer.count({ where: { playerId } })) {
-    throw new AppError(409, 'El jugador tiene historial. Desactívalo para conservar sus equipos, torneos y estadísticas.', 'HISTORY_PROTECTED');
-  }
   await tx.matchEvent.deleteMany({ where: { playerId } });
   await tx.match.updateMany({ where: { mvpPlayerId: playerId }, data: { mvpPlayerId: null } });
   await tx.transfer.deleteMany({ where: { playerId } });
@@ -140,7 +125,6 @@ export const purgeTeam = async (tx: Tx, teamId: string, leaderId?: string | null
     where: { teamId },
     select: { id: true },
   });
-  if (registrations.length) throw new AppError(409, 'El equipo tiene historial. Desactívalo para conservar sus torneos, plantillas y resultados.', 'HISTORY_PROTECTED');
   await purgeRegistrations(tx, idsOf(registrations));
   await tx.teamBlock.deleteMany({ where: { teamId } });
   if (leaderId) await purgeUser(tx, leaderId);

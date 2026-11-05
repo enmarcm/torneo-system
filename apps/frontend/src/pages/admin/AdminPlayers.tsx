@@ -187,7 +187,7 @@ const AdminPlayers: React.FC = () => {
           }
         }}
         title="¿Eliminar definitivamente?"
-        message={`Solo se puede eliminar a "${purgingPlayer?.firstName ?? ''} ${purgingPlayer?.lastName ?? ''}" si no tiene historial. Para retirar un jugador que ya participó, desactívalo: se conservan sus equipos, torneos y estadísticas.`}
+        message={`Se eliminará a "${purgingPlayer?.firstName ?? ''} ${purgingPlayer?.lastName ?? ''}" con sus plantillas, estadísticas y eventos de partido. No se puede deshacer. Para conservar su historial, desactívalo en vez de eliminarlo.`}
         confirmLabel="Eliminar definitivamente"
         loading={deletePlayer.isPending}
       />
