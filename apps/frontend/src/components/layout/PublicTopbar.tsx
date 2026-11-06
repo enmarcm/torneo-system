@@ -12,7 +12,7 @@ import MenuOpenRounded from '@mui/icons-material/MenuOpenRounded';
 import LightModeRounded from '@mui/icons-material/LightModeRounded';
 import DarkModeRounded from '@mui/icons-material/DarkModeRounded';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSiteLogos } from '@/hooks/common/useSiteLogos';
 import { ROUTES } from '@/routes/routes';
@@ -42,27 +42,34 @@ export const PublicTopbar: React.FC<Props> = ({ onToggleNav, navExpanded }) => {
   const navigate = useNavigate();
   const { mode, toggleMode } = useGlobalStore();
   const heroActive = useGlobalStore((s) => s.publicHeroActive);
+  const barRef = useRef<HTMLElement>(null);
   const isDark = mode === 'dark';
 
   /*
-    La barra se apoya sobre la portada mientras esta la esté cubriendo, y recién
-    ahí puede ser transparente. La portada mide una pantalla y arranca pegada
-    arriba, así que deja de taparla en cuanto se baja más de una pantalla menos
-    el alto de la propia barra.
+    El borde real de la portada manda, incluso si crece por el contenido o
+    cambia el alto disponible al girar el teléfono.
   */
   const [pastHero, setPastHero] = useState(false);
   useEffect(() => {
-    if (!heroActive) return;
-    const alto = () =>
-      window.innerWidth >= 900 ? PUBLIC_TOPBAR_H.md : PUBLIC_TOPBAR_H.xs;
-    const check = () => setPastHero(window.scrollY > window.innerHeight - alto());
+    if (!heroActive) {
+      setPastHero(false);
+      return;
+    }
+    const hero = document.getElementById('public-hero');
+    const check = () => setPastHero(
+      !hero || hero.getBoundingClientRect().bottom <= (barRef.current?.getBoundingClientRect().bottom ?? 0),
+    );
     check();
+    const observer = new ResizeObserver(check);
+    if (hero) observer.observe(hero);
+    if (barRef.current) observer.observe(barRef.current);
     // `passive`: no se cancela el scroll, y así no se le pega al hilo de pintado.
     window.addEventListener('scroll', check, { passive: true });
     window.addEventListener('resize', check);
     return () => {
       window.removeEventListener('scroll', check);
       window.removeEventListener('resize', check);
+      observer.disconnect();
     };
   }, [heroActive]);
 
@@ -86,10 +93,12 @@ export const PublicTopbar: React.FC<Props> = ({ onToggleNav, navExpanded }) => {
 
   return (
     <AppBar
+      ref={barRef}
       position="fixed"
       elevation={0}
       sx={{
         bgcolor: sobreHero ? 'transparent' : 'var(--sidebar)',
+        backgroundImage: 'none',
         color: sobreHero ? '#fff' : 'text.primary',
         borderBottom: '1px solid',
         borderColor: sobreHero ? 'transparent' : 'var(--sidebarBorder)',

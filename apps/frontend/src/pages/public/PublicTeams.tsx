@@ -22,7 +22,6 @@ import { CompetitionTags } from '@/components/sport/CompetitionTags';
 import { AppModal } from '@/components/ui/AppModal';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { AdSlot } from '@/components/ui/AdSlot';
-import { getCompetitionSubtitle } from '@/utils/competitionMeta';
 import { ROUTES } from '@/routes/routes';
 import type { PublicRegistration } from '@/api/public.api';
 import type { Competition } from '@/api/competitions.api';
@@ -113,7 +112,7 @@ const PublicTeams: React.FC = () => {
               ) : (
                 <Grid container spacing={2}>
                   {teams.map((r: PublicRegistration, i: number) => (
-                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={r.id}>
+                    <Grid size={{ xs: 6, sm: 6, md: 4, lg: 3 }} key={r.id}>
                       <Card
                         component={motion.div}
 
@@ -129,16 +128,16 @@ const PublicTeams: React.FC = () => {
                             setSelected({ registration: r, competition });
                           }
                         }}
-                        sx={{ p: 3, textAlign: 'center', cursor: 'pointer' }}
+                        sx={{ p: { xs: 1.75, sm: 3 }, height: '100%', textAlign: 'center', cursor: 'pointer' }}
                         onClick={() => setSelected({ registration: r, competition })}
                       >
                         <Crest
                           src={r.team.logoUrl ?? undefined}
                           sx={{
-                            width: 64,
-                            height: 64,
+                            width: { xs: 52, sm: 64 },
+                            height: { xs: 52, sm: 64 },
                             mx: 'auto',
-                            mb: 2,
+                            mb: { xs: 1.25, sm: 2 },
                             bgcolor: 'primary.soft',
                             color: 'primary.main',
                             fontWeight: 800,
@@ -147,7 +146,7 @@ const PublicTeams: React.FC = () => {
                         >
                           {r.team.name[0]}
                         </Crest>
-                        <Typography variant="h4" sx={{ mb: 0.5 }}>
+                        <Typography variant="h4" sx={{ mb: 0.5, fontSize: { xs: 15, sm: undefined }, overflowWrap: 'anywhere' }}>
                           {r.team.name}
                         </Typography>
                         {r.group && (
@@ -169,7 +168,7 @@ const PublicTeams: React.FC = () => {
         title={selected?.registration.team.name ?? ''}
         subtitle={
           selected
-            ? `${selected.competition.name} · ${getCompetitionSubtitle(selected.competition)}`
+            ? selected.competition.name
             : undefined
         }
         maxWidth={560}

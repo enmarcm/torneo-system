@@ -73,12 +73,16 @@ export const ImageUpload: React.FC<Props> = ({ value, onChange, accept = 'image/
           <Stack alignItems="center" spacing={1}>
             {uploading ? <CircularProgress size={28} /> : <CloudUploadRounded sx={{ fontSize: 36, color: 'text.secondary' }} />}
             <Typography variant="body2" color="text.secondary">{uploading ? 'Subiendo imagen…' : required ? 'Seleccionar imagen' : label}</Typography>
-            <Typography variant="caption" color="text.secondary">Haz clic o arrastra una imagen aquí</Typography>
+            <Typography variant="caption" color="text.secondary">
+              {/* En un teléfono no se arrastra nada: el texto cambia con el tipo de puntero, no con el ancho. */}
+              <Box component="span" sx={{ '@media (pointer: coarse)': { display: 'none' } }}>Haz clic o arrastra una imagen aquí</Box>
+              <Box component="span" sx={{ display: 'none', '@media (pointer: coarse)': { display: 'inline' } }}>Toca para elegir una imagen</Box>
+            </Typography>
           </Stack>
         </ButtonBase>
       )}
       {error && <Alert severity="error">{error}</Alert>}
-      {hint && <Stack direction="row" spacing={0.75} alignItems="flex-start"><InfoOutlined sx={{ fontSize: 15, color: 'text.secondary' }} /><Typography variant="caption" color="text.secondary">Medida sugerida: {hint}.</Typography></Stack>}
+      {hint && <Stack direction="row" spacing={0.75} alignItems="flex-start"><InfoOutlined sx={{ fontSize: 15, color: 'text.secondary' }} /><Typography variant="caption" color="text.secondary">Medida sugerida: {hint.replace(/\.+$/, '')}.</Typography></Stack>}
     </Stack>
   );
 };

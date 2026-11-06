@@ -13,7 +13,9 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { MatchLoader } from '@/components/ui/MatchLoader';
 import { RouteProgressSignal } from '@/components/ui/RouteProgress';
-import { isMatchRoute, legalPath } from '@/routes/routes';
+import { ROUTES, isMatchRoute, legalPath } from '@/routes/routes';
+import { COMING_SOON } from '@/routes/comingSoon';
+import { ComingSoon } from '@/components/ui/ComingSoon';
 import { usePublicSiteQuery } from '@/hooks/queries';
 import { FALLBACK_SETTINGS } from '@/api/site.api';
 import { AdSlot } from '@/components/ui/AdSlot';
@@ -77,6 +79,7 @@ export const PublicLayout: React.FC = () => {
   return (
     <Box
       sx={{
+        '--public-topbar-height': { xs: `${PUBLIC_TOPBAR_H.xs}px`, md: `${PUBLIC_TOPBAR_H.md}px` },
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
@@ -127,7 +130,7 @@ export const PublicLayout: React.FC = () => {
           display: 'flex',
           flexDirection: 'column',
           // La barra es fija y cruza la pantalla: el contenido arranca debajo.
-          pt: { xs: `${PUBLIC_TOPBAR_H.xs}px`, md: `${PUBLIC_TOPBAR_H.md}px` },
+          pt: 'var(--public-topbar-height)',
         }}
       >
         {/*
@@ -144,16 +147,41 @@ export const PublicLayout: React.FC = () => {
               </>
             }
           >
-            <Outlet />
+            {/* Una sección marcada como pendiente no carga su página: muestra la obra. */}
+            {COMING_SOON[pathname] ? (
+              <ComingSoon
+                title={COMING_SOON[pathname].title}
+                description={COMING_SOON[pathname].description}
+                onBack={() => navigate(ROUTES.public.home)}
+                secondary={
+                  COMING_SOON[pathname].alternative && {
+                    label: COMING_SOON[pathname].alternative.label,
+                    onClick: () => navigate(COMING_SOON[pathname].alternative!.to),
+                  }
+                }
+              />
+            ) : (
+              <Outlet />
+            )}
           </Suspense>
         </Box>
 
-        {/*
-          Los patrocinadores van en una franja de gris medio, justo antes del pie:
-          ni el fondo claro ni el oscuro dejan ver a la vez logos blancos y negros.
-        */}
-        <Box sx={{ bgcolor: '#8C8C8C' }}>
-          <Container maxWidth="xl" sx={{ py: 2.5 }}>
+        {/* La franja comparte el fondo del pie, con un separador blanco fino. */}
+        <Box sx={{ bgcolor: 'var(--footerSurface)' }}>
+          <Container maxWidth="xl" sx={{
+            py: 2,
+            position: 'relative',
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              bottom: 0,
+              left: { xs: 24, md: 32 },
+              right: { xs: 24, md: 32 },
+              height: '1px',
+              bgcolor: 'var(--sponsorDivider)',
+              pointerEvents: 'none',
+            },
+          }}>
             <AdSlot placement="FOOTER_LOGOS" />
           </Container>
         </Box>
@@ -241,6 +269,8 @@ export const PublicLayout: React.FC = () => {
                   )}
                 </Stack>
 
+                {/* Sin ningún dato de contacto, la columna entera se omite: un título solo no dice nada. */}
+                {(contacto.length > 0 || redes.length > 0) && (
                 <Box>
                   <Typography
                     variant="caption"
@@ -284,6 +314,7 @@ export const PublicLayout: React.FC = () => {
                     )}
                   </Stack>
                 </Box>
+                )}
 
                 <Box>
                   <Typography
@@ -299,7 +330,7 @@ export const PublicLayout: React.FC = () => {
                   >
                     La liga
                   </Typography>
-                  <Stack spacing={0.75}>
+                  <Stack spacing={{ xs: 1.5, md: 0.75 }}>
                     {PUBLIC_NAV.map((n) => (
                       <Typography
                         key={n.to}
@@ -318,6 +349,8 @@ export const PublicLayout: React.FC = () => {
                           font: 'inherit',
                           color: 'rgba(255,255,255,0.8)',
                           '&:hover': { color: '#fff' },
+                          // Zona táctil de ~44 px sin alterar el aspecto: el dedo no acierta a un texto de 24 px.
+                          '&::before': { content: '""', position: 'absolute', left: -4, right: -4, top: -9, bottom: -9 },
                         }}
                       >
                         {n.label}
@@ -351,6 +384,7 @@ export const PublicLayout: React.FC = () => {
                         color: 'rgba(255,255,255,0.75)',
                         font: 'inherit',
                         fontSize: 13,
+                        py: 1,
                         '&:hover': { color: '#fff' },
                       }}
                     >
@@ -378,6 +412,7 @@ export const PublicLayout: React.FC = () => {
                     rel="noopener noreferrer"
                     color="inherit"
                     underline="hover"
+                    sx={{ display: 'inline-block', py: 1.25 }}
                   >
                     Colina
                   </Link>{' '}
@@ -388,6 +423,7 @@ export const PublicLayout: React.FC = () => {
                     rel="noopener noreferrer"
                     color="inherit"
                     underline="hover"
+                    sx={{ display: 'inline-block', py: 1.25 }}
                   >
                     Merchan
                   </Link>

@@ -31,12 +31,8 @@ const ROTATE_MS = 8000;
 /** A partir de cuántos logos la tira del pie pasa a desplazarse como carrusel. */
 const LOGOS_PARA_CARRUSEL = 4;
 
-/*
-  Los logos suben en el lienzo único de 5:1 con fondo transparente, así que el
-  logo ocupa solo el centro. Por eso la pieza se muestra a un alto grande y se
-  escala entera (sin deformarla): a 32px de alto el logo quedaba diminuto.
-*/
-const ALTO_LOGO = { xs: 44, md: 60 };
+/* Alto compacto; cada pieza conserva su proporción y sus colores originales. */
+const ALTO_LOGO = { xs: 32, md: 40 };
 const SEPARACION_LOGOS = { xs: 1, md: 2 };
 
 /** La imagen, envuelta en su enlace solo si el anuncio tiene destino. */
@@ -119,6 +115,7 @@ export const AdSlot: React.FC<Props> = ({ placement, variant, label, max, priori
       height: ALTO_LOGO,
       flexShrink: 0,
       objectFit: 'contain' as const,
+      filter: placement === 'FOOTER_LOGOS' ? 'var(--sponsorLogoFilter)' : undefined,
       transition: 'opacity 0.2s ease',
     };
 
@@ -136,13 +133,15 @@ export const AdSlot: React.FC<Props> = ({ placement, variant, label, max, priori
               sx={logo}
             />
           )}
-          sx={sx}
+          sx={{ py: placement === 'FOOTER_LOGOS' ? 1 : 0, ...sx }}
         />
       );
     }
 
     return (
       <Stack
+        role="group"
+        aria-label="Patrocinadores"
         direction="row"
         useFlexGap
         sx={{

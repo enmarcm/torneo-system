@@ -28,6 +28,7 @@ import { ROUTES } from '@/routes/routes';
 import { usePublicEditionsQuery, usePublicMatchesQuery } from '@/hooks/queries';
 import { useRef, type ReactNode } from 'react';
 import { RailIndicator } from './RailIndicator';
+import { isComingSoon } from '@/routes/comingSoon';
 
 export interface PublicNavItem {
   label: string;
@@ -193,7 +194,9 @@ export const PublicSidebar: React.FC<Props> = ({ onNavigate, onClose }) => {
         <RailIndicator containerRef={listRef} deps={[pathname]} />
         {PUBLIC_NAV.map((item) => {
           const isActive = pathname === item.to;
-          const isLiveItem = item.to === ROUTES.public.live && liveCount > 0;
+          const soon = isComingSoon(item.to);
+          // Una sección pendiente no anuncia partidos: el contador solo va en la que funciona.
+          const isLiveItem = !soon && item.to === ROUTES.public.live && liveCount > 0;
 
           return (
             <ListItemButton
@@ -228,6 +231,27 @@ export const PublicSidebar: React.FC<Props> = ({ onNavigate, onClose }) => {
                   noWrap: true,
                 }}
               />
+
+              {soon && (
+                <Typography
+                  component="span"
+                  sx={{
+                    px: 0.875,
+                    height: 20,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    borderRadius: 999,
+                    bgcolor: 'warning.main',
+                    color: 'warning.contrastText',
+                    fontSize: 10.5,
+                    fontWeight: 800,
+                    letterSpacing: 0.3,
+                    flexShrink: 0,
+                  }}
+                >
+                  Pronto
+                </Typography>
+              )}
 
               {isLiveItem && (
                 <Stack

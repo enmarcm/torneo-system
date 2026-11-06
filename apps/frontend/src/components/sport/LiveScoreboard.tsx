@@ -113,8 +113,8 @@ export const LiveScoreboard: React.FC<Props> = ({ match, showFeed = true, size =
           <Typography
             variant="caption"
             color="text.secondary"
-            sx={{ display: 'block', fontWeight: 600 }}
-            noWrap
+            // Sede y hora pueden ser largas: se parten en dos líneas antes que perder la hora con "…".
+            sx={{ display: 'block', fontWeight: 600, overflowWrap: 'anywhere' }}
           >
             {match.venue ?? 'Sede por confirmar'} ·{' '}
             {match.scheduledAt ? formatTime(match.scheduledAt) : UNSCHEDULED_LABEL}

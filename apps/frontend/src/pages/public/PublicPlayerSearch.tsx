@@ -10,6 +10,7 @@ import {
   TextField,
   Button,
   Chip,
+  Container,
   Divider,
 } from '@mui/material';
 import SearchRounded from '@mui/icons-material/SearchRounded';
@@ -51,7 +52,7 @@ const PublicPlayerSearch: React.FC = () => {
   const career = data?.career ?? [];
 
   return (
-    <Box>
+    <Container maxWidth="md" sx={{ py: { xs: 3, md: 5 } }}>
       <Typography component="h1" variant="h2" sx={{ mb: 0.5 }}>
         Ficha del jugador
       </Typography>
@@ -245,7 +246,7 @@ const PublicPlayerSearch: React.FC = () => {
           )}
         </>
       )}
-    </Box>
+    </Container>
   );
 };
 

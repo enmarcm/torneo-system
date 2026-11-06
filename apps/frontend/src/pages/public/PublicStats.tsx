@@ -28,10 +28,11 @@ const StatRow: React.FC<{ row: PlayerStatRow; position: number }> = ({ row, posi
   const podium = PODIUM[position];
 
   return (
-    <Stack direction="row" spacing={2} alignItems="center" sx={{ py: 1.25 }}>
+    <Stack direction="row" spacing={{ xs: 1.25, sm: 2 }} alignItems="center" sx={{ py: 1.25 }}>
       <Typography
         sx={{
-          width: 30,
+          width: { xs: 24, sm: 30 },
+          flexShrink: 0,
           textAlign: 'center',
           fontWeight: 800,
           color: podium ?? 'text.secondary',
@@ -48,6 +49,8 @@ const StatRow: React.FC<{ row: PlayerStatRow; position: number }> = ({ row, posi
           bgcolor: 'primary.soft',
           color: 'primary.main',
           fontWeight: 700,
+          fontSize: 15,
+          flexShrink: 0,
           ...(podium ? { border: '2px solid', borderColor: podium } : {}),
         }}
       >
@@ -55,7 +58,18 @@ const StatRow: React.FC<{ row: PlayerStatRow; position: number }> = ({ row, posi
         {player?.lastName?.[0]}
       </Avatar>
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography sx={{ fontWeight: 600 }} noWrap>
+        {/* Dos líneas antes que cortar con "…": con nombres compuestos el apellido se perdía. */}
+        <Typography
+          sx={{
+            fontWeight: 600,
+            lineHeight: 1.3,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            overflowWrap: 'anywhere',
+          }}
+        >
           {player?.firstName} {player?.lastName}
         </Typography>
         <Typography variant="caption" color="text.secondary" noWrap>
@@ -67,7 +81,7 @@ const StatRow: React.FC<{ row: PlayerStatRow; position: number }> = ({ row, posi
           { value: row.goals, label: 'Goles', strong: true },
           { value: row.matchesPlayed, label: 'PJ' },
         ].map((s) => (
-          <Box key={s.label} sx={{ textAlign: 'center', minWidth: 40 }}>
+          <Box key={s.label} sx={{ textAlign: 'center', minWidth: { xs: 34, sm: 40 } }}>
             <Typography
               sx={{
                 fontWeight: 800,

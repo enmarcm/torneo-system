@@ -31,6 +31,18 @@ export const buildTheme = (mode: 'light' | 'dark') => {
       caption: { fontSize: '0.75rem' },
     },
     components: {
+      /*
+        `noWrap` solo recorta con "…" si el elemento es de bloque. Un `caption`
+        o un `span` es en línea, y su texto largo se desbordaba por encima de
+        lo que tenía a la derecha (el nombre del equipo pisaba la columna de
+        goles). Cualquier texto que pida no partirse pasa a ser de bloque; el
+        que defina su propio `display` en `sx` sigue mandando.
+      */
+      MuiTypography: {
+        styleOverrides: {
+          noWrap: { display: 'block' },
+        },
+      },
       MuiCssBaseline: {
         styleOverrides: {
           /*
@@ -203,6 +215,65 @@ export const buildTheme = (mode: 'light' | 'dark') => {
           '@keyframes llfBlurUp': {
             from: { opacity: 0, filter: 'blur(12px)', transform: 'scale(1.06)' },
             to: { opacity: 1, filter: 'blur(0)', transform: 'none' },
+          },
+          /*
+            Escena "próximamente" (ComingSoon): futbolistas con casco armando
+            el marcador. Cada pieza tiene su propio ciclo para que la escena no
+            se lea como un solo bucle repetido.
+          */
+          // Martillazo: se arma, golpea y rebota.
+          '@keyframes llfHammer': {
+            '0%, 100%': { transform: 'rotate(-38deg)' },
+            '42%': { transform: 'rotate(26deg)' },
+            '60%': { transform: 'rotate(10deg)' },
+          },
+          '@keyframes llfSpark': {
+            '0%, 38%': { opacity: 0, transform: 'scale(0.4)' },
+            '44%': { opacity: 1, transform: 'scale(1.15)' },
+            '75%, 100%': { opacity: 0, transform: 'scale(1.5)' },
+          },
+          // Paso: las dos piernas usan la misma curva, una en dirección inversa.
+          '@keyframes llfStep': {
+            '0%, 100%': { transform: 'rotate(18deg)' },
+            '50%': { transform: 'rotate(-18deg)' },
+          },
+          // Va y viene por la cancha cargando un ladrillo; se da vuelta en cada extremo.
+          '@keyframes llfPace': {
+            '0%': { transform: 'translateX(-34px) scaleX(1)' },
+            '49.9%': { transform: 'translateX(34px) scaleX(1)' },
+            '50%': { transform: 'translateX(34px) scaleX(-1)' },
+            '99.9%': { transform: 'translateX(-34px) scaleX(-1)' },
+            '100%': { transform: 'translateX(-34px) scaleX(1)' },
+          },
+          '@keyframes llfBob': {
+            '0%, 100%': { transform: 'translateY(0)' },
+            '50%': { transform: 'translateY(-3px)' },
+          },
+          // Cada ladrillo del marcador cae en su lugar y, al final del ciclo, se retira.
+          '@keyframes llfBrickIn': {
+            '0%': { opacity: 0, transform: 'translateY(-16px)' },
+            '5%, 88%': { opacity: 1, transform: 'translateY(0)' },
+            '96%, 100%': { opacity: 0, transform: 'translateY(0)' },
+          },
+          // Ladrillo que sube con la grúa hasta el marcador.
+          '@keyframes llfHoist': {
+            '0%, 5%': { transform: 'translateY(0)', opacity: 1 },
+            '75%': { transform: 'translateY(-118px)', opacity: 1 },
+            '85%, 100%': { transform: 'translateY(-118px)', opacity: 0 },
+          },
+          // Pelota al aire: sube frenándose y cae acelerando.
+          '@keyframes llfJuggle': {
+            '0%, 100%': { transform: 'translateY(0)', animationTimingFunction: 'cubic-bezier(.2,.7,.4,1)' },
+            '50%': { transform: 'translateY(-64px)', animationTimingFunction: 'cubic-bezier(.6,0,.8,.3)' },
+          },
+          '@keyframes llfKick': {
+            '0%, 100%': { transform: 'rotate(-40deg)' },
+            '10%, 80%': { transform: 'rotate(0deg)' },
+          },
+          // Cinta de obra: las franjas avanzan por la tira.
+          '@keyframes llfHazard': {
+            // 28.28 px = un período de franja (20 px) medido en horizontal a 45°: el bucle no se corta.
+            to: { backgroundPosition: '28.28px 0' },
           },
           '.llf-rise': { animation: 'none' },
           /*

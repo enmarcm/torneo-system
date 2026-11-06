@@ -212,8 +212,7 @@ export const MatchCard: React.FC<Props> = ({
           <Typography
             variant="body2"
             align={compact ? 'left' : 'center'}
-            sx={{ fontWeight: homeWon ? 800 : 600, width: '100%', fontSize: compact ? 13 : undefined }}
-            noWrap
+            sx={{ fontWeight: homeWon ? 800 : 600, width: '100%', fontSize: compact ? 13 : undefined, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', overflowWrap: 'anywhere', lineHeight: 1.25 }}
           >
             {match.homeRegistration.team.name}
           </Typography>
@@ -275,8 +274,7 @@ export const MatchCard: React.FC<Props> = ({
           <Typography
             variant="body2"
             align={compact ? 'right' : 'center'}
-            sx={{ fontWeight: awayWon ? 800 : 600, width: '100%', fontSize: compact ? 13 : undefined }}
-            noWrap
+            sx={{ fontWeight: awayWon ? 800 : 600, width: '100%', fontSize: compact ? 13 : undefined, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', overflowWrap: 'anywhere', lineHeight: 1.25 }}
           >
             {match.awayRegistration.team.name}
           </Typography>
@@ -296,7 +294,8 @@ export const MatchCard: React.FC<Props> = ({
           color: 'text.secondary',
         }}
       >
-        <Stack direction="row" alignItems="center" spacing={0.6} sx={{ minWidth: 0 }}>
+        {/* La fecha no se recorta nunca: lo que cede espacio es la sede. */}
+        <Stack direction="row" alignItems="center" spacing={0.6} sx={{ flexShrink: 0 }}>
           {isPending ? (
             <PendingActionsRounded sx={{ fontSize: 15, color: 'warning.main' }} />
           ) : (
@@ -304,8 +303,7 @@ export const MatchCard: React.FC<Props> = ({
           )}
           <Typography
             variant="caption"
-            noWrap
-            sx={{ fontWeight: isPending ? 700 : 500, color: isPending ? 'warning.main' : 'inherit' }}
+            sx={{ fontWeight: isPending ? 700 : 500, color: isPending ? 'warning.main' : 'inherit', whiteSpace: 'nowrap' }}
           >
             {formatDateTimeOrPending(match.scheduledAt)}
           </Typography>

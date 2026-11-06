@@ -45,13 +45,14 @@ export const PublicScopeFilters: React.FC<Props> = ({
 }) => (
   <Card sx={{ p: 2, mb: 3 }}>
     <Stack
-      direction={{ xs: 'column', md: 'row' }}
+      direction={{ xs: 'column', sm: 'row' }}
       spacing={2}
-      alignItems={{ md: 'center' }}
+      alignItems={{ sm: 'center' }}
       useFlexGap
-      sx={{ flexWrap: 'wrap' }}
+      // En columna (teléfono) nada envuelve: cada campo ocupa el ancho de la tarjeta.
+      sx={{ flexWrap: { xs: 'nowrap', sm: 'wrap' } }}
     >
-      <FormControl size="small" sx={{ minWidth: 190 }}>
+      <FormControl size="small" sx={{ minWidth: { xs: 0, sm: 190 }, width: { xs: '100%', sm: 'auto' } }}>
         <InputLabel>Edición</InputLabel>
         <Select
           label="Edición"
@@ -67,10 +68,10 @@ export const PublicScopeFilters: React.FC<Props> = ({
       </FormControl>
 
       {isCurrentEdition && (
-        <Chip size="small" color="success" variant="outlined" label="Edición en curso" />
+        <Chip size="small" color="success" variant="outlined" label="Edición en curso" sx={{ alignSelf: { xs: 'flex-start', sm: 'center' } }} />
       )}
 
-      <FormControl size="small" sx={{ minWidth: 260 }}>
+      <FormControl size="small" sx={{ minWidth: { xs: 0, sm: 260 }, width: { xs: '100%', sm: 'auto' } }}>
         <InputLabel>Competición</InputLabel>
         <Select
           label="Competición"

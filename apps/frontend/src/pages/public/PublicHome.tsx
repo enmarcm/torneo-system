@@ -23,6 +23,7 @@ import { ErrorState } from '@/components/ui/ErrorState';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { NextMatchRow } from '@/components/sport/NextMatchRow';
 import { ROUTES } from '@/routes/routes';
+import { isComingSoon } from '@/routes/comingSoon';
 import { AGE_GROUP_LABELS, getCompetitionAgeGroup, sortCompetitions, getCompetitionShortLabel } from '@/utils/competitionMeta';
 import type { Edition, Competition, Match } from '@/api/public.api';
 import { ARTICLE_KIND_LABEL } from '@/api/news.api';
@@ -176,9 +177,11 @@ const PublicHome: React.FC = () => {
               <Box sx={{ width: 9, height: 9, borderRadius: '50%', bgcolor: 'var(--live)', animation: 'pulse 1.4s infinite' }} />
               <Typography variant="h4" component="h2">En vivo ahora</Typography>
               <Box sx={{ flex: 1 }} />
-              <Button size="small" endIcon={<ArrowForwardRounded />} onClick={() => navigate(ROUTES.public.live)}>
-                Ver todos
-              </Button>
+              {!isComingSoon(ROUTES.public.live) && (
+                <Button size="small" endIcon={<ArrowForwardRounded />} sx={{ flexShrink: 0, whiteSpace: 'nowrap', minHeight: 40 }} onClick={() => navigate(ROUTES.public.live)}>
+                  Ver todos
+                </Button>
+              )}
             </Stack>
             <Grid container spacing={2}>
               {liveMatches.map((m: Match) => (
@@ -213,7 +216,7 @@ const PublicHome: React.FC = () => {
                 />
               )}
               <Box sx={{ flex: 1 }} />
-              <Button size="small" endIcon={<ArrowForwardRounded />} onClick={() => navigate(ROUTES.public.schedule)}>
+              <Button size="small" endIcon={<ArrowForwardRounded />} sx={{ flexShrink: 0, whiteSpace: 'nowrap', minHeight: 40 }} onClick={() => navigate(ROUTES.public.schedule)}>
                 Ver calendario
               </Button>
             </Stack>
@@ -246,7 +249,7 @@ const PublicHome: React.FC = () => {
               <StarRounded sx={{ fontSize: 20, color: 'var(--accent)' }} />
               <Typography variant="h4" component="h2">Destacados de la semana</Typography>
               <Box sx={{ flex: 1 }} />
-              <Button size="small" endIcon={<ArrowForwardRounded />} onClick={() => navigate(ROUTES.public.schedule)}>
+              <Button size="small" endIcon={<ArrowForwardRounded />} sx={{ flexShrink: 0, whiteSpace: 'nowrap', minHeight: 40 }} onClick={() => navigate(ROUTES.public.schedule)}>
                 Ver calendario
               </Button>
             </Stack>
@@ -286,7 +289,7 @@ const PublicHome: React.FC = () => {
             <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 1.5 }}>
               <Typography variant="h4" component="h2">Última jornada</Typography>
               <Box sx={{ flex: 1 }} />
-              <Button size="small" endIcon={<ArrowForwardRounded />} onClick={() => navigate(ROUTES.public.schedule)}>
+              <Button size="small" endIcon={<ArrowForwardRounded />} sx={{ flexShrink: 0, whiteSpace: 'nowrap', minHeight: 40 }} onClick={() => navigate(ROUTES.public.schedule)}>
                 Ver todos
               </Button>
             </Stack>
@@ -312,7 +315,7 @@ const PublicHome: React.FC = () => {
             <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 1.5 }}>
               <Typography variant="h4" component="h2">Noticias y fichas</Typography>
               <Box sx={{ flex: 1 }} />
-              <Button size="small" endIcon={<ArrowForwardRounded />} onClick={() => navigate(ROUTES.public.news)}>
+              <Button size="small" endIcon={<ArrowForwardRounded />} sx={{ flexShrink: 0, whiteSpace: 'nowrap', minHeight: 40 }} onClick={() => navigate(ROUTES.public.news)}>
                 Ver todas
               </Button>
             </Stack>

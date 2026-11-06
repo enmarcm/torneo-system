@@ -46,7 +46,7 @@ const PublicNews: React.FC = () => {
   // La destacada abre el apartado a lo ancho; el resto va en la grilla.
   const [lead, ...rest] = visible;
 
-  const Cover: React.FC<{ article: Article; height: number }> = ({ article, height }) =>
+  const Cover: React.FC<{ article: Article; height: number | { xs: number; md: number } }> = ({ article, height }) =>
     article.coverUrl ? (
       <Box
         component="img"
@@ -119,7 +119,7 @@ const PublicNews: React.FC = () => {
             label={f.label}
             color={kind === f.value ? 'primary' : 'default'}
             onClick={() => setKind(f.value)}
-            sx={{ fontWeight: 600 }}
+            sx={{ fontWeight: 600, height: { xs: 40, md: 32 } }}
           />
         ))}
       </Stack>
@@ -149,7 +149,7 @@ const PublicNews: React.FC = () => {
           >
             <Grid container>
               <Grid size={{ xs: 12, md: 7 }}>
-                <Cover article={lead} height={320} />
+                <Cover article={lead} height={{ xs: 190, md: 320 }} />
               </Grid>
               <Grid size={{ xs: 12, md: 5 }}>
                 <Box sx={{ p: { xs: 2.5, md: 4 } }}>

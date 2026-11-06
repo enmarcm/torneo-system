@@ -144,14 +144,14 @@ const PublicSchedule: React.FC = () => {
           value={dateFilter}
           onChange={(e) => setDateFilter(e.target.value)}
           InputLabelProps={{ shrink: true }}
-          sx={{ minWidth: 170 }}
+          sx={{ minWidth: { xs: 0, sm: 170 }, width: { xs: '100%', sm: 'auto' } }}
         />
         {dateFilter && (
           <Button size="small" onClick={() => setDateFilter('')} sx={{ color: 'text.secondary' }}>
             Limpiar día
           </Button>
         )}
-        <Box sx={{ flex: 1 }} />
+        <Box sx={{ flex: 1, display: { xs: 'none', sm: 'block' } }} />
         <Tabs
           value={filter}
           onChange={(_, v: Filter) => setFilter(v)}
@@ -217,7 +217,7 @@ const PublicSchedule: React.FC = () => {
                 <Typography variant="h6" sx={{ fontWeight: 800 }}>
                   {day}
                 </Typography>
-                <Chip size="small" label={`${dayMatches.length} partidos`} variant="outlined" />
+                <Chip size="small" label={`${dayMatches.length} ${dayMatches.length === 1 ? 'partido' : 'partidos'}`} variant="outlined" />
                 <Divider sx={{ flex: 1 }} />
               </Stack>
               <Stack spacing={1.5}>
@@ -254,7 +254,7 @@ const PublicSchedule: React.FC = () => {
                   size="small"
                   color="warning"
                   variant="outlined"
-                  label={`${groups.pending.length} partidos`}
+                  label={`${groups.pending.length} ${groups.pending.length === 1 ? 'partido' : 'partidos'}`}
                 />
                 <Divider sx={{ flex: 1 }} />
               </Stack>

@@ -35,14 +35,20 @@ const bootstrap = async () => {
   bootstrapped = true;
 };
 
-/** Reemplaza {{marcadores}} con los datos de la configuración. */
+/**
+ * Reemplaza {{marcadores}} con los datos de la configuración. Un marcador vacío
+ * dejaba un espacio suelto ("Liga Lago Futsal , con domicilio"), así que al final
+ * se quita el espacio que quede antes de la puntuación.
+ */
 const fill = (text: string, s: { siteName: string; legalName: string; taxId: string } & Record<string, unknown>) =>
-  text.replace(/\{\{(\w+)\}\}/g, (_m, key: string) => {
-    // Sin razón social, el responsable es la liga misma: evita dejar un hueco en el texto.
-    if (key === 'legalName') return s.legalName || s.siteName;
-    if (key === 'taxId') return s.taxId ? `(${s.taxId})` : '';
-    return String(s[key] ?? '');
-  });
+  text
+    .replace(/\{\{(\w+)\}\}/g, (_m, key: string) => {
+      // Sin razón social, el responsable es la liga misma: evita dejar un hueco en el texto.
+      if (key === 'legalName') return s.legalName || s.siteName;
+      if (key === 'taxId') return s.taxId ? `(${s.taxId})` : '';
+      return String(s[key] ?? '');
+    })
+    .replace(/[ \t]+([,.;:])/g, '$1');
 
 export const siteService = {
   getSettings: async () => {

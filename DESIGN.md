@@ -45,7 +45,9 @@ La administración y el panel de equipo usan una barra lateral de 240px, plegabl
 
 Los bloques comparten una separación de 16–24px. Las métricas muestran primero la etiqueta y luego el número, sin animaciones de conteo ni iconos decorativos. Los resúmenes de entidad son compactos y usan una tinta clara de marca. El encabezado no compite con el dato.
 
-El sitio público usa un contenedor centrado `xl`. La portada tiene altura de contenido y fotografía propia, para que el comienzo de la jornada aparezca antes. Los accesos a partidos y posiciones son visibles desde el primer bloque. La navegación pública sigue siendo desplegable.
+El sitio público usa un contenedor centrado `xl`. La portada tiene fotografía propia y completa la primera pantalla (`100svh`), detrás de la barra superior transparente. El contenido reserva el alto de la barra; el título y los accesos quedan centrados verticalmente y los escudos al pie. Al llegar el borde inferior del hero al de la barra, esta recupera su fondo. La jornada comienza debajo al desplazarse. En pantallas bajas o con texto ampliado, la portada puede crecer para mostrar todo el contenido. La navegación pública sigue siendo desplegable.
+
+La franja de patrocinadores comparte el fondo navy del pie en ambos temas, con una línea blanca de 1px al 14% de opacidad entre ambos. El separador respeta el contenedor centrado y tiene márgenes de 24px en móvil y 32px en escritorio. Sus logos miden 32px de alto en móvil y 40px en escritorio, conservan los colores originales y llevan una sombra blanca que sigue su silueta mediante `drop-shadow`, también en el carrusel y con movimiento reducido.
 
 ## Componentes y estados
 
