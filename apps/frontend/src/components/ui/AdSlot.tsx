@@ -1,5 +1,7 @@
 import { Box, Card, Fade, Stack, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
+import { useReducedMotion } from 'framer-motion';
+import { LogoMarquee } from './LogoMarquee';
 import { usePublicAdsQuery } from '@/hooks/queries';
 import { getPlacementMeta, type AdVariant } from '@/utils/adPlacements';
 import type { Ad, AdPlacement } from '@/api/ads.api';
@@ -26,13 +28,31 @@ interface Props {
 /** Cada cuánto rota una ranura que tiene más de un anuncio cargado. */
 const ROTATE_MS = 8000;
 
+/** A partir de cuántos logos la tira del pie pasa a desplazarse como carrusel. */
+const LOGOS_PARA_CARRUSEL = 4;
+
+/*
+  Los logos suben en el lienzo único de 5:1 con fondo transparente, así que el
+  logo ocupa solo el centro. Por eso la pieza se muestra a un alto grande y se
+  escala entera (sin deformarla): a 32px de alto el logo quedaba diminuto.
+*/
+const ALTO_LOGO = { xs: 44, md: 60 };
+const SEPARACION_LOGOS = { xs: 1, md: 2 };
+
 /** La imagen, envuelta en su enlace solo si el anuncio tiene destino. */
-const AdImage: React.FC<{ ad: Ad; sx?: object; priority?: boolean }> = ({ ad, sx, priority }) => {
+const AdImage: React.FC<{ ad: Ad; sx?: object; priority?: boolean; decorative?: boolean }> = ({
+  ad,
+  sx,
+  priority,
+  decorative,
+}) => {
   const img = (
     <Box
       component="img"
       src={ad.imageUrl}
-      alt={ad.title || 'Publicidad'}
+      // La copia del carrusel repite el logo: no se dicta dos veces ni se enfoca.
+      alt={decorative ? '' : ad.title || 'Publicidad'}
+      aria-hidden={decorative || undefined}
       loading={priority ? 'eager' : 'lazy'}
       fetchPriority={priority ? 'high' : undefined}
       sx={{ display: 'block', width: '100%', height: 'auto', ...sx }}
@@ -45,6 +65,8 @@ const AdImage: React.FC<{ ad: Ad; sx?: object; priority?: boolean }> = ({ ad, sx
       href={ad.linkUrl}
       target="_blank"
       rel="noopener noreferrer sponsored"
+      tabIndex={decorative ? -1 : undefined}
+      aria-hidden={decorative || undefined}
       sx={{ display: 'block', lineHeight: 0 }}
     >
       {img}
@@ -74,6 +96,7 @@ export const AdSlot: React.FC<Props> = ({ placement, variant, label, max, priori
     : {};
   const stacked = shape === 'logos' || shape === 'sidebar';
   const list = max ? ads.slice(0, max) : ads;
+  const reduceMotion = useReducedMotion();
 
   const [index, setIndex] = useState(0);
 
@@ -89,6 +112,35 @@ export const AdSlot: React.FC<Props> = ({ placement, variant, label, max, priori
   const current = list[index % list.length];
 
   if (shape === 'logos') {
+    // Todos al mismo alto y respetando su proporción: es una tira de logos,
+    // no un collage de imágenes de tamaños distintos.
+    const logo = {
+      width: 'auto',
+      height: ALTO_LOGO,
+      flexShrink: 0,
+      objectFit: 'contain' as const,
+      transition: 'opacity 0.2s ease',
+    };
+
+    // Con varios logos la tira se desplaza como la de escudos de la portada.
+    if (list.length >= LOGOS_PARA_CARRUSEL && !reduceMotion) {
+      return (
+        <LogoMarquee
+          ariaLabel="Patrocinadores"
+          srcs={list.map((ad) => ad.imageUrl)}
+          renderItem={(n, copia) => (
+            <AdImage
+              key={`${list[n].id}-${copia ? 'c' : 'o'}`}
+              ad={list[n]}
+              decorative={copia}
+              sx={logo}
+            />
+          )}
+          sx={sx}
+        />
+      );
+    }
+
     return (
       <Stack
         direction="row"
@@ -97,27 +149,13 @@ export const AdSlot: React.FC<Props> = ({ placement, variant, label, max, priori
           flexWrap: 'wrap',
           alignItems: 'center',
           justifyContent: 'center',
-          columnGap: { xs: 2.5, md: 4 },
-          rowGap: 2,
+          columnGap: SEPARACION_LOGOS,
+          rowGap: 1,
           ...sx,
         }}
       >
         {list.map((ad) => (
-          <AdImage
-            key={ad.id}
-            ad={ad}
-            // Todos al mismo alto y respetando su proporción: es una tira de logos,
-            // no un collage de imágenes de tamaños distintos.
-            sx={{
-              width: 'auto',
-              height: { xs: 26, md: 32 },
-              maxWidth: 150,
-              objectFit: 'contain',
-              opacity: 0.85,
-              transition: 'opacity 0.2s ease',
-              '&:hover': { opacity: 1 },
-            }}
-          />
+          <AdImage key={ad.id} ad={ad} sx={logo} />
         ))}
       </Stack>
     );

@@ -23,8 +23,7 @@ import LoginRounded from '@mui/icons-material/LoginRounded';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { PUBLIC_TOPBAR_H } from './PublicTopbar';
 import { useGlobalStore } from '@/store/useGlobalStore';
-import logoAzul from '@/assets/logo_azul.PNG';
-import logoBlanco from '@/assets/logo.PNG';
+import { useSiteLogos } from '@/hooks/common/useSiteLogos';
 import { ROUTES } from '@/routes/routes';
 import { usePublicEditionsQuery, usePublicMatchesQuery } from '@/hooks/queries';
 import { useRef, type ReactNode } from 'react';
@@ -76,7 +75,8 @@ export const PublicSidebar: React.FC<Props> = ({ onNavigate, onClose }) => {
   const listRef = useRef<HTMLUListElement>(null);
   const navigate = useNavigate();
   const isDark = useGlobalStore((s) => s.mode) === 'dark';
-  const logoSrc = isDark ? logoBlanco : logoAzul;
+  const logos = useSiteLogos();
+  const logoSrc = isDark ? logos.oscuro : logos.claro;
 
   /*
     Consultas compartidas con la portada y la pantalla de en vivo: react-query
@@ -167,7 +167,8 @@ export const PublicSidebar: React.FC<Props> = ({ onNavigate, onClose }) => {
             sx={{
               width: { xs: 32, md: 38 },
               height: { xs: 32, md: 38 },
-              borderRadius: '50%',
+              borderRadius: logos.personalizado ? 0 : '50%',
+              objectFit: 'contain',
               flexShrink: 0,
               boxShadow: isDark ? '0 0 0 1px rgba(255,255,255,0.12)' : 'none',
             }}

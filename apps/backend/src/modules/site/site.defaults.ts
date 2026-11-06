@@ -23,6 +23,8 @@ export const DEFAULT_SETTINGS = {
   instagramUrl: '',
   facebookUrl: '',
   tiktokUrl: '',
+  logoUrl: '',
+  logoDarkUrl: '',
 };
 
 export interface DefaultLegalPage {

@@ -25,6 +25,7 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { SaveButton } from '@/components/ui/SaveButton';
+import { ImageUpload } from '@/components/ui/ImageUpload';
 import { useLegalPagesQuery, useSiteSettingsQuery } from '@/hooks/queries';
 import {
   useCreateLegalPage,
@@ -125,6 +126,42 @@ const CompanyTab: React.FC = () => {
 
   return (
     <Stack spacing={2}>
+      <Card sx={{ p: { xs: 2, md: 3 } }}>
+        <Typography sx={{ fontWeight: 800 }}>Logo principal</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
+          Es el que aparece en la barra superior, el menú y el inicio de sesión. Si no subes ninguno, se usa el logo
+          original del sitio. Para volver al original, quita la imagen y guarda.
+        </Typography>
+        <Box sx={{ display: 'grid', gap: 2.5, gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' } }}>
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+              Para fondo claro
+            </Typography>
+            <ImageUpload
+              label="Subir logo"
+              value={form.logoUrl}
+              onChange={(logoUrl) => setForm({ ...form, logoUrl })}
+              hint="cuadrado, PNG con fondo transparente, 256 × 256 px o más"
+            />
+          </Box>
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+              Para fondo oscuro y portada (opcional)
+            </Typography>
+            <Box sx={{ borderRadius: 2, bgcolor: '#0B1220', p: 1 }}>
+              <ImageUpload
+                label="Subir logo para fondo oscuro"
+                value={form.logoDarkUrl}
+                onChange={(logoDarkUrl) => setForm({ ...form, logoDarkUrl })}
+              />
+            </Box>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.75 }}>
+              Si lo dejas vacío, se usa el mismo logo de la izquierda.
+            </Typography>
+          </Box>
+        </Box>
+      </Card>
+
       {SECTIONS.map((section) => (
         <Card key={section.title} sx={{ p: { xs: 2, md: 3 } }}>
           <Typography sx={{ fontWeight: 800 }}>{section.title}</Typography>

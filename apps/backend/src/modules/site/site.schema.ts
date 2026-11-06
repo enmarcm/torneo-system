@@ -25,6 +25,9 @@ export const updateSettingsSchema = z
     instagramUrl: url,
     facebookUrl: url,
     tiktokUrl: url,
+    // Vacío = logo por defecto del sitio. Llegan de la subida de imágenes.
+    logoUrl: text(500),
+    logoDarkUrl: text(500),
   })
   .partial();
 

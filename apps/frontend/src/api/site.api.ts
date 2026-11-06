@@ -14,6 +14,10 @@ export interface SiteSettings {
   instagramUrl: string;
   facebookUrl: string;
   tiktokUrl: string;
+  /** Logo principal para fondo claro. Vacío = el logo que trae el sitio. */
+  logoUrl: string;
+  /** Versión para fondo oscuro y portada. Vacío = se usa `logoUrl`, o el logo por defecto. */
+  logoDarkUrl: string;
 }
 
 export interface LegalLink {
@@ -60,6 +64,8 @@ export const FALLBACK_SETTINGS: SiteSettings = {
   instagramUrl: '',
   facebookUrl: '',
   tiktokUrl: '',
+  logoUrl: '',
+  logoDarkUrl: '',
 };
 
 export const siteApi = {

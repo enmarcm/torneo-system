@@ -148,10 +148,15 @@ export const PublicLayout: React.FC = () => {
           </Suspense>
         </Box>
 
-        {/* Los patrocinadores van sobre el fondo de la página, justo antes del pie. */}
-        <Container maxWidth="xl" sx={{ pt: 2, pb: 3 }}>
-          <AdSlot placement="FOOTER_LOGOS" />
-        </Container>
+        {/*
+          Los patrocinadores van en una franja de gris medio, justo antes del pie:
+          ni el fondo claro ni el oscuro dejan ver a la vez logos blancos y negros.
+        */}
+        <Box sx={{ bgcolor: '#8C8C8C' }}>
+          <Container maxWidth="xl" sx={{ py: 2.5 }}>
+            <AdSlot placement="FOOTER_LOGOS" />
+          </Container>
+        </Box>
 
         <Box
           component="footer"

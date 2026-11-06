@@ -13,7 +13,7 @@ import VisibilityRounded from '@mui/icons-material/VisibilityRounded';
 import VisibilityOffRounded from '@mui/icons-material/VisibilityOffRounded';
 import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded';
 import ArrowForwardRounded from '@mui/icons-material/ArrowForwardRounded';
-import logoBlanco from '@/assets/logo.PNG';
+import { useSiteLogos } from '@/hooks/common/useSiteLogos';
 import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -63,6 +63,7 @@ const Login: React.FC = () => {
   const welcoming = useRef(false);
   const userRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
+  const logos = useSiteLogos();
   const user = useAuthStore((s) => s.user);
   const login = useLoginMutation();
 
@@ -120,7 +121,7 @@ const Login: React.FC = () => {
           spacing={1.5}
           sx={{ position: 'absolute', left: { xs: 16, md: 28 }, top: { xs: 16, md: 24 }, zIndex: 2 }}
         >
-          <Box component="img" src={logoBlanco} alt="" sx={{ width: 44, height: 44, borderRadius: '50%', boxShadow: '0 0 0 1px rgba(255,255,255,0.12)' }} />
+          <Box component="img" src={logos.oscuro} alt="" sx={{ width: 44, height: 44, borderRadius: logos.personalizado ? 0 : '50%', objectFit: 'contain', boxShadow: logos.personalizado ? 'none' : '0 0 0 1px rgba(255,255,255,0.12)' }} />
           <Typography sx={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 800, fontSize: 17, letterSpacing: '-0.01em' }}>
             Liga Lago Futsal
           </Typography>

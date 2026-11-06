@@ -599,6 +599,10 @@ model SiteSettings {
   instagramUrl String  @default("")
   facebookUrl  String  @default("")
   tiktokUrl    String  @default("")
+  /// Logo principal para fondo claro. Vacío = el logo que trae el sitio.
+  logoUrl      String  @default("")
+  /// Versión para fondo oscuro y portada. Vacío = se usa logoUrl, o el logo por defecto.
+  logoDarkUrl  String  @default("")
   updatedAt   DateTime @updatedAt
 }
 

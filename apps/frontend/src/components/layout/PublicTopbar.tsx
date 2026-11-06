@@ -14,8 +14,7 @@ import DarkModeRounded from '@mui/icons-material/DarkModeRounded';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import logoAzul from '@/assets/logo_azul.PNG';
-import logoBlanco from '@/assets/logo.PNG';
+import { useSiteLogos } from '@/hooks/common/useSiteLogos';
 import { ROUTES } from '@/routes/routes';
 import { useGlobalStore } from '@/store/useGlobalStore';
 import { RouteProgress } from '@/components/ui/RouteProgress';
@@ -82,7 +81,8 @@ export const PublicTopbar: React.FC<Props> = ({ onToggleNav, navExpanded }) => {
   const reduceMotion = useReducedMotion();
   // El logotipo tiene que contrastar con lo que tenga detrás: el tema, o la
   // portada oscura cuando la barra se apoya sobre ella.
-  const logoSrc = isDark || sobreHero ? logoBlanco : logoAzul;
+  const logos = useSiteLogos();
+  const logoSrc = isDark || sobreHero ? logos.oscuro : logos.claro;
 
   return (
     <AppBar
@@ -147,7 +147,9 @@ export const PublicTopbar: React.FC<Props> = ({ onToggleNav, navExpanded }) => {
             sx={{
               width: { xs: 32, md: 38 },
               height: { xs: 32, md: 38 },
-              borderRadius: '50%',
+              // El escudo original es redondo; uno subido por el admin entra entero.
+              borderRadius: logos.personalizado ? 0 : '50%',
+              objectFit: 'contain',
               flexShrink: 0,
               /* Sobre el casi negro el escudo redondo flota; el filo lo apoya. */
               boxShadow: isDark ? '0 0 0 1px rgba(255,255,255,0.12)' : 'none',
