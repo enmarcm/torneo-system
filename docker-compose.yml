@@ -1,5 +1,9 @@
 services:
   postgres:
+    mem_limit: 192m
+    memswap_limit: 288m
+    cpus: 1.0
+    pids_limit: 512
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
@@ -15,6 +19,10 @@ services:
       retries: 5
 
   minio:
+    mem_limit: 192m
+    memswap_limit: 288m
+    cpus: 1.0
+    pids_limit: 512
     image: minio/minio:latest
     restart: unless-stopped
     command: server /data --console-address ":9001"
@@ -37,16 +45,24 @@ services:
       exit 0;"
 
   backend:
+    mem_limit: 256m
+    memswap_limit: 384m
+    cpus: 1.0
+    pids_limit: 512
     build: ./apps/backend
     restart: unless-stopped
     env_file: .env
     depends_on:
       postgres: { condition: service_healthy }
       minio: { condition: service_started }
-    ports: ["7391:4000"]
+    ports: ["127.0.0.1:7391:4000"]
     command: sh -c "npx prisma migrate deploy && npm run prisma:seed && npm run start"
 
   frontend:
+    mem_limit: 32m
+    memswap_limit: 48m
+    cpus: 0.25
+    pids_limit: 512
     build:
       context: ./apps/frontend
       args:
@@ -54,7 +70,7 @@ services:
         VITE_SOCKET_URL: ${VITE_SOCKET_URL}
         VITE_PUBLIC_ASSETS_URL: ${VITE_PUBLIC_ASSETS_URL}
     restart: unless-stopped
-    ports: ["5842:80"]
+    ports: ["127.0.0.1:5842:80"]
     depends_on: [backend]
 
   adminer:

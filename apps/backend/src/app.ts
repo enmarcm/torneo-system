@@ -18,7 +18,8 @@ export const createApp = () => {
       contentSecurityPolicy: false,
     }),
   );
-  app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
+  const allowedOrigins = env.CORS_ORIGIN.split(',').map((o) => o.trim()).filter(Boolean);
+  app.use(cors({ origin: allowedOrigins, credentials: true }));
   app.use(express.json({ limit: '10mb' }));
   app.use(cookieParser());
   app.use(
