@@ -1,8 +1,13 @@
-import { Box, Button, ButtonBase, Stack, Typography } from '@mui/material';
+import { Alert, Box, Button, ButtonBase, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import DeleteOutlineRounded from '@mui/icons-material/DeleteOutlineRounded';
 import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded';
 import { useState } from 'react';
 import type { Competition } from '@/api/competitions.api';
 import { useCompetitionQuery, useStandingsQuery } from '@/hooks/queries';
+import { useRemoveRegistration } from '@/hooks/mutations';
+import { useToast } from '@/hooks/common/useToast';
+import { extractErrorMessage } from '@/api/axios';
+import { useAuthStore } from '@/store/useAuthStore';
 import { getDivisionLabel } from '@/utils/statusLabels';
 import { AppModal } from '@/components/ui/AppModal';
 import { Crest } from '@/components/ui/Crest';
@@ -23,6 +28,21 @@ export const CompetitionOverviewModal: React.FC<Props> = ({ competition, onClose
   const standings = useStandingsQuery(competition.id);
   const [selectedTeam, setSelectedTeam] = useState<{ registrationId: string; name: string } | null>(null);
   const openRoster = (registrationId: string, name: string) => setSelectedTeam({ registrationId, name });
+  const isAdmin = useAuthStore((s) => s.user?.role === 'ADMIN');
+  const removeRegistration = useRemoveRegistration();
+  const toast = useToast();
+  // Equipo pendiente de quitar de esta competición. Pide confirmación.
+  const [pendingRemoval, setPendingRemoval] = useState<{ id: string; name: string } | null>(null);
+  const confirmRemoval = async () => {
+    if (!pendingRemoval) return;
+    try {
+      await removeRegistration.mutateAsync(pendingRemoval.id);
+      toast.success(`${pendingRemoval.name} quitado de la competición`);
+      setPendingRemoval(null);
+    } catch (e) {
+      toast.error(extractErrorMessage(e));
+    }
+  };
   const registrations = [...(detail.data?.registrations ?? [])].sort((a, b) =>
     a.team.name.localeCompare(b.team.name, 'es'),
   );
@@ -56,7 +76,8 @@ export const CompetitionOverviewModal: React.FC<Props> = ({ competition, onClose
           ) : (
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, columnGap: 3 }}>
               {registrations.map((registration) => (
-                <Stack component={ButtonBase} onClick={() => openRoster(registration.id, registration.team.name)} aria-label={`Ver jugadores de ${registration.team.name}`} key={registration.id} direction="row" alignItems="center" spacing={1.5} sx={{ py: 1.5, width: '100%', textAlign: 'left', minWidth: 0, borderBottom: '1px solid', borderColor: 'divider', '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main' } }}>
+                <Stack key={registration.id} direction="row" alignItems="center" spacing={0.5} sx={{ minWidth: 0, borderBottom: '1px solid', borderColor: 'divider' }}>
+                <Stack component={ButtonBase} onClick={() => openRoster(registration.id, registration.team.name)} aria-label={`Ver jugadores de ${registration.team.name}`} direction="row" alignItems="center" spacing={1.5} sx={{ py: 1.5, flex: 1, textAlign: 'left', minWidth: 0, '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main' } }}>
                   <Crest src={registration.team.logoUrl ?? undefined} alt={registration.team.name} sx={{ width: 40, height: 40, bgcolor: 'background.default', color: 'text.secondary', '& img': { objectFit: 'contain' } }}>
                     {registration.team.name.charAt(0)}
                   </Crest>
@@ -65,6 +86,18 @@ export const CompetitionOverviewModal: React.FC<Props> = ({ competition, onClose
                     <Typography variant="caption" color="text.secondary">{registration.roster.length} jugadores</Typography>
                   </Box>
                   <StatusBadge status={registration.status} />
+                </Stack>
+                {isAdmin && (
+                  <Tooltip title="Quitar de esta competición">
+                    <IconButton
+                      color="error"
+                      aria-label={`Quitar ${registration.team.name} de la competición`}
+                      onClick={() => setPendingRemoval({ id: registration.id, name: registration.team.name })}
+                    >
+                      <DeleteOutlineRounded />
+                    </IconButton>
+                  </Tooltip>
+                )}
                 </Stack>
               ))}
             </Box>
@@ -81,6 +114,21 @@ export const CompetitionOverviewModal: React.FC<Props> = ({ competition, onClose
           )}
         </Box>
       </Stack>}
+      <Dialog open={!!pendingRemoval} onClose={() => setPendingRemoval(null)} maxWidth="xs" fullWidth>
+        <DialogTitle>Quitar {pendingRemoval?.name}</DialogTitle>
+        <DialogContent>
+          <Alert severity="error" variant="outlined">
+            Se borra su inscripción en {competition.name}: plantilla, partidos, goles, tarjetas y
+            sanciones de esta competición. El equipo y sus otras categorías no se tocan. No se puede deshacer.
+          </Alert>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPendingRemoval(null)}>Cancelar</Button>
+          <Button variant="contained" color="error" onClick={confirmRemoval} disabled={removeRegistration.isPending}>
+            {removeRegistration.isPending ? 'Quitando…' : 'Quitar equipo'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </AppModal>
   );
 };
