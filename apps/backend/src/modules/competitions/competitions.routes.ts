@@ -50,6 +50,14 @@ competitionsRouter.patch(
   audit('OUTCOME', 'TeamRegistration'),
   competitionsController.setRegistrationOutcome,
 );
+/* Quita un equipo de esta competiciÃ³n, sin tocar el club ni sus otras inscripciones. */
+competitionsRouter.delete(
+  '/registrations/:registrationId',
+  authMiddleware,
+  requireRole('ADMIN'),
+  audit('DELETE', 'TeamRegistration'),
+  competitionsController.removeRegistration,
+);
 competitionsRouter.delete(
   '/:id',
   authMiddleware,

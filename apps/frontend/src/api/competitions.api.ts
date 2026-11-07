@@ -79,6 +79,9 @@ export const competitionsApi = {
       outcome,
       outcomeNote,
     })).data.data,
+  /** Quita un equipo de esta competiciÃ³n: borra su inscripciÃ³n, plantilla y partidos aquÃ­. */
+  removeRegistration: async (registrationId: string): Promise<{ id: string }> =>
+    (await api.delete(`/competitions/registrations/${registrationId}`)).data.data,
   /** Borrado definitivo en cascada: se lleva inscripciones, partidos y estadísticas. */
   remove: async (id: string): Promise<{ id: string }> =>
     (await api.delete(`/competitions/${id}`)).data.data,

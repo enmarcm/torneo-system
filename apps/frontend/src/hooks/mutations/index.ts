@@ -425,6 +425,20 @@ export const useSetRegistrationOutcome = () => {
       invalidate(qc, [['competitions'], ['standings'], ['public', 'standings'], ['teams']]),
   });
 };
+export const useRemoveRegistration = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (registrationId: string) => competitionsApi.removeRegistration(registrationId),
+    onSuccess: () =>
+      invalidate(qc, [
+        ['competitions'],
+        ['standings'],
+        ['public', 'standings'],
+        ['teams'],
+        ['matches'],
+      ]),
+  });
+};
 export const useCreateMatchEvent = () => {
   const qc = useQueryClient();
   return useMutation({

@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/utils/app-error';
 import { MESSAGES } from '@/config/constants';
-import { purgeCompetitions, CASCADE_TX } from '@/utils/cascade.util';
+import { purgeCompetitions, purgeRegistrations, CASCADE_TX } from '@/utils/cascade.util';
 import { Prisma, type CompetitionAgeGroup, type CompetitionKind } from '@prisma/client';
 import type { CreateCompetitionDto } from './competitions.schema';
 
@@ -316,6 +316,27 @@ export const competitionsService = {
       async (tx: Prisma.TransactionClient) => {
         await purgeCompetitions(tx, [id]);
         return { id };
+      },
+      CASCADE_TX,
+    );
+  },
+
+  /**
+   * Quita un equipo de una competiciÃ³n concreta. Se lleva su inscripciÃ³n con
+   * plantilla, partidos, eventos y sanciones de esa competiciÃ³n. El club y sus
+   * inscripciones en otras categorÃ­as no se tocan.
+   */
+  removeRegistration: async (registrationId: string) => {
+    const reg = await prisma.teamRegistration.findUnique({ where: { id: registrationId } });
+    if (!reg) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
+
+    return prisma.$transaction(
+      async (tx: Prisma.TransactionClient) => {
+        await tx.teamBlock.deleteMany({
+          where: { teamId: reg.teamId, competitionId: reg.competitionId },
+        });
+        await purgeRegistrations(tx, [registrationId]);
+        return { id: registrationId, teamId: reg.teamId, competitionId: reg.competitionId };
       },
       CASCADE_TX,
     );

@@ -1,4 +1,5 @@
-import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Button, Tabs, Tab, Avatar, TextField, MenuItem, Alert } from '@mui/material';
+import { Box, Grid2 as Grid, Card, Stack, Typography, Chip, Button, Tabs, Tab, Avatar, TextField, MenuItem, Alert, IconButton, Tooltip } from '@mui/material';
+import DeleteOutlineRounded from '@mui/icons-material/DeleteOutlineRounded';
 import { AppModal } from '@/components/ui/AppModal';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
@@ -8,7 +9,7 @@ import SportsSoccerRounded from '@mui/icons-material/SportsSoccerRounded';
 import TableChartRounded from '@mui/icons-material/TableChartRounded';
 import PeopleAltRounded from '@mui/icons-material/PeopleAltRounded';
 import { useCompetitionQuery, useStandingsQuery, useMatchesQuery } from '@/hooks/queries';
-import { useSetRegistrationOutcome } from '@/hooks/mutations';
+import { useSetRegistrationOutcome, useRemoveRegistration } from '@/hooks/mutations';
 import { useToast } from '@/hooks/common/useToast';
 import { extractErrorMessage } from '@/api/axios';
 import { PageHeader } from '@/components/ui/PageHeader';
@@ -60,6 +61,20 @@ const AdminCompetitionDetail: React.FC = () => {
   const { data: standings = [] } = useStandingsQuery(id ?? '');
   const { data: matches = [] } = useMatchesQuery(id);
   const setOutcome = useSetRegistrationOutcome();
+  const removeRegistration = useRemoveRegistration();
+  // Equipo pendiente de quitar de esta competiciÃ³n. Pide confirmaciÃ³n.
+  const [pendingRemoval, setPendingRemoval] = useState<{ id: string; teamName: string } | null>(null);
+
+  const confirmRemoval = async () => {
+    if (!pendingRemoval) return;
+    try {
+      await removeRegistration.mutateAsync(pendingRemoval.id);
+      toast.success(`${pendingRemoval.teamName} quitado de la competiciÃ³n`);
+      setPendingRemoval(null);
+    } catch (e) {
+      toast.error(extractErrorMessage(e));
+    }
+  };
   const toast = useToast();
 
   const compTeams = (comp as any)?.registrations ?? [];
@@ -174,6 +189,16 @@ const AdminCompetitionDetail: React.FC = () => {
                         <Typography variant="caption" color="text.secondary">{r.roster?.length ?? 0} jugadores</Typography>
                       </Box>
                       <StatusBadge status={r.status} />
+                      <Tooltip title="Quitar de esta competiciÃ³n">
+                        <IconButton
+                          size="small"
+                          color="error"
+                          aria-label={`Quitar ${r.team?.name ?? 'equipo'} de la competiciÃ³n`}
+                          onClick={() => setPendingRemoval({ id: r.id, teamName: r.team?.name ?? 'el equipo' })}
+                        >
+                          <DeleteOutlineRounded fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
                     </Stack>
 
                     <Button
@@ -265,6 +290,34 @@ const AdminCompetitionDetail: React.FC = () => {
                 disabled={setOutcome.isPending}
               >
                 {setOutcome.isPending ? 'Guardando…' : 'Confirmar'}
+              </Button>
+            </Stack>
+          </Stack>
+        )}
+      </AppModal>
+      <AppModal
+        open={!!pendingRemoval}
+        onClose={() => setPendingRemoval(null)}
+        title="Quitar equipo de la competiciÃ³n"
+        subtitle={pendingRemoval?.teamName}
+        maxWidth={480}
+      >
+        {pendingRemoval && (
+          <Stack spacing={2}>
+            <Alert severity="error" variant="outlined">
+              Se borra la inscripciÃ³n de {pendingRemoval.teamName} en {comp.name}: su plantilla,
+              sus partidos, goles, tarjetas y sanciones de esta competiciÃ³n. El equipo y sus
+              inscripciones en otras categorÃ­as no se tocan. No se puede deshacer.
+            </Alert>
+            <Stack direction="row" spacing={1} justifyContent="flex-end">
+              <Button onClick={() => setPendingRemoval(null)}>Cancelar</Button>
+              <Button
+                variant="contained"
+                color="error"
+                onClick={confirmRemoval}
+                disabled={removeRegistration.isPending}
+              >
+                {removeRegistration.isPending ? 'Quitandoâ€¦' : 'Quitar equipo'}
               </Button>
             </Stack>
           </Stack>
