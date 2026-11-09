@@ -73,6 +73,22 @@ services:
     ports: ["127.0.0.1:5842:80"]
     depends_on: [backend]
 
+  backup:
+    build: ./ops/backup
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      postgres: { condition: service_healthy }
+      minio: { condition: service_started }
+    # Carpeta del servidor, no volumen de Docker: sobrevive a `docker volume rm`.
+    volumes: ["${BACKUP_DIR:-./backups}:/backups"]
+    healthcheck:
+      test: ["CMD", "backup", "healthcheck"]
+      interval: 10m
+      timeout: 10s
+      retries: 1
+      start_period: 30m
+
   adminer:
     image: adminer
     restart: unless-stopped

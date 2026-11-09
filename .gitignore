@@ -44,3 +44,6 @@ prisma/migrations/dev.db*
 # --- Sistema operativo ---
 Thumbs.db
 desktop.ini
+
+# Copias de seguridad (contienen datos personales)
+/backups/
