@@ -1,7 +1,8 @@
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/utils/app-error';
 import { MESSAGES } from '@/config/constants';
-import { purgePlayer, CASCADE_TX } from '@/utils/cascade.util';
+import { purgePlayer } from '@/utils/cascade.util';
+import { trashService } from '@/modules/trash/trash.service';
 import { validatePlayerPhotos } from './player-photos';
 import type { CreatePlayerDto } from './players.schema';
 
@@ -223,16 +224,13 @@ export const playersService = {
    * Solo se elimina un perfil sin trayectoria. Los perfiles con historial
    * deben desactivarse; purgePlayer protege sus plantillas y estadísticas.
    */
-  remove: async (id: string) => {
+  remove: async (id: string, actorId?: string) => {
     const player = await prisma.player.findUnique({ where: { id } });
     if (!player) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
 
-    return prisma.$transaction(
-      async (tx) => {
-        await purgePlayer(tx, id);
-        return { id };
-      },
-      CASCADE_TX,
-    );
+    return trashService.withTrash('PLAYER', id, actorId, async (tx) => {
+      await purgePlayer(tx, id);
+      return { id };
+    });
   },
 };

@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/utils/app-error';
+import { trashService } from '@/modules/trash/trash.service';
 import { DEFAULT_LEGAL_PAGES, DEFAULT_SETTINGS } from './site.defaults';
 
 const SETTINGS_ID = 'main';
@@ -104,5 +105,9 @@ export const siteService = {
   updateLegalPage: (id: string, data: Partial<LegalPageInput>) =>
     prisma.legalPage.update({ where: { id }, data }),
 
-  removeLegalPage: (id: string) => prisma.legalPage.delete({ where: { id } }),
+  removeLegalPage: (id: string, actorId?: string) =>
+    trashService.withTrash('LEGAL_PAGE', id, actorId, async (tx) => {
+      await tx.legalPage.delete({ where: { id } });
+      return { id };
+    }),
 };

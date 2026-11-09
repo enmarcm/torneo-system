@@ -34,6 +34,6 @@ export const matchesController = {
     ok(res, await matchesService.clearMvp(req.params.id), 'MVP quitado'),
   ),
   remove: asyncHandler(async (req, res) =>
-    ok(res, await matchesService.remove(req.params.id), 'Eliminado'),
+    ok(res, await matchesService.remove(req.params.id, req.user?.id), 'Eliminado'),
   ),
 };

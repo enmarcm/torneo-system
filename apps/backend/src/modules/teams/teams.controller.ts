@@ -40,6 +40,6 @@ export const teamsController = {
     ok(res, await teamsService.players(req.params.id)),
   ),
   remove: asyncHandler(async (req, res) =>
-    ok(res, await teamsService.remove(req.params.id), 'Eliminado definitivamente'),
+    ok(res, await teamsService.remove(req.params.id, req.user?.id), 'Eliminado definitivamente'),
   ),
 };

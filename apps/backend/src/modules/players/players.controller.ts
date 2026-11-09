@@ -31,6 +31,6 @@ export const playersController = {
     ok(res, await playersService.competitions(req.params.id, req.user?.role === 'TEAM_LEADER' ? req.user.teamId : undefined)),
   ),
   remove: asyncHandler(async (req, res) =>
-    ok(res, await playersService.remove(req.params.id), 'Eliminado definitivamente'),
+    ok(res, await playersService.remove(req.params.id, req.user?.id), 'Eliminado definitivamente'),
   ),
 };

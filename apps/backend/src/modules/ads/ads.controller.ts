@@ -13,6 +13,6 @@ export const adsController = {
     ok(res, await adsService.update(req.params.id, req.body)),
   ),
   remove: asyncHandler(async (req, res) =>
-    ok(res, await adsService.remove(req.params.id), 'Eliminado'),
+    ok(res, await adsService.remove(req.params.id, req.user?.id), 'Eliminado'),
   ),
 };

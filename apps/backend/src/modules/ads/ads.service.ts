@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import type { AdPlacement, Prisma } from '@prisma/client';
+import { trashService } from '@/modules/trash/trash.service';
 
 export interface AdInput {
   title: string;
@@ -48,5 +49,9 @@ export const adsService = {
   update: (id: string, data: Partial<AdInput>) =>
     prisma.advertisement.update({ where: { id }, data }),
 
-  remove: (id: string) => prisma.advertisement.delete({ where: { id } }),
+  remove: (id: string, actorId?: string) =>
+    trashService.withTrash('AD', id, actorId, async (tx) => {
+      await tx.advertisement.delete({ where: { id } });
+      return { id };
+    }),
 };

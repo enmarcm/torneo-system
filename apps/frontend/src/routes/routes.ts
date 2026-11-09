@@ -19,6 +19,7 @@ export const ROUTES = {
     media: '/admin/imagenes',
     users: '/admin/usuarios',
     audit: '/admin/auditoria',
+    trash: '/admin/papelera',
     settings: '/admin/configuracion',
   },
   team: {

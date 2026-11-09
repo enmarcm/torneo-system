@@ -48,6 +48,6 @@ export const newsController = {
     ok(res, await newsService.regenerate(req.params.id), 'Ficha actualizada'),
   ),
   remove: asyncHandler(async (req, res) =>
-    ok(res, await newsService.remove(req.params.id), 'Eliminado'),
+    ok(res, await newsService.remove(req.params.id, req.user?.id), 'Eliminado'),
   ),
 };

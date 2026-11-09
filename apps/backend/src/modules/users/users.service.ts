@@ -2,7 +2,8 @@ import { prisma } from '@/lib/prisma';
 import { hashPassword } from '@/utils/password.util';
 import { AppError } from '@/utils/app-error';
 import { MESSAGES } from '@/config/constants';
-import { purgeUser, CASCADE_TX } from '@/utils/cascade.util';
+import { purgeUser } from '@/utils/cascade.util';
+import { trashService } from '@/modules/trash/trash.service';
 import type { UserRole } from '@/config/roles';
 
 const SELECT = {
@@ -184,12 +185,9 @@ export const usersService = {
     const u = await prisma.user.findUnique({ where: { id } });
     if (!u) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
     await assertNotLastAdmin(id);
-    return prisma.$transaction(
-      async (tx) => {
-        await purgeUser(tx, id);
-        return { id };
-      },
-      CASCADE_TX,
-    );
+    return trashService.withTrash('USER', id, actorId, async (tx) => {
+      await purgeUser(tx, id);
+      return { id };
+    });
   },
 };

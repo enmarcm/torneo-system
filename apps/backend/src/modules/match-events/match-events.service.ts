@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { AppError } from '@/utils/app-error';
 import { emitMatchEvent, emitMatchUpdate } from '@/lib/socket';
 import { MatchEventType } from '@prisma/client';
+import { trashService } from '@/modules/trash/trash.service';
 
 export const matchEventsService = {
   create: async (
@@ -49,5 +50,9 @@ export const matchEventsService = {
     return event;
   },
 
-  remove: (id: string) => prisma.matchEvent.delete({ where: { id } }),
+  remove: (id: string, actorId?: string) =>
+    trashService.withTrash('MATCH_EVENT', id, actorId, async (tx) => {
+      await tx.matchEvent.delete({ where: { id } });
+      return { id };
+    }),
 };

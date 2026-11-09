@@ -40,6 +40,7 @@ const AdminSchedule = lazy(() => import('@/pages/admin/AdminSchedule'));
 const AdminMatchDetail = lazy(() => import('@/pages/admin/AdminMatchDetail'));
 const AdminStats = lazy(() => import('@/pages/admin/AdminStats'));
 const AdminAudit = lazy(() => import('@/pages/admin/AdminAudit'));
+const AdminTrash = lazy(() => import('@/pages/admin/AdminTrash'));
 const AdminAds = lazy(() => import('@/pages/admin/AdminAds'));
 const AdminMedia = lazy(() => import('@/pages/admin/AdminMedia'));
 const AdminNews = lazy(() => import('@/pages/admin/AdminNews'));
@@ -82,6 +83,7 @@ export const AppRouter: React.FC = () => (
           <Route path={ROUTES.admin.playerDetail} element={<AdminPlayerDetail />} />
           <Route path={ROUTES.admin.stats} element={<AdminStats />} />
           <Route path={ROUTES.admin.audit} element={<AdminAudit />} />
+          <Route path={ROUTES.admin.trash} element={<AdminTrash />} />
           <Route path={ROUTES.admin.users} element={<AdminUsers />} />
           <Route path={ROUTES.admin.settings} element={<AdminSettings />} />
         </Route>

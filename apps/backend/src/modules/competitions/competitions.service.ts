@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { AppError } from '@/utils/app-error';
 import { MESSAGES } from '@/config/constants';
 import { purgeCompetitions, purgeRegistrations, CASCADE_TX } from '@/utils/cascade.util';
+import { trashService } from '@/modules/trash/trash.service';
 import { Prisma, type CompetitionAgeGroup, type CompetitionKind } from '@prisma/client';
 import type { CreateCompetitionDto } from './competitions.schema';
 
@@ -308,17 +309,14 @@ export const competitionsService = {
    * grupos, llaves y sanciones de la competición. No hay red de seguridad: si el
    * administrador la borra, la temporada de ese torneo desaparece con ella.
    */
-  remove: async (id: string) => {
+  remove: async (id: string, actorId?: string) => {
     const competition = await prisma.competition.findUnique({ where: { id } });
     if (!competition) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
 
-    return prisma.$transaction(
-      async (tx: Prisma.TransactionClient) => {
-        await purgeCompetitions(tx, [id]);
-        return { id };
-      },
-      CASCADE_TX,
-    );
+    return trashService.withTrash('COMPETITION', id, actorId, async (tx) => {
+      await purgeCompetitions(tx, [id]);
+      return { id };
+    });
   },
 
   /**

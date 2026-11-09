@@ -14,6 +14,7 @@ import CampaignRounded from '@mui/icons-material/CampaignRounded';
 import NewspaperRounded from '@mui/icons-material/NewspaperRounded';
 import BlockRounded from '@mui/icons-material/BlockRounded';
 import FactCheckRounded from '@mui/icons-material/FactCheckRounded';
+import DeleteSweepRounded from '@mui/icons-material/DeleteSweepRounded';
 import ManageAccountsRounded from '@mui/icons-material/ManageAccountsRounded';
 import PhotoLibraryRounded from '@mui/icons-material/PhotoLibraryRounded';
 import LightModeRounded from '@mui/icons-material/LightModeRounded';
@@ -53,6 +54,7 @@ const NAV: NavItem[] = [
   { label: 'Usuarios', icon: <ManageAccountsRounded />, to: ROUTES.admin.users, roles: ADMIN_ONLY },
   { label: 'Configuración', icon: <SettingsRounded />, to: ROUTES.admin.settings, roles: ADMIN_ONLY },
   { label: 'Auditoría', icon: <FactCheckRounded />, to: ROUTES.admin.audit, roles: ADMIN_ONLY },
+  { label: 'Papelera', icon: <DeleteSweepRounded />, to: ROUTES.admin.trash, roles: ADMIN_ONLY },
 ];
 
 export const Sidebar: React.FC<{ onNavigate?: () => void }> = ({ onNavigate }) => {

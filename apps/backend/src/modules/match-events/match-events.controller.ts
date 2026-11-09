@@ -7,6 +7,6 @@ export const matchEventsController = {
     created(res, await matchEventsService.create(req.params.id, req.body)),
   ),
   remove: asyncHandler(async (req, res) =>
-    ok(res, await matchEventsService.remove(req.params.id), 'Eliminado'),
+    ok(res, await matchEventsService.remove(req.params.id, req.user?.id), 'Eliminado'),
   ),
 };

@@ -623,3 +623,44 @@ model LegalPage {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
+
+/// Qué clase de elemento se guardó en la papelera. Cada valor sabe qué filas
+/// arrastra al borrarse (ver trash.collectors).
+enum TrashKind {
+  EDITION
+  COMPETITION
+  TEAM
+  PLAYER
+  USER
+  MATCH
+  MATCH_EVENT
+  AD
+  ARTICLE
+  LEGAL_PAGE
+}
+
+/// Papelera general. Antes de un borrado definitivo se fotografía en `payload`
+/// el elemento y todo lo que se iba con él, y se borra de verdad. Restaurar
+/// vuelve a insertar esas filas con sus ids originales. Es una foto, no un
+/// borrado lógico: las consultas del resto del sistema no la conocen.
+model TrashItem {
+  id            String    @id @default(uuid())
+  kind          TrashKind
+  /// Id que tenía el elemento original.
+  entityId      String
+  /// Nombre legible: lo que el administrador reconoce en la lista.
+  label         String
+  detail        String?
+  /// Conteo de filas por tabla, para mostrar qué arrastró el borrado sin cargar el payload.
+  summary       Json
+  /// Filas fotografiadas y vínculos que había que reponer (ver trash.service).
+  payload       Json
+  deletedById   String?
+  deletedByName String?
+  expiresAt     DateTime
+  createdAt     DateTime  @default(now())
+
+  @@index([kind])
+  @@index([createdAt])
+  @@index([expiresAt])
+}

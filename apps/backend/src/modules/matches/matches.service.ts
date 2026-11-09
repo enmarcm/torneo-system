@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { AppError } from '@/utils/app-error';
 import { MESSAGES } from '@/config/constants';
 import { emitMatchUpdate, emitMatchListChanged } from '@/lib/socket';
+import { trashService } from '@/modules/trash/trash.service';
 import { dayRange } from '@/utils/date.util';
 import { Prisma } from '@prisma/client';
 import type { CreateMatchDto } from './matches.schema';
@@ -263,10 +264,8 @@ export const matchesService = {
     }),
 
   /** Borrado definitivo: los goles y tarjetas del partido se van con él. */
-  remove: async (id: string) => {
-    const res = await prisma.$transaction(async (tx) => {
-      const current = await tx.match.findUnique({ where: { id } });
-      if (!current) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
+  remove: async (id: string, actorId?: string) => {
+    const res = await trashService.withTrash('MATCH', id, actorId, async (tx) => {
       await tx.matchEvent.deleteMany({ where: { matchId: id } });
       await tx.match.delete({ where: { id } });
       return { id };

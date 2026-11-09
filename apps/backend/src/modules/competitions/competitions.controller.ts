@@ -33,6 +33,6 @@ export const competitionsController = {
     ),
   ),
   remove: asyncHandler(async (req, res) =>
-    ok(res, await competitionsService.remove(req.params.id), 'Eliminado definitivamente'),
+    ok(res, await competitionsService.remove(req.params.id, req.user?.id), 'Eliminado definitivamente'),
   ),
 };

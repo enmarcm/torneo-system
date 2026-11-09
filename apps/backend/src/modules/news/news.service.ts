@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { Prisma, type ArticleKind } from '@prisma/client';
 import { AppError } from '@/utils/app-error';
 import { MESSAGES } from '@/config/constants';
+import { trashService } from '@/modules/trash/trash.service';
 import { factSheetsService, type SheetKind } from '@/modules/fact-sheets/fact-sheets.service';
 import { SUBJECT_FIELD, type CreateArticleDto, type UpdateArticleDto } from './news.schema';
 
@@ -210,5 +211,9 @@ export const newsService = {
     });
   },
 
-  remove: (id: string) => prisma.article.delete({ where: { id } }),
+  remove: (id: string, actorId?: string) =>
+    trashService.withTrash('ARTICLE', id, actorId, async (tx) => {
+      await tx.article.delete({ where: { id } });
+      return { id };
+    }),
 };

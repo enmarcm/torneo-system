@@ -21,6 +21,6 @@ export const siteController = {
     ok(res, await siteService.updateLegalPage(req.params.id, req.body)),
   ),
   removeLegalPage: asyncHandler(async (req, res) =>
-    ok(res, await siteService.removeLegalPage(req.params.id), 'Eliminado'),
+    ok(res, await siteService.removeLegalPage(req.params.id, req.user?.id), 'Eliminado'),
   ),
 };

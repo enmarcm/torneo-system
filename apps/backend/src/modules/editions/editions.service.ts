@@ -1,7 +1,8 @@
 import { prisma } from '@/lib/prisma';
 import { AppError } from '@/utils/app-error';
 import { MESSAGES } from '@/config/constants';
-import { purgeCompetitions, CASCADE_TX } from '@/utils/cascade.util';
+import { purgeCompetitions } from '@/utils/cascade.util';
+import { trashService } from '@/modules/trash/trash.service';
 import type { CreateEditionDto, UpdateEditionDto } from './editions.schema';
 
 export const editionsService = {
@@ -27,24 +28,21 @@ export const editionsService = {
    * Borrado definitivo y en cascada: la edición se lleva sus competiciones
    * enteras (partidos, tablas, plantillas y estadísticas).
    */
-  remove: async (id: string) => {
+  remove: async (id: string, actorId?: string) => {
     const edition = await prisma.edition.findUnique({ where: { id } });
     if (!edition) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
 
-    return prisma.$transaction(
-      async (tx) => {
-        const competitions = await tx.competition.findMany({
-          where: { editionId: id },
-          select: { id: true },
-        });
-        await purgeCompetitions(tx, competitions.map((c) => c.id));
-        await tx.transfer.deleteMany({ where: { editionId: id } });
-        // La liga de la edición se crea sola y no tiene valor sin ella.
-        await tx.leagueSystem.deleteMany({ where: { editionId: id } });
-        await tx.edition.delete({ where: { id } });
-        return { id };
-      },
-      CASCADE_TX,
-    );
+    return trashService.withTrash('EDITION', id, actorId, async (tx) => {
+      const competitions = await tx.competition.findMany({
+        where: { editionId: id },
+        select: { id: true },
+      });
+      await purgeCompetitions(tx, competitions.map((c) => c.id));
+      await tx.transfer.deleteMany({ where: { editionId: id } });
+      // La liga de la edición se crea sola y no tiene valor sin ella.
+      await tx.leagueSystem.deleteMany({ where: { editionId: id } });
+      await tx.edition.delete({ where: { id } });
+      return { id };
+    });
   },
 };

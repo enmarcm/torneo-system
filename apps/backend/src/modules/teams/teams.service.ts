@@ -2,7 +2,8 @@ import { prisma } from '@/lib/prisma';
 import { AppError } from '@/utils/app-error';
 import { MESSAGES } from '@/config/constants';
 import { hashPassword } from '@/utils/password.util';
-import { purgeTeam, CASCADE_TX } from '@/utils/cascade.util';
+import { purgeTeam } from '@/utils/cascade.util';
+import { trashService } from '@/modules/trash/trash.service';
 import { Prisma } from '@prisma/client';
 
 /** Nombre del escalón dentro del sistema de liga. El 1 está por encima del 2. */
@@ -84,17 +85,14 @@ export const teamsService = {
    * Solo se elimina un equipo sin inscripciones históricas. Desactivar
    * conserva su trayectoria y la de sus rivales; purgeTeam aplica la regla.
    */
-  remove: async (id: string) => {
+  remove: async (id: string, actorId?: string) => {
     const team = await prisma.team.findUnique({ where: { id }, include: { leader: true } });
     if (!team) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
 
-    return prisma.$transaction(
-      async (tx: Prisma.TransactionClient) => {
-        await purgeTeam(tx, id, team.leader?.id ?? null);
-        return { id };
-      },
-      CASCADE_TX,
-    );
+    return trashService.withTrash('TEAM', id, actorId, async (tx) => {
+      await purgeTeam(tx, id, team.leader?.id ?? null);
+      return { id };
+    });
   },
 
   /**

@@ -13,6 +13,6 @@ export const editionsController = {
     ok(res, await editionsService.setStatus(req.params.id, req.body.status)),
   ),
   remove: asyncHandler(async (req, res) =>
-    ok(res, await editionsService.remove(req.params.id), 'Eliminado definitivamente'),
+    ok(res, await editionsService.remove(req.params.id, req.user?.id), 'Eliminado definitivamente'),
   ),
 };
