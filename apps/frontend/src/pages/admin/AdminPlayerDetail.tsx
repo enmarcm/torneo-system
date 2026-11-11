@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Box, Button, Avatar, Stack, Typography, Grid2 as Grid } from '@mui/material';
 import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded';
+import BadgeRounded from '@mui/icons-material/BadgeRounded';
 import GroupsRounded from '@mui/icons-material/GroupsRounded';
 import SportsSoccerRounded from '@mui/icons-material/SportsSoccerRounded';
 import EmojiEventsRounded from '@mui/icons-material/EmojiEventsRounded';
@@ -15,12 +16,14 @@ import { ErrorState } from '@/components/ui/ErrorState';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { HistoryControls } from '@/components/sport/HistoryControls';
 import { HistoryMatches } from '@/components/sport/HistoryMatches';
+import { PlayerDocumentsModal } from '@/components/sport/PlayerDocumentsModal';
 import { calcAge, formatDate } from '@/utils/formatDate';
 import { ROUTES } from '@/routes/routes';
 
 const AdminPlayerDetail: React.FC = () => {
   const { id } = useParams(); const navigate = useNavigate();
   const [filters, setFilters] = useState<HistoryFilters>({ page: 1, limit: 25 });
+  const [docsOpen, setDocsOpen] = useState(false);
   const query = useQuery({ queryKey: ['history', 'player', id, filters], queryFn: () => historyApi.player(id!, filters), enabled: !!id, staleTime: 15000 });
   if (query.isPending) return <PageLoader />;
   if (query.error || !query.data) return <ErrorState onRetry={() => void query.refetch()} />;
@@ -29,7 +32,7 @@ const AdminPlayerDetail: React.FC = () => {
     <Button startIcon={<ArrowBackRounded />} onClick={() => navigate(ROUTES.admin.players)} sx={{ mb: 2 }}>Volver a jugadores</Button>
     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'flex-start', sm: 'center' }} sx={{ mb: 3, minWidth: 0 }}><Avatar src={player.photoUrl || undefined} sx={{ width: 64, height: 64, flexShrink: 0 }} /><Box sx={{ minWidth: 0, width: '100%' }}>
       <PageHeader title={`${player.firstName} ${player.lastName}`} subtitle={`${player.documentType === 'CEDULA' ? 'C.I.' : 'P.N.'} ${player.documentNumber} · ${calcAge(player.birthDate)} años · Registro: ${formatDate(player.createdAt)}`} />
-      <Stack direction="row" spacing={1.5} alignItems="center"><StatusBadge status={player.status} />{player.universityDegreeVerified && <Typography variant="caption" color="success.main">Título verificado</Typography>}</Stack>
+      <Stack direction="row" spacing={1.5} alignItems="center"><StatusBadge status={player.status} /><Button size="small" variant="outlined" startIcon={<BadgeRounded />} onClick={() => setDocsOpen(true)}>Ver documentos</Button>{player.universityDegreeVerified && <Typography variant="caption" color="success.main">Título verificado</Typography>}</Stack>
     </Box></Stack>
     <HistoryControls value={filters} onChange={setFilters} teamFilter />
     <Grid container spacing={2} sx={{ mb: 3 }}>{[
@@ -57,6 +60,7 @@ const AdminPlayerDetail: React.FC = () => {
       { key: 'competition', label: 'Torneo', render: (r) => `${r.toRegistration.competition.name} · ${r.edition.name}` },
       { key: 'status', label: 'Estado', render: (r) => <StatusBadge status={r.status} /> },
     ]} />
+    <PlayerDocumentsModal open={docsOpen} onClose={() => setDocsOpen(false)} player={player} />
   </Box>;
 };
 export default AdminPlayerDetail;

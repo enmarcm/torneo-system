@@ -22,7 +22,7 @@ export interface HistoryReport {
   summary: { total: number; goals: number; matchesPlayed: number };
 }
 export interface PlayerHistory {
-  player: { id: string; firstName: string; lastName: string; birthDate: string; documentType: string; documentNumber: string; photoUrl: string | null; position: string | null; status: 'ACTIVE' | 'INACTIVE'; createdAt: string; universityDegreeVerified: boolean };
+  player: { id: string; firstName: string; lastName: string; birthDate: string; documentType: string; documentNumber: string; photoUrl: string | null; identityPhotoKey: string | null; position: string | null; status: 'ACTIVE' | 'INACTIVE'; createdAt: string; universityDegreeVerified: boolean };
   totals: HistoricalStats; teams: number; tournaments: number;
   career: { id: string; jerseyNumber: number | null; status: string; createdAt: string; stats: HistoricalStats | null;
     teamRegistration: { id: string; status: string; outcome: string; team: { id: string; name: string; logoUrl: string | null }; competition: HistoricalCompetition };

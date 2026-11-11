@@ -116,6 +116,8 @@ export const historyService = {
     const player = await tx.player.findUnique({ where: { id }, select: {
       id: true, firstName: true, lastName: true, birthDate: true, documentType: true, documentNumber: true,
       photoUrl: true, position: true, status: true, createdAt: true, universityDegreeVerified: true,
+      // Solo la llave: la imagen sale del almacenamiento privado por /uploads/identity.
+      identityPhotoKey: true,
     } });
     if (!player) throw new AppError(404, 'Jugador no encontrado', 'NOT_FOUND');
     const career = await tx.rosterEntry.findMany({
