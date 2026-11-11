@@ -18,6 +18,7 @@ import VerifiedRounded from '@mui/icons-material/VerifiedRounded';
 import VerifiedOutlined from '@mui/icons-material/VerifiedOutlined';
 import RestoreRounded from '@mui/icons-material/RestoreRounded';
 import HistoryRounded from '@mui/icons-material/HistoryRounded';
+import BadgeRounded from '@mui/icons-material/BadgeRounded';
 import { useRosterCandidatesQuery, useRosterQuery, usePreviousRosterQuery } from '@/hooks/queries';
 import { useDebouncedValue } from '@/hooks/common/useDebouncedValue';
 import {
@@ -31,6 +32,8 @@ import { useToast } from '@/hooks/common/useToast';
 import { extractErrorMessage } from '@/api/axios';
 import { RosterSkeleton } from '@/components/ui/LoadingState';
 import { NewRosterPlayer } from '@/components/sport/NewRosterPlayer';
+import { PlayerDocumentsModal } from '@/components/sport/PlayerDocumentsModal';
+import type { RosterEntry } from '@/api/rosters.api';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { EmptyState } from '@/components/ui/EmptyState';
 
@@ -57,6 +60,8 @@ export const RosterEditor: React.FC<Props> = ({
   const { data: rosterData, isLoading, isFetching, error, refetch } = useRosterQuery(registrationId, allowCreatePlayer);
   const roster = rosterData ?? [];
   const [search, setSearch] = useState('');
+  /* Jugador cuyos documentos se están revisando (solo el administrador). */
+  const [docsOf, setDocsOf] = useState<RosterEntry['player'] | null>(null);
   /* Lo que quedó afuera en la última importación, para poder resolverlo a mano. */
   const [skipped, setSkipped] = useState<Array<{ name: string; reason: string }> | null>(null);
   const settledSearch = useDebouncedValue(search.trim());
@@ -299,6 +304,13 @@ export const RosterEditor: React.FC<Props> = ({
                 <Typography variant="caption" color="text.secondary">
                   C.I. {r.player.documentNumber}
                 </Typography>
+                {canApproveEligibility && (
+                  <Box>
+                    <Button size="small" startIcon={<BadgeRounded />} onClick={() => setDocsOf(r.player)} sx={{ px: 0.5, minWidth: 0 }}>
+                      Ver documentos
+                    </Button>
+                  </Box>
+                )}
               </Box>
               <TextField
                 size="small"
@@ -372,6 +384,7 @@ export const RosterEditor: React.FC<Props> = ({
           </Stack>
         </Box>
       )}
+      {docsOf && <PlayerDocumentsModal open onClose={() => setDocsOf(null)} player={docsOf} />}
     </Stack>
   );
 };

@@ -38,6 +38,7 @@ const AdminPlayerDetail: React.FC = () => {
     <Grid container spacing={2} sx={{ mb: 3 }}>{[
       ['Equipos', data.teams, <GroupsRounded />], ['Torneos', data.tournaments, <EmojiEventsRounded />],
       ['Partidos acumulados', data.totals.matchesPlayed, <SportsSoccerRounded />], ['Goles', data.totals.goals, <SportsSoccerRounded />],
+      ['Asistencias', data.totals.assists, <SportsSoccerRounded />], ['Amarillas / Rojas', `${data.totals.yellowCards} / ${data.totals.redCards}`, <SportsSoccerRounded />],
     ].map(([label, value, icon]) => <Grid key={String(label)} size={{ xs: 6, md: 3 }}><StatCard label={String(label)} value={value as number} icon={icon} /></Grid>)}</Grid>
     <Typography variant="h4" sx={{ mb: 2 }}>Trayectoria por equipo y torneo</Typography>
     <DataTable rows={data.career} getRowKey={(r) => r.id} emptyTitle="Sin inscripciones en este periodo" emptyDescription="Consulta otro periodo o limpia los filtros." columns={[

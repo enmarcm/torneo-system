@@ -24,8 +24,14 @@ export interface RosterEntry {
     id: string;
     firstName: string;
     lastName: string;
+    documentType: Player['documentType'];
     documentNumber: string;
+    birthDate: string;
+    position: string | null;
+    status: string;
+    createdAt: string;
     photoUrl: string | null;
+    identityPhotoKey: string | null;
   };
   stats: {
     matchesPlayed: number;

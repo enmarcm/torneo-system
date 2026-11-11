@@ -19,6 +19,8 @@ import { usePlayersQuery } from '@/hooks/queries';
 import { useCreatePlayer, useUpdatePlayer, useSetPlayerDegree, useSetPlayerStatus, useDeletePlayer } from '@/hooks/mutations';
 import type { Player } from '@/api/players.api';
 import { calcAge } from '@/utils/formatDate';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/routes/routes';
 import { extractErrorMessage } from '@/api/axios';
 import { useToast } from '@/hooks/common/useToast';
 
@@ -34,6 +36,7 @@ const AdminPlayers: React.FC = () => {
   const toast = useToast();
   const create = useCreatePlayer();
   const update = useUpdatePlayer();
+  const navigate = useNavigate();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const setStatus = useSetPlayerStatus();
@@ -130,6 +133,8 @@ const AdminPlayers: React.FC = () => {
         onRetry={refetch}
         getRowKey={(r) => r.id}
         actions={actions}
+        // La ficha con sus estadísticas (por torneo, por equipo y totales) y los documentos.
+        onRowClick={(r) => navigate(ROUTES.admin.playerDetail.replace(':id', r.id))}
         emptyTitle={ageGroup ? `Sin jugadores inscritos en ${ageGroup === 'ADULT' ? 'Adultos' : 'Menores'}` : 'Aún no hay jugadores'}
         emptyDescription="Los jugadores aparecen en cada apartado al agregarlos a la plantilla de una competición. Su ficha se registra una sola vez."
       />
