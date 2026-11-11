@@ -17,6 +17,7 @@ import FactCheckRounded from '@mui/icons-material/FactCheckRounded';
 import DeleteSweepRounded from '@mui/icons-material/DeleteSweepRounded';
 import ManageAccountsRounded from '@mui/icons-material/ManageAccountsRounded';
 import PhotoLibraryRounded from '@mui/icons-material/PhotoLibraryRounded';
+import HomeRounded from '@mui/icons-material/HomeRounded';
 import LightModeRounded from '@mui/icons-material/LightModeRounded';
 import DarkModeRounded from '@mui/icons-material/DarkModeRounded';
 import LogoutRounded from '@mui/icons-material/LogoutRounded';
@@ -57,6 +58,9 @@ const NAV: NavItem[] = [
   { label: 'Papelera', icon: <DeleteSweepRounded />, to: ROUTES.admin.trash, roles: ADMIN_ONLY },
 ];
 
+/** Salida al sitio público: la ven todos los roles, así que va fuera de NAV. */
+const HOME_ITEM: NavItem = { label: 'Ir al inicio', icon: <HomeRounded />, to: ROUTES.public.home, roles: [] };
+
 export const Sidebar: React.FC<{ onNavigate?: () => void }> = ({ onNavigate }) => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -75,6 +79,7 @@ export const Sidebar: React.FC<{ onNavigate?: () => void }> = ({ onNavigate }) =
   );
 
   const isActive = (item: NavItem) => {
+    if (item === HOME_ITEM) return false;
     const isRoot = item.to === '/admin';
     return !!matchPath({ path: item.to, end: isRoot }, pathname) ||
            (!isRoot && !!matchPath({ path: item.to + '/*', end: false }, pathname));
@@ -117,7 +122,7 @@ export const Sidebar: React.FC<{ onNavigate?: () => void }> = ({ onNavigate }) =
         </Box>
 
         <List ref={listRef} sx={{ position: 'relative', flex: 1, overflow: 'auto', px: expanded ? 1 : 0.5, '&::-webkit-scrollbar': { width: 3 }, '&::-webkit-scrollbar-thumb': { bgcolor: 'var(--sidebarBorder)', borderRadius: 4 } }}>
-          {nav.map((item) => {
+          {[...nav, HOME_ITEM].map((item) => {
             const active = isActive(item);
             const btn = (
               <ListItemButton
@@ -129,6 +134,7 @@ export const Sidebar: React.FC<{ onNavigate?: () => void }> = ({ onNavigate }) =
                 sx={{
                   borderRadius: expanded ? 1.5 : 1,
                   mb: 0.25,
+                  mt: item === HOME_ITEM ? 1.5 : 0,
                   py: 0.75,
                   px: expanded ? 1.5 : 0.75,
                   minHeight: { xs: 44, md: 40 },
