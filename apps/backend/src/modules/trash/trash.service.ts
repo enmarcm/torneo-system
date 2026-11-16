@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { AppError } from '@/utils/app-error';
 import { MESSAGES, PAGINATION } from '@/config/constants';
 import { CASCADE_TX } from '@/utils/cascade.util';
+import { discardTrashFiles } from './trash.files';
 import { COLLECTORS, RESTORE_ORDER, createBag, type Snapshot } from './trash.collectors';
 
 type Tx = Prisma.TransactionClient;
@@ -107,7 +108,14 @@ export const trashService = {
 
   list: async (filters: { kind?: TrashKind; search?: string; page?: number; limit?: number }) => {
     // Lo vencido se limpia al consultar: no hay tarea programada que lo haga.
-    await prisma.trashItem.deleteMany({ where: { expiresAt: { lt: new Date() } } });
+    const expired = await prisma.trashItem.findMany({
+      where: { expiresAt: { lt: new Date() } },
+      select: { id: true, payload: true },
+    });
+    if (expired.length) {
+      await prisma.trashItem.deleteMany({ where: { id: { in: expired.map((e) => e.id) } } });
+      await discardTrashFiles(expired);
+    }
 
     const page = filters.page && filters.page > 0 ? filters.page : 1;
     const limit = Math.min(filters.limit ?? PAGINATION.defaultLimit, PAGINATION.maxLimit);
@@ -192,13 +200,18 @@ export const trashService = {
 
   /** Eliminación definitiva de un elemento de la papelera. Ya no hay vuelta atrás. */
   purge: async (id: string) => {
-    const res = await prisma.trashItem.deleteMany({ where: { id } });
-    if (res.count === 0) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
+    const item = await prisma.trashItem.findUnique({ where: { id }, select: { payload: true } });
+    if (!item) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
+    await prisma.trashItem.deleteMany({ where: { id } });
+    await discardTrashFiles([item]);
     return { id };
   },
 
   empty: async (kind?: TrashKind) => {
-    const res = await prisma.trashItem.deleteMany({ where: kind ? { kind } : {} });
+    const where = kind ? { kind } : {};
+    const items = await prisma.trashItem.findMany({ where, select: { payload: true } });
+    const res = await prisma.trashItem.deleteMany({ where });
+    await discardTrashFiles(items);
     return { deleted: res.count };
   },
 };
