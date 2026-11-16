@@ -13,6 +13,7 @@ const Loading = () => <PageLoader minHeight="100vh" />;
 // Public
 const PublicHome = lazy(() => import('@/pages/public/PublicHome'));
 const PublicCompetitions = lazy(() => import('@/pages/public/PublicCompetitions'));
+const PublicHistory = lazy(() => import('@/pages/public/PublicHistory'));
 const PublicSchedule = lazy(() => import('@/pages/public/PublicSchedule'));
 const PublicLive = lazy(() => import('@/pages/public/PublicLive'));
 const PublicStats = lazy(() => import('@/pages/public/PublicStats'));
@@ -123,6 +124,7 @@ export const AppRouter: React.FC = () => (
       <Route element={<PublicLayout />}>
         <Route path={ROUTES.public.home} element={<PublicHome />} />
         <Route path={ROUTES.public.competitions} element={<PublicCompetitions />} />
+        <Route path={ROUTES.public.history} element={<PublicHistory />} />
         <Route path={ROUTES.public.schedule} element={<PublicSchedule />} />
         <Route path={ROUTES.public.live} element={<PublicLive />} />
         <Route path={ROUTES.public.stats} element={<PublicStats />} />

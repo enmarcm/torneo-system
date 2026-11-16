@@ -17,6 +17,7 @@ import LiveTvRounded from '@mui/icons-material/LiveTvRounded';
 import BarChartRounded from '@mui/icons-material/BarChartRounded';
 import GroupsRounded from '@mui/icons-material/GroupsRounded';
 import BadgeRounded from '@mui/icons-material/BadgeRounded';
+import HistoryRounded from '@mui/icons-material/HistoryRounded';
 import NewspaperRounded from '@mui/icons-material/NewspaperRounded';
 import MenuOpenRounded from '@mui/icons-material/MenuOpenRounded';
 import LoginRounded from '@mui/icons-material/LoginRounded';
@@ -40,6 +41,7 @@ export interface PublicNavItem {
 export const PUBLIC_NAV: PublicNavItem[] = [
   { label: 'Inicio', to: ROUTES.public.home, icon: <HomeRounded /> },
   { label: 'Competiciones', to: ROUTES.public.competitions, icon: <EmojiEventsRounded /> },
+  { label: 'Histórico', to: ROUTES.public.history, icon: <HistoryRounded /> },
   { label: 'Calendario', to: ROUTES.public.schedule, icon: <CalendarMonthRounded /> },
   { label: 'En vivo', to: ROUTES.public.live, icon: <LiveTvRounded /> },
   { label: 'Estadísticas', to: ROUTES.public.stats, icon: <BarChartRounded /> },

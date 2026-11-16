@@ -34,6 +34,8 @@ export const ROUTES = {
   public: {
     home: '/',
     competitions: '/competiciones',
+    /** Archivo de torneos ya finalizados, por año y edición. */
+    history: '/historico',
     stats: '/estadisticas',
     teams: '/equipos',
     schedule: '/calendario',
@@ -55,6 +57,7 @@ const MATCH_ROUTES: string[] = [
   ROUTES.public.live,
   ROUTES.public.schedule,
   ROUTES.public.competitions,
+  ROUTES.public.history,
   ROUTES.public.stats,
   ROUTES.team.matches,
   ROUTES.team.stats,
