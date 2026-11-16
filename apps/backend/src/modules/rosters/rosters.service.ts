@@ -3,6 +3,7 @@ import { AppError } from '@/utils/app-error';
 import { MESSAGES } from '@/config/constants';
 import { Prisma } from '@prisma/client';
 import { validatePlayerPhotos } from '../players/player-photos';
+import { duplicatePlayerError } from '../players/player-duplicate';
 import type { CreateRosterPlayerDto } from './rosters.schema';
 
 const rosterTransaction = async <T>(work: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T> => {
@@ -85,7 +86,7 @@ export const rostersService = {
     const existing = await tx.player.findUnique({ where: { documentType_documentNumber: {
       documentType: profile.documentType, documentNumber: profile.documentNumber,
     } } });
-    if (existing) throw new AppError(409, MESSAGES.duplicatePlayer, 'DUPLICATE');
+    if (existing) throw duplicatePlayerError(existing);
     const player = await tx.player.create({ data: profile });
     return insertRoster(tx, registration, player.id, jerseyNumber);
   }),

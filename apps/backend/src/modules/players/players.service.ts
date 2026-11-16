@@ -4,6 +4,7 @@ import { MESSAGES } from '@/config/constants';
 import { purgePlayer } from '@/utils/cascade.util';
 import { trashService } from '@/modules/trash/trash.service';
 import { validatePlayerPhotos } from './player-photos';
+import { duplicatePlayerError } from './player-duplicate';
 import type { CreatePlayerDto } from './players.schema';
 
 export const playersService = {
@@ -77,7 +78,7 @@ export const playersService = {
         },
       },
     });
-    if (exists) throw new AppError(409, MESSAGES.duplicatePlayer, 'DUPLICATE');
+    if (exists) throw duplicatePlayerError(exists);
     return prisma.player.create({ data });
   },
 
@@ -221,8 +222,9 @@ export const playersService = {
     }),
 
   /**
-   * Solo se elimina un perfil sin trayectoria. Los perfiles con historial
-   * deben desactivarse; purgePlayer protege sus plantillas y estadísticas.
+   * Borrado físico: la ficha desaparece (con un respaldo en la papelera) y su
+   * documento queda libre para registrarlo de nuevo. Desactivar, en cambio, solo
+   * cambia el estado y la cédula sigue ocupada.
    */
   remove: async (id: string, actorId?: string) => {
     const player = await prisma.player.findUnique({ where: { id } });
