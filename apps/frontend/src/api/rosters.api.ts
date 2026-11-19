@@ -11,6 +11,8 @@ export interface RosterCandidate {
   documentType: Player['documentType'];
   documentMasked: string;
   eligible: boolean;
+  /** Equipo que lo tiene en este apartado: mientras no lo libere no se puede inscribir. */
+  heldBy?: string | null;
 }
 
 export interface RosterEntry {

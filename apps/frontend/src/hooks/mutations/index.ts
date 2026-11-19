@@ -4,7 +4,7 @@ import { competitionsApi, fixturesApi, type Competition } from '@/api/competitio
 import { knockoutApi } from '@/api/knockout.api';
 import { teamBlocksApi } from '@/api/team-blocks.api';
 import { teamsApi, type Team } from '@/api/teams.api';
-import { playersApi, type Player } from '@/api/players.api';
+import { playersApi, type Player, type AgeGroup } from '@/api/players.api';
 import { rostersApi, type RosterEntry, type CreateRosterPlayerInput } from '@/api/rosters.api';
 import { matchesApi, matchEventsApi, type Match, type AttendanceEntry } from '@/api/matches.api';
 import { adsApi, type Ad } from '@/api/ads.api';
@@ -170,6 +170,14 @@ export const useSetPlayerStatus = () => {
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: 'ACTIVE' | 'INACTIVE' }) => playersApi.setStatus(id, status),
     onSuccess: () => invalidate(qc, [['players'], ['public', 'players']]),
+  });
+};
+/** Libera al jugador en un apartado. Cierra sus plantillas vigentes en ese club, por eso invalida también las plantillas. */
+export const useReleasePlayer = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ageGroup }: { id: string; ageGroup: AgeGroup }) => playersApi.release(id, ageGroup),
+    onSuccess: () => invalidate(qc, [['players'], ['public', 'players'], ['roster'], ['roster-candidates'], ['teams'], ['competitions'], ['history']]),
   });
 };
 export const useSetPlayerDegree = () => {

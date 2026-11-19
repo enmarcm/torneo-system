@@ -28,6 +28,7 @@ export const playersService = {
 
   list: (search?: string, teamId?: string | null, ageGroup?: 'ADULT' | 'YOUTH') =>
     prisma.player.findMany({
+      include: { clubs: { select: { ageGroup: true, team: { select: { id: true, name: true } } } } },
       where: {
         ...(ageGroup ? { AND: [{ rosterEntries: { some: { status: 'ACTIVE' as const, teamRegistration: { ...(teamId !== undefined ? { teamId: teamId || '__no_team__' } : {}), competition: { ageGroup } } } } }] } : {}),
         ...(search
@@ -62,7 +63,7 @@ export const playersService = {
 
   getForTeam: async (id: string, teamId: string) => {
     const player = await prisma.player.findFirst({
-      where: { id, rosterEntries: { some: { teamRegistration: { teamId } } } },
+      where: { id, clubs: { some: { teamId } } },
     });
     if (!player) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
     return player;
@@ -89,12 +90,8 @@ export const playersService = {
   },
 
   updateForTeam: async (id: string, teamId: string, data: Partial<CreatePlayerDto>) => {
+    // Quien tiene el pase del jugador en algún apartado puede corregir su ficha.
     await playersService.getForTeam(id, teamId);
-    const shared = await prisma.rosterEntry.findFirst({
-      where: { playerId: id, teamRegistration: { teamId: { not: teamId } } },
-      select: { id: true },
-    });
-    if (shared) throw new AppError(403, 'Este jugador también pertenece a otro equipo.', 'SHARED_PLAYER');
     return playersService.update(id, data);
   },
 
@@ -105,10 +102,8 @@ export const playersService = {
 
   setStatusForTeam: async (id: string, teamId: string, status: 'ACTIVE' | 'INACTIVE') => {
     await playersService.getForTeam(id, teamId);
-    const shared = await prisma.rosterEntry.findFirst({
-      where: { playerId: id, teamRegistration: { teamId: { not: teamId } } },
-      select: { id: true },
-    });
+    // Activar o desactivar es global: si otro club también lo tiene en otro apartado, no es decisión de uno solo.
+    const shared = await prisma.playerClub.findFirst({ where: { playerId: id, teamId: { not: teamId } }, select: { id: true } });
     if (shared) throw new AppError(403, 'Este jugador también pertenece a otro equipo.', 'SHARED_PLAYER');
     return playersService.setStatus(id, status);
   },

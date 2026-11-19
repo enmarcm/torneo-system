@@ -2,6 +2,7 @@ import { asyncHandler } from '@/utils/async-handler';
 import { ok, created } from '@/utils/http.util';
 import { assertIdentityPhotoOwner } from './player-photos';
 import { playersService } from './players.service';
+import { playerClubs } from './player-clubs';
 
 export const playersController = {
   list: asyncHandler(async (req, res) =>
@@ -29,6 +30,16 @@ export const playersController = {
   ),
   competitions: asyncHandler(async (req, res) =>
     ok(res, await playersService.competitions(req.params.id, req.user?.role === 'TEAM_LEADER' ? req.user.teamId : undefined)),
+  ),
+  /** Pases vigentes: el delegado ve los de su equipo; el administrador, los de todos o los de un equipo. */
+  holds: asyncHandler(async (req, res) =>
+    ok(res, await playerClubs.holds({
+      teamId: req.user?.role === 'TEAM_LEADER' ? (req.user.teamId ?? '__no_team__') : (req.query.teamId as string | undefined),
+      ageGroup: req.query.ageGroup as 'ADULT' | 'YOUTH' | undefined,
+    })),
+  ),
+  release: asyncHandler(async (req, res) =>
+    ok(res, await playerClubs.release(req.params.id, req.body.ageGroup, { role: req.user!.role, teamId: req.user!.teamId }), 'Jugador liberado'),
   ),
   remove: asyncHandler(async (req, res) =>
     ok(res, await playersService.remove(req.params.id, req.user?.id), 'Eliminado definitivamente'),

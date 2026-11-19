@@ -28,6 +28,7 @@ const setup = (t: TestContext, initialRegistration = true) => {
   stub(t, minioClient, 'statObject', async () => ({ size: 100 }));
   const profiles: any[] = [];
   const entries: any[] = [];
+  const clubs: any[] = [];
   const competition = { id: competitionId, editionId: 'edition', kind: 'STANDALONE_LEAGUE', ageGroup: 'ADULT', format: 'LEAGUE', status: 'DRAFT', ageMin: 18, ageMax: null, minPlayers: 11, maxPlayers: 25, requiresAdminEligibility: true, edition: { id: 'edition', name: 'Apertura', year: 2026 } };
   const registration = { id: registrationId, teamId: 'club', competitionId, status: 'ACTIVE', outcome: 'NONE', competition };
   const registrations: any[] = initialRegistration ? [registration] : [];
@@ -35,8 +36,9 @@ const setup = (t: TestContext, initialRegistration = true) => {
     assert.equal(options.isolationLevel, 'Serializable');
     const profileCount = profiles.length;
     const entryCount = entries.length;
+    const clubCount = clubs.length;
     try { return await callback(prisma); }
-    catch (error) { profiles.length = profileCount; entries.length = entryCount; throw error; }
+    catch (error) { profiles.length = profileCount; entries.length = entryCount; clubs.length = clubCount; throw error; }
   });
   stub(t, prisma.competition, 'findUnique', async () => competition);
   stub(t, prisma.teamRegistration, 'findUnique', async ({ where }) => registrations.find((r) => r.id === where.id) ?? (where.id === 'foreign-registration' ? { ...registration, id: 'foreign-registration', teamId: 'other-club' } : null));
@@ -48,7 +50,11 @@ const setup = (t: TestContext, initialRegistration = true) => {
   stub(t, prisma.rosterEntry, 'count', async ({ where }) => entries.filter((e) => e.teamRegistrationId === where.teamRegistrationId && e.status === 'ACTIVE').length);
   stub(t, prisma.rosterEntry, 'findUnique', async ({ where }) => entries.find((e) => e.playerId === where.playerId_teamRegistrationId.playerId && e.teamRegistrationId === where.playerId_teamRegistrationId.teamRegistrationId) ?? null);
   const createEntry = stub(t, prisma.rosterEntry, 'create', async ({ data }) => { const entry = { id: `entry-${entries.length}`, ...data, status: 'ACTIVE', player: profiles.find((p) => p.id === data.playerId), stats: {} }; entries.push(entry); return entry; });
-  return { profiles, entries, competition, registration, registrations, transaction, createProfile, createEntry };
+  const clubName = (teamId: string) => ({ name: `Club ${teamId}` });
+  stub(t, prisma.playerClub, 'findUnique', async ({ where }) => { const key = where.playerId_ageGroup; const club = clubs.find((c) => c.playerId === key.playerId && c.ageGroup === key.ageGroup); return club ? { ...club, team: clubName(club.teamId), player: profiles.find((p) => p.id === club.playerId) ?? { firstName: 'Ana', lastName: 'Perez' } } : null; });
+  stub(t, prisma.playerClub, 'create', async ({ data }) => { const club = { id: `club-${clubs.length}`, ...data }; clubs.push(club); return club; });
+  stub(t, prisma.playerClub, 'findMany', async ({ where }) => clubs.filter((c) => c.ageGroup === where.ageGroup && where.playerId.in.includes(c.playerId) && c.teamId !== where.teamId.not).map((c) => ({ playerId: c.playerId, team: clubName(c.teamId) })));
+  return { profiles, entries, clubs, competition, registration, registrations, transaction, createProfile, createEntry };
 };
 
 test('new players are created and linked to the selected tournament in one transaction', async (t) => {
@@ -270,4 +276,59 @@ test('player sections follow active memberships rather than an assumed adult bir
   assert.equal(query.where.birthDate, undefined);
   await playersService.list('Ana', undefined, 'ADULT');
   assert.deepEqual(lookup.mock.calls[1].arguments[0].where.AND[0].rosterEntries.some.teamRegistration, { competition: { ageGroup: 'ADULT' } });
+});
+
+test('a player held by one club in a section cannot be added by another club until released', async (t) => {
+  const state = setup(t);
+  const first = await rostersService.createPlayer(registrationId, input);
+  assert.equal(state.clubs.length, 1);
+  assert.equal(state.clubs[0].teamId, 'club');
+  const rival = { ...state.registration, id: 'rival-registration', teamId: 'rival', competitionId: 'rival-tournament', competition: { ...state.competition, id: 'rival-tournament' } };
+  state.registrations.push(rival);
+  await assert.rejects(rostersService.add(rival.id, first.playerId), { code: 'PLAYER_HELD' });
+  assert.equal(state.entries.length, 1);
+  assert.equal(state.clubs.length, 1);
+});
+
+test('a club can hold a player in youth while another holds the same player in adults', async (t) => {
+  const state = setup(t);
+  const adult = await rostersService.createPlayer(registrationId, input);
+  state.registrations.push({ ...state.registration, id: 'youth-registration', teamId: 'youth-club', competition: { ...state.competition, ageGroup: 'YOUTH' } });
+  await rostersService.add('youth-registration', adult.playerId);
+  assert.deepEqual(state.clubs.map((c) => [c.teamId, c.ageGroup]), [['club', 'ADULT'], ['youth-club', 'YOUTH']]);
+});
+
+test('candidates report which club holds a player in the section', async (t) => {
+  const state = setup(t);
+  const held = await rostersService.createPlayer(registrationId, input);
+  state.registrations.push({ ...state.registration, id: 'rival-registration', teamId: 'rival', competitionId: 'rival-tournament', competition: { ...state.competition, id: 'rival-tournament' } });
+  stub(t, prisma.player, 'findMany', async () => [
+    { id: held.playerId, firstName: 'Ana', lastName: 'Perez', documentType: 'CEDULA', documentNumber: '12345678', photoUrl: input.photoUrl, birthDate: input.birthDate },
+    { id: 'free', firstName: 'Luis', lastName: 'Gomez', documentType: 'CEDULA', documentNumber: '87654321', photoUrl: input.photoUrl, birthDate: input.birthDate },
+  ]);
+  const found = await rostersService.candidates('rival-registration', 'a');
+  assert.equal(found.find((c: any) => c.id === held.playerId)?.heldBy, 'Club club');
+  assert.equal(found.find((c: any) => c.id === 'free')?.heldBy, null);
+});
+
+test('releasing frees the section: only the holder or an admin can do it, and the old rosters are closed', async (t) => {
+  const state = setup(t);
+  const held = await rostersService.createPlayer(registrationId, input);
+  const deleted: any[] = [];
+  const closed: any[] = [];
+  stub(t, prisma.playerClub, 'delete', async ({ where }) => { deleted.push(where.id); state.clubs.length = 0; return {}; });
+  stub(t, prisma.rosterEntry, 'updateMany', async (args) => { closed.push(args); return { count: 1 }; });
+  const { playerClubs } = await import('../src/modules/players/player-clubs');
+  await assert.rejects(playerClubs.release(held.playerId, 'ADULT', { role: 'TEAM_LEADER', teamId: 'rival' }), { code: 'FORBIDDEN' });
+  assert.equal(deleted.length, 0);
+  await assert.rejects(playerClubs.release(held.playerId, 'YOUTH', { role: 'ADMIN' }), { code: 'NOT_HELD' });
+  const released = await playerClubs.release(held.playerId, 'ADULT', { role: 'TEAM_LEADER', teamId: 'club' });
+  assert.equal(released.deactivatedEntries, 1);
+  assert.equal(deleted.length, 1);
+  assert.equal(closed[0].where.teamRegistration.teamId, 'club');
+  assert.equal(closed[0].data.status, 'INACTIVE');
+  state.registrations.push({ ...state.registration, id: 'rival-registration', teamId: 'rival', competitionId: 'rival-tournament', competition: { ...state.competition, id: 'rival-tournament' } });
+  const taken = await rostersService.add('rival-registration', held.playerId);
+  assert.equal(taken.teamRegistrationId, 'rival-registration');
+  assert.equal(state.clubs[0].teamId, 'rival');
 });

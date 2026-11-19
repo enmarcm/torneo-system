@@ -12,6 +12,9 @@ import EditRounded from '@mui/icons-material/EditRounded';
 import VisibilityRounded from '@mui/icons-material/VisibilityRounded';
 import PowerSettingsNewRounded from '@mui/icons-material/PowerSettingsNewRounded';
 import PlaylistAddRounded from '@mui/icons-material/PlaylistAddRounded';
+import LockOpenRounded from '@mui/icons-material/LockOpenRounded';
+import { ReleasePlayerDialog, type ReleaseTarget } from '@/components/sport/ReleasePlayerDialog';
+import { AGE_GROUP_LABELS } from '@/utils/competitionMeta';
 import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
@@ -30,7 +33,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useTeamRegistrationsQuery } from '@/hooks/queries';
+import { useTeamRegistrationsQuery, usePlayerHoldsQuery } from '@/hooks/queries';
 import { useUpdatePlayer, useUpdateRoster } from '@/hooks/mutations';
 import { getCompetitionAgeGroup } from '@/utils/competitionMeta';
 import { canManageRoster } from '@/utils/teamRegistrations';
@@ -106,6 +109,15 @@ const TeamPlayers: React.FC = () => {
   useEffect(() => {
     if (pickedAgeGroup === null && registrationsData?.length) setAgeGroup(ageGroup);
   }, [pickedAgeGroup, registrationsData, ageGroup]);
+  /*
+    El pase es por apartado: quien lo tiene en Menores puede no tenerlo en Adultos.
+    Un jugador liberado sigue en la lista como historial, pero ya no es de este equipo.
+  */
+  const holdsQuery = usePlayerHoldsQuery(undefined, !!teamId);
+  const holds = holdsQuery.data ?? [];
+  const heldInSection = useMemo(() => new Set(holds.filter((h) => h.ageGroup === ageGroup).map((h) => h.player.id)), [holds, ageGroup]);
+  const heldAnywhere = useMemo(() => new Set(holds.map((h) => h.player.id)), [holds]);
+  const [releasing, setReleasing] = useState<ReleaseTarget | null>(null);
   const sectionRegistrations = useMemo(() => registrations.filter((r) => getCompetitionAgeGroup(r.competition) === ageGroup), [registrations, ageGroup]);
 
   // Edit drawer
@@ -249,15 +261,36 @@ const TeamPlayers: React.FC = () => {
       label: 'Estado',
       render: (row) => {
         const anyActive = row.registrations.some((r) => r.entryStatus === 'ACTIVE');
-        return <StatusBadge status={anyActive ? 'ACTIVE' : 'INACTIVE'} />;
+        return (
+          <Stack direction="row" spacing={0.75} alignItems="center" useFlexGap sx={{ flexWrap: 'wrap' }}>
+            <StatusBadge status={anyActive ? 'ACTIVE' : 'INACTIVE'} />
+            {holdsQuery.isSuccess && !heldInSection.has(row.id) && <Chip size="small" variant="outlined" color="warning" label="Liberado" />}
+          </Stack>
+        );
       },
     },
   ];
 
   const actions: DataTableAction<PlayerRow>[] = [
     { label: 'Ver detalle', icon: <VisibilityRounded fontSize="small" />, onClick: (r) => openDetail(r.id) },
-    { label: 'Editar', icon: <EditRounded fontSize="small" />, onClick: (r) => openEdit(r.id) },
+    {
+      label: 'Editar',
+      icon: <EditRounded fontSize="small" />,
+      onClick: (r) => {
+        if (holdsQuery.isSuccess && !heldAnywhere.has(r.id)) { toast.error('Este jugador ya no pertenece a tu equipo. Solo puedes consultarlo.'); return; }
+        openEdit(r.id);
+      },
+    },
     { label: 'Inscribir en torneos', icon: <PlaylistAddRounded fontSize="small" />, onClick: setAssigningPlayer },
+    {
+      label: 'Liberar jugador',
+      icon: <LockOpenRounded fontSize="small" />,
+      color: 'error',
+      onClick: (r) => {
+        if (!heldInSection.has(r.id)) { toast.error(`Este jugador ya está libre en ${AGE_GROUP_LABELS[ageGroup]}.`); return; }
+        setReleasing({ playerId: r.id, playerName: `${r.firstName} ${r.lastName}`, holds: [{ ageGroup, teamName: 'Tu equipo' }] });
+      },
+    },
     {
       label: (r) => {
         const anyActive = r.registrations.some((reg) => reg.entryStatus === 'ACTIVE');
@@ -340,6 +373,7 @@ const TeamPlayers: React.FC = () => {
         </Card>
       )}
 
+      <ReleasePlayerDialog target={releasing} onClose={() => setReleasing(null)} />
       {assigningPlayer && teamId && <AssignPlayerTournaments player={assigningPlayer} teamId={teamId} onClose={() => setAssigningPlayer(null)} />}
       {/* Edit Player Drawer */}
       <AppDrawer

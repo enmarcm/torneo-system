@@ -132,6 +132,7 @@ async function main() {
           position: 'Delantero',
         },
       });
+      await prisma.playerClub.create({ data: { playerId: player.id, teamId: team.id, ageGroup: comp.ageGroup } });
       await prisma.rosterEntry.create({
         data: {
           teamRegistrationId: reg.id,

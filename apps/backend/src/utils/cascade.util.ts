@@ -111,6 +111,7 @@ export const purgePlayer = async (tx: Tx, playerId: string) => {
   await tx.matchEvent.deleteMany({ where: { playerId } });
   await tx.match.updateMany({ where: { mvpPlayerId: playerId }, data: { mvpPlayerId: null } });
   await tx.transfer.deleteMany({ where: { playerId } });
+  await tx.playerClub.deleteMany({ where: { playerId } });
 
   const roster = await tx.rosterEntry.findMany({ where: { playerId }, select: { id: true } });
   await tx.playerSeasonStats.deleteMany({ where: { rosterEntryId: { in: idsOf(roster) } } });
@@ -127,6 +128,7 @@ export const purgeTeam = async (tx: Tx, teamId: string, leaderId?: string | null
   });
   await purgeRegistrations(tx, idsOf(registrations));
   await tx.teamBlock.deleteMany({ where: { teamId } });
+  await tx.playerClub.deleteMany({ where: { teamId } });
   if (leaderId) await purgeUser(tx, leaderId);
   await tx.team.delete({ where: { id: teamId } });
 };

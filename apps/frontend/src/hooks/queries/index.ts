@@ -83,6 +83,10 @@ export const useTeamPlayersQuery = (teamId?: string) =>
 export const usePlayersQuery = (search?: string, ageGroup?: 'ADULT' | 'YOUTH') =>
   useQuery({ queryKey: ['players', search, ageGroup], queryFn: () => playersApi.list(search, ageGroup), staleTime: MID_STALE });
 
+/** Pases vigentes de un equipo (o el propio, si quien consulta es su delegado). */
+export const usePlayerHoldsQuery = (teamId?: string, enabled = true) =>
+  useQuery({ queryKey: ['players', 'holds', teamId ?? null], queryFn: () => playersApi.holds(teamId), enabled, staleTime: MID_STALE });
+
 export const usePlayerQuery = (id: string) =>
   useQuery({ queryKey: ['players', id], queryFn: () => playersApi.get(id), enabled: !!id, staleTime: MID_STALE });
 

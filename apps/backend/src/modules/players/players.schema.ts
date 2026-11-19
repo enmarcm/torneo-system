@@ -26,3 +26,6 @@ export const degreeSchema = z.object({
 });
 
 export type CreatePlayerDto = z.infer<typeof createPlayerSchema>;
+
+/** Apartado del que se libera al jugador: el pase es uno por apartado. */
+export const releasePlayerSchema = z.object({ ageGroup: z.enum(['ADULT', 'YOUTH']) });

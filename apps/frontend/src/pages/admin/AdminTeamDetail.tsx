@@ -7,6 +7,11 @@ import SportsSoccerRounded from '@mui/icons-material/SportsSoccerRounded';
 import EmojiEventsRounded from '@mui/icons-material/EmojiEventsRounded';
 import { useParams, useNavigate } from 'react-router-dom';
 import { historyApi, type HistoryFilters } from '@/api/history.api';
+import type { PlayerHold } from '@/api/players.api';
+import { usePlayerHoldsQuery } from '@/hooks/queries';
+import LockOpenRounded from '@mui/icons-material/LockOpenRounded';
+import { ReleasePlayerDialog, type ReleaseTarget } from '@/components/sport/ReleasePlayerDialog';
+import { AGE_GROUP_LABELS } from '@/utils/competitionMeta';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { StatCard } from '@/components/ui/StatCard';
@@ -25,6 +30,8 @@ const AdminTeamDetail: React.FC = () => {
   const [filters, setFilters] = useState<HistoryFilters>({ page: 1, limit: 25 });
   const [rosterOf, setRosterOf] = useState<{ id: string; label: string; max: number } | null>(null);
   const [rosterPage, setRosterPage] = useState(0);
+  const [releasing, setReleasing] = useState<ReleaseTarget | null>(null);
+  const holdsQuery = usePlayerHoldsQuery(id, !!id);
   const query = useQuery({ queryKey: ['history', 'team', id, filters], queryFn: () => historyApi.team(id!, filters), enabled: !!id, staleTime: 15000 });
   if (query.isPending) return <PageLoader />;
   if (query.error || !query.data) return <ErrorState onRetry={() => void query.refetch()} />;
@@ -41,7 +48,28 @@ const AdminTeamDetail: React.FC = () => {
       ['Partidos jugados', data.totals.matchesPlayed, <SportsSoccerRounded />], ['Goles a favor', data.totals.goalsFor, <SportsSoccerRounded />],
     ].map(([label, value, icon]) => <Grid key={String(label)} size={{ xs: 6, md: 3 }}><StatCard label={String(label)} value={value as number} icon={icon} /></Grid>)}</Grid>
     <Typography sx={{ mb: 3 }}>Ganados: {data.totals.wins} · Empatados: {data.totals.draws} · Perdidos: {data.totals.losses} · Goles en contra: {data.totals.goalsAgainst}</Typography>
-    <Typography variant="h4" sx={{ mb: 2 }}>Torneos y plantillas históricas</Typography>
+    <Typography variant="h4" sx={{ mb: 1 }}>Jugadores del equipo</Typography>
+    <Typography color="text.secondary" sx={{ mb: 2 }}>Los que este equipo tiene hoy en Adultos y en Menores. Al liberarlos, otro equipo podrá inscribirlos.</Typography>
+    <DataTable<PlayerHold>
+      rows={holdsQuery.data ?? []}
+      loading={holdsQuery.isLoading}
+      getRowKey={(r) => r.id}
+      emptyTitle="Sin jugadores asignados"
+      emptyDescription="Cuando el equipo inscriba jugadores, aparecerán aquí."
+      columns={[
+        { key: 'player', label: 'Jugador', render: (r) => <Button onClick={() => navigate(`/admin/jugadores/${r.player.id}`)}>{r.player.firstName} {r.player.lastName}</Button> },
+        { key: 'section', label: 'Apartado', render: (r) => AGE_GROUP_LABELS[r.ageGroup] },
+        { key: 'status', label: 'Estado', render: (r) => <StatusBadge status={r.player.status} /> },
+      ]}
+      actions={[{
+        label: 'Liberar jugador',
+        icon: <LockOpenRounded fontSize="small" />,
+        color: 'error',
+        onClick: (r) => setReleasing({ playerId: r.player.id, playerName: `${r.player.firstName} ${r.player.lastName}`, holds: [{ ageGroup: r.ageGroup, teamName: team.name }] }),
+      }]}
+    />
+    <ReleasePlayerDialog target={releasing} onClose={() => setReleasing(null)} />
+    <Typography variant="h4" sx={{ mt: 4, mb: 2 }}>Torneos y plantillas históricas</Typography>
     <DataTable rows={data.career} getRowKey={(r) => r.id} emptyTitle="Sin torneos en este periodo" emptyDescription="Consulta otro periodo o limpia los filtros." columns={[
       { key: 'edition', label: 'Edición', render: (r) => `${r.competition.edition.year} · ${r.competition.edition.name}` },
       { key: 'competition', label: 'Torneo', render: (r) => <Button onClick={() => navigate(`/admin/competiciones/${r.competition.id}`)}>{r.competition.name}</Button> },

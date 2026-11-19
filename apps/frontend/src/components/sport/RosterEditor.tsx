@@ -255,14 +255,20 @@ export const RosterEditor: React.FC<Props> = ({
                     {p.documentType === 'CEDULA' ? 'C.I.' : 'P.N.'} {p.documentMasked}
                   </Typography>
                 </Box>
-                <Button
-                  size="small"
-                  startIcon={<AddRounded />}
-                  onClick={() => addPlayer(p.id)}
-                  disabled={add.isPending || full}
-                >
-                  Agregar
-                </Button>
+                {p.heldBy ? (
+                  <Typography variant="caption" color="warning.main" sx={{ fontWeight: 600, textAlign: 'right', maxWidth: 150 }}>
+                    Lo tiene {p.heldBy}. Debe liberarlo primero
+                  </Typography>
+                ) : (
+                  <Button
+                    size="small"
+                    startIcon={<AddRounded />}
+                    onClick={() => addPlayer(p.id)}
+                    disabled={add.isPending || full}
+                  >
+                    Agregar
+                  </Button>
+                )}
               </Stack>
             ))
           )}

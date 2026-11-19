@@ -10,6 +10,9 @@ import VerifiedRounded from '@mui/icons-material/VerifiedRounded';
 import VerifiedOutlined from '@mui/icons-material/VerifiedOutlined';
 import PowerSettingsNewRounded from '@mui/icons-material/PowerSettingsNewRounded';
 import DeleteForeverRounded from '@mui/icons-material/DeleteForeverRounded';
+import LockOpenRounded from '@mui/icons-material/LockOpenRounded';
+import { ReleasePlayerDialog, type ReleaseTarget } from '@/components/sport/ReleasePlayerDialog';
+import { AGE_GROUP_LABELS } from '@/utils/competitionMeta';
 import { useState, useEffect } from 'react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { DataTable, type DataTableColumn, type DataTableAction } from '@/components/ui/DataTable';
@@ -47,6 +50,7 @@ const AdminPlayers: React.FC = () => {
   const [purgingPlayer, setPurgingPlayer] = useState<Player | null>(null);
   const deletePlayer = useDeletePlayer();
   const [assigningPlayer, setAssigningPlayer] = useState<Player | null>(null);
+  const [releasing, setReleasing] = useState<ReleaseTarget | null>(null);
 
   const submit = async () => {
     try {
@@ -76,6 +80,13 @@ const AdminPlayers: React.FC = () => {
     { key: 'doc', label: 'Documento', render: (r) => `${r.documentType === 'CEDULA' ? 'C.I.' : 'P.N.'} ${r.documentNumber}`, hideInMobile: true },
     { key: 'age', label: 'Edad', align: 'right', render: (r) => calcAge(r.birthDate) },
     { key: 'degree', label: 'Título', render: (r) => r.universityDegreeVerified ? <Chip size="small" color="success" label="Verificado" variant="outlined" icon={<VerifiedRounded sx={{ fontSize: 14 }} />} /> : <Chip size="small" label="Sin verificar" variant="outlined" /> },
+    {
+      key: 'clubs', label: 'Equipo', render: (r) => (r.clubs?.length ? (
+        <Stack spacing={0.25}>
+          {r.clubs.map((c) => <Typography key={c.ageGroup} variant="body2"><strong>{AGE_GROUP_LABELS[c.ageGroup]}:</strong> {c.team.name}</Typography>)}
+        </Stack>
+      ) : <Chip size="small" variant="outlined" label="Libre" />),
+    },
     { key: 'status', label: 'Estado', render: (r) => <StatusBadge status={r.status} /> },
   ];
   const actions: DataTableAction<Player>[] = [
@@ -103,6 +114,14 @@ const AdminPlayers: React.FC = () => {
       onClick: (r) => (r.status === 'ACTIVE'
         ? setDeletingPlayer(r)
         : setStatus.mutate({ id: r.id, status: 'ACTIVE' })),
+    },
+    {
+      label: 'Liberar jugador',
+      icon: <LockOpenRounded fontSize="small" />,
+      onClick: (r) => {
+        if (!r.clubs?.length) { toast.success('Este jugador ya está libre en Adultos y Menores'); return; }
+        setReleasing({ playerId: r.id, playerName: `${r.firstName} ${r.lastName}`, holds: r.clubs.map((c) => ({ ageGroup: c.ageGroup, teamName: c.team.name })) });
+      },
     },
     {
       label: 'Eliminar definitivamente',
@@ -164,6 +183,7 @@ const AdminPlayers: React.FC = () => {
       </AppDrawer>
 
       {assigningPlayer && <AssignPlayerTournaments player={assigningPlayer} onClose={() => setAssigningPlayer(null)} />}
+      <ReleasePlayerDialog target={releasing} onClose={() => setReleasing(null)} />
       <ConfirmDialog
         open={!!deletingPlayer}
         onClose={() => setDeletingPlayer(null)}

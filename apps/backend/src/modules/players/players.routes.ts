@@ -10,6 +10,7 @@ import {
   playerStatusSchema,
   degreeSchema,
   listPlayersQuerySchema,
+  releasePlayerSchema,
 } from './players.schema';
 
 export const playersRouter = Router();
@@ -17,6 +18,7 @@ export const playersRouter = Router();
 playersRouter.use(authMiddleware, requireRole('ADMIN', 'TEAM_LEADER'));
 playersRouter.get('/', validate(listPlayersQuerySchema, 'query'), playersController.list);
 playersRouter.get('/by-document', playersController.byDocument);
+playersRouter.get('/holds', playersController.holds);
 playersRouter.get('/:id', playersController.get);
 playersRouter.get('/:id/competitions', playersController.competitions);
 playersRouter.post('/', requireRole('ADMIN'), validate(createPlayerSchema), audit('CREATE', 'Player'), playersController.create);
@@ -26,6 +28,12 @@ playersRouter.patch(
   requireRole('ADMIN', 'TEAM_LEADER'),
   validate(playerStatusSchema),
   playersController.setStatus,
+);
+playersRouter.post(
+  '/:id/release',
+  validate(releasePlayerSchema),
+  audit('RELEASE', 'Player'),
+  playersController.release,
 );
 playersRouter.patch(
   '/:id/degree',

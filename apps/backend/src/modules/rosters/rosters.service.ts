@@ -4,6 +4,7 @@ import { MESSAGES } from '@/config/constants';
 import { Prisma } from '@prisma/client';
 import { validatePlayerPhotos } from '../players/player-photos';
 import { duplicatePlayerError } from '../players/player-duplicate';
+import { claimPlayer } from '../players/player-clubs';
 import type { CreateRosterPlayerDto } from './rosters.schema';
 
 const rosterTransaction = async <T>(work: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T> => {
@@ -58,8 +59,14 @@ export const rostersService = {
       orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
       take: 20,
     });
+    // Quien tiene su pase en otro equipo de este apartado no se puede inscribir hasta que lo liberen.
+    const holds = await prisma.playerClub.findMany({
+      where: { ageGroup: registration.competition.ageGroup, playerId: { in: players.map((p) => p.id) }, teamId: { not: registration.teamId } },
+      select: { playerId: true, team: { select: { name: true } } },
+    });
+    const heldBy = new Map(holds.map((h) => [h.playerId, h.team.name]));
     return players.map(({ birthDate, documentNumber, ...player }) => ({
-      ...player, documentMasked: `***${documentNumber.slice(-4)}`, eligible: true,
+      ...player, documentMasked: `***${documentNumber.slice(-4)}`, eligible: true, heldBy: heldBy.get(player.id) ?? null,
     }));
   },
   list: (teamRegistrationId: string) =>
@@ -76,6 +83,7 @@ export const rostersService = {
     const duplicate = await tx.rosterEntry.findUnique({ where: { playerId_teamRegistrationId: { playerId, teamRegistrationId } } });
     if (duplicate) throw new AppError(409, 'Este jugador ya pertenece a esta plantilla', 'DUPLICATE');
     const registration = await checkRegistration(tx, teamRegistrationId);
+    await claimPlayer(tx, playerId, registration.teamId, registration.competition.ageGroup);
     return insertRoster(tx, registration, playerId, jerseyNumber);
   }),
 
@@ -88,6 +96,7 @@ export const rostersService = {
     } } });
     if (existing) throw duplicatePlayerError(existing);
     const player = await tx.player.create({ data: profile });
+    await claimPlayer(tx, player.id, registration.teamId, registration.competition.ageGroup);
     return insertRoster(tx, registration, player.id, jerseyNumber);
   }),
 
@@ -209,7 +218,7 @@ export const rostersService = {
       }
       try { await rostersService.add(teamRegistrationId, p.playerId, p.jerseyNumber ?? undefined); }
       catch (error) {
-        if (error instanceof AppError && error.statusCode === 422) { skipped.push({ name, reason: error.message }); continue; }
+        if (error instanceof AppError && (error.statusCode === 422 || error.code === 'PLAYER_HELD')) { skipped.push({ name, reason: error.message }); continue; }
         throw error;
       }
       slots -= 1;
@@ -224,10 +233,13 @@ export const rostersService = {
 
   update: async (id: string, data: { jerseyNumber?: number; status?: 'ACTIVE' | 'INACTIVE' }) => {
     if (data.status === 'ACTIVE') return rosterTransaction(async (tx) => {
-      const entry = await tx.rosterEntry.findUnique({ where: { id }, include: { player: true } });
+      const entry = await tx.rosterEntry.findUnique({ where: { id }, include: { player: true, teamRegistration: { include: { competition: true } } } });
       if (!entry) throw new AppError(404, MESSAGES.notFound, 'NOT_FOUND');
       await validatePlayerPhotos(entry.player);
-      if (entry.status !== 'ACTIVE') await checkRegistration(tx, entry.teamRegistrationId);
+      if (entry.status !== 'ACTIVE') {
+        const registration = await checkRegistration(tx, entry.teamRegistrationId);
+        await claimPlayer(tx, entry.playerId, registration.teamId, registration.competition.ageGroup);
+      }
       return tx.rosterEntry.update({ where: { id }, data });
     });
     return prisma.rosterEntry.update({ where: { id }, data });

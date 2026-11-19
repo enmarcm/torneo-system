@@ -152,85 +152,86 @@ model User {
 }
 
 model Edition {
-  id                  String        @id @default(uuid())
+  id                  String         @id @default(uuid())
   name                String
   year                Int
   seasonNumber        Int
-  status              EditionStatus @default(DRAFT)
+  status              EditionStatus  @default(DRAFT)
   startDate           DateTime
   endDate             DateTime
-  transfersOpen       Boolean       @default(false)
+  transfersOpen       Boolean        @default(false)
   transferWindowStart DateTime?
   transferWindowEnd   DateTime?
   competitions        Competition[]
   leagueSystems       LeagueSystem[]
   transfers           Transfer[]
   articles            Article[]
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
 }
 
 /// Agrupa las divisiones de una misma edición (Primera / Segunda / Tercera) para
 /// que compartan ascenso/descenso y para que la Copa sepa de dónde salen sus equipos.
 model LeagueSystem {
-  id        String        @id @default(uuid())
-  edition   Edition       @relation(fields: [editionId], references: [id])
+  id        String              @id @default(uuid())
+  edition   Edition             @relation(fields: [editionId], references: [id])
   editionId String
   ageGroup  CompetitionAgeGroup @default(ADULT)
   name      String
-  divisions Competition[] @relation("SystemDivisions")
-  cups      Competition[] @relation("SystemCups")
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  divisions Competition[]       @relation("SystemDivisions")
+  cups      Competition[]       @relation("SystemCups")
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
 
   @@index([editionId])
 }
 
 model Competition {
-  id                       String             @id @default(uuid())
-  edition                  Edition            @relation(fields: [editionId], references: [id])
+  id                       String              @id @default(uuid())
+  edition                  Edition             @relation(fields: [editionId], references: [id])
   editionId                String
   name                     String
   description              String?
   format                   CompetitionFormat
-  kind                     CompetitionKind    @default(STANDALONE_LEAGUE)
+  kind                     CompetitionKind     @default(STANDALONE_LEAGUE)
   ageGroup                 CompetitionAgeGroup @default(ADULT)
   imageUrl                 String?
   division                 String?
   /// 1 = Primera, 2 = Segunda, 3 = Tercera. Ordena el ascenso/descenso.
   divisionLevel            Int?
   /// Sistema de liga al que pertenece esta división.
-  leagueSystem             LeagueSystem?      @relation("SystemDivisions", fields: [leagueSystemId], references: [id])
+  leagueSystem             LeagueSystem?       @relation("SystemDivisions", fields: [leagueSystemId], references: [id])
   leagueSystemId           String?
   /// Para una Copa: sistema de liga del que se nutre de equipos.
-  sourceLeagueSystem       LeagueSystem?      @relation("SystemCups", fields: [sourceLeagueSystemId], references: [id])
+  sourceLeagueSystem       LeagueSystem?       @relation("SystemCups", fields: [sourceLeagueSystemId], references: [id])
   sourceLeagueSystemId     String?
   ageMin                   Int?
   ageMax                   Int?
-  requiresAdminEligibility Boolean            @default(false)
-  minPlayers               Int                @default(11)
-  maxPlayers               Int                @default(25)
-  manualTeamSelection      Boolean            @default(false)
+  requiresAdminEligibility Boolean             @default(false)
+  minPlayers               Int                 @default(11)
+  maxPlayers               Int                 @default(25)
+  manualTeamSelection      Boolean             @default(false)
   /// Vueltas del todos contra todos (1 = solo ida, 2 = ida y vuelta).
-  rounds                   Int                @default(1)
+  rounds                   Int                 @default(1)
   /// Rondas de eliminatoria que se juegan a doble partido.
-  twoLeggedStages          MatchStage[]       @default([])
+  twoLeggedStages          MatchStage[]        @default([])
   /// Plazas de ascenso/descenso que se pintan en la tabla. La decisión final es del admin.
-  promotionSpots           Int                @default(0)
-  relegationSpots          Int                @default(0)
+  promotionSpots           Int                 @default(0)
+  relegationSpots          Int                 @default(0)
   knockoutQualifiers       Int?
   numGroups                Int?
   groupSize                Int?
   qualifiersPerGroup       Int?
-  status                   CompetitionStatus  @default(DRAFT)
+  status                   CompetitionStatus   @default(DRAFT)
   groups                   CompetitionGroup[]
   registrations            TeamRegistration[]
   matches                  Match[]
   ties                     KnockoutTie[]
   blocks                   TeamBlock[]
   articles                 Article[]
-  createdAt                DateTime           @default(now())
-  updatedAt                DateTime           @updatedAt
+  createdAt                DateTime            @default(now())
+  updatedAt                DateTime            @updatedAt
+
   @@index([editionId])
   @@index([leagueSystemId])
 }
@@ -244,6 +245,7 @@ model CompetitionGroup {
   matches       Match[]
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
+
   @@index([competitionId])
 }
 
@@ -258,6 +260,7 @@ model Team {
   registrations TeamRegistration[]
   blocks        TeamBlock[]
   articles      Article[]
+  playerClubs   PlayerClub[]
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
 }
@@ -296,28 +299,29 @@ model TeamBlock {
 }
 
 model TeamRegistration {
-  id            String            @id @default(uuid())
-  team          Team              @relation(fields: [teamId], references: [id])
+  id            String              @id @default(uuid())
+  team          Team                @relation(fields: [teamId], references: [id])
   teamId        String
-  competition   Competition       @relation(fields: [competitionId], references: [id])
+  competition   Competition         @relation(fields: [competitionId], references: [id])
   competitionId String
-  group         CompetitionGroup? @relation(fields: [groupId], references: [id])
+  group         CompetitionGroup?   @relation(fields: [groupId], references: [id])
   groupId       String?
-  status        EntityStatus      @default(ACTIVE)
+  status        EntityStatus        @default(ACTIVE)
   /// Ascenso / descenso / no participa. Lo decide el administrador, no la tabla.
   outcome       RegistrationOutcome @default(NONE)
   outcomeNote   String?
   roster        RosterEntry[]
-  homeMatches   Match[]           @relation("HomeRegistration")
-  awayMatches   Match[]           @relation("AwayRegistration")
+  homeMatches   Match[]             @relation("HomeRegistration")
+  awayMatches   Match[]             @relation("AwayRegistration")
   matchEvents   MatchEvent[]
-  tiesAsHome    KnockoutTie[]     @relation("TieHome")
-  tiesAsAway    KnockoutTie[]     @relation("TieAway")
-  tiesWon       KnockoutTie[]     @relation("TieWinner")
-  transfersFrom Transfer[]        @relation("TransferFrom")
-  transfersTo   Transfer[]        @relation("TransferTo")
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
+  tiesAsHome    KnockoutTie[]       @relation("TieHome")
+  tiesAsAway    KnockoutTie[]       @relation("TieAway")
+  tiesWon       KnockoutTie[]       @relation("TieWinner")
+  transfersFrom Transfer[]          @relation("TransferFrom")
+  transfersTo   Transfer[]          @relation("TransferTo")
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
   @@unique([teamId, competitionId])
   @@index([competitionId])
 }
@@ -347,6 +351,7 @@ model KnockoutTie {
   matches              Match[]
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
+
   @@unique([competitionId, stage, slot])
   @@index([competitionId])
 }
@@ -368,9 +373,28 @@ model Player {
   matchEvents              MatchEvent[]
   mvpMatches               Match[]       @relation("MatchMvp")
   transfers                Transfer[]
+  clubs                    PlayerClub[]
   createdAt                DateTime      @default(now())
   updatedAt                DateTime      @updatedAt
+
   @@unique([documentType, documentNumber])
+}
+
+/// Pase: qué equipo tiene a un jugador en cada apartado. Un jugador puede estar en
+/// Menores de un club y en Adultos de otro, pero en un solo club por apartado.
+/// Mientras el pase exista ningún otro equipo puede inscribirlo en ese apartado;
+/// liberarlo (el delegado o el administrador) borra la fila y lo deja libre.
+model PlayerClub {
+  id        String              @id @default(uuid())
+  player    Player              @relation(fields: [playerId], references: [id])
+  playerId  String
+  team      Team                @relation(fields: [teamId], references: [id])
+  teamId    String
+  ageGroup  CompetitionAgeGroup
+  createdAt DateTime            @default(now())
+
+  @@unique([playerId, ageGroup])
+  @@index([teamId])
 }
 
 model RosterEntry {
@@ -386,6 +410,7 @@ model RosterEntry {
   matchAttendances    MatchAttendance[]
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
+
   @@unique([playerId, teamRegistrationId])
   @@index([teamRegistrationId])
 }
@@ -405,39 +430,40 @@ model PlayerSeasonStats {
 }
 
 model Match {
-  id                 String            @id @default(uuid())
-  competition        Competition       @relation(fields: [competitionId], references: [id])
-  competitionId      String
-  group              CompetitionGroup? @relation(fields: [groupId], references: [id])
-  groupId            String?
-  stage              MatchStage        @default(LEAGUE)
-  matchday           Int               @default(1)
-  tie                KnockoutTie?      @relation(fields: [tieId], references: [id], onDelete: Cascade)
-  tieId              String?
+  id                  String            @id @default(uuid())
+  competition         Competition       @relation(fields: [competitionId], references: [id])
+  competitionId       String
+  group               CompetitionGroup? @relation(fields: [groupId], references: [id])
+  groupId             String?
+  stage               MatchStage        @default(LEAGUE)
+  matchday            Int               @default(1)
+  tie                 KnockoutTie?      @relation(fields: [tieId], references: [id], onDelete: Cascade)
+  tieId               String?
   /// 1 = ida, 2 = vuelta. Null en partido único o de liga.
-  leg                Int?
-  homeRegistration   TeamRegistration  @relation("HomeRegistration", fields: [homeRegistrationId], references: [id])
-  homeRegistrationId String
-  awayRegistration   TeamRegistration  @relation("AwayRegistration", fields: [awayRegistrationId], references: [id])
-  awayRegistrationId String
+  leg                 Int?
+  homeRegistration    TeamRegistration  @relation("HomeRegistration", fields: [homeRegistrationId], references: [id])
+  homeRegistrationId  String
+  awayRegistration    TeamRegistration  @relation("AwayRegistration", fields: [awayRegistrationId], references: [id])
+  awayRegistrationId  String
   /// Null hasta que el admin le asigna día y hora. El sorteo genera solo los cruces.
-  scheduledAt        DateTime?
+  scheduledAt         DateTime?
   /// Partido destacado de la jornada. Lo marca el admin al programarlo y es lo
   /// que la portada muestra como "lo que viene" antes que el resto del fixture.
-  featured           Boolean           @default(false)
-  status             MatchStatus       @default(SCHEDULED)
-  homeScore          Int               @default(0)
-  awayScore          Int               @default(0)
-  venue              String?
-  mvpPlayer          Player?           @relation("MatchMvp", fields: [mvpPlayerId], references: [id])
-  mvpPlayerId        String?
-  mvpPhotoUrl        String?
-  mvpNote            String?
-  events             MatchEvent[]
-  attendances        MatchAttendance[]
+  featured            Boolean           @default(false)
+  status              MatchStatus       @default(SCHEDULED)
+  homeScore           Int               @default(0)
+  awayScore           Int               @default(0)
+  venue               String?
+  mvpPlayer           Player?           @relation("MatchMvp", fields: [mvpPlayerId], references: [id])
+  mvpPlayerId         String?
+  mvpPhotoUrl         String?
+  mvpNote             String?
+  events              MatchEvent[]
+  attendances         MatchAttendance[]
   attendanceUpdatedAt DateTime?
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
   @@index([competitionId])
   @@index([status])
   @@index([tieId])
@@ -454,6 +480,7 @@ model MatchEvent {
   type               MatchEventType
   minute             Int
   createdAt          DateTime         @default(now())
+
   @@index([matchId])
 }
 
@@ -470,6 +497,7 @@ model Transfer {
   status             TransferStatus    @default(PENDING)
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
+
   @@index([editionId])
 }
 
@@ -541,6 +569,7 @@ model AuditLog {
   metadata  Json?
   ip        String?
   createdAt DateTime @default(now())
+
   @@index([entity])
 }
 
@@ -561,6 +590,7 @@ model CategoryArchive {
   active                          Boolean           @default(true)
   createdAt                       DateTime          @default(now())
   updatedAt                       DateTime          @updatedAt
+
   @@ignore
 }
 
@@ -583,27 +613,27 @@ model MatchAttendance {
 /// público muestra en el pie. Es una sola fila (id fija "main"): no hay varias
 /// "configuraciones", hay una.
 model SiteSettings {
-  id          String   @id @default("main")
+  id           String   @id @default("main")
   /// Nombre comercial: aparece en el pie y en los textos legales.
-  siteName    String   @default("Liga Lago Futsal")
+  siteName     String   @default("Liga Lago Futsal")
   /// Razón social y documento fiscal de quien opera el sitio. Van en el aviso legal.
-  legalName   String   @default("")
-  taxId       String   @default("")
+  legalName    String   @default("")
+  taxId        String   @default("")
   /// Frase corta bajo el logo del pie.
-  tagline     String   @default("")
-  address     String   @default("")
-  phone       String   @default("")
-  email       String   @default("")
-  schedule    String   @default("")
-  whatsapp    String   @default("")
-  instagramUrl String  @default("")
-  facebookUrl  String  @default("")
-  tiktokUrl    String  @default("")
+  tagline      String   @default("")
+  address      String   @default("")
+  phone        String   @default("")
+  email        String   @default("")
+  schedule     String   @default("")
+  whatsapp     String   @default("")
+  instagramUrl String   @default("")
+  facebookUrl  String   @default("")
+  tiktokUrl    String   @default("")
   /// Logo principal para fondo claro. Vacío = el logo que trae el sitio.
-  logoUrl      String  @default("")
+  logoUrl      String   @default("")
   /// Versión para fondo oscuro y portada. Vacío = se usa logoUrl, o el logo por defecto.
-  logoDarkUrl  String  @default("")
-  updatedAt   DateTime @updatedAt
+  logoDarkUrl  String   @default("")
+  updatedAt    DateTime @updatedAt
 }
 
 /// Documento legal del sitio (términos, privacidad, cookies…). El cuerpo es
