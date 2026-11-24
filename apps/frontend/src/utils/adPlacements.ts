@@ -43,7 +43,7 @@ export const AD_PLACEMENTS: AdPlacementMeta[] = [
   {
     value: 'HOME_BANNER',
     label: 'Banner principal',
-    where: 'Arriba de la portada, debajo de la barra de la edición.',
+    where: 'En la portada, debajo del título y los botones de la edición.',
     variant: 'panel',
     hint: AD_SIZE_HINT,
     ratio: AD_RATIO,

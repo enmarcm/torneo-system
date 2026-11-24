@@ -144,17 +144,11 @@ const PublicHome: React.FC = () => {
           seasonNumber={active.seasonNumber}
           liveCount={liveMatches.length}
         >
-          {/*
-            El banner vive dentro de la portada, al pie del bloque central.
-            `onDark` le da su panel blanco: sobre la foto oscura, la tarjeta del
-            tema se confundiría con el fondo y la pieza del anunciante quedaría
-            enturbiada.
-          */}
           <AdSlot
             placement="HOME_BANNER"
             priority
             onDark
-            sx={{ width: '100%', mx: 'auto' }}
+            sx={{ width: '100%', maxWidth: 1080, '& img': { objectFit: 'contain' } }}
           />
         </PublicHero>
       ) : <Container maxWidth="xl" sx={{ pt: 3 }}>
